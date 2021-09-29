@@ -23,8 +23,6 @@ endfunction()
 
 #test lib:
 
-if (ZEC_OPTION_DISABLE_NET)
-else()
-add_sub_sample(echo_server)
-endif()
+add_sub_sample(sample_app)
+
 

@@ -41,7 +41,7 @@ aux_source_directory(./src/private_zec/Container                   ZEC_SRC)
 
 if (ZEC_OPTION_STATIC)
 #static lib:
-	add_library(${libname} ${ZEC_SRC} ${ZEC_NET_SRC} ${ZEC_MYSQL_SRC} ${ZEC_GAME_SRC})
+	add_library(${libname} ${ZEC_SRC})
 	set_target_properties(${libname} PROPERTIES VERSION 1.0)
 	target_link_libraries(${libname} PRIVATE ${shared_lib_dependency_private})
 	target_link_libraries(${libname} PUBLIC ${shared_lib_dependency_public})
@@ -49,7 +49,7 @@ if (ZEC_OPTION_STATIC)
 
 else()
 #dynamic lib:
-	add_library(${libname} SHARED  ${ZEC_SRC} ${ZEC_NET_SRC} ${ZEC_MYSQL_SRC} ${ZEC_GAME_SRC})
+	add_library(${libname} SHARED  ${ZEC_SRC})
 	set_target_properties(${libname} PROPERTIES VERSION 1.0)
 	target_link_libraries(${libname} PRIVATE ${shared_lib_dependency_private})
 	target_link_libraries(${libname} PUBLIC ${shared_lib_dependency_public})
