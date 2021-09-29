@@ -1,0 +1,28 @@
+# Look for the header file.
+find_path(__LIBEVENT_INCLUDE_DIR event2/event.h)
+# Look for the library.
+find_library(__LIBEVENT_CORE  NAMES event_core event_core_shared)
+find_library(__LIBEVENT_EXTRA NAMES event_extra event_extra_shared)
+
+include(FindPackageHandleStandardArgs)
+if (CMAKE_SYSTEM_NAME MATCHES "Windows")
+	set(__WS2_32_LIBRARY Ws2_32)
+	FIND_PACKAGE_HANDLE_STANDARD_ARGS(LIBEVENT DEFAULT_MSG __LIBEVENT_CORE __LIBEVENT_EXTRA __LIBEVENT_INCLUDE_DIR)
+elseif (CMAKE_SYSTEM_NAME MATCHES "Linux")
+	find_library(__LIBEVENT_THREADS NAMES event_pthreads)
+	FIND_PACKAGE_HANDLE_STANDARD_ARGS(LIBEVENT DEFAULT_MSG __LIBEVENT_CORE __LIBEVENT_EXTRA __LIBEVENT_THREADS __LIBEVENT_INCLUDE_DIR)
+elseif (CMAKE_SYSTEM_NAME MATCHES "Darwin")
+	find_library(__LIBEVENT_THREADS NAMES event_pthreads)
+	FIND_PACKAGE_HANDLE_STANDARD_ARGS(LIBEVENT DEFAULT_MSG __LIBEVENT_CORE __LIBEVENT_EXTRA __LIBEVENT_THREADS __LIBEVENT_INCLUDE_DIR)
+endif()
+
+# Handle the QUIETLY and REQUIRED arguments and set LIBEVENT_FOUND to TRUE if all listed variables are TRUE.
+# Copy the results to the output variables.
+
+if(LIBEVENT_FOUND)
+	set(LIBEVENT_LIBRARIES ${__LIBEVENT_THREADS} ${__LIBEVENT_EXTRA} ${__LIBEVENT_CORE} ${__WS2_32_LIBRARY})
+	set(LIBEVENT_INCLUDE_DIRS ${__LIBEVENT_INCLUDE_DIR})
+else()
+	set(LIBEVENT_LIBRARIES)
+	set(LIBEVENT_INCLUDE_DIRS)
+endif()
