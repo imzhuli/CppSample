@@ -38,13 +38,14 @@ ZEC_NS
 
 	private:
 		uint64_t _Value;
+
 		template<bool RandomKey>
 		friend class xIndexIdPool;
 		template<typename tValue, bool RandomKey>
 		friend class xIndexedStorage;
 
-		static constexpr const uint32_t KeyInUseBitmask = 0x8000'0000u;
 		ZEC_API_STATIC_MEMBER uint_fast32_t TimeSeed();
+		static constexpr const uint32_t KeyInUseBitmask = 0x8000'0000u;
 	};
 
 	template<bool RandomKey>
