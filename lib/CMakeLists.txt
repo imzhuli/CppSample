@@ -63,7 +63,7 @@ install(
 	FILES_MATCHING REGEX ".+\.(h|hpp)"
 	)
 install(TARGETS
-	zec
+	${libname}
 	RUNTIME DESTINATION bin
 	ARCHIVE DESTINATION lib
 	LIBRARY DESTINATION lib
