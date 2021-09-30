@@ -1,7 +1,9 @@
 #pragma once
 #include "../Common.hpp"
+#include "./Thread.hpp"
 #include <filesystem>
 #include <cstring>
+#include <cstdio>
 #include <mutex>
 #include <atomic>
 #include <cinttypes>
@@ -87,6 +89,37 @@ ZEC_NS
 		std::mutex                   _SyncMutex;
 		std::atomic<eLogLevel>       _LogLevel { eLogLevel::Debug };
 		FILE *                       _LogFile = nullptr;
+	};
+
+	class xMemoryLogger final
+	: public xLogger
+	{
+	public:
+		ZEC_API_MEMBER xMemoryLogger();
+		ZEC_API_MEMBER ~xMemoryLogger();
+
+		ZEC_API_MEMBER bool Init(size32_t MaxLineNumber = 10000, size32_t MaxLineSize = 1024);
+		ZEC_API_MEMBER void Clean();
+
+		ZEC_API_MEMBER void SetLogLevel(eLogLevel ll) override { _LogLevel = ll; }
+		ZEC_API_MEMBER void Log(eLogLevel ll, const char * fmt, ...) override;
+		ZEC_API_MEMBER void Output(FILE * fp =  stdout);
+
+	private:
+		xSpinlock               _Spinlock;
+		std::atomic<eLogLevel>  _LogLevel { eLogLevel::Debug };
+
+		size_t                  _LineSize = 0;
+		size_t                  _RealLineSize = 0;
+		char *                  _LogBufferPtr = nullptr;
+
+		size_t                  _LineNumber = 0;
+		size_t                  _CurrentLineIndex = 0;
+
+		// Format:
+		// Length@size32_t + Output + "\n\0"
+		static constexpr const size_t ExtraSize = 2 /* \n\0 */; 
+		static constexpr const size_t LineLeadBufferSize = 48;
 	};
 
 	ZEC_API xNonLogger * const NonLoggerPtr;
