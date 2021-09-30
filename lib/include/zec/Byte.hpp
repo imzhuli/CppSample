@@ -125,12 +125,12 @@ ZEC_NS
 		ZEC_INLINE void Wf(float f)                          { __detail__::__raw__::UF uf{.f = f}; W4(uf.u); }
 		ZEC_INLINE void Wd(double d)                         { __detail__::__raw__::UD ud{.d = d}; W8(ud.u); }
 
-		ZEC_INLINE void W1l(uint8_t u)                       { *(_curr++) = u; }
-		ZEC_INLINE void W2l(uint16_t u)                      { iter::write(_curr, zecLE16(u)); }
-		ZEC_INLINE void W4l(uint32_t u)                      { iter::write(_curr, zecLE32(u)); }
-		ZEC_INLINE void W8l(uint64_t u)                      { iter::write(_curr, zecLE64(u)); }
-		ZEC_INLINE void Wfl(float f)                         { __detail__::__raw__::UF uf{.f = f}; W4l(uf.u); }
-		ZEC_INLINE void Wdl(double d)                        { __detail__::__raw__::UD ud{.d = d}; W8l(ud.u); }
+		ZEC_INLINE void W1L(uint8_t u)                       { *(_curr++) = u; }
+		ZEC_INLINE void W2L(uint16_t u)                      { iter::write(_curr, zecLE16(u)); }
+		ZEC_INLINE void W4L(uint32_t u)                      { iter::write(_curr, zecLE32(u)); }
+		ZEC_INLINE void W8L(uint64_t u)                      { iter::write(_curr, zecLE64(u)); }
+		ZEC_INLINE void WFL(float f)                         { __detail__::__raw__::UF uf{.f = f}; W4L(uf.u); }
+		ZEC_INLINE void WDL(double d)                        { __detail__::__raw__::UD ud{.d = d}; W8L(ud.u); }
 
 		ZEC_INLINE void *          operator ()() const          { return _curr; }
 		ZEC_INLINE operator        ubyte * () const             { return _curr; }
@@ -163,12 +163,12 @@ ZEC_NS
 		ZEC_INLINE float    RF()                             { __detail__::__raw__::UF uf{.u=R4()}; return uf.f; }
 		ZEC_INLINE double   RD()                             { __detail__::__raw__::UD ud{.u=R8()}; return ud.d; }
 
-		ZEC_INLINE uint8_t  R1l()                            { return *(_curr++); }
-		ZEC_INLINE uint16_t R2l()                            { return zecLE16(iter::read<uint16_t>(_curr)); }
-		ZEC_INLINE uint32_t R4l()                            { return zecLE32(iter::read<uint32_t>(_curr)); }
-		ZEC_INLINE uint64_t R8l()                            { return zecLE64(iter::read<uint64_t>(_curr)); }
-		ZEC_INLINE float    Rfl()                            { __detail__::__raw__::UF uf{.u=R4l()}; return uf.f; }
-		ZEC_INLINE double   Rdl()                            { __detail__::__raw__::UD ud{.u=R8l()}; return ud.d; }
+		ZEC_INLINE uint8_t  R1L()                            { return *(_curr++); }
+		ZEC_INLINE uint16_t R2L()                            { return zecLE16(iter::read<uint16_t>(_curr)); }
+		ZEC_INLINE uint32_t R4L()                            { return zecLE32(iter::read<uint32_t>(_curr)); }
+		ZEC_INLINE uint64_t R8L()                            { return zecLE64(iter::read<uint64_t>(_curr)); }
+		ZEC_INLINE float    RFL()                            { __detail__::__raw__::UF uf{.u=R4L()}; return uf.f; }
+		ZEC_INLINE double   RDL()                            { __detail__::__raw__::UD ud{.u=R8L()}; return ud.d; }
 
 		ZEC_INLINE const void *      operator ()() const        { return _curr; }
 		ZEC_INLINE operator          const ubyte * () const     { return _curr; }
