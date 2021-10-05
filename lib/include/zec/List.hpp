@@ -69,8 +69,6 @@ ZEC_NS
 		xListNode _Head;
 
 	public:
-		using xNode = tNode;
-
 		xList() = default;
 		xList(const xList&) = delete;
 		ZEC_INLINE xList(xList&& other) {
