@@ -33,6 +33,8 @@ ZEC_NS
 		ZEC_INLINE uint32_t GetIndex() const { return (uint32_t)_Value; }
 		ZEC_INLINE uint32_t GetKey() const { return static_cast<uint32_t>(_Value >> 32);}
 
+		static constexpr uint64_t InvalidValue  = static_cast<uint64_t>(-1);
+
 	private:
 		uint64_t _Value;
 
@@ -43,7 +45,6 @@ ZEC_NS
 
 		ZEC_API_STATIC_MEMBER uint_fast32_t TimeSeed();
 		static constexpr uint32_t MaxIndexValue = static_cast<uint32_t>(0x7FFF'FFFFu);
-		static constexpr uint64_t InvalidValue  = static_cast<uint64_t>(-1);
 		static constexpr const uint32_t KeyInUseBitmask = 0x8000'0000u;
 	};
 
