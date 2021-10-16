@@ -154,7 +154,7 @@ ZEC_NS
 		ZEC_INLINE xStreamReader(const void * p) { Reset(p); }
 
 		ZEC_INLINE char     R()                              { return *(_curr++); }
-		ZEC_INLINE void     R(void * d, ptrdiff_t zecLEn)       { ::memcpy(d, _curr, zecLEn); _curr += zecLEn; }
+		ZEC_INLINE void     R(void * d, ptrdiff_t len)       { ::memcpy(d, _curr, len); _curr += len; }
 
 		ZEC_INLINE uint8_t  R1()                             { return *(_curr++); }
 		ZEC_INLINE uint16_t R2()                             { return zecBE16(iter::read<uint16_t>(_curr)); }
