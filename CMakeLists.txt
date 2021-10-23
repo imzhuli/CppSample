@@ -84,6 +84,9 @@ set(CMAKE_INSTALL_REMOVE_ENVIRONMENT_RPATH     TRUE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH          FALSE)
 
 enable_testing()
+
+set(ZEC_OPTION_STATIC ON)
+
 add_subdirectory(lib)
 add_subdirectory(test)
 add_subdirectory(sample)
