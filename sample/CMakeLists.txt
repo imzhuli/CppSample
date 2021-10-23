@@ -1,5 +1,7 @@
 project(sample_${libname})
 
+find_package(FastCGI)
+
 # dependencies:
 set(shared_lib_dependency_private)
 
@@ -7,9 +9,15 @@ set(shared_lib_dependency_private)
 include_directories(
 	../lib/src/
 	../lib/include/
+	FCGI_INCLUDE_DIRS
 	)
 link_directories(
 	)
+
+set(shared_lib_dependency_private
+	${shared_lib_dependency_private}
+	${FCGI_LIBRARIES}
+)
 
 function(add_sub_sample sub_dir_name)
 	aux_source_directory(${sub_dir_name} LOCAL_SOURCE_CODE)
@@ -23,6 +31,7 @@ endfunction()
 
 #test lib:
 
-add_sub_sample(sample_app)
+add_sub_sample(app)
+add_sub_sample(http_echo)
 
 
