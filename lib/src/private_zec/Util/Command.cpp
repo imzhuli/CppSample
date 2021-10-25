@@ -4,7 +4,7 @@
 ZEC_NS
 {
 
-	xCommandLine::xCommandLine(int Argc, char ** Argv, const std::vector<xOption> OptionList)
+	xCommandLine::xCommandLine(int Argc, const char ** Argv, const std::vector<xOption> & OptionList)
 	{
 		for (const auto & Option : OptionList) {
 			AddOption(Option);
@@ -34,7 +34,7 @@ ZEC_NS
 		}
 	}
 
-	void xCommandLine::Parse(int Argc, char * Argv[])
+	void xCommandLine::Parse(int Argc, const char * Argv[])
 	{
 		std::vector<std::string> Keys;
 		int i = 0;
