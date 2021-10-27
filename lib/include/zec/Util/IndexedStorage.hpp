@@ -94,6 +94,11 @@ ZEC_NS
 			return { (static_cast<uint64_t>(Rand) << 32) + Index };
 		}
 
+		ZEC_INLINE void Release(const xIndexId& Id) {
+			uint32_t Index = Id.GetIndex();
+			_IdPoolPtr[Index] = Steal(_NextFreeIdIndex, Index);
+		}
+
 		ZEC_INLINE bool Check(const xIndexId& Id) {
 			uint32_t Index = Id.GetIndex();
 			if (Index >= _IdPoolSize) {
@@ -101,15 +106,21 @@ ZEC_NS
 			}
 			return _IdPoolPtr[Index] == Id.GetKey();
 		}
+
+		ZEC_INLINE bool CheckAndRelease(const xIndexId& Id) {
+			uint32_t Index = Id.GetIndex();
+			if (Index >= _IdPoolSize || _IdPoolPtr[Index] != Id.GetKey()) {
+				return false;
+			}
+			_IdPoolPtr[Index] = Steal(_NextFreeIdIndex, Index);
+			return true;
+		}
+
 		ZEC_INLINE bool IsInUse(const uint32_t Index) {
 			assert(Index < _IdPoolSize);
 			return _IdPoolPtr[Index] & xIndexId::KeyInUseBitmask;
 		}
 
-		ZEC_INLINE void Release(const xIndexId& Id) {
-			uint32_t Index = Id.GetIndex();
-			_IdPoolPtr[Index] = Steal(_NextFreeIdIndex, Index);
-		}
 
 	private:
 		size32_t      _InitedId   = 0;
@@ -171,12 +182,38 @@ ZEC_NS
 			return { (static_cast<uint64_t>(Rand) << 32) + Index };
 		}
 
+		ZEC_INLINE void Release(const xIndexId& Id) {
+			uint32_t Index = Id.GetIndex();
+			_IdPoolPtr[Index] = Steal(_NextFreeIdIndex, Index);
+			_StoragePtr[Index].~tValue();
+		}
+
 		ZEC_INLINE bool Check(const xIndexId& Id) {
 			uint32_t Index = Id.GetIndex();
 			if (Index >= _IdPoolSize) {
 				return false;
 			}
 			return _IdPoolPtr[Index] == Id.GetKey();
+		}
+
+		ZEC_INLINE xOptional<xRef<const tValue>> CheckAndGet(const xIndexId& Id) const {
+			uint32_t Index = Id.GetIndex();
+			if (Index >= _IdPoolSize || _IdPoolPtr[Index] != Id.GetKey()) {
+				return {};
+			}
+			return _StoragePtr[Index];
+		}
+
+		ZEC_INLINE xOptional<tValue> CheckAndRelease(const xIndexId& Id) const {
+			uint32_t Index = Id.GetIndex();
+			if (Index >= _IdPoolSize || _IdPoolPtr[Index] != Id.GetKey()) {
+				return {};
+			}
+			auto DeferedRelese = xScopeGuard{[&](){
+				_StoragePtr[Index].~tValue();
+			}};
+			_IdPoolPtr[Index] = Steal(_NextFreeIdIndex, Index);
+			return std::move(_StoragePtr[Index]);
 		}
 
 		ZEC_INLINE const tValue & Get(const xIndexId& Id) const {
@@ -188,11 +225,6 @@ ZEC_NS
 			_StoragePtr[Id.GetIndex()] = std::forward<tAssignValue>(Value);
 		}
 
-		ZEC_INLINE void Release(const xIndexId& Id) {
-			uint32_t Index = Id.GetIndex();
-			_StoragePtr[Index].~tValue();
-			_IdPoolPtr[Index] = Steal(_NextFreeIdIndex, Index);
-		}
 
 	private:
 		size32_t      _InitedId   = 0;
