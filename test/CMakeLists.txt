@@ -11,9 +11,6 @@ include_directories(
 link_directories(
 	)
 
-
-add_compile_options("--save-temps")
-
 function(add_sub_test sub_dir_name)
 	aux_source_directory(${sub_dir_name} LOCAL_SOURCE_CODE)
 	add_executable(test_${sub_dir_name}  ${LOCAL_SOURCE_CODE})
