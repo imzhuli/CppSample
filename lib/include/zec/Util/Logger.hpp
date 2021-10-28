@@ -84,6 +84,18 @@ ZEC_NS
 		ZEC_API_MEMBER void SetLogLevel(eLogLevel ll) override { _LogLevel = ll; }
 		ZEC_API_MEMBER void Log(eLogLevel ll, const char * fmt, ...) override;
 
+		ZEC_API_MEMBER FILE * Lock() {
+			_SyncMutex.lock();
+			if (!_LogFile) {
+				_SyncMutex.unlock();
+			}
+			return _LogFile;			
+		}
+		ZEC_API_MEMBER void Unlock(FILE * && ExpiringFilePtr) {
+			assert(ExpiringFilePtr == _LogFile);
+			_SyncMutex.unlock();
+		}
+		
 	private:
 		std::filesystem::path        _LogFilename;
 		std::mutex                   _SyncMutex;
