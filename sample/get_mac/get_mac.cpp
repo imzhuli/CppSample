@@ -1,10 +1,5 @@
 #include <zec/String.hpp>
 
-#include <sys/types.h>
-#include <netinet/ip.h>
-#include <netinet/ip6.h>
-#include <linux/if_packet.h>
-#include <ifaddrs.h>
 #include <string.h>
 #include <assert.h>
 
@@ -12,6 +7,13 @@
 #include <sstream>
 using std::cout;
 using std::endl;
+
+#include <sys/types.h>
+#include <netinet/ip.h>
+#include <netinet/ip6.h>
+#include <linux/if_packet.h>
+#include <ifaddrs.h>
+#include <linux/if_link.h>
 
 [[maybe_unused]]
 static const char * HATypename(short type)
@@ -93,7 +95,12 @@ void PrintMac(char * buffer, size_t bufferSize)
         }
 
         if (iface->ifa_data) {
-            ss << "ifa_data_ok" << " ";
+            struct rtnl_link_stats *stats = (struct rtnl_link_stats *)iface->ifa_data;
+            char StateBuffer[1024];
+            snprintf(StateBuffer, sizeof(StateBuffer), "\t\ttx_packets = %10u; rx_packets = %10u\n"
+                    "\t\ttx_bytes   = %10u; rx_bytes   = %10u\n",
+                    stats->tx_packets, stats->rx_packets,
+                    stats->tx_bytes, stats->rx_bytes);
         } else {
             ss << "ifa_data_nil" << " ";
         }
