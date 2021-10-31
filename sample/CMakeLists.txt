@@ -32,6 +32,7 @@ endfunction()
 #test lib:
 
 add_sub_sample(app)
+add_sub_sample(get_mac)
 add_sub_sample(http_echo)
 
 
