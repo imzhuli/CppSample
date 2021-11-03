@@ -16,8 +16,10 @@ xNetlinkInterfaceList GetNetlinkMac()
         struct ifinfomsg ifi;
     } Req_getlink;
     assert(NLMSG_LENGTH(sizeof(struct ifinfomsg)) == sizeof(Req_getlink));
-    int fd = -1;
-    fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+    int fd = socket(AF_NETLINK, SOCK_RAW, NETLINK_ROUTE);
+    if (fd == -1) {
+        return {};
+    }
 
     auto request = Req_getlink{
         .nh = {
