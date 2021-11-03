@@ -4,7 +4,7 @@ using namespace std;
 
 // netlink package is base on packets, 
 // but there might be large response consist of small packets.
-#define SZ 40960 
+#define SZ 81920 
 
 xNetlinkInterfaceList GetNetlinkMac()
 {
@@ -35,7 +35,10 @@ xNetlinkInterfaceList GetNetlinkMac()
             .ifi_flags = 0,
             .ifi_change = 0,
         }};
-    if (sizeof(Req_getlink) != send(fd, &request, sizeof(request), 0)) {
+    auto sendbytes = send(fd, &request, sizeof(request), 0);
+    if (sendbytes != sizeof(request)) {
+        // LOGE("Failed to send netlink request, socket=%i, sendbytes=%i, errno=%i", (int)fd, (int)sendbytes, errno);
+        close(fd);
         return {};
     }
 
@@ -51,6 +54,7 @@ xNetlinkInterfaceList GetNetlinkMac()
             if (err == EAGAIN) {
                 cerr << "netlinke response buffer is too small, current size is " << SZ << endl;                
             }
+            close(fd);
             return {};
         };
 
@@ -58,6 +62,7 @@ xNetlinkInterfaceList GetNetlinkMac()
         auto MessageType = ((struct nlmsghdr *)p)->nlmsg_type;
         if (MessageType == NLMSG_ERROR) {
             cerr << "netlink returns error" << endl;
+            close(fd);
             return {};
         }
         if (MessageType == NLMSG_DONE) {
@@ -107,5 +112,6 @@ xNetlinkInterfaceList GetNetlinkMac()
         }
         ResultList.push_back(std::move(Interface));
     }
+    close(fd);
     return ResultList;
 }
