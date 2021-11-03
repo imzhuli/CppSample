@@ -362,6 +362,9 @@ ZEC_NS
 			T & _Resource;
 			const bool _Inited;
 		};
+		
+		template<typename T, typename ... tArgs>
+		xResourceGuard(T & Resource, tArgs&& ... Args) -> xResourceGuard<T>;
 
 		template<typename T>
 		class xOptional final {
