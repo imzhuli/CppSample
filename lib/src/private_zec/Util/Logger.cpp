@@ -186,14 +186,13 @@ ZEC_NS
 
 		size_t StartIndex = _CurrentLineIndex + 1;
 		while(StartIndex != _CurrentLineIndex) {
-			StartIndex %= _LineNumber;
 			auto LineStart = _LogBufferPtr + StartIndex * _RealLineSize;
 			if (*LineStart) {
 				fprintf(fp, "%s", LineStart);
 			}
 			++StartIndex;
+			StartIndex %= _LineNumber;
 		}
 	}
-
 
 }
