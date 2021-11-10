@@ -1,6 +1,7 @@
 project(sample_${libname})
 
 find_package(FastCGI)
+find_package(Lua REQUIRED)
 
 # dependencies:
 set(shared_lib_dependency_private)
@@ -9,7 +10,8 @@ set(shared_lib_dependency_private)
 include_directories(
 	../lib/src/
 	../lib/include/
-	FCGI_INCLUDE_DIRS
+	${FCGI_INCLUDE_DIRS}
+	${LUA_INCLUDE_DIR}
 	)
 link_directories(
 	)
@@ -17,6 +19,7 @@ link_directories(
 set(shared_lib_dependency_private
 	${shared_lib_dependency_private}
 	${FCGI_LIBRARIES}
+	${LUA_LIBRARIES}
 )
 
 function(add_sub_sample sub_dir_name)
@@ -34,5 +37,6 @@ endfunction()
 add_sub_sample(app)
 add_sub_sample(get_mac)
 add_sub_sample(http_echo)
+add_sub_sample(lua)
 
 

@@ -21,6 +21,12 @@ xNetlinkInterfaceList GetNetlinkMac()
         return {};
     }
 
+    int type = AF_UNSPEC;
+    socklen_t typeLen = sizeof(type);
+    getsockopt(fd, SOL_SOCKET, SO_DOMAIN, &type, &typeLen);
+    cout << "SocketType value:" << type << endl;;
+
+
     auto request = Req_getlink{
         .nh = {
             .nlmsg_len = NLMSG_LENGTH(sizeof(struct ifinfomsg)),
@@ -40,7 +46,7 @@ xNetlinkInterfaceList GetNetlinkMac()
         // LOGE("Failed to send netlink request, socket=%i, sendbytes=%i, errno=%i", (int)fd, (int)sendbytes, errno);
         close(fd);
         return {};
-    }
+    }    
 
     // Receive
     char recvbuf[SZ] = {};
