@@ -20,9 +20,16 @@ public:
         return LUA_OK == luaL_loadstring(_LuaStatePtr, CodeStr.c_str());
     }
 
+    template<typename tArg>
+    inline std::enable_if_t<std::is_integral_v<tArg>, tArg> GetAt(int Index) const { return luaL_checkinteger(_LuaStatePtr, Index); }
+    template<typename tArg>
+    inline std::enable_if_t<std::is_floating_point_v<tArg>, tArg> GetAt(int Index) const { return luaL_checknumber(_LuaStatePtr, Index); }
+    template<typename tArg>
+    inline std::enable_if_t<std::is_same_v<tArg, const char *>, tArg> GetAt(int Index) const { return luaL_checkstring(_LuaStatePtr, Index); }
+ 
     inline auto GetTop() const { return lua_gettop(_LuaStatePtr); }
     inline auto SetTop(int Index) const { lua_settop(_LuaStatePtr, Index); }
-    inline auto Pop(int Index) const { lua_pop(_LuaStatePtr, Index); }
+    inline auto Pop(int Number) const { lua_pop(_LuaStatePtr, Number); }
 
     inline void Push(lua_Integer IntValue) const { lua_pushinteger(_LuaStatePtr, IntValue); }
     inline void Push(const char * StrValue) const { lua_pushstring(_LuaStatePtr, StrValue); }
@@ -78,13 +85,6 @@ public:
     template<typename tArg>
     inline std::enable_if_t<std::is_same_v<tArg, const char *>, tArg> Pop() const { return PopStr(); }
 
-    template<typename tArg>
-    inline std::enable_if_t<std::is_integral_v<tArg>, tArg> GetAt(int Index) const { return luaL_checkinteger(_LuaStatePtr, Index); }
-    template<typename tArg>
-    inline std::enable_if_t<std::is_floating_point_v<tArg>, tArg> GetAt(int Index) const { return luaL_checknumber(_LuaStatePtr, Index); }
-    template<typename tArg>
-    inline std::enable_if_t<std::is_same_v<tArg, const char *>, tArg> GetAt(int Index) const { return luaL_checkstring(_LuaStatePtr, Index); }
-
     template<typename...tArgs>
     inline std::enable_if_t<(sizeof...(tArgs) > 1),std::tuple<tArgs...>> Pop() const {
         auto Top = lua_gettop(_LuaStatePtr); assert (Top);
@@ -93,7 +93,7 @@ public:
         lua_pop(_LuaStatePtr, (int)(sizeof...(tArgs)));
         return Result;
     }
- 
+
     inline void Error(const char * Reason) const { lua_pushstring(_LuaStatePtr, Reason); lua_error(_LuaStatePtr); }
     inline bool Execute(const char * CodeStr) const { return LUA_OK == luaL_dostring(_LuaStatePtr, CodeStr); }
     template<size_t ResultNumber = 0, typename...tArgs>
