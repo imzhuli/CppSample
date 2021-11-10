@@ -15,17 +15,14 @@ int LuaCallback(lua_State * LP)
 int LuaCallbackSub(lua_State * LP)
 {
 	auto W = xLuaStateWrapper(LP);
-	W.Execute("print('LuaCallbackSub')");
+	auto [Param1, Param2, Param3] = W.Pop<int, int, const char *>();
+	return W.BatchPush(Param1 + Param2, Param1 - Param2, Param3);
+}
 
-	auto Param1 = W.GetIntParam(1);
-	auto Param2 = W.GetIntParam(2);
-	auto Param3 = W.GetStrParam(3);
-
-	cout << "Callback inner result: " << (int)(Param1 - Param2) << endl;
-	cout << "Callback sub param3: " << Param3 << endl;
-
-	W.Push(Param1 - Param2);
-	return 1;
+int LuaCallbackSubSub(lua_State * LP)
+{
+	auto W = xLuaStateWrapper(LP);
+	return W.BatchPush(1, 2, "Hello R3");
 }
 
 int main(int, char *[])
@@ -48,6 +45,7 @@ int main(int, char *[])
 	LuaState.SetGlobal("global_fstr1", "Hello the int value is %f!", 123.456);
 	LuaState.SetGlobal("global_callback", LuaCallback);
 	LuaState.SetGlobal("global_callback_sub", LuaCallbackSub);
+	LuaState.SetGlobal("global_callback_subsub", LuaCallbackSubSub);
 
 	LuaState.Execute("print(global_int)");
 	LuaState.Execute("print(global_str)");
@@ -57,9 +55,13 @@ int main(int, char *[])
 
 	LuaState.Execute("print(global_callback_sub(1000, 112, 'hello world!'))");
 
-	LuaState.Call<1>("global_callback_sub", 1000, 112, "hello world!");
-	auto CallResult = LuaState.PopInt();
-	cout << "CallResult: " << CallResult << endl;
+	do {
+		LuaState.Call<3>("global_callback_subsub");	
+		auto [R1,R2,R3] = LuaState.Pop<int, int, const char *>();
+		cout << "Results: " << R1 << ", " << R2 << ", " << R3 << endl;
+	} while(false);
+
+	cout << "Top: " << lua_gettop(LuaState) << endl;
 
 	return 0;
 }
