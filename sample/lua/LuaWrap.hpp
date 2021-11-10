@@ -21,8 +21,8 @@ public:
     }
 
     inline auto GetTop() const { return lua_gettop(_LuaStatePtr); }
-    // inline auto SetTop(int Index) const { lua_settop(_LuaStatePtr, Index); }
-    // inline auto Pop(int Index) const { lua_pop(_LuaStatePtr, Index); }
+    inline auto SetTop(int Index) const { lua_settop(_LuaStatePtr, Index); }
+    inline auto Pop(int Index) const { lua_pop(_LuaStatePtr, Index); }
 
     inline void Push(lua_Integer IntValue) const { lua_pushinteger(_LuaStatePtr, IntValue); }
     inline void Push(const char * StrValue) const { lua_pushstring(_LuaStatePtr, StrValue); }
@@ -114,7 +114,6 @@ private:
             _FillTuple<MemberIndex + 1>(Tuple, StackOffset + 1);            
         }
     }
-
 };
 
 class xLuaState
