@@ -44,13 +44,13 @@ ZEC_NS
         template<typename tArg>
         inline std::enable_if_t<std::is_floating_point_v<tArg>> Push(tArg Number) { lua_pushnumber(_LuaStatePtr, Number); }
         template<typename...Args>
-        inline void Push(const char * FmtStr, Args&&...args) const { lua_pushfstring(_LuaStatePtr, FmtStr, std::forward<Args>(args)...); }
+        inline void PushF(const char * FmtStr, Args&&...args) const { lua_pushfstring(_LuaStatePtr, FmtStr, std::forward<Args>(args)...); }
 
-        inline int BatchPush() const { return 0; }
+        inline int Push() const { return 0; }
         template<typename tFirstArg, typename...tOtherArgs>
-        inline int BatchPush(tFirstArg&& FirstArg, tOtherArgs&&...args) const { 
+        inline int Push(tFirstArg&& FirstArg, tOtherArgs&&...args) const { 
             Push(std::forward<tFirstArg>(FirstArg));
-            BatchPush(std::forward<tOtherArgs>(args)...);
+            Push(std::forward<tOtherArgs>(args)...);
             return 1 + (int)sizeof...(args);
         }
 
