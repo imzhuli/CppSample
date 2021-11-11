@@ -10,57 +10,57 @@ ZEC_NS
     class xLuaStateWrapper
     {
     public:
-        inline xLuaStateWrapper() = default;
-        inline xLuaStateWrapper(lua_State * LuaStatePtr) : _LuaStatePtr(LuaStatePtr) {}
-        inline ~xLuaStateWrapper() = default;
+        ZEC_INLINE xLuaStateWrapper() = default;
+        ZEC_INLINE xLuaStateWrapper(lua_State * LuaStatePtr) : _LuaStatePtr(LuaStatePtr) {}
+        ZEC_INLINE ~xLuaStateWrapper() = default;
 
-        inline operator lua_State * () const { return _LuaStatePtr; }
+        ZEC_INLINE operator lua_State * () const { return _LuaStatePtr; }
 
-        inline bool LoadStr(const char * CodeStr) {
+        ZEC_INLINE bool LoadStr(const char * CodeStr) {
             return LUA_OK == luaL_loadstring(_LuaStatePtr, CodeStr);
         }
-        inline bool LoadStr(const std::string & CodeStr) {
+        ZEC_INLINE bool LoadStr(const std::string & CodeStr) {
             return LUA_OK == luaL_loadstring(_LuaStatePtr, CodeStr.c_str());
         }
 
         template<typename tArg>
-        inline std::enable_if_t<std::is_integral_v<tArg>, tArg> GetAt(int Index) const { return luaL_checkinteger(_LuaStatePtr, Index); }
+        ZEC_INLINE std::enable_if_t<std::is_integral_v<tArg>, tArg> GetAt(int Index) const { return luaL_checkinteger(_LuaStatePtr, Index); }
         template<typename tArg>
-        inline std::enable_if_t<std::is_floating_point_v<tArg>, tArg> GetAt(int Index) const { return luaL_checknumber(_LuaStatePtr, Index); }
+        ZEC_INLINE std::enable_if_t<std::is_floating_point_v<tArg>, tArg> GetAt(int Index) const { return luaL_checknumber(_LuaStatePtr, Index); }
         template<typename tArg>
-        inline std::enable_if_t<std::is_same_v<tArg, const char *>, tArg> GetAt(int Index) const { return luaL_checkstring(_LuaStatePtr, Index); }
+        ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, const char *>, tArg> GetAt(int Index) const { return luaL_checkstring(_LuaStatePtr, Index); }
         template<typename tArg>
-        inline std::enable_if_t<std::is_same_v<tArg, std::string>, tArg> GetAt(int Index) const { return luaL_checkstring(_LuaStatePtr, Index); }
+        ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, std::string>, tArg> GetAt(int Index) const { return luaL_checkstring(_LuaStatePtr, Index); }
     
-        inline auto GetTop() const { return lua_gettop(_LuaStatePtr); }
-        inline auto SetTop(int Index) const { lua_settop(_LuaStatePtr, Index); }
-        inline auto Pop(int Number) const { lua_pop(_LuaStatePtr, Number); }
+        ZEC_INLINE auto GetTop() const { return lua_gettop(_LuaStatePtr); }
+        ZEC_INLINE auto SetTop(int Index) const { lua_settop(_LuaStatePtr, Index); }
+        ZEC_INLINE auto Pop(int Number) const { lua_pop(_LuaStatePtr, Number); }
 
-        inline void Push() const {}
-        inline void Push(lua_Integer IntValue) const { lua_pushinteger(_LuaStatePtr, IntValue); }
-        inline void Push(const char * StrValue) const { lua_pushstring(_LuaStatePtr, StrValue); }
-        inline void Push(const std::string& StrValue) const { lua_pushstring(_LuaStatePtr, StrValue.c_str()); }
-        inline void Push(int (*Func)(lua_State*)) const { lua_pushcfunction(_LuaStatePtr, Func); }
+        ZEC_INLINE void Push() const {}
+        ZEC_INLINE void Push(lua_Integer IntValue) const { lua_pushinteger(_LuaStatePtr, IntValue); }
+        ZEC_INLINE void Push(const char * StrValue) const { lua_pushstring(_LuaStatePtr, StrValue); }
+        ZEC_INLINE void Push(const std::string& StrValue) const { lua_pushstring(_LuaStatePtr, StrValue.c_str()); }
+        ZEC_INLINE void Push(int (*Func)(lua_State*)) const { lua_pushcfunction(_LuaStatePtr, Func); }
         
         template<typename tArg>
-        inline std::enable_if_t<std::is_floating_point_v<tArg>> Push(tArg Number) { lua_pushnumber(_LuaStatePtr, Number); }
+        ZEC_INLINE std::enable_if_t<std::is_floating_point_v<tArg>> Push(tArg Number) { lua_pushnumber(_LuaStatePtr, Number); }
         template<typename...Args>
-        inline void PushF(const char * FmtStr, Args&&...args) const { lua_pushfstring(_LuaStatePtr, FmtStr, std::forward<Args>(args)...); }
+        ZEC_INLINE void PushF(const char * FmtStr, Args&&...args) const { lua_pushfstring(_LuaStatePtr, FmtStr, std::forward<Args>(args)...); }
 
         template<typename tFirstArg, typename...tOtherArgs>
-        inline std::enable_if_t<sizeof...(tOtherArgs), int> Push(tFirstArg&& FirstArg, tOtherArgs&&...args) const { 
+        ZEC_INLINE std::enable_if_t<sizeof...(tOtherArgs), int> Push(tFirstArg&& FirstArg, tOtherArgs&&...args) const { 
             Push(std::forward<tFirstArg>(FirstArg));
             Push(std::forward<tOtherArgs>(args)...);
             return 1 + (int)sizeof...(args);
         }
 
         template<typename...Args>
-        inline void SetGlobal(const char * name, Args&&...args) {
+        ZEC_INLINE void SetGlobal(const char * name, Args&&...args) {
             Push(std::forward<Args>(args)...);
             lua_setglobal(_LuaStatePtr, name);
         }
 
-        inline lua_Integer PopInt() const {
+        ZEC_INLINE lua_Integer PopInt() const {
             auto Top = lua_gettop(_LuaStatePtr); 
             assert (Top);
             auto Ret = lua_tointeger(_LuaStatePtr, Top); 
@@ -68,7 +68,7 @@ ZEC_NS
             return Ret;
         }
 
-        inline lua_Number PopNumber() const {
+        ZEC_INLINE lua_Number PopNumber() const {
             auto Top = lua_gettop(_LuaStatePtr); 
             assert (Top);
             auto Ret = lua_tonumber(_LuaStatePtr, Top);
@@ -76,7 +76,7 @@ ZEC_NS
             return Ret;
         }
 
-        inline std::string PopStr() const {
+        ZEC_INLINE std::string PopStr() const {
             auto Top = lua_gettop(_LuaStatePtr); 
             assert (Top);
             auto Ret = lua_tostring(_LuaStatePtr, Top); 
@@ -85,14 +85,14 @@ ZEC_NS
         }
 
         template<typename tArg>
-        inline std::enable_if_t<std::is_integral_v<tArg>, tArg> Pop() const { return (tArg)PopInt(); }
+        ZEC_INLINE std::enable_if_t<std::is_integral_v<tArg>, tArg> Pop() const { return (tArg)PopInt(); }
         template<typename tArg>
-        inline std::enable_if_t<std::is_floating_point_v<tArg>, tArg> Pop() const { return (tArg)PopNumber(); }
+        ZEC_INLINE std::enable_if_t<std::is_floating_point_v<tArg>, tArg> Pop() const { return (tArg)PopNumber(); }
         template<typename tArg>
-        inline std::enable_if_t<std::is_same_v<tArg, std::string>, tArg> Pop() const { return PopStr(); }
+        ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, std::string>, tArg> Pop() const { return PopStr(); }
 
         template<typename...tArgs>
-        inline std::enable_if_t<(sizeof...(tArgs) > 1),std::tuple<tArgs...>> Pop() const {
+        ZEC_INLINE std::enable_if_t<(sizeof...(tArgs) > 1),std::tuple<tArgs...>> Pop() const {
             auto Top = lua_gettop(_LuaStatePtr); assert (Top);
             std::tuple<tArgs...> Result;
             _FillTuple<0>(Result, Top + 1 - sizeof...(tArgs));
@@ -100,11 +100,11 @@ ZEC_NS
             return Result;
         }
 
-        inline void Error(const char * Reason) const { lua_pushstring(_LuaStatePtr, Reason); lua_error(_LuaStatePtr); }
-        inline bool Execute(const char * CodeStr) const { return LUA_OK == luaL_dostring(_LuaStatePtr, CodeStr); }
-        inline bool ExecuteFile(const char * Filename) const { return LUA_OK == luaL_dofile(_LuaStatePtr, Filename); }
+        ZEC_INLINE void Error(const char * Reason) const { lua_pushstring(_LuaStatePtr, Reason); lua_error(_LuaStatePtr); }
+        ZEC_INLINE bool Execute(const char * CodeStr) const { return LUA_OK == luaL_dostring(_LuaStatePtr, CodeStr); }
+        ZEC_INLINE bool ExecuteFile(const char * Filename) const { return LUA_OK == luaL_dofile(_LuaStatePtr, Filename); }
         template<size_t ResultNumber = 0, typename...tArgs>
-        inline void Call(const char * name, tArgs&&...args) {
+        ZEC_INLINE void Call(const char * name, tArgs&&...args) {
             lua_getglobal(_LuaStatePtr, name);        
             Push(std::forward<tArgs>(args)...);
             lua_call(_LuaStatePtr, sizeof...(args), ResultNumber);        
@@ -115,7 +115,7 @@ ZEC_NS
 
     private:
         template<size_t MemberIndex, typename tTuple>
-        inline void _FillTuple(tTuple & Tuple, int StackOffset) const {
+        ZEC_INLINE void _FillTuple(tTuple & Tuple, int StackOffset) const {
             static_assert(!std::is_same_v<std::remove_reference_t<decltype(std::get<MemberIndex>(Tuple))>, const char *>);
             std::get<MemberIndex>(Tuple) = GetAt<std::remove_reference_t<decltype(std::get<MemberIndex>(Tuple))>>(StackOffset);
             if constexpr(MemberIndex < std::tuple_size<tTuple>() - 1) {            
@@ -129,8 +129,8 @@ ZEC_NS
     , xNonCopyable
     {
     public:
-        xLuaState();
-        ~xLuaState();
+        ZEC_API_MEMBER xLuaState();
+        ZEC_API_MEMBER ~xLuaState();
     };
 
 }
