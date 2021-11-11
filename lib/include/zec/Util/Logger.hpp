@@ -89,13 +89,13 @@ ZEC_NS
 			if (!_LogFile) {
 				_SyncMutex.unlock();
 			}
-			return _LogFile;			
+			return _LogFile;
 		}
 		ZEC_API_MEMBER void Unlock(FILE * && ExpiringFilePtr) {
 			assert(ExpiringFilePtr == _LogFile);
 			_SyncMutex.unlock();
 		}
-		
+
 	private:
 		std::filesystem::path        _LogFilename;
 		std::mutex                   _SyncMutex;
@@ -130,7 +130,7 @@ ZEC_NS
 
 		// Format:
 		// Length@size32_t + Output + "\n\0"
-		static constexpr const size_t ExtraSize = 2 /* \n\0 */; 
+		static constexpr const size_t ExtraSize = 2 /* \n\0 */;
 		static constexpr const size_t LineLeadBufferSize = 48;
 	};
 
