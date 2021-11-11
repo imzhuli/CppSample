@@ -7,7 +7,7 @@ using namespace std;
 int LuaCallbackSubSub(lua_State * LP)
 {
 	auto W = xLuaStateWrapper(LP);
-	return W.BatchPush(1, 2, "Hello R3");
+	return W.Push(1, 2, "Hello R3");
 }
 
 int main(int, char *[])

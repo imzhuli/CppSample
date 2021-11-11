@@ -36,6 +36,7 @@ ZEC_NS
         inline auto SetTop(int Index) const { lua_settop(_LuaStatePtr, Index); }
         inline auto Pop(int Number) const { lua_pop(_LuaStatePtr, Number); }
 
+        inline void Push() const {}
         inline void Push(lua_Integer IntValue) const { lua_pushinteger(_LuaStatePtr, IntValue); }
         inline void Push(const char * StrValue) const { lua_pushstring(_LuaStatePtr, StrValue); }
         inline void Push(const std::string& StrValue) const { lua_pushstring(_LuaStatePtr, StrValue.c_str()); }
@@ -46,9 +47,8 @@ ZEC_NS
         template<typename...Args>
         inline void PushF(const char * FmtStr, Args&&...args) const { lua_pushfstring(_LuaStatePtr, FmtStr, std::forward<Args>(args)...); }
 
-        inline int Push() const { return 0; }
         template<typename tFirstArg, typename...tOtherArgs>
-        inline int Push(tFirstArg&& FirstArg, tOtherArgs&&...args) const { 
+        inline std::enable_if_t<sizeof...(tOtherArgs), int> Push(tFirstArg&& FirstArg, tOtherArgs&&...args) const { 
             Push(std::forward<tFirstArg>(FirstArg));
             Push(std::forward<tOtherArgs>(args)...);
             return 1 + (int)sizeof...(args);
@@ -106,7 +106,7 @@ ZEC_NS
         template<size_t ResultNumber = 0, typename...tArgs>
         inline void Call(const char * name, tArgs&&...args) {
             lua_getglobal(_LuaStatePtr, name);        
-            BatchPush(std::forward<tArgs>(args)...);
+            Push(std::forward<tArgs>(args)...);
             lua_call(_LuaStatePtr, sizeof...(args), ResultNumber);        
         }
 
