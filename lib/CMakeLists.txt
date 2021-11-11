@@ -3,6 +3,7 @@ project(lib_${libname})
 ##FindPackages here
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost REQUIRED)
+find_package(Lua   REQUIRED)
 
 # enable specific macors by system type:
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
@@ -26,6 +27,7 @@ endif()
 include_directories(
 	./include/
 	${Boost_INCLUDE_DIRS}
+	${LUA_INCLUDE_DIR}
 	)
 link_directories(
 	${Boost_LIBRARY_DIRS}
@@ -34,6 +36,7 @@ link_directories(
 # libs:
 set(shared_lib_dependency_private
 	${Boost_LIBRARIES}
+	${LUA_LIBRARIES}
 	)
 set(shared_lib_dependency_public
 	${PLATFORM_LIBRARIES}
@@ -45,6 +48,7 @@ aux_source_directory(./src/private_zec                             ZEC_SRC)
 aux_source_directory(./src/private_zec/Util                        ZEC_SRC)
 aux_source_directory(./src/private_zec/Container                   ZEC_SRC)
 
+aux_source_directory(./src/private_zec_ext/Lua                     ZEC_SRC)
 aux_source_directory(./src/private_zec_ext/Utility                 ZEC_SRC)
 
 

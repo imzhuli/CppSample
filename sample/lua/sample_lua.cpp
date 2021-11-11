@@ -1,4 +1,4 @@
-#include "./LuaWrap.hpp"
+#include <zec_ext/Lua/LuaWrap.hpp>
 #include <iostream>
 
 using namespace zec;
@@ -16,7 +16,7 @@ int main(int, char *[])
 
 	LuaState.SetGlobal("global_callback_subsub", LuaCallbackSubSub);
 	LuaState.Call<3>("global_callback_subsub");	
-	auto [R1,R2,R3] = LuaState.Pop<int, int, const char *>();
+	auto [R1,R2,R3] = LuaState.Pop<int, int, std::string>();
 	cout << "Results: " << R1 << ", " << R2 << ", " << R3 << endl;
 
 	return 0;

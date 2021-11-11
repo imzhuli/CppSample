@@ -19,7 +19,6 @@ link_directories(
 set(shared_lib_dependency_private
 	${shared_lib_dependency_private}
 	${FCGI_LIBRARIES}
-	${LUA_LIBRARIES}
 )
 
 function(add_sub_sample sub_dir_name)
