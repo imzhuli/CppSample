@@ -34,7 +34,7 @@ ZEC_NS
 
         ZEC_INLINE auto GetTop() const { return lua_gettop(_LuaStatePtr); }
         ZEC_INLINE auto SetTop(int Index) const { lua_settop(_LuaStatePtr, Index); }
-        ZEC_INLINE auto Pop(int Number) const { lua_pop(_LuaStatePtr, Number); }
+        ZEC_INLINE auto PopN(int Number) const { lua_pop(_LuaStatePtr, Number); }
 
         ZEC_INLINE void Push() const {}
         ZEC_INLINE void Push(lua_Integer IntValue) const { lua_pushinteger(_LuaStatePtr, IntValue); }
@@ -92,6 +92,14 @@ ZEC_NS
         ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, std::string>, tArg> Pop() const { return PopStr(); }
 
         template<typename...tArgs>
+        ZEC_INLINE std::enable_if_t<(sizeof...(tArgs) > 1),std::tuple<tArgs...>> Get() const {
+            auto Top = lua_gettop(_LuaStatePtr); assert (Top);
+            std::tuple<tArgs...> Result;
+            _FillTuple<0, true>(Result, Top + 1 - sizeof...(tArgs));
+            return Result;
+        }
+
+        template<typename...tArgs>
         ZEC_INLINE std::enable_if_t<(sizeof...(tArgs) > 1),std::tuple<tArgs...>> Pop() const {
             auto Top = lua_gettop(_LuaStatePtr); assert (Top);
             std::tuple<tArgs...> Result;
@@ -119,17 +127,13 @@ ZEC_NS
     protected:
         lua_State * _LuaStatePtr = nullptr;
 
-    public:
-        template<typename...tRetVars>
-        ZEC_INLINE auto Get() const { return xGet<tRetVars...>{this}; }
-
     private:
-        template<size_t MemberIndex, typename tTuple>
+        template<size_t MemberIndex,  bool AllowCString = false, typename tTuple>
         ZEC_INLINE void _FillTuple(tTuple & Tuple, int StackOffset) const {
-            static_assert(!std::is_same_v<std::remove_reference_t<decltype(std::get<MemberIndex>(Tuple))>, const char *>);
+            static_assert(AllowCString || !std::is_same_v<std::remove_reference_t<decltype(std::get<MemberIndex>(Tuple))>, const char *>);
             std::get<MemberIndex>(Tuple) = GetAt<std::remove_reference_t<decltype(std::get<MemberIndex>(Tuple))>>(StackOffset);
             if constexpr(MemberIndex < std::tuple_size<tTuple>() - 1) {
-                _FillTuple<MemberIndex + 1>(Tuple, StackOffset + 1);
+                _FillTuple<MemberIndex + 1, AllowCString>(Tuple, StackOffset + 1);
             }
         }
     };
