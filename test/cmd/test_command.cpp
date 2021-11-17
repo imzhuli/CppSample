@@ -13,8 +13,7 @@ int main(int argc, char * argv[])
 		{ 'a', nullptr, "OptA", false },
 		{ 'b', nullptr, "OptB", false },
 		{ 'c', nullptr, "OptC", false },
-		{ 'v', nullptr, "OptV", true  },
-		{ 0, "LongValue", "OptV", true },
+		{ 'v', "LongValue", "OptV", true  },
 		{ 'e', "EmptyValue", "OptE", true},
 		{ 'n', "NoValue", "OptN", true},
 	});

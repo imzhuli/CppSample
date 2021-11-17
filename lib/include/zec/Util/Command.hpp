@@ -1,5 +1,6 @@
 #pragma once
 #include <zec/Common.hpp>
+#include <unordered_set>
 #include <unordered_map>
 #include <string>
 #include <vector>
@@ -77,6 +78,7 @@ ZEC_NS
 			bool NeedValue;
 		};
 
+		std::unordered_set<std::string> _KeySet;
 		std::unordered_map<char, xCoreOption> _ShortOptions;
 		std::unordered_map<std::string, xCoreOption> _LongOptions;
 		std::unordered_map<std::string, std::string> _ParsedValues;

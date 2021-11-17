@@ -26,6 +26,10 @@ ZEC_NS
 		assert(Option.KeyName);
 		assert(Option.ShortName || Option.LongName);
 		xCoreOption CoreOption = { Option.KeyName, Option.NeedValue	};
+		if (_KeySet.find(Option.KeyName) != _KeySet.end()) {
+			Error("Duplicate OptionKey");
+		}
+		_KeySet.insert(Option.KeyName);
 		if (Option.ShortName) {
 			_ShortOptions.insert_or_assign(Option.ShortName, CoreOption);
 		}
@@ -102,6 +106,7 @@ ZEC_NS
 	{
 		_ShortOptions.clear();
 		_LongOptions.clear();
+		_KeySet.clear();
 	}
 
 	void xCommandLine::CleanValues()
