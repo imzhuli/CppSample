@@ -77,6 +77,124 @@ ZEC_NS
 		ZEC_API_MEMBER void Sync();
 	};
 
+	template<bool AutoReset = false>
+	struct xEvent
+	: xNonCopyable
+	{
+	private:
+		std::mutex _Mutex;
+		std::condition_variable _ConditionVariable;
+		bool _Ready = false;
+
+	public:
+		ZEC_INLINE void Reset() {
+			auto Lock = std::unique_lock(_Mutex);
+			_Ready = false;
+		}
+
+		template<typename tFuncObj>
+		ZEC_INLINE auto SyncCall(tFuncObj & func) {
+			auto Lock = std::unique_lock(_Mutex);
+			return func();
+		}
+
+		ZEC_INLINE void Wait() {
+			auto Lock = std::unique_lock(_Mutex);
+			_ConditionVariable.wait(Lock, [this](){return _Ready;});
+			if constexpr (AutoReset) {
+				_Ready = false;
+			}
+		}
+
+		template<typename tFuncObj>
+		ZEC_INLINE void Wait(const tFuncObj & func) {
+			auto Lock = std::unique_lock(_Mutex);
+			func();
+			_ConditionVariable.wait(Lock, [this](){return _Ready;});
+			if (AutoReset) {
+				_Ready = false;
+			}
+		}
+
+		template<typename tFuncPre, typename tFuncPost>
+		ZEC_INLINE void Wait(const tFuncPre & funcPre, const tFuncPost & funcPost) {
+			auto Lock = std::unique_lock(_Mutex);
+			funcPre();
+			_ConditionVariable.wait(Lock, [this](){return _Ready;});
+			if constexpr (AutoReset) {
+				_Ready = false;
+			}
+			// Notice : the Post function is called after auto reset,
+			// just incase it throws exception;
+			funcPost();
+		}
+
+		template<typename Rep, typename Period>
+		ZEC_INLINE bool WaitFor(const std::chrono::duration<Rep, Period>& RelTime) {
+			auto Lock = std::unique_lock(_Mutex);
+			if (!_ConditionVariable.wait_for(Lock, RelTime, [this](){return _Ready;})) {
+				return false;
+			}
+			if constexpr (AutoReset) {
+				_Ready = false;
+			}
+			return true;
+		}
+
+		template<typename tFuncObj, typename Rep, typename Period>
+		ZEC_INLINE bool WaitFor(const tFuncObj & func, const std::chrono::duration<Rep, Period>& RelTime) {
+			auto Lock = std::unique_lock(_Mutex);
+			func();
+			if (!_ConditionVariable.wait_for(Lock, RelTime, [this](){return _Ready;})) {
+				return false;
+			}
+			if constexpr (AutoReset) {
+				_Ready = false;
+			}
+			return true;
+		}
+
+		template<typename tFuncPre, typename Rep, typename Period, typename tFuncPost>
+		ZEC_INLINE bool WaitFor(const tFuncPre & funcPre, const std::chrono::duration<Rep, Period>& RelTime, const tFuncPost & funcPost) {
+			auto Lock = std::unique_lock(_Mutex);
+			funcPre();
+			if (!_ConditionVariable.wait_for(Lock, RelTime, [this](){return _Ready;})) {
+				return false;
+			}
+			if constexpr (AutoReset) {
+				_Ready = false;
+			}
+			// Notice : the Post function is called after auto reset,
+			// just incase it throws exception;
+			funcPost();
+			return true;
+		}
+
+		ZEC_INLINE void Notify() {
+			auto Lock = std::unique_lock(_Mutex);
+			_Ready = true; _ConditionVariable.notify_one();
+		}
+
+		template<typename tFuncObj>
+		ZEC_INLINE std::enable_if_t<std::is_same_v<void, std::invoke_result_t<tFuncObj>>> Notify(const tFuncObj & func) {
+			auto Lock = std::unique_lock(_Mutex);
+			func();
+			_Ready = true; _ConditionVariable.notify_one();
+		}
+
+		ZEC_INLINE void NotifyAll() {
+			auto Lock = std::unique_lock(_Mutex);
+			_Ready = true; _ConditionVariable.notify_all();
+		}
+
+		template<typename tFuncObj>
+		ZEC_INLINE std::enable_if_t<std::is_same_v<void, std::invoke_result_t<tFuncObj>>> NotifyAll(const tFuncObj & func) {
+			auto Lock = std::unique_lock(_Mutex);
+			func();
+			_Ready = true; _ConditionVariable.notify_all();
+		}
+	};
+
 	class xThreadChecker final
 	{
 	public:
