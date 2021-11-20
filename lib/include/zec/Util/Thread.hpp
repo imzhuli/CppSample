@@ -194,6 +194,7 @@ ZEC_NS
 			_Ready = true; _ConditionVariable.notify_all();
 		}
 	};
+	xEvent() -> xEvent<>;
 
 	class xThreadChecker final
 	{
