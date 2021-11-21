@@ -23,15 +23,19 @@ int main(int, char *[])
 	} while(false);
 
 	do {
+		LuaState.Push(1, 2,3,4,5,6,7,8,9,10);
 		LuaState.SetGlobal("global_callback_subsub", LuaCallbackSubSub);
 		LuaState.CallN<3>("global_callback_subsub", 1, 2, "ThisIsParamString");
-		auto [R1,R2,R3] = LuaState.Get<int, int, const char *>();
-		cout << "Results: " << R1 << ", " << R2 << ", " << R3 << endl;
+		auto [R0, R1,R2,R3] = LuaState.Get<int, int, int, const char *>();
+		cout << "Results: " << R1 << ", " << R2 << ", " << R3 << ", " << R0 << endl;
+
+		cout << "Top: " << LuaState.GetTop() << endl;
 
 		auto RR3 = LuaState.Pop<std::string>();
 		auto RR2 = LuaState.Pop<int>();
 		auto RR1 = LuaState.Pop<int>();
-		cout << "Results: " << RR1 << ", " << RR2 << ", " << RR3 << endl;
+		auto RR0 = LuaState.Pop<int>();
+		cout << "Results: " << RR1 << ", " << RR2 << ", " << RR3 << ", " << RR0 << endl;
 	} while(false);
 
 	return 0;
