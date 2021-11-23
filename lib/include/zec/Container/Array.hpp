@@ -44,7 +44,7 @@ ZEC_NS
 			}
 		}
 
-		ZEC_INLINE xArray(size_t initSize, decltype(xZeroInit), xAllocator * alloc = &DefaultAllocator)
+		ZEC_INLINE xArray(size_t initSize, const xNoInit &, xAllocator * alloc = &DefaultAllocator)
 		: _Alloc(alloc), _Size(initSize)
 		{
 			_Capacity = (_Size + 15) & ~0x0F;
@@ -169,7 +169,7 @@ ZEC_NS
 			_Size = vNewSize;
 		}
 
-		ZEC_INLINE void Resize(size_t vNewSize, decltype(xZeroInit))
+		ZEC_INLINE void Resize(size_t vNewSize, const xZeroInit &)
 		{
 			if (vNewSize <= _Size) {
 				for(auto & it : xRangeView(Begin() + vNewSize, End())) {

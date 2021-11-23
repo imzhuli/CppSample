@@ -208,9 +208,11 @@ ZEC_NS
 		template<typename T>
 		constexpr std::in_place_type_t<T> xType {};
 
-		constexpr struct {} xNoInit {};
-		constexpr struct {} xZeroInit {};
-		constexpr struct {} xDefaultInit {};
+		constexpr struct xNoInit {} NoInit {};
+		constexpr struct xZeroInit {} ZeroInit {};
+		constexpr struct xDefaultInit {} DefaultInit {};
+		constexpr struct xGeneratorInit {} GeneratorInit {};
+
 		struct xSizeInit final { size_t value; };
 		struct xCapacityInit final { size_t value; };
 		struct xPass final { ZEC_INLINE void operator()() const {} };
@@ -362,7 +364,7 @@ ZEC_NS
 			T & _Resource;
 			const bool _Inited;
 		};
-		
+
 		template<typename T, typename ... tArgs>
 		xResourceGuard(T & Resource, tArgs&& ... Args) -> xResourceGuard<T>;
 
