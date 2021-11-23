@@ -6,18 +6,21 @@ using namespace std;
 int main(int, char **)
 {
     ubyte s[16] = "hello world!";
-    xUuid u1;
+
+    xUuid u0;
+    xUuid u1{NoInit};
     xUuid u2{s};
     xUuid u3{GeneratorInit};
 
-    cout << u2.GetData() << endl;
 
     u1 = u2;
     cout << u1.GetData() << endl;
-
+    cout << u2.GetData() << endl;
     cout << u3.GetData() << endl;
 
-    cout << "equal? " << YN(u1 == u2) << endl;
+    if (!(u1 == u2 && u0 < u1 && u0 < u2 && u0 < u3)) {
+        return -1;
+    }
 
     return 0;
 }

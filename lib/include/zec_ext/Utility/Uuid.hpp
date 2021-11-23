@@ -18,9 +18,12 @@ ZEC_NS
 		ZEC_INLINE xUuid(const xGeneratorInit &) { Generate(); }
 		ZEC_INLINE xUuid(const xRawType & RawData) { memcpy(&_Data, &RawData, sizeof(xRawType)); }
 
-		// ZEC_INLINE xUuid(const xUuid &) = default;
 		ZEC_INLINE bool operator != (const xUuid & Other) const { return memcmp(_Data, Other._Data, sizeof(xRawType)); }
 		ZEC_INLINE bool operator == (const xUuid & Other) const { return !memcmp(_Data, Other._Data, sizeof(xRawType)); }
+		ZEC_INLINE bool operator < (const xUuid & Other) const { return memcmp(_Data, Other._Data, 16) < 0; }
+		ZEC_INLINE bool operator > (const xUuid & Other) const { return memcmp(_Data, Other._Data, 16) > 0; }
+		ZEC_INLINE bool operator <= (const xUuid & Other) const { return memcmp(_Data, Other._Data, 16) <= 0; }
+		ZEC_INLINE bool operator >= (const xUuid & Other) const { return memcmp(_Data, Other._Data, 16) >= 0; }
 
 		ZEC_API_MEMBER void Generate();
 
