@@ -75,7 +75,7 @@ ZEC_NS
 			GrabListTail(other);
 		}
 		ZEC_INLINE ~xList() {
-			assert(Empty());
+			assert(IsEmpty());
 		}
 
 	private:
@@ -128,7 +128,7 @@ ZEC_NS
 		using xForwardConstIterator = xForwardIteratorTemplate<true>;
 
 	public:
-		ZEC_INLINE bool Empty() { return _Head.pNext == &_Head;  }
+		ZEC_INLINE bool IsEmpty() { return _Head.pNext == &_Head;  }
 		ZEC_INLINE void AddHead(tNode& rTarget) {
 			static_cast<xListNode&>(rTarget).AppendTo(_Head);
 		}
@@ -144,7 +144,7 @@ ZEC_NS
 			AddTail(rTarget);
 		}
 		ZEC_INLINE void GrabListHead(xList& other) {
-			if (other.Empty()) {
+			if (other.IsEmpty()) {
 				return;
 			};
 			xListNode* remoteHead = other._Head.pNext;
@@ -158,7 +158,7 @@ ZEC_NS
 			remoteTail->pNext = localHead;
 		}
 		ZEC_INLINE void GrabListTail(xList& other) {
-			if (other.Empty()) {
+			if (other.IsEmpty()) {
 				return;
 			};
 			xListNode* remoteHead = other._Head.pNext;
@@ -172,19 +172,19 @@ ZEC_NS
 			remoteHead->pPrev = localTail;
 		}
 		ZEC_INLINE tNode * Head() {
-			if (Empty()) {
+			if (IsEmpty()) {
 				return nullptr;
 			}
 			return static_cast<tNode*>(_Head.pNext);
 		}
 		ZEC_INLINE tNode * Tail() {
-			if (Empty()) {
+			if (IsEmpty()) {
 				return nullptr;
 			}
 			return static_cast<tNode*>(_Head.pPrev);
 		}
 		ZEC_INLINE tNode * PopHead() {
-			if (Empty()) {
+			if (IsEmpty()) {
 				return nullptr;
 			}
 			auto ret = _Head.pNext;
@@ -192,7 +192,7 @@ ZEC_NS
 			return static_cast<tNode*>(ret);
 		}
 		ZEC_INLINE tNode * PopTail() {
-			if (Empty()) {
+			if (IsEmpty()) {
 				return nullptr;
 			}
 			auto ret = _Head.pPrev;
