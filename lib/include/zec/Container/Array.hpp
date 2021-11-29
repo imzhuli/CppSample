@@ -44,7 +44,7 @@ ZEC_NS
 			}
 		}
 
-		ZEC_INLINE xArray(size_t initSize, const xNoInit &, xAllocator * alloc = &DefaultAllocator)
+		ZEC_INLINE xArray(size_t initSize, const xZeroInit &, xAllocator * alloc = &DefaultAllocator)
 		: _Alloc(alloc), _Size(initSize)
 		{
 			_Capacity = (_Size + 15) & ~0x0F;
