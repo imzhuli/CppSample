@@ -170,7 +170,7 @@ ZEC_NS
 			// printf("---offset:%d/%d/%d---", (int)S.Offset(), (int)LogLength, (int)_LineSize);
 
 			++_CurrentLineIndex;
-			_CurrentLineIndex %= _LineNumber;		
+			_CurrentLineIndex %= _LineNumber;
 		} while(false);
 
 		va_end(vaList);
