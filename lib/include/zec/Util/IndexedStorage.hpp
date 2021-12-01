@@ -21,6 +21,7 @@ ZEC_NS
 	 *      the highest bit in Key part is always one (aka: KeyInUseBitmask == 0x8000'0000u),
 	 *      so the id pool could use one 32bit integer to store an index to next free node in chain
 	 *      while the index itself is free, or a key value with KeyInUseBitmask set while the index is in use;
+	 *    Especially, since all allocated index has KeyInUseBitmask set to 1, a valid index id is never zero;
 	 * */
 	class xIndexId final
 	{
@@ -28,12 +29,11 @@ ZEC_NS
 		ZEC_INLINE xIndexId() = default;
 		ZEC_INLINE constexpr xIndexId(uint64_t Value) : _Value(Value) {};
 		ZEC_INLINE constexpr operator uint64_t () const { return _Value; }
-		ZEC_INLINE constexpr bool IsValid() const { return _Value != InvalidValue; }
 
 		ZEC_INLINE uint32_t GetIndex() const { return (uint32_t)_Value; }
 		ZEC_INLINE uint32_t GetKey() const { return static_cast<uint32_t>(_Value >> 32);}
 
-		static constexpr uint64_t InvalidValue  = static_cast<uint64_t>(-1);
+		static constexpr uint64_t InvalidValue  = static_cast<uint64_t>(0);
 
 	private:
 		uint64_t _Value;
