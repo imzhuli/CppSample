@@ -36,7 +36,6 @@ int main(int, char *[])
 			int r1 = luaL_checkinteger(LuaState, top - 2);
 			lua_pop(LuaState, 3);
 			cout << "Results: " << r1 << ", " << r2 << ", " << r3 << endl;
-
 		} while(false);
 		auto [R1,R2,R3] = LuaState.Call<int, float, std::string>("global_callback_subsub", 1, 2.0, "Param3");
 		cout << "Results: " << R1 << ", " << R2 << ", " << R3 << endl;
