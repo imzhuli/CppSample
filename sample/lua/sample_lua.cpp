@@ -28,9 +28,6 @@ int main(int, char *[])
 			lua_pushstring(LuaState, p3);
             lua_call(LuaState, 3, 3);
 			int top = lua_gettop(LuaState);
-			if (top != 3) {
-				Error();
-			}
 			std::string r3 = luaL_checkstring(LuaState, top);
 			float r2 = luaL_checknumber(LuaState, top - 1);
 			int r1 = luaL_checkinteger(LuaState, top - 2);
