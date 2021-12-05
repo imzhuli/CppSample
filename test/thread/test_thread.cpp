@@ -23,8 +23,8 @@ int main(int, char **)
 
     auto t2 = thread{[&]{
         if (!ev.WaitFor(
-            []{ cout << "WaitFor_2_Pre(" << GetMilliTimestamp() << ")" << endl; },
             1s,
+            []{ cout << "WaitFor_2_Pre(" << GetMilliTimestamp() << ")" << endl; },
             []{ cout << "WaittFor_2_Post(" << GetMilliTimestamp() << ")" << endl;}
         )) {
             cout << "WaitFor_2_Timeout" << endl;

@@ -100,26 +100,8 @@ ZEC_NS
 				return func();
 			}
 
-			ZEC_INLINE void Wait() {
-				auto Lock = std::unique_lock(_Mutex);
-				_ConditionVariable.wait(Lock, [this](){return _Ready;});
-				if constexpr (AutoReset) {
-					_Ready = false;
-				}
-			}
-
-			template<typename tFuncObj>
-			ZEC_INLINE void Wait(const tFuncObj & func) {
-				auto Lock = std::unique_lock(_Mutex);
-				func();
-				_ConditionVariable.wait(Lock, [this](){return _Ready;});
-				if (AutoReset) {
-					_Ready = false;
-				}
-			}
-
-			template<typename tFuncPre, typename tFuncPost>
-			ZEC_INLINE void Wait(const tFuncPre & funcPre, const tFuncPost & funcPost) {
+			template<typename tFuncPre = xPass, typename tFuncPost = xPass>
+			ZEC_INLINE void Wait(const tFuncPre & funcPre, const tFuncPost & funcPost = {}) {
 				auto Lock = std::unique_lock(_Mutex);
 				funcPre();
 				_ConditionVariable.wait(Lock, [this](){return _Ready;});
@@ -131,33 +113,9 @@ ZEC_NS
 				funcPost();
 			}
 
-			template<typename Rep, typename Period>
-			ZEC_INLINE bool WaitFor(const std::chrono::duration<Rep, Period>& RelTime) {
-				auto Lock = std::unique_lock(_Mutex);
-				if (!_ConditionVariable.wait_for(Lock, RelTime, [this](){return _Ready;})) {
-					return false;
-				}
-				if constexpr (AutoReset) {
-					_Ready = false;
-				}
-				return true;
-			}
-
-			template<typename tFuncObj, typename Rep, typename Period>
-			ZEC_INLINE bool WaitFor(const tFuncObj & func, const std::chrono::duration<Rep, Period>& RelTime) {
-				auto Lock = std::unique_lock(_Mutex);
-				func();
-				if (!_ConditionVariable.wait_for(Lock, RelTime, [this](){return _Ready;})) {
-					return false;
-				}
-				if constexpr (AutoReset) {
-					_Ready = false;
-				}
-				return true;
-			}
-
-			template<typename tFuncPre, typename Rep, typename Period, typename tFuncPost>
-			ZEC_INLINE bool WaitFor(const tFuncPre & funcPre, const std::chrono::duration<Rep, Period>& RelTime, const tFuncPost & funcPost) {
+			template<typename Rep, typename Period, typename tFuncPre= xPass, typename tFuncPost = xPass>
+			ZEC_INLINE bool WaitFor(const std::chrono::duration<Rep, Period>& RelTime
+					, const tFuncPre & funcPre = {},  const tFuncPost & funcPost = {}) {
 				auto Lock = std::unique_lock(_Mutex);
 				funcPre();
 				if (!_ConditionVariable.wait_for(Lock, RelTime, [this](){return _Ready;})) {
@@ -172,27 +130,17 @@ ZEC_NS
 				return true;
 			}
 
-			ZEC_INLINE void Notify() {
+			template<typename tFuncObj = xPass>
+			ZEC_INLINE std::enable_if_t<std::is_same_v<void, std::invoke_result_t<tFuncObj>>> Notify(const tFuncObj & PreNotifyFunc = {}) {
 				auto Lock = std::unique_lock(_Mutex);
+				PreNotifyFunc();
 				_Ready = true; _ConditionVariable.notify_one();
 			}
 
-			template<typename tFuncObj>
-			ZEC_INLINE std::enable_if_t<std::is_same_v<void, std::invoke_result_t<tFuncObj>>> Notify(const tFuncObj & func) {
+			template<typename tFuncObj = xPass>
+			ZEC_INLINE std::enable_if_t<std::is_same_v<void, std::invoke_result_t<tFuncObj>>> NotifyAll(const tFuncObj & PreNotifyFunc = {}) {
 				auto Lock = std::unique_lock(_Mutex);
-				func();
-				_Ready = true; _ConditionVariable.notify_one();
-			}
-
-			ZEC_INLINE void NotifyAll() {
-				auto Lock = std::unique_lock(_Mutex);
-				_Ready = true; _ConditionVariable.notify_all();
-			}
-
-			template<typename tFuncObj>
-			ZEC_INLINE std::enable_if_t<std::is_same_v<void, std::invoke_result_t<tFuncObj>>> NotifyAll(const tFuncObj & func) {
-				auto Lock = std::unique_lock(_Mutex);
-				func();
+				PreNotifyFunc();
 				_Ready = true; _ConditionVariable.notify_all();
 			}
 		};
