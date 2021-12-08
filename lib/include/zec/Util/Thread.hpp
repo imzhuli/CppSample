@@ -101,7 +101,7 @@ ZEC_NS
 			}
 
 			template<typename tFuncPre = xPass, typename tFuncPost = xPass>
-			ZEC_INLINE void Wait(const tFuncPre & funcPre, const tFuncPost & funcPost = {}) {
+			ZEC_INLINE void Wait(const tFuncPre & funcPre = {}, const tFuncPost & funcPost = {}) {
 				auto Lock = std::unique_lock(_Mutex);
 				funcPre();
 				_ConditionVariable.wait(Lock, [this](){return _Ready;});
