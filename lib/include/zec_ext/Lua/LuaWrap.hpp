@@ -99,6 +99,9 @@ ZEC_NS
         }
 
         template<typename...tArgs>
+        ZEC_INLINE std::enable_if_t<(sizeof...(tArgs) == 0)> Pop() const {}
+
+        template<typename...tArgs>
         ZEC_INLINE std::enable_if_t<(sizeof...(tArgs) > 1),std::tuple<tArgs...>> Pop() const {
             auto Top = lua_gettop(_LuaStatePtr); assert (Top);
             std::tuple<tArgs...> Result;

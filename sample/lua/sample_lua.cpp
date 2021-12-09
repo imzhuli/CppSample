@@ -54,5 +54,9 @@ int main(int, char *[])
 		cout << "Results: " << RR1 << ", " << RR2 << ", " << RR3 << ", " << RR0 << endl;
 	} while(false);
 
+	do {
+		LuaState.Call("print", 1, 2.5, "hello world!");
+	} while(false);
+
 	return 0;
 }
