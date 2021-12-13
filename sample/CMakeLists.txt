@@ -34,8 +34,9 @@ endfunction()
 #test lib:
 
 add_sub_sample(app)
-add_sub_sample(get_mac)
 add_sub_sample(http_echo)
 add_sub_sample(lua)
 
-
+if (CMAKE_SYSTEM_NAME MATCHES "Linux")
+add_sub_sample(get_mac)
+endif()

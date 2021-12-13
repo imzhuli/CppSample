@@ -110,7 +110,7 @@ ZEC_NS
 		++MaxLineNumber;
 		_LineSize = MaxLineSize;
 		_RealLineSize = LineLeadBufferSize + _LineSize + ExtraSize;
-		size32_t TotalBufferSize = MaxLineNumber * _RealLineSize;
+		size_t TotalBufferSize = MaxLineNumber * _RealLineSize;
 		_LogBufferPtr = (char*)malloc(TotalBufferSize);
 		if (!_LogBufferPtr) {
 			Reset(_LineSize);
