@@ -62,10 +62,19 @@ ZEC_NS
 		size_t           _TotalSize = 0;
 
 	public:
+
+		ZEC_INLINE bool Init(const size_t MaxPoolSize, const size_t Addend = 128) {
+			assert(MaxPoolSize > 0);
+			xMemoryPoolOptions Options = {};
+			Options.MaxPoolSize = (Options.InitSize >= MaxPoolSize) ? Options.InitSize : MaxPoolSize;
+			Options.Addend = Addend;
+			return Init(Options);
+		}
+
 		ZEC_INLINE bool Init(const xMemoryPoolOptions & Options) {
 			assert(Options.Allocator);
 			assert(Options.MultiplierBy100th || Options.Addend);
-			assert(Options.InitSize > 1 && Options.MaxSizeIncrement > 0 && Options.MaxPoolSize >= Options.InitSize);
+			assert(Options.InitSize >= 1 && Options.MaxSizeIncrement > 0 && Options.MaxPoolSize >= Options.InitSize);
 
 			hAlloc = Options.Allocator;
 			cInitSize = Options.InitSize;
@@ -114,7 +123,7 @@ ZEC_NS
 				_NextFreeNode = _NextFreeNode->pNext;
 				return pTarget;
 			}
-			auto pLastBlock = _BlockList.tail();
+			auto pLastBlock = _BlockList.Tail();
 			if (pLastBlock->Count == pLastBlock->InitCount && !(pLastBlock = ExtendPool())) {
 				return nullptr;
 			}
