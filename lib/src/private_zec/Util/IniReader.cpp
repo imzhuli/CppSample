@@ -32,6 +32,9 @@ ZEC_NS
 
 		char * vhAssignChar = vhLine->hKeyStart;
 		char * vhValueStart = nullptr;
+		if (*vhAssignChar == '#') { // treat comment as empty line
+			*vhAssignChar = '\0';
+		}
 		if (*vhAssignChar == '\0') { // empty line
 			vhLine->hValueStart = vhAssignChar;
 			return;
