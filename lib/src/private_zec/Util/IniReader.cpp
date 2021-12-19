@@ -269,7 +269,7 @@ ZEC_NS
 		if(0 == ::strcasecmp(vxStrVal, "true")) {
 			return true;
 		}
-		else if (::strcasecmp(vxStrVal, "false")) {
+		else if (0 == ::strcasecmp(vxStrVal, "false")) {
 			return false;
 		}
 		return vxDefaultValue;
