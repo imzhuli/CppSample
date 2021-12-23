@@ -75,12 +75,9 @@ ZEC_NS
 			assert(Options.Allocator);
 			assert(Options.MultiplierBy100th || Options.Addend);
 			assert(Options.InitSize >= 1 && Options.MaxSizeIncrement > 0);
-			if (Options.MaxPoolSize < Options.InitSize) {
-				Options.InitSize = Options.MaxPoolSize;
-			}
 
 			hAlloc = Options.Allocator;
-			cInitSize = Options.InitSize;
+			cInitSize = std::min(Options.InitSize, Options.MaxPoolSize);
 			cAddend = Options.Addend;
 			cMultiplierBy100th = Options.MultiplierBy100th;
 			cMaxSizeIncrement = Options.MaxSizeIncrement;
