@@ -74,7 +74,10 @@ ZEC_NS
 		ZEC_INLINE bool Init(const xMemoryPoolOptions & Options) {
 			assert(Options.Allocator);
 			assert(Options.MultiplierBy100th || Options.Addend);
-			assert(Options.InitSize >= 1 && Options.MaxSizeIncrement > 0 && Options.MaxPoolSize >= Options.InitSize);
+			assert(Options.InitSize >= 1 && Options.MaxSizeIncrement > 0);
+			if (Options.MaxPoolSize < Options.InitSize) {
+				Options.InitSize = Options.MaxPoolSize;
+			}
 
 			hAlloc = Options.Allocator;
 			cInitSize = Options.InitSize;
