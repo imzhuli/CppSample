@@ -2,9 +2,9 @@
 #include <iostream>
 using namespace std;
 
-// netlink package is base on packets, 
+// netlink package is base on packets,
 // but there might be large response consist of small packets.
-#define SZ 81920 
+#define SZ 81920
 
 xNetlinkInterfaceList GetNetlinkMac()
 {
@@ -41,12 +41,13 @@ xNetlinkInterfaceList GetNetlinkMac()
             .ifi_flags = 0,
             .ifi_change = 0,
         }};
-    auto sendbytes = send(fd, &request, sizeof(request), 0);
+
+    auto sendbytes = send(fd, &request, sizeof(request), MSG_NOSIGNAL);
     if (sendbytes != sizeof(request)) {
         // LOGE("Failed to send netlink request, socket=%i, sendbytes=%i, errno=%i", (int)fd, (int)sendbytes, errno);
         close(fd);
         return {};
-    }    
+    }
 
     // Receive
     char recvbuf[SZ] = {};
@@ -58,7 +59,7 @@ xNetlinkInterfaceList GetNetlinkMac()
         if (seglen <= 0) {
             auto err = errno;
             if (err == EAGAIN) {
-                cerr << "netlinke response buffer is too small, current size is " << SZ << endl;                
+                cerr << "netlinke response buffer is too small, current size is " << SZ << endl;
             }
             close(fd);
             return {};
@@ -87,10 +88,10 @@ xNetlinkInterfaceList GetNetlinkMac()
 
         xNetlinkInterface Interface;
 
-        struct ifinfomsg *ifm = (struct ifinfomsg *)NLMSG_DATA(nh);    
+        struct ifinfomsg *ifm = (struct ifinfomsg *)NLMSG_DATA(nh);
         Interface.Index = ifm->ifi_index;
-    
-        struct rtattr *rta = IFLA_RTA(ifm); 
+
+        struct rtattr *rta = IFLA_RTA(ifm);
         int rtl = RTM_PAYLOAD(nh);
         for (; RTA_OK(rta, rtl); rta = RTA_NEXT(rta, rtl))
         {
@@ -102,19 +103,19 @@ xNetlinkInterfaceList GetNetlinkMac()
             case IFLA_ADDRESS: {
                 char HwAddr[18];
                 const unsigned char * Data = (const unsigned char*)RTA_DATA(rta);
-                snprintf(HwAddr, sizeof(HwAddr), "%02X:%02X:%02X:%02X:%02X:%02X", 
-                    (unsigned int)Data[0], 
-                    (unsigned int)Data[1], 
-                    (unsigned int)Data[2], 
-                    (unsigned int)Data[3], 
-                    (unsigned int)Data[4], 
+                snprintf(HwAddr, sizeof(HwAddr), "%02X:%02X:%02X:%02X:%02X:%02X",
+                    (unsigned int)Data[0],
+                    (unsigned int)Data[1],
+                    (unsigned int)Data[2],
+                    (unsigned int)Data[3],
+                    (unsigned int)Data[4],
                     (unsigned int)Data[5]);
-                Interface.HardwareAddress = HwAddr;   
-                break;             
+                Interface.HardwareAddress = HwAddr;
+                break;
             }
             default:
                 break;
-            }            
+            }
         }
         ResultList.push_back(std::move(Interface));
     }

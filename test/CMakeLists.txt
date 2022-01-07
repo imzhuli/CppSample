@@ -31,8 +31,8 @@ add_sub_test(alignment)
 add_sub_test(cmd)
 add_sub_test(memlog)
 add_sub_test(optional)
-add_sub_test(thread)
 add_sub_test(uuid)
+#add_sub_test(thread)
 
 add_test(
 	NAME cmd_short_long_empty

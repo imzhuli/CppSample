@@ -53,6 +53,9 @@ aux_source_directory(./src/private_zec_ext/FFmpeg                  ZEC_SRC)
 aux_source_directory(./src/private_zec_ext/Lua                     ZEC_SRC)
 aux_source_directory(./src/private_zec_ext/Utility                 ZEC_SRC)
 
+# C version utils:
+aux_source_directory(./src/private_zec/C                           ZEC_SRC)
+
 
 if (ZEC_OPTION_STATIC)
 #static lib:

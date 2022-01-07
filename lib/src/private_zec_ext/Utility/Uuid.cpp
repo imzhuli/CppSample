@@ -7,6 +7,8 @@
 
 ZEC_NS
 {
+	static_assert(sizeof(xUuid) == sizeof(xUuid::xRawType));
+
 	static auto UuidGenerator = boost::uuids::random_generator();
 
 	void xUuid::Generate()
