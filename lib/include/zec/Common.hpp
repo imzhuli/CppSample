@@ -311,21 +311,19 @@ ZEC_NS
 			T * _Ref;
 		};
 
-		template<typename T, typename tExit>
-		class xScopedPtr final
-		: xNonCopyable {
-			T * _Ptr;
-			const tExit _ExitCallback;
-		public:
-			[[nodiscard]] ZEC_INLINE xScopedPtr(T * Ptr, const tExit& Exit) : _Ptr(Ptr), _ExitCallback(Exit) {}
-			ZEC_INLINE ~xScopedPtr() { _ExitCallback(_Ptr); }
-		public:
-			[[nodiscard]] operator T * ()  const { return _Ptr; }
-			[[nodiscard]] T * operator->() const { return _Ptr; }
-			[[nodiscard]] T & operator *() const { return *_Ptr; }
+		template<typename RefedT>
+		struct xRefCaster {
+			static_assert(!std::is_reference_v<RefedT>);
+			using Type = RefedT;
+			static RefedT& Get(RefedT & R) { return R; }
+			static const RefedT& Get(const RefedT & R) { return R; }
 		};
-		template<typename tValue, typename tExit>
-		xScopedPtr(tValue * && Ptr, const tExit& Exit) -> xScopedPtr<tValue, std::decay_t<tExit>>;
+		template<typename RefedT>
+		struct xRefCaster<xRef<RefedT>> {
+			static_assert(!std::is_reference_v<RefedT>);
+			using Type = RefedT;
+			static RefedT& Get(const xRef<RefedT> & RR) { return RR.Get(); }
+		};
 
 		template<typename tFuncObj, typename ... Args>
 		struct xInstantRun final : xNonCopyable	{
@@ -342,13 +340,13 @@ ZEC_NS
 			 *  if caller is quite aware of the lifetime of a func-object and if:
 			 *       the fuct-object is non-copyable, or
 			 *       avoiding ctor/copy ctor/dtor really matters
-			 *     use xRef(some_non_const_object) bellow as a const-wrapper-object
+			 *     use xRef(some_non_const_object) above as a const-wrapper-object
 			 * */
 			const tExit _ExitCallback;
 		public:
 			[[nodiscard]] ZEC_INLINE xScopeGuard(const tEntry& Entry, const tExit& Exit) : _ExitCallback(Exit) { Entry(); }
 			[[nodiscard]] ZEC_INLINE xScopeGuard(const tExit& Exit) : _ExitCallback(Exit) {}
-			ZEC_INLINE ~xScopeGuard() { _ExitCallback(); }
+			ZEC_INLINE ~xScopeGuard() { xRefCaster<tExit>::Get(_ExitCallback)(); }
 		};
 		template<typename tEntry, typename tExit>
 		xScopeGuard(const tEntry& Entry, const tExit& Exit) -> xScopeGuard<std::decay_t<tEntry>, std::decay_t<tExit>>;
@@ -374,20 +372,6 @@ ZEC_NS
 		class xOptional final {
 			static_assert(!std::is_reference_v<T> && !std::is_const_v<T>);
 			using Type = std::remove_cv_t<std::remove_reference_t<T>>;
-
-			template<typename RefedT>
-			struct xRefCaster {
-				static_assert(!std::is_reference_v<RefedT>);
-				using Type = RefedT;
-				static RefedT& Get(RefedT & R) { return R; }
-				static const RefedT& Get(const RefedT & R) { return R; }
-			};
-			template<typename RefedT>
-			struct xRefCaster<xRef<RefedT>> {
-				static_assert(!std::is_reference_v<RefedT>);
-				using Type = RefedT;
-				static RefedT& Get(const xRef<RefedT> & RR) { return RR.Get(); }
-			};
 			using xCaster = xRefCaster<T>;
 			using xValueType = typename xCaster::Type;
 
