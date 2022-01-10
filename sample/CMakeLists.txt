@@ -33,6 +33,7 @@ endfunction()
 
 #test lib:
 
+add_sub_sample(aio)
 add_sub_sample(app)
 add_sub_sample(http_client)
 add_sub_sample(http_echo)
