@@ -3,7 +3,6 @@
 ZEC_NS
 {
 
-
 	bool xTransactional::Execute()
 	{
 		Pure();
