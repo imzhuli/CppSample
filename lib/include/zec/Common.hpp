@@ -183,6 +183,8 @@ ZEC_NS
 
 		union xVariable
 		{
+			ubyte                         B[8];
+
 			void *                        Ptr;
 			const void *                  CstPtr;
 			const char *                  Str;

@@ -1,4 +1,5 @@
 #pragma once
+
 #include <string.h>
 #include <stdint.h>
 
@@ -33,6 +34,10 @@
 	#define xel_byteSwap16 _byteswap_ushort
 	#define xel_byteSwap32 _byteswap_ulong
 	#define xel_byteSwap64 _byteswap_uint64
+#endif
+
+#ifdef __cplusplus
+extern "C" {
 #endif
 
 /****************************************
@@ -245,3 +250,7 @@ static inline void WSkip(XelStreamWriterContext * CtxPtr, size_t Length) {
 static inline size_t WPos(XelStreamWriterContext * CtxPtr) {
 	return (CtxPtr->Current - CtxPtr->Start);
 }
+
+#ifdef __cplusplus
+}
+#endif

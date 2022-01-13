@@ -83,27 +83,56 @@ ZEC_NS
 
 		class iter
 		{
-		private:
-			template<typename T>
-			union U {
-				T i;
-				ubyte bytes[sizeof(T)];
-				static_assert(std::is_integral_v<T>);
-			};
 		public:
-			template<typename T>
-			ZEC_STATIC_INLINE void write(ubyte * &p, const T & input) {
-				U<T> u;
-				u.i = input;
-				memcpy(p, u.bytes, sizeof(T));
-				p += sizeof(T);
+			ZEC_STATIC_INLINE void write16(ubyte * &p, const uint16_t & input) {
+				xVariable V = { .U16 = input };
+				*p++ = V.B[0];
+				*p++ = V.B[1];
 			}
-			template<typename T>
-			ZEC_STATIC_INLINE T read(const ubyte * &p) {
-				U<T> u;
-				memcpy(u.bytes, p, sizeof(T));
-				p += sizeof(T);
-				return u.i;
+			ZEC_STATIC_INLINE void write32(ubyte * &p, const uint32_t & input) {
+				xVariable V = { .U32 = input };
+				*p++ = V.B[0];
+				*p++ = V.B[1];
+				*p++ = V.B[2];
+				*p++ = V.B[3];
+			}
+			ZEC_STATIC_INLINE void write64(ubyte * &p, const uint64_t & input) {
+				xVariable V = { .U64 = input };
+				*p++ = V.B[0];
+				*p++ = V.B[1];
+				*p++ = V.B[2];
+				*p++ = V.B[3];
+				*p++ = V.B[4];
+				*p++ = V.B[5];
+				*p++ = V.B[6];
+				*p++ = V.B[7];
+			}
+
+			ZEC_STATIC_INLINE uint16_t read16(const ubyte * &p) {
+				xVariable V;
+				V.B[0] = *p++;
+				V.B[1] = *p++;
+				return V.U16;
+			}
+			ZEC_STATIC_INLINE uint32_t read32(const ubyte * &p) {
+				xVariable V;
+				V.B[0] = *p++;
+				V.B[1] = *p++;
+				V.B[2] = *p++;
+				V.B[3] = *p++;
+				return V.U32;
+			}
+			ZEC_STATIC_INLINE uint64_t read64(const ubyte * &p) {
+				xVariable V;
+				V.B[0] = *p++;
+				V.B[1] = *p++;
+				V.B[2] = *p++;
+				V.B[3] = *p++;
+				V.B[4] = *p++;
+				V.B[5] = *p++;
+				V.B[6] = *p++;
+				V.B[7] = *p++;
+				return V.U64;
 			}
 		};
 	}
@@ -115,20 +144,20 @@ ZEC_NS
 		xStreamWriter() = default;
 		ZEC_INLINE xStreamWriter(void * p) { Reset(p);	}
 
-		ZEC_INLINE void W(char c)                            { *(_curr++) = c; }
+		ZEC_INLINE void W(ubyte c)                            { *(_curr++) = c; }
 		ZEC_INLINE void W(const void * s, ptrdiff_t len)     { ::memcpy(_curr, s, len); _curr += len; }
 
 		ZEC_INLINE void W1(uint8_t u)                        { *(_curr++) = u; }
-		ZEC_INLINE void W2(uint16_t u)                       { iter::write(_curr, zecBE16(u)); }
-		ZEC_INLINE void W4(uint32_t u)                       { iter::write(_curr, zecBE32(u)); }
-		ZEC_INLINE void W8(uint64_t u)                       { iter::write(_curr, zecBE64(u)); }
+		ZEC_INLINE void W2(uint16_t u)                       { iter::write16(_curr, zecBE16(u)); }
+		ZEC_INLINE void W4(uint32_t u)                       { iter::write32(_curr, zecBE32(u)); }
+		ZEC_INLINE void W8(uint64_t u)                       { iter::write64(_curr, zecBE64(u)); }
 		ZEC_INLINE void Wf(float f)                          { __detail__::__raw__::UF uf{.f = f}; W4(uf.u); }
 		ZEC_INLINE void Wd(double d)                         { __detail__::__raw__::UD ud{.d = d}; W8(ud.u); }
 
 		ZEC_INLINE void W1L(uint8_t u)                       { *(_curr++) = u; }
-		ZEC_INLINE void W2L(uint16_t u)                      { iter::write(_curr, zecLE16(u)); }
-		ZEC_INLINE void W4L(uint32_t u)                      { iter::write(_curr, zecLE32(u)); }
-		ZEC_INLINE void W8L(uint64_t u)                      { iter::write(_curr, zecLE64(u)); }
+		ZEC_INLINE void W2L(uint16_t u)                      { iter::write16(_curr, zecLE16(u)); }
+		ZEC_INLINE void W4L(uint32_t u)                      { iter::write32(_curr, zecLE32(u)); }
+		ZEC_INLINE void W8L(uint64_t u)                      { iter::write64(_curr, zecLE64(u)); }
 		ZEC_INLINE void WFL(float f)                         { __detail__::__raw__::UF uf{.f = f}; W4L(uf.u); }
 		ZEC_INLINE void WDL(double d)                        { __detail__::__raw__::UD ud{.d = d}; W8L(ud.u); }
 
@@ -153,20 +182,20 @@ ZEC_NS
 		xStreamReader() = default;
 		ZEC_INLINE xStreamReader(const void * p) { Reset(p); }
 
-		ZEC_INLINE char     R()                              { return *(_curr++); }
+		ZEC_INLINE ubyte    R()                              { return *(_curr++); }
 		ZEC_INLINE void     R(void * d, ptrdiff_t len)       { ::memcpy(d, _curr, len); _curr += len; }
 
 		ZEC_INLINE uint8_t  R1()                             { return *(_curr++); }
-		ZEC_INLINE uint16_t R2()                             { return zecBE16(iter::read<uint16_t>(_curr)); }
-		ZEC_INLINE uint32_t R4()                             { return zecBE32(iter::read<uint32_t>(_curr)); }
-		ZEC_INLINE uint64_t R8()                             { return zecBE64(iter::read<uint64_t>(_curr)); }
+		ZEC_INLINE uint16_t R2()                             { return zecBE16(iter::read16(_curr)); }
+		ZEC_INLINE uint32_t R4()                             { return zecBE32(iter::read32(_curr)); }
+		ZEC_INLINE uint64_t R8()                             { return zecBE64(iter::read64(_curr)); }
 		ZEC_INLINE float    RF()                             { __detail__::__raw__::UF uf{.u=R4()}; return uf.f; }
 		ZEC_INLINE double   RD()                             { __detail__::__raw__::UD ud{.u=R8()}; return ud.d; }
 
 		ZEC_INLINE uint8_t  R1L()                            { return *(_curr++); }
-		ZEC_INLINE uint16_t R2L()                            { return zecLE16(iter::read<uint16_t>(_curr)); }
-		ZEC_INLINE uint32_t R4L()                            { return zecLE32(iter::read<uint32_t>(_curr)); }
-		ZEC_INLINE uint64_t R8L()                            { return zecLE64(iter::read<uint64_t>(_curr)); }
+		ZEC_INLINE uint16_t R2L()                            { return zecLE16(iter::read16(_curr)); }
+		ZEC_INLINE uint32_t R4L()                            { return zecLE32(iter::read32(_curr)); }
+		ZEC_INLINE uint64_t R8L()                            { return zecLE64(iter::read64(_curr)); }
 		ZEC_INLINE float    RFL()                            { __detail__::__raw__::UF uf{.u=R4L()}; return uf.f; }
 		ZEC_INLINE double   RDL()                            { __detail__::__raw__::UD ud{.u=R8L()}; return ud.d; }
 
