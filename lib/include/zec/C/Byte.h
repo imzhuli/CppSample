@@ -85,8 +85,8 @@ typedef struct {
 } XelStreamReaderContext;
 
 typedef struct {
-	xel_byte * Start;
 	xel_byte * Current;
+	xel_byte * Start;
 } XelStreamWriterContext;
 
 /* StreamReader */
