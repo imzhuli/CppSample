@@ -75,8 +75,8 @@ typedef union {
 } XelBytePunning;
 
 typedef struct {
-	const xel_byte * Start;
 	const xel_byte * Current;
+	const xel_byte * Start;
 } XelStreamReaderContext;
 
 typedef struct {
