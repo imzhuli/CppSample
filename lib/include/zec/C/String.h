@@ -9,7 +9,7 @@
 extern "C" {
 #endif
 
-typedef struct {} * XelString;
+typedef struct { char __PlaceHolder__ [1]; } * XelString;
 
 extern XelString      XS_New();
 extern XelString      XS_Duplicate(XelString Str);
