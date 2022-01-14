@@ -1,6 +1,5 @@
 project(sample_${libname})
 
-find_package(FastCGI)
 find_package(Lua REQUIRED)
 
 # dependencies:
