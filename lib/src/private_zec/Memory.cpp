@@ -1,4 +1,4 @@
-#include <zec/Util/Memory.hpp>
+#include <zec/Memory.hpp>
 #include <atomic>
 #include <new>
 

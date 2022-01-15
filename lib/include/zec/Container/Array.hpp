@@ -1,6 +1,6 @@
 #pragma once
 #include "../Common.hpp"
-#include "../Util/Memory.hpp"
+#include "../Memory.hpp"
 #include "../View.hpp"
 #include <cstring>
 #include <new>
