@@ -10,6 +10,7 @@ message(STATUS "CMAKE_SYSTEM_NAME=" ${CMAKE_SYSTEM_NAME})
 message(STATUS "CMAKE_CXX_COMPILER_ID=" ${CMAKE_CXX_COMPILER_ID})
 
 find_package(Threads REQUIRED)
+set(CMAKE_C_STANDARD 11)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 	add_compile_options("-D_CRT_SECURE_NO_WARNINGS")
 	add_compile_options("-std:c++latest")
