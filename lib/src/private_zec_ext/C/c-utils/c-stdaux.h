@@ -29,24 +29,19 @@ extern "C" {
 #endif
 
 #include <assert.h>
-#include <dirent.h>
 #include <errno.h>
 #include <fcntl.h>
 #include <inttypes.h>
 #include <limits.h>
 #include <stdalign.h>
 #include <stdarg.h>
-#include <stdatomic.h>
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdnoreturn.h>
 #include <string.h>
-#include <sys/time.h>
-#include <sys/types.h>
 #include <time.h>
-#include <unistd.h>
 
 /*
  * Shortcuts for gcc attributes. See GCC manual for details. They're 1-to-1

@@ -62,7 +62,7 @@ typedef struct CRBTree CRBTree;
  */
 struct CRBNode {
         union {
-                unsigned long __parent_and_flags;
+                uintptr_t __parent_and_flags;
                 /* enforce >=4-byte alignment for @__parent_and_flags */
                 alignas(4) unsigned char __align_dummy;
         };
@@ -70,7 +70,7 @@ struct CRBNode {
         CRBNode *right;
 };
 
-#define C_RBNODE_INIT(_var) { .__parent_and_flags = (unsigned long)&(_var) }
+#define C_RBNODE_INIT(_var) { .__parent_and_flags = (uintptr_t)&(_var) }
 
 CRBNode *c_rbnode_leftmost(CRBNode *n);
 CRBNode *c_rbnode_rightmost(CRBNode *n);
@@ -219,7 +219,7 @@ static inline void c_rbnode_unlink(CRBNode *n) {
  * or assign C_RBTREE_INIT.
  */
 static inline void c_rbtree_init(CRBTree *t) {
-        *t = (CRBTree)C_RBTREE_INIT;
+        *t = (CRBTree) { .root = NULL };
 }
 
 /**
