@@ -34,7 +34,6 @@ extern "C" {
 #include <fcntl.h>
 #include <inttypes.h>
 #include <limits.h>
-#include <stdalign.h>
 #include <stdarg.h>
 #include <stdatomic.h>
 #include <stdbool.h>
