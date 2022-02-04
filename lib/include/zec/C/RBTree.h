@@ -41,7 +41,7 @@ static inline void XRBN_Unlink(XelRBNode * NodePtr) {
 
 #define XEL_RBNODE_RED    ((uint32_t)(0x01))
 #define XEL_RBNODE_ROOT   ((uint32_t)(0x02))
-#define XRBN_ENTRY(_What, Type, Member) XRBN_Cast((_What), offsetof(Type, Member))
+#define XRBN_ENTRY(_What, Type, Member) ((Type*)(XRBN_Cast((_What), offsetof(Type, Member))))
 
 /* Tree */
 typedef struct XelRBTree XelRBTree;
@@ -66,7 +66,7 @@ static inline void* XRBT_Cast(XelRBTree* TreePtr, size_t NodeMemberOffset) {
     }
     return (void*)((unsigned char*)TreePtr - NodeMemberOffset);
 }
-#define XRBT_ENTRY(_What, Type, Member) XRBT_Cast((_What), offsetof(Type, Member))
+#define XRBT_ENTRY(_What, Type, Member) ((Type*)(XRBT_Cast((_What), offsetof(Type, Member))))
 
 static inline XelRBNode *XRBT_Find(XelRBTree * TreePtr, XRBT_KeyCompare * Func, const void * KeyPtr) {
     XelRBNode * CurrNodePtr = TreePtr->RootPtr;

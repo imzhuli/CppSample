@@ -19,21 +19,21 @@
 #endif
 
 #if defined(__APPLE__)
-	#define xel_byteSwap16 OSSwapInt16
-	#define xel_byteSwap32 OSSwapInt32
-	#define xel_byteSwap64 OSSwapInt64
+	#define X_ByteSwap16 OSSwapInt16
+	#define X_ByteSwap32 OSSwapInt32
+	#define X_ByteSwap64 OSSwapInt64
 #elif defined(__ANDROID_API__)
-    #define xel_byteSwap16 __swap16
-    #define xel_byteSwap32 __swap32
-    #define xel_byteSwap64 __swap64
+    #define X_ByteSwap16 __swap16
+    #define X_ByteSwap32 __swap32
+    #define X_ByteSwap64 __swap64
 #elif defined(_POSIX_SOURCE)
-	#define xel_byteSwap16 __bswap_16
-	#define xel_byteSwap32 __bswap_32
-	#define xel_byteSwap64 __bswap_64
+	#define X_ByteSwap16 __bswap_16
+	#define X_ByteSwap32 __bswap_32
+	#define X_ByteSwap64 __bswap_64
 #elif defined(_MSC_VER)
-	#define xel_byteSwap16 _byteswap_ushort
-	#define xel_byteSwap32 _byteswap_ulong
-	#define xel_byteSwap64 _byteswap_uint64
+	#define X_ByteSwap16 _byteswap_ushort
+	#define X_ByteSwap32 _byteswap_ulong
+	#define X_ByteSwap64 _byteswap_uint64
 #endif
 
 #ifdef __cplusplus
@@ -46,79 +46,79 @@ extern "C" {
 #if BYTE_ORDER == LITTLE_ENDIAN
 	#define Xel_IS_CONSIST_LITTLE_ENDIAN    true
 	#define Xel_IS_CONSIST_BIG_ENDIAN       false
-	static inline uint8_t  XelLE8 (const uint8_t s)  { return s; }
-	static inline uint16_t XelLE16(const uint16_t s) { return s; }
-	static inline uint32_t XelLE32(const uint32_t s) { return s; }
-	static inline uint64_t XelLE64(const uint64_t s) { return s; }
-	static inline uint8_t  XelBE8 (const uint8_t s)  { return s; }
-	static inline uint16_t XelBE16(const uint16_t s) { return xel_byteSwap16(s); }
-	static inline uint32_t XelBE32(const uint32_t s) { return xel_byteSwap32(s); }
-	static inline uint64_t XelBE64(const uint64_t s) { return xel_byteSwap64(s); }
+	static inline uint8_t  X_LE8 (const uint8_t s)  { return s; }
+	static inline uint16_t X_LE16(const uint16_t s) { return s; }
+	static inline uint32_t X_LE32(const uint32_t s) { return s; }
+	static inline uint64_t X_LE64(const uint64_t s) { return s; }
+	static inline uint8_t  X_BE8 (const uint8_t s)  { return s; }
+	static inline uint16_t X_BE16(const uint16_t s) { return X_ByteSwap16(s); }
+	static inline uint32_t X_BE32(const uint32_t s) { return X_ByteSwap32(s); }
+	static inline uint64_t X_BE64(const uint64_t s) { return X_ByteSwap64(s); }
 #elif BYTE_ORDER == BIG_ENDIAN
 	#define Xel_IS_CONSIST_LITTLE_ENDIAN    false
 	#define Xel_IS_CONSIST_BIG_ENDIAN       true
-	static inline uint8_t  XelLE8 (const uint8_t s)  { return s; }
-	static inline uint16_t XelLE16(const uint16_t s) { return xel_byteSwap16(s); }
-	static inline uint32_t XelLE32(const uint32_t s) { return xel_byteSwap32(s); }
-	static inline uint64_t XelLE64(const uint64_t s) { return xel_byteSwap64(s); }
-	static inline uint8_t  XelBE8 (const uint8_t s)  { return s; }
-	static inline uint16_t XelBE16(const uint16_t s) { return s; }
-	static inline uint32_t XelBE32(const uint32_t s) { return s; }
-	static inline uint64_t XelBE64(const uint64_t s) { return s; }
+	static inline uint8_t  X_LE8 (const uint8_t s)  { return s; }
+	static inline uint16_t X_LE16(const uint16_t s) { return X_ByteSwap16(s); }
+	static inline uint32_t X_LE32(const uint32_t s) { return X_ByteSwap32(s); }
+	static inline uint64_t X_LE64(const uint64_t s) { return X_ByteSwap64(s); }
+	static inline uint8_t  X_BE8 (const uint8_t s)  { return s; }
+	static inline uint16_t X_BE16(const uint16_t s) { return s; }
+	static inline uint32_t X_BE32(const uint32_t s) { return s; }
+	static inline uint64_t X_BE64(const uint64_t s) { return s; }
 #else
 	#error("Mixed endian is not supported by Xel");
 #endif
 
-typedef unsigned char xel_byte;
+typedef unsigned char X_Byte;
 
 typedef union {
 	uint8_t  _1;
 	uint16_t _2;
     uint32_t _4;
 	uint64_t _8;
-	xel_byte _[8];
+	X_Byte _[8];
 } XelBytePunning;
 
 typedef struct {
-	const xel_byte * Current;
-	const xel_byte * Start;
+	const X_Byte * Current;
+	const X_Byte * Start;
 } XelStreamReaderContext;
 
 typedef struct {
-	xel_byte * Current;
-	xel_byte * Start;
+	X_Byte * Current;
+	X_Byte * Start;
 } XelStreamWriterContext;
 
 /* StreamReader */
-static inline XelStreamReaderContext SR(const void * SourcePtr) {
+static inline XelStreamReaderContext XSR(const void * SourcePtr) {
 	XelStreamReaderContext Ctx;
-	Ctx.Current = Ctx.Start = (const xel_byte *)SourcePtr;
+	Ctx.Current = Ctx.Start = (const X_Byte *)SourcePtr;
 	return Ctx;
 }
-static inline void RRewind(XelStreamReaderContext * CtxPtr) {
+static inline void XSR_Rewind(XelStreamReaderContext * CtxPtr) {
 	CtxPtr->Current = CtxPtr->Start;
 }
-static inline xel_byte RB(XelStreamReaderContext * CtxPtr) {
+static inline X_Byte XSR_B(XelStreamReaderContext * CtxPtr) {
 	return (*(CtxPtr->Current++));
 }
-static inline uint8_t R1(XelStreamReaderContext * CtxPtr) {
+static inline uint8_t XSR_1(XelStreamReaderContext * CtxPtr) {
 	return (uint8_t)(*(CtxPtr->Current++));
 }
-static inline uint16_t R2(XelStreamReaderContext * CtxPtr) {
+static inline uint16_t XSR_2(XelStreamReaderContext * CtxPtr) {
 	XelBytePunning Punning;
 	Punning._[0] = (*(CtxPtr->Current++));
 	Punning._[1] = (*(CtxPtr->Current++));
-	return XelBE16(Punning._2);
+	return X_BE16(Punning._2);
 }
-static inline uint32_t R4(XelStreamReaderContext * CtxPtr) {
+static inline uint32_t XSR_4(XelStreamReaderContext * CtxPtr) {
 	XelBytePunning Punning;
 	Punning._[0] = (*(CtxPtr->Current++));
 	Punning._[1] = (*(CtxPtr->Current++));
 	Punning._[2] = (*(CtxPtr->Current++));
 	Punning._[3] = (*(CtxPtr->Current++));
-	return XelBE32(Punning._4);
+	return X_BE32(Punning._4);
 }
-static inline uint64_t R8(XelStreamReaderContext * CtxPtr) {
+static inline uint64_t XSR_8(XelStreamReaderContext * CtxPtr) {
 	XelBytePunning Punning;
 	Punning._[0] = (*(CtxPtr->Current++));
 	Punning._[1] = (*(CtxPtr->Current++));
@@ -128,26 +128,26 @@ static inline uint64_t R8(XelStreamReaderContext * CtxPtr) {
 	Punning._[5] = (*(CtxPtr->Current++));
 	Punning._[6] = (*(CtxPtr->Current++));
 	Punning._[7] = (*(CtxPtr->Current++));
-	return XelBE64(Punning._8);
+	return X_BE64(Punning._8);
 }
-static inline uint8_t R1L(XelStreamReaderContext * CtxPtr) {
+static inline uint8_t XSR_1L(XelStreamReaderContext * CtxPtr) {
 	return (uint8_t)(*(CtxPtr->Current++));
 }
-static inline uint16_t R2L(XelStreamReaderContext * CtxPtr) {
+static inline uint16_t XSR_2L(XelStreamReaderContext * CtxPtr) {
 	XelBytePunning Punning;
 	Punning._[0] = (*(CtxPtr->Current++));
 	Punning._[1] = (*(CtxPtr->Current++));
-	return XelLE16(Punning._2);
+	return X_LE16(Punning._2);
 }
-static inline uint32_t R4L(XelStreamReaderContext * CtxPtr) {
+static inline uint32_t XSR_4L(XelStreamReaderContext * CtxPtr) {
 	XelBytePunning Punning;
 	Punning._[0] = (*(CtxPtr->Current++));
 	Punning._[1] = (*(CtxPtr->Current++));
 	Punning._[2] = (*(CtxPtr->Current++));
 	Punning._[3] = (*(CtxPtr->Current++));
-	return XelLE32(Punning._4);
+	return X_LE32(Punning._4);
 }
-static inline uint64_t R8L(XelStreamReaderContext * CtxPtr) {
+static inline uint64_t XSR_8L(XelStreamReaderContext * CtxPtr) {
 	XelBytePunning Punning;
 	Punning._[0] = (*(CtxPtr->Current++));
 	Punning._[1] = (*(CtxPtr->Current++));
@@ -157,80 +157,51 @@ static inline uint64_t R8L(XelStreamReaderContext * CtxPtr) {
 	Punning._[5] = (*(CtxPtr->Current++));
 	Punning._[6] = (*(CtxPtr->Current++));
 	Punning._[7] = (*(CtxPtr->Current++));
-	return XelLE64(Punning._8);
+	return X_LE64(Punning._8);
 }
-static inline void R(XelStreamReaderContext * CtxPtr, void * DestPtr, size_t Length) {
+static inline void XSR_Raw(XelStreamReaderContext * CtxPtr, void * DestPtr, size_t Length) {
 	memcpy(DestPtr, CtxPtr->Current, Length);
 	CtxPtr->Current += Length;
 }
-static inline void RSkip(XelStreamReaderContext * CtxPtr, size_t Length) {
+static inline void XSR_Skip(XelStreamReaderContext * CtxPtr, size_t Length) {
 	CtxPtr->Current += Length;
 }
-static inline size_t RPos(XelStreamReaderContext * CtxPtr) {
+static inline size_t XSR_Pos(XelStreamReaderContext * CtxPtr) {
 	return (CtxPtr->Current - CtxPtr->Start);
 }
 
 /* StreamWriter */
-static inline XelStreamWriterContext SW(void * SourcePtr) {
+static inline XelStreamWriterContext XSW(void * SourcePtr) {
 	XelStreamWriterContext Ctx;
-	Ctx.Current = Ctx.Start = (xel_byte *)SourcePtr;
+	Ctx.Current = Ctx.Start = (X_Byte *)SourcePtr;
 	return Ctx;
 }
-static inline void WRewind(XelStreamWriterContext * CtxPtr) {
+static inline void XSW_Rewind(XelStreamWriterContext * CtxPtr) {
 	CtxPtr->Current = CtxPtr->Start;
 }
-static inline void WB(XelStreamWriterContext * CtxPtr, xel_byte Value) {
+static inline void XSW_B(XelStreamWriterContext * CtxPtr, X_Byte Value) {
 	(*(CtxPtr->Current++)) = Value;
 }
-static inline void W1(XelStreamWriterContext * CtxPtr, uint8_t Value) {
-	(*(CtxPtr->Current++)) = (xel_byte)Value;
+static inline void XSW_1(XelStreamWriterContext * CtxPtr, uint8_t Value) {
+	(*(CtxPtr->Current++)) = (X_Byte)Value;
 }
-static inline void W2(XelStreamWriterContext * CtxPtr, uint16_t Value) {
+static inline void XSW_2(XelStreamWriterContext * CtxPtr, uint16_t Value) {
 	XelBytePunning Punning;
-	Punning._2 = XelBE16(Value);
+	Punning._2 = X_BE16(Value);
 	(*(CtxPtr->Current++)) = Punning._[0];
 	(*(CtxPtr->Current++)) = Punning._[1];
 }
-static inline void W4(XelStreamWriterContext * CtxPtr, uint32_t Value) {
+static inline void XSW_4(XelStreamWriterContext * CtxPtr, uint32_t Value) {
 	XelBytePunning Punning;
-	Punning._4 = XelBE32(Value);
-	(*(CtxPtr->Current++)) = Punning._[0];
-	(*(CtxPtr->Current++)) = Punning._[1];
-	(*(CtxPtr->Current++)) = Punning._[2];
-	(*(CtxPtr->Current++)) = Punning._[3];
-}
-static inline void W8(XelStreamWriterContext * CtxPtr, uint64_t Value) {
-	XelBytePunning Punning;
-	Punning._8 = XelBE64(Value);
-	(*(CtxPtr->Current++)) = Punning._[0];
-	(*(CtxPtr->Current++)) = Punning._[1];
-	(*(CtxPtr->Current++)) = Punning._[2];
-	(*(CtxPtr->Current++)) = Punning._[3];
-	(*(CtxPtr->Current++)) = Punning._[4];
-	(*(CtxPtr->Current++)) = Punning._[5];
-	(*(CtxPtr->Current++)) = Punning._[6];
-	(*(CtxPtr->Current++)) = Punning._[7];
-}
-static inline void W1L(XelStreamWriterContext * CtxPtr, uint8_t Value) {
-	(*(CtxPtr->Current++)) = (xel_byte)Value;
-}
-static inline void W2L(XelStreamWriterContext * CtxPtr, uint16_t Value) {
-	XelBytePunning Punning;
-	Punning._2 = XelLE16(Value);
-	(*(CtxPtr->Current++)) = Punning._[0];
-	(*(CtxPtr->Current++)) = Punning._[1];
-}
-static inline void W4L(XelStreamWriterContext * CtxPtr, uint32_t Value) {
-	XelBytePunning Punning;
-	Punning._4 = XelLE32(Value);
+	Punning._4 = X_BE32(Value);
 	(*(CtxPtr->Current++)) = Punning._[0];
 	(*(CtxPtr->Current++)) = Punning._[1];
 	(*(CtxPtr->Current++)) = Punning._[2];
 	(*(CtxPtr->Current++)) = Punning._[3];
 }
-static inline void W8L(XelStreamWriterContext * CtxPtr, uint64_t Value) {
+static inline void XSW_8(XelStreamWriterContext * CtxPtr, uint64_t Value) {
 	XelBytePunning Punning;
-	Punning._8 = XelLE64(Value);
+	Punning._8 = X_BE64(Value);
 	(*(CtxPtr->Current++)) = Punning._[0];
 	(*(CtxPtr->Current++)) = Punning._[1];
 	(*(CtxPtr->Current++)) = Punning._[2];
@@ -240,14 +211,43 @@ static inline void W8L(XelStreamWriterContext * CtxPtr, uint64_t Value) {
 	(*(CtxPtr->Current++)) = Punning._[6];
 	(*(CtxPtr->Current++)) = Punning._[7];
 }
-static inline void W(XelStreamWriterContext * CtxPtr, const void * SourcePtr, size_t Length) {
+static inline void XSW_1L(XelStreamWriterContext * CtxPtr, uint8_t Value) {
+	(*(CtxPtr->Current++)) = (X_Byte)Value;
+}
+static inline void XSW_2L(XelStreamWriterContext * CtxPtr, uint16_t Value) {
+	XelBytePunning Punning;
+	Punning._2 = X_LE16(Value);
+	(*(CtxPtr->Current++)) = Punning._[0];
+	(*(CtxPtr->Current++)) = Punning._[1];
+}
+static inline void XSW_4L(XelStreamWriterContext * CtxPtr, uint32_t Value) {
+	XelBytePunning Punning;
+	Punning._4 = X_LE32(Value);
+	(*(CtxPtr->Current++)) = Punning._[0];
+	(*(CtxPtr->Current++)) = Punning._[1];
+	(*(CtxPtr->Current++)) = Punning._[2];
+	(*(CtxPtr->Current++)) = Punning._[3];
+}
+static inline void XSW_8L(XelStreamWriterContext * CtxPtr, uint64_t Value) {
+	XelBytePunning Punning;
+	Punning._8 = X_LE64(Value);
+	(*(CtxPtr->Current++)) = Punning._[0];
+	(*(CtxPtr->Current++)) = Punning._[1];
+	(*(CtxPtr->Current++)) = Punning._[2];
+	(*(CtxPtr->Current++)) = Punning._[3];
+	(*(CtxPtr->Current++)) = Punning._[4];
+	(*(CtxPtr->Current++)) = Punning._[5];
+	(*(CtxPtr->Current++)) = Punning._[6];
+	(*(CtxPtr->Current++)) = Punning._[7];
+}
+static inline void XSW_Raw(XelStreamWriterContext * CtxPtr, const void * SourcePtr, size_t Length) {
 	memcpy(CtxPtr->Current, SourcePtr, Length);
 	CtxPtr->Current += Length;
 }
-static inline void WSkip(XelStreamWriterContext * CtxPtr, size_t Length) {
+static inline void XSW_Skip(XelStreamWriterContext * CtxPtr, size_t Length) {
 	CtxPtr->Current += Length;
 }
-static inline size_t WPos(XelStreamWriterContext * CtxPtr) {
+static inline size_t XSW_Pos(XelStreamWriterContext * CtxPtr) {
 	return (CtxPtr->Current - CtxPtr->Start);
 }
 
