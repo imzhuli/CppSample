@@ -5,6 +5,9 @@
 extern "C" {
 #endif
 
+#define XEL_RBNODE_RED    ((uint32_t)(0x01))
+#define XEL_RBNODE_ROOT   ((uint32_t)(0x02))
+
 /* Node */
 typedef struct XelRBNode XelRBNode;
 struct XelRBNode {
@@ -20,6 +23,19 @@ ZEC_API void XRBN_UnlinkStale(XelRBNode * NodePtr);
 static inline void XRBN_Init(XelRBNode * NodePtr) {
     XelRBNode InitValue = {};
     *NodePtr = InitValue;
+}
+
+static inline void XRBN_MarkRed(XelRBNode * NodePtr) {
+    NodePtr->Flags |= XEL_RBNODE_RED;
+}
+static inline void XRBN_MarkBlack(XelRBNode * NodePtr) {
+    NodePtr->Flags &= ~XEL_RBNODE_RED;
+}
+static inline void XRBN_MarkRoot(XelRBNode * NodePtr) {
+    NodePtr->Flags |= XEL_RBNODE_ROOT;
+}
+static inline void XRBN_RemoveRoot(XelRBNode * NodePtr) {
+    NodePtr->Flags &= ~XEL_RBNODE_ROOT;
 }
 
 static inline void* XRBN_Cast(XelRBNode* NodePtr, size_t NodeMemberOffset) {
@@ -39,8 +55,73 @@ static inline void XRBN_Unlink(XelRBNode * NodePtr) {
     XRBN_Init(NodePtr);
 }
 
-#define XEL_RBNODE_RED    ((uint32_t)(0x01))
-#define XEL_RBNODE_ROOT   ((uint32_t)(0x02))
+static inline XelRBNode * XRBN_LeftMost(XelRBNode * NodePtr) {
+    if (!NodePtr) {
+        return NULL;
+    }
+    while (NodePtr->LeftNodePtr) {
+        NodePtr = NodePtr->LeftNodePtr;
+    }
+    return NodePtr;
+}
+
+static inline XelRBNode * XRBN_LeftDeepest(XelRBNode * NodePtr) {
+    if (!NodePtr) {
+        return NULL;
+    }
+    while(true) {
+        if (NodePtr->LeftNodePtr) {
+            NodePtr = NodePtr->LeftNodePtr;
+        }
+        else if (NodePtr) {
+            NodePtr = NodePtr->RightNodePtr;
+        }
+        else {
+            break;
+        }
+    }
+    return NodePtr;
+}
+
+static inline XelRBNode * XRBN_RightDeepest(XelRBNode * NodePtr) {
+    if (!NodePtr) {
+        return NULL;
+    }
+    while(true) {
+        if (NodePtr) {
+            NodePtr = NodePtr->RightNodePtr;
+        }
+        else if (NodePtr->LeftNodePtr) {
+            NodePtr = NodePtr->LeftNodePtr;
+        }
+        else {
+            break;
+        }
+    }
+    return NodePtr;
+}
+
+static inline XelRBNode * XRBN_Next(XelRBNode * NodePtr) {
+    XelRBNode * ParentPtr;
+    if (NodePtr->RightNodePtr) {
+        return XRBN_LeftMost(NodePtr->RightNodePtr);
+    }
+    while ((ParentPtr = NodePtr->ParentPtr) && NodePtr == ParentPtr->RightNodePtr) {
+        NodePtr = ParentPtr;
+    }
+    return ParentPtr;
+}
+
+static inline XelRBNode * XRBN_RightMost(XelRBNode * NodePtr) {
+    if (!NodePtr) {
+        return NULL;
+    }
+    while (NodePtr->RightNodePtr) {
+        NodePtr = NodePtr->RightNodePtr;
+    }
+    return NodePtr;
+}
+
 #define XRBN_ENTRY(_What, Type, Member) ((Type*)(XRBN_Cast((_What), offsetof(Type, Member))))
 
 /* Tree */
@@ -68,10 +149,10 @@ static inline void* XRBT_Cast(XelRBTree* TreePtr, size_t NodeMemberOffset) {
 }
 #define XRBT_ENTRY(_What, Type, Member) ((Type*)(XRBT_Cast((_What), offsetof(Type, Member))))
 
-static inline XelRBNode *XRBT_Find(XelRBTree * TreePtr, XRBT_KeyCompare * Func, const void * KeyPtr) {
+static inline XelRBNode *XRBT_Find(XelRBTree * TreePtr, XRBT_KeyCompare * CompFunc, const void * KeyPtr) {
     XelRBNode * CurrNodePtr = TreePtr->RootPtr;
     while (CurrNodePtr) {
-        int CompareResult = (*Func)(TreePtr, CurrNodePtr, KeyPtr);
+        int CompareResult = (*CompFunc)(TreePtr, CurrNodePtr, KeyPtr);
         if (CompareResult < 0) {
             CurrNodePtr = CurrNodePtr->LeftNodePtr;
         }
@@ -85,6 +166,38 @@ static inline XelRBNode *XRBT_Find(XelRBTree * TreePtr, XRBT_KeyCompare * Func, 
     return NULL;
 }
 
+typedef struct XelRBInsertNode
+{
+    XelRBNode * ParentPtr;
+    XelRBNode ** SubNodeRefPtr;
+} XelRBInsertNode;
+
+static inline XelRBInsertNode XRBT_FindInsertSlot(XelRBTree * TreePtr, XRBT_KeyCompare * CompFunc, const void *KeyPtr) {
+    XelRBInsertNode InsertNode = {};
+    XelRBNode ** CurrNodeRefPtr = &TreePtr->RootPtr;
+    while (*CurrNodeRefPtr) {
+        int CompareResult = (*CompFunc)(TreePtr, *CurrNodeRefPtr, KeyPtr);
+        InsertNode.ParentPtr = *CurrNodeRefPtr;
+        if (CompareResult < 0) {
+            CurrNodeRefPtr = &(*CurrNodeRefPtr)->LeftNodePtr;
+        }
+        else if (CompareResult > 0) {
+            CurrNodeRefPtr = &(*CurrNodeRefPtr)->RightNodePtr;
+        }
+        else {
+            CurrNodeRefPtr = NULL;
+            break;
+        }
+    }
+    InsertNode.SubNodeRefPtr = CurrNodeRefPtr;
+    return InsertNode;
+}
+
+#define XRBT_FOR_EACH(_iter, _tree) \
+    for (XelRBNode *_iter = c_rbtree_first(_tree); _iter; _iter = c_rbnode_next(_iter))
+
+#define XRBT_FOR_EACH_SAFE(_iter, _tree) \
+    for (XelRBNode *_iter = c_rbtree_first(_tree), *_safe = c_rbnode_next(_iter); _iter; _iter = _safe, _safe = c_rbnode_next(_iter))
 
 #ifdef __cplusplus
 }
