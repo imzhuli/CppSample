@@ -25,11 +25,21 @@ static inline void XRBN_Init(XelRBNode * NodePtr) {
     *NodePtr = InitValue;
 }
 
+static inline bool XRBN_IsRed(XelRBNode * NodePtr) {
+    return NodePtr->Flags & XEL_RBNODE_RED;
+}
+static inline bool XRBN_IsBlack(XelRBNode * NodePtr) {
+    return !XRBN_IsRed(NodePtr);
+}
 static inline void XRBN_MarkRed(XelRBNode * NodePtr) {
     NodePtr->Flags |= XEL_RBNODE_RED;
 }
 static inline void XRBN_MarkBlack(XelRBNode * NodePtr) {
     NodePtr->Flags &= ~XEL_RBNODE_RED;
+}
+
+static inline bool XRBN_IsRoot(XelRBNode * NodePtr) {
+    return NodePtr->Flags & XEL_RBNODE_ROOT;
 }
 static inline void XRBN_MarkRoot(XelRBNode * NodePtr) {
     NodePtr->Flags |= XEL_RBNODE_ROOT;
