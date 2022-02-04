@@ -58,7 +58,7 @@ aux_source_directory(./src/private_zec_ext/Utility                 ZEC_SRC)
 # C version utils:
 aux_source_directory(./src/private_zec/C                           ZEC_SRC)
 aux_source_directory(./src/private_zec_ext/C                       ZEC_SRC)
-aux_source_directory(./src/private_zec_ext/C/c-utils               ZEC_SRC)
+aux_source_directory(./src/private_zec_ext/C/CppCompat             ZEC_SRC)
 
 
 if (ZEC_OPTION_STATIC)
