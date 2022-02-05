@@ -109,12 +109,16 @@ static inline XelRBNode * XRBN_RightDeepest(XelRBNode * NodePtr) {
     return NodePtr;
 }
 
+static inline XelRBNode * XRBN_Parent(XelRBNode * NodePtr) {
+    return NodePtr->ParentPtr == NodePtr ? NULL : NodePtr->ParentPtr;
+}
+
 static inline XelRBNode * XRBN_Prev(XelRBNode * NodePtr) {
     XelRBNode * ParentPtr;
     if (NodePtr->LeftNodePtr) {
         return XRBN_RightMost(NodePtr->LeftNodePtr);
     }
-    while ((ParentPtr = NodePtr->ParentPtr) && NodePtr == ParentPtr->LeftNodePtr) {
+    while ((ParentPtr = XRBN_Parent(NodePtr)) && NodePtr == ParentPtr->LeftNodePtr) {
         NodePtr = ParentPtr;
     }
     return ParentPtr;
@@ -125,7 +129,7 @@ static inline XelRBNode * XRBN_Next(XelRBNode * NodePtr) {
     if (NodePtr->RightNodePtr) {
         return XRBN_LeftMost(NodePtr->RightNodePtr);
     }
-    while ((ParentPtr = NodePtr->ParentPtr) && NodePtr == ParentPtr->RightNodePtr) {
+    while ((ParentPtr = XRBN_Parent(NodePtr)) && NodePtr == ParentPtr->RightNodePtr) {
         NodePtr = ParentPtr;
     }
     return ParentPtr;
@@ -163,6 +167,11 @@ static inline void* XRBT_Cast(XelRBTree* TreePtr, size_t NodeMemberOffset) {
 static inline XelRBNode * XRBT_First(XelRBTree * TreePtr)
 {
     return XRBN_LeftMost(TreePtr->RootPtr);
+}
+
+static inline XelRBNode * XRBT_Last(XelRBTree * TreePtr)
+{
+    return XRBN_RightMost(TreePtr->RootPtr);
 }
 
 static inline XelRBNode *XRBT_Find(XelRBTree * TreePtr, XRBT_KeyCompare * CompFunc, const void * KeyPtr) {
