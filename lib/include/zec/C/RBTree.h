@@ -6,7 +6,6 @@ extern "C" {
 #endif
 
 #define XEL_RBNODE_RED    ((uint32_t)(0x01))
-#define XEL_RBNODE_ROOT   ((uint32_t)(0x02))
 
 /* Node */
 typedef struct XelRBNode XelRBNode;
@@ -25,27 +24,29 @@ static inline void XRBN_Init(XelRBNode * NodePtr) {
     *NodePtr = InitValue;
 }
 
+static inline bool XRBN_IsRoot(XelRBNode * NodePtr) {
+    return NodePtr == NodePtr->ParentPtr;
+}
+static inline bool XRBN_IsLeaf(XelRBNode * NodePtr) {
+    return !NodePtr->LeftNodePtr && !NodePtr->RightNodePtr;
+}
 static inline bool XRBN_IsRed(XelRBNode * NodePtr) {
     return NodePtr->Flags & XEL_RBNODE_RED;
 }
+static inline bool XRBN_IsGenericRed(XelRBNode * NodePtr) {
+    return NodePtr && (NodePtr->Flags & XEL_RBNODE_RED);
+}
 static inline bool XRBN_IsBlack(XelRBNode * NodePtr) {
     return !XRBN_IsRed(NodePtr);
+}
+static inline bool XRBN_IsGenericBlack(XelRBNode * NodePtr) {
+    return !NodePtr || !XRBN_IsRed(NodePtr);
 }
 static inline void XRBN_MarkRed(XelRBNode * NodePtr) {
     NodePtr->Flags |= XEL_RBNODE_RED;
 }
 static inline void XRBN_MarkBlack(XelRBNode * NodePtr) {
     NodePtr->Flags &= ~XEL_RBNODE_RED;
-}
-
-static inline bool XRBN_IsRoot(XelRBNode * NodePtr) {
-    return NodePtr->Flags & XEL_RBNODE_ROOT;
-}
-static inline void XRBN_MarkRoot(XelRBNode * NodePtr) {
-    NodePtr->Flags |= XEL_RBNODE_ROOT;
-}
-static inline void XRBN_RemoveRoot(XelRBNode * NodePtr) {
-    NodePtr->Flags &= ~XEL_RBNODE_ROOT;
 }
 
 static inline void* XRBN_Cast(XelRBNode* NodePtr, size_t NodeMemberOffset) {
@@ -55,15 +56,7 @@ static inline void* XRBN_Cast(XelRBNode* NodePtr, size_t NodeMemberOffset) {
     return (void*)((unsigned char*)NodePtr - NodeMemberOffset);
 }
 
-static inline bool XRBN_IsLinked(XelRBNode * NodePtr) {
-    return NodePtr->ParentPtr;
-}
-
 static inline void XRBN_Unlink(XelRBNode * NodePtr) {
-    if(!XRBN_IsLinked(NodePtr)) {
-        // no need to unlink the root node
-        return;
-    }
     XRBN_UnlinkStale(NodePtr);
     XRBN_Init(NodePtr);
 }
@@ -154,8 +147,10 @@ static inline void XRBT_Init(XelRBTree* TreePtr) {
 }
 
 static inline bool XRBT_IsEmpty(XelRBTree* TreePtr) {
-    return TreePtr->RootPtr;
+    return !TreePtr->RootPtr;
 }
+
+ZEC_API bool XRBT_Check(XelRBTree * TreePtr);
 
 static inline void* XRBT_Cast(XelRBTree* TreePtr, size_t NodeMemberOffset) {
     if (!TreePtr) {
@@ -165,7 +160,7 @@ static inline void* XRBT_Cast(XelRBTree* TreePtr, size_t NodeMemberOffset) {
 }
 #define XRBT_ENTRY(_What, Type, Member) ((Type*)(XRBT_Cast((_What), offsetof(Type, Member))))
 
-static inline XelRBNode * XRBN_First(XelRBTree * TreePtr)
+static inline XelRBNode * XRBT_First(XelRBTree * TreePtr)
 {
     return XRBN_LeftMost(TreePtr->RootPtr);
 }
@@ -215,10 +210,10 @@ static inline XelRBInsertNode XRBT_FindInsertSlot(XelRBTree * TreePtr, XRBT_KeyC
 }
 
 #define XRBT_FOR_EACH(_iter, _tree) \
-    for (XelRBNode *_iter = c_rbtree_first(_tree); _iter; _iter = c_rbnode_next(_iter))
+    for (XelRBNode *_iter = XRBT_First(_tree); _iter; _iter = XRBN_Next(_iter))
 
 #define XRBT_FOR_EACH_SAFE(_iter, _tree) \
-    for (XelRBNode *_iter = c_rbtree_first(_tree), *_safe = c_rbnode_next(_iter); _iter; _iter = _safe, _safe = c_rbnode_next(_iter))
+    for (XelRBNode *_iter = XRBT_First(_tree), *_safe = XRBN_Next(_iter); _iter; _iter = _safe, _safe = XRBN_Next(_iter))
 
 #ifdef __cplusplus
 }
