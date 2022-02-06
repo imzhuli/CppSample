@@ -5,7 +5,8 @@
 extern "C" {
 #endif
 
-#define XEL_RBNODE_RED    ((uint32_t)(0x01))
+#define XEL_RBNODE_RED          ((uint32_t)(0x01))
+#define XEL_RBNODE_COLORMASK    ((uint32_t)(0x01))
 
 /* Node */
 typedef struct XelRBNode XelRBNode;
@@ -212,6 +213,66 @@ static inline XelRBInsertNode XRBT_FindInsertSlot(XelRBTree * TreePtr, XRBT_KeyC
     }
     InsertNode.SubNodeRefPtr = CurrNodeRefPtr;
     return InsertNode;
+}
+
+typedef struct XelRBInsertResult
+{
+    bool Inserted;
+    XelRBNode * PrevNode;
+} XelRBInsertResult;
+
+static inline XelRBInsertResult XRBT_Insert(XelRBTree * TreePtr, XelRBNode * NodePtr, XRBT_KeyCompare * CompFunc, const void * KeyPtr, bool AllowReplace)
+{
+    assert(!NodePtr->ParentPtr);
+    assert(!NodePtr->LeftNodePtr);
+    assert(!NodePtr->RightNodePtr);
+    assert(!NodePtr->Flags);
+    XelRBInsertResult Result = {};
+
+    XelRBInsertNode InsertNode = XRBT_FindInsertSlot(TreePtr, CompFunc, KeyPtr);
+    if (!InsertNode.ParentPtr) { // root
+        assert(!TreePtr->RootPtr);
+        TreePtr->RootPtr = NodePtr;
+        Result.Inserted = true;
+        return Result;
+    }
+
+    if (!InsertNode.SubNodeRefPtr) { // Replacement
+        if (!AllowReplace) {
+            Result.PrevNode = InsertNode.ParentPtr;
+            return Result;
+        }
+        XelRBNode * ReplaceNodePtr = InsertNode.ParentPtr;
+        if ((NodePtr->LeftNodePtr = ReplaceNodePtr->LeftNodePtr)) {
+            NodePtr->LeftNodePtr->ParentPtr = NodePtr;
+        }
+        if ((NodePtr->RightNodePtr = ReplaceNodePtr->RightNodePtr)) {
+            NodePtr->RightNodePtr->ParentPtr = NodePtr;
+        }
+        NodePtr->Flags = ReplaceNodePtr->Flags;
+
+        if ((NodePtr->ParentPtr = ReplaceNodePtr->ParentPtr)) {
+            XelRBNode * ParentNodePtr = NodePtr->ParentPtr;
+            if (ParentNodePtr->LeftNodePtr == ReplaceNodePtr) {
+                ParentNodePtr->LeftNodePtr = NodePtr;
+            } else {
+                ParentNodePtr->RightNodePtr = NodePtr;
+            }
+        } else { // root
+            assert(TreePtr->RootPtr == ReplaceNodePtr);
+            TreePtr->RootPtr = NodePtr;
+        }
+        XRBN_Init(ReplaceNodePtr);
+        Result.Inserted = true;
+        Result.PrevNode = ReplaceNodePtr;
+        return Result;
+    }
+
+    *InsertNode.SubNodeRefPtr = NodePtr;
+    NodePtr->ParentPtr = InsertNode.ParentPtr;
+
+     // TODO: fix: (rb-rebalance)
+
 }
 
 #define XRBT_FOR_EACH(_iter, _tree) \
