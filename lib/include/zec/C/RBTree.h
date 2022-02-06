@@ -270,9 +270,12 @@ static inline XelRBInsertResult XRBT_Insert(XelRBTree * TreePtr, XelRBNode * Nod
 
     *InsertNode.SubNodeRefPtr = NodePtr;
     NodePtr->ParentPtr = InsertNode.ParentPtr;
+    // TODO: fix: (rb-rebalance)
 
-     // TODO: fix: (rb-rebalance)
 
+    // return insert done
+    Result.Inserted = true;
+    return Result;
 }
 
 #define XRBT_FOR_EACH(_iter, _tree) \
