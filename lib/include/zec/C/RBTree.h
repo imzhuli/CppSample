@@ -214,8 +214,6 @@ static inline XelRBInsertNode XRBT_FindInsertSlot(XelRBTree * TreePtr, XRBT_KeyC
     return InsertNode;
 }
 
-ZEC_API void XRBT_Insert(XelRBTree * TreePtr, )
-
 #define XRBT_FOR_EACH(_iter, _tree) \
     for (XelRBNode *_iter = XRBT_First(_tree); _iter; _iter = XRBN_Next(_iter))
 
