@@ -25,7 +25,7 @@ static inline void XRBN_Init(XelRBNode * NodePtr) {
 }
 
 static inline bool XRBN_IsRoot(XelRBNode * NodePtr) {
-    return NodePtr == NodePtr->ParentPtr;
+    return !NodePtr->ParentPtr;
 }
 static inline bool XRBN_IsLeaf(XelRBNode * NodePtr) {
     return !NodePtr->LeftNodePtr && !NodePtr->RightNodePtr;
@@ -109,16 +109,12 @@ static inline XelRBNode * XRBN_RightDeepest(XelRBNode * NodePtr) {
     return NodePtr;
 }
 
-static inline XelRBNode * XRBN_Parent(XelRBNode * NodePtr) {
-    return NodePtr->ParentPtr == NodePtr ? NULL : NodePtr->ParentPtr;
-}
-
 static inline XelRBNode * XRBN_Prev(XelRBNode * NodePtr) {
     XelRBNode * ParentPtr;
     if (NodePtr->LeftNodePtr) {
         return XRBN_RightMost(NodePtr->LeftNodePtr);
     }
-    while ((ParentPtr = XRBN_Parent(NodePtr)) && NodePtr == ParentPtr->LeftNodePtr) {
+    while ((ParentPtr = NodePtr->ParentPtr) && (NodePtr == ParentPtr->LeftNodePtr)) {
         NodePtr = ParentPtr;
     }
     return ParentPtr;
@@ -129,7 +125,7 @@ static inline XelRBNode * XRBN_Next(XelRBNode * NodePtr) {
     if (NodePtr->RightNodePtr) {
         return XRBN_LeftMost(NodePtr->RightNodePtr);
     }
-    while ((ParentPtr = XRBN_Parent(NodePtr)) && NodePtr == ParentPtr->RightNodePtr) {
+    while ((ParentPtr = NodePtr->ParentPtr) && (NodePtr == ParentPtr->RightNodePtr)) {
         NodePtr = ParentPtr;
     }
     return ParentPtr;
@@ -201,8 +197,8 @@ static inline XelRBInsertNode XRBT_FindInsertSlot(XelRBTree * TreePtr, XRBT_KeyC
     XelRBInsertNode InsertNode = {};
     XelRBNode ** CurrNodeRefPtr = &TreePtr->RootPtr;
     while (*CurrNodeRefPtr) {
-        int CompareResult = (*CompFunc)(TreePtr, *CurrNodeRefPtr, KeyPtr);
         InsertNode.ParentPtr = *CurrNodeRefPtr;
+        int CompareResult = (*CompFunc)(TreePtr, *CurrNodeRefPtr, KeyPtr);
         if (CompareResult < 0) {
             CurrNodeRefPtr = &(*CurrNodeRefPtr)->LeftNodePtr;
         }
@@ -217,6 +213,8 @@ static inline XelRBInsertNode XRBT_FindInsertSlot(XelRBTree * TreePtr, XRBT_KeyC
     InsertNode.SubNodeRefPtr = CurrNodeRefPtr;
     return InsertNode;
 }
+
+ZEC_API void XRBT_Insert(XelRBTree * TreePtr, )
 
 #define XRBT_FOR_EACH(_iter, _tree) \
     for (XelRBNode *_iter = XRBT_First(_tree); _iter; _iter = XRBN_Next(_iter))
