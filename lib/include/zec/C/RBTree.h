@@ -11,7 +11,7 @@ extern "C" {
 /* Node */
 typedef struct XelRBNode XelRBNode;
 struct XelRBNode {
-    void *        ParentPtr;
+    XelRBNode *   ParentPtr;
     XelRBNode *   LeftNodePtr;
     XelRBNode *   RightNodePtr;
     uint32_t      Flags;
@@ -140,7 +140,7 @@ struct XelRBTree {
     XelRBNode * RootPtr;
 };
 
-typedef int XRBT_KeyCompare(XelRBTree * TreePtr, XelRBNode * NodePtr, const void * KeyPtr);
+typedef int XRBT_KeyCompare(XelRBTree * TreePtr, const void * KeyPtr, XelRBNode * NodePtr);
 
 static inline void XRBT_Init(XelRBTree* TreePtr) {
     XelRBTree InitValue = {};
@@ -174,7 +174,7 @@ static inline XelRBNode * XRBT_Last(XelRBTree * TreePtr)
 static inline XelRBNode *XRBT_Find(XelRBTree * TreePtr, XRBT_KeyCompare * CompFunc, const void * KeyPtr) {
     XelRBNode * CurrNodePtr = TreePtr->RootPtr;
     while (CurrNodePtr) {
-        int CompareResult = (*CompFunc)(TreePtr, CurrNodePtr, KeyPtr);
+        int CompareResult = (*CompFunc)(TreePtr, KeyPtr, CurrNodePtr);
         if (CompareResult < 0) {
             CurrNodePtr = CurrNodePtr->LeftNodePtr;
         }
@@ -199,7 +199,7 @@ static inline XelRBInsertNode XRBT_FindInsertSlot(XelRBTree * TreePtr, XRBT_KeyC
     XelRBNode ** CurrNodeRefPtr = &TreePtr->RootPtr;
     while (*CurrNodeRefPtr) {
         InsertNode.ParentPtr = *CurrNodeRefPtr;
-        int CompareResult = (*CompFunc)(TreePtr, *CurrNodeRefPtr, KeyPtr);
+        int CompareResult = (*CompFunc)(TreePtr, KeyPtr, *CurrNodeRefPtr);
         if (CompareResult < 0) {
             CurrNodeRefPtr = &(*CurrNodeRefPtr)->LeftNodePtr;
         }
@@ -279,10 +279,10 @@ static inline XelRBInsertResult XRBT_Insert(XelRBTree * TreePtr, XelRBNode * Nod
 }
 
 #define XRBT_FOR_EACH(_iter, _tree) \
-    for (XelRBNode *_iter = XRBT_First(_tree); _iter; _iter = XRBN_Next(_iter))
+    for (XelRBNode *_iter = XRBT_First((_tree)); _iter; _iter = XRBN_Next(_iter))
 
 #define XRBT_FOR_EACH_SAFE(_iter, _tree) \
-    for (XelRBNode *_iter = XRBT_First(_tree), *_safe = XRBN_Next(_iter); _iter; _iter = _safe, _safe = XRBN_Next(_iter))
+    for (XelRBNode *_iter = XRBT_First((_tree)), *_safe = XRBN_Next(_iter); _iter; _iter = _safe, _safe = XRBN_Next(_iter))
 
 #ifdef __cplusplus
 }
