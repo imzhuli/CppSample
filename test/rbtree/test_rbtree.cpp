@@ -9,11 +9,11 @@ using namespace zec;
 
 struct TestNode
 {
-    size_t Key;
     XelRBNode Node;
+    size_t Key;
 };
 
-static constexpr const size_t Total = 202400;
+static constexpr const size_t Total = 3;
 static TestNode * NodePool[Total] = {};
 
 size_t GenerateNodePool()
@@ -59,10 +59,26 @@ void test1()
 
     srand(time(nullptr));
     size_t Counter = 0;
+    size_t MaxKey = 0;
     for (size_t i = 0 ; i < Total; ++i) {
         size_t Index = rand() % Total;
+        switch(i) {
+            case 0:
+                Index = 3; break;
+            case 1:
+                Index = 1; break;
+            case 2:
+                Index = 2; break;
+            default:
+            break;
+        }
         if (NodePool[Index]) {
             continue;
+        }
+
+        // cout << "Trying to insert " << Index << endl;
+        if (Index > MaxKey) {
+            MaxKey = Index;
         }
 
         auto TestNodePtr = new TestNode {};
@@ -75,13 +91,16 @@ void test1()
         ++Counter;
     }
     cout << "GeneratedCount: " << Counter << endl;
+    cout << "MaxKey: " << MaxKey << endl;
 
     size_t Last = 0;
+    Counter = 0;
     XRBT_FOR_EACH(Iter, &Tree) {
         size_t Key = XRBN_ENTRY(Iter, TestNode, Node)->Key;
+        cout << "Counter: " << Counter << ", Key: " << Key << ", MaxKey:" << MaxKey << endl;
         if (Key && Key <= Last) {
-            Fatal("TreeOrderError");
-            return;
+            cerr << ("TreeOrderError") << endl;
+            continue;
         }
         Last = Key;
     }
@@ -92,7 +111,6 @@ void test1()
 
     ClearNodePool();
 }
-
 
 int main(int, char **)
 {

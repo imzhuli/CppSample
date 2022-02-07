@@ -5,20 +5,20 @@
 extern "C" {
 #endif
 
-#define XEL_RBNODE_RED          ((uint32_t)(0x01))
-#define XEL_RBNODE_COLORMASK    ((uint32_t)(0x01))
-
 /* Node */
 typedef struct XelRBNode XelRBNode;
 struct XelRBNode {
     XelRBNode *   ParentPtr;
     XelRBNode *   LeftNodePtr;
     XelRBNode *   RightNodePtr;
-    uint32_t      Flags;
+    bool          RedFlag;
 };
 
-ZEC_API void XRBN_Link(XelRBNode *Parent, XelRBNode **l, XelRBNode *n);
-ZEC_API void XRBN_UnlinkStale(XelRBNode * NodePtr);
+typedef struct XelRBInsertNode
+{
+    XelRBNode * ParentPtr;
+    XelRBNode ** SubNodeRefPtr;
+} XelRBInsertNode;
 
 static inline void XRBN_Init(XelRBNode * NodePtr) {
     XelRBNode InitValue = {};
@@ -32,10 +32,10 @@ static inline bool XRBN_IsLeaf(XelRBNode * NodePtr) {
     return !NodePtr->LeftNodePtr && !NodePtr->RightNodePtr;
 }
 static inline bool XRBN_IsRed(XelRBNode * NodePtr) {
-    return NodePtr->Flags & XEL_RBNODE_RED;
+    return NodePtr->RedFlag;
 }
 static inline bool XRBN_IsGenericRed(XelRBNode * NodePtr) {
-    return NodePtr && (NodePtr->Flags & XEL_RBNODE_RED);
+    return NodePtr && (NodePtr->RedFlag);
 }
 static inline bool XRBN_IsBlack(XelRBNode * NodePtr) {
     return !XRBN_IsRed(NodePtr);
@@ -44,10 +44,10 @@ static inline bool XRBN_IsGenericBlack(XelRBNode * NodePtr) {
     return !NodePtr || !XRBN_IsRed(NodePtr);
 }
 static inline void XRBN_MarkRed(XelRBNode * NodePtr) {
-    NodePtr->Flags |= XEL_RBNODE_RED;
+    NodePtr->RedFlag = true;
 }
 static inline void XRBN_MarkBlack(XelRBNode * NodePtr) {
-    NodePtr->Flags &= ~XEL_RBNODE_RED;
+    NodePtr->RedFlag = false;
 }
 
 static inline void* XRBN_Cast(XelRBNode* NodePtr, size_t NodeMemberOffset) {
@@ -55,11 +55,6 @@ static inline void* XRBN_Cast(XelRBNode* NodePtr, size_t NodeMemberOffset) {
         return NULL;
     }
     return (void*)((unsigned char*)NodePtr - NodeMemberOffset);
-}
-
-static inline void XRBN_Unlink(XelRBNode * NodePtr) {
-    XRBN_UnlinkStale(NodePtr);
-    XRBN_Init(NodePtr);
 }
 
 static inline XelRBNode * XRBN_LeftMost(XelRBNode * NodePtr) {
@@ -186,12 +181,6 @@ static inline XelRBNode *XRBT_Find(XelRBTree * TreePtr, XRBT_KeyCompare * CompFu
     return NULL;
 }
 
-typedef struct XelRBInsertNode
-{
-    XelRBNode * ParentPtr;
-    XelRBNode ** SubNodeRefPtr;
-} XelRBInsertNode;
-
 static inline XelRBInsertNode XRBT_FindInsertSlot(XelRBTree * TreePtr, XRBT_KeyCompare * CompFunc, const void *KeyPtr) {
     XelRBInsertNode InsertNode = {};
     XelRBNode ** CurrNodeRefPtr = &TreePtr->RootPtr;
@@ -219,70 +208,16 @@ typedef struct XelRBInsertResult
     XelRBNode * PrevNode;
 } XelRBInsertResult;
 
-static inline XelRBInsertResult XRBT_Insert(XelRBTree * TreePtr, XelRBNode * NodePtr, XRBT_KeyCompare * CompFunc, const void * KeyPtr, bool AllowReplace)
-{
-    assert(!NodePtr->ParentPtr);
-    assert(!NodePtr->LeftNodePtr);
-    assert(!NodePtr->RightNodePtr);
-    assert(!NodePtr->Flags);
-    XelRBInsertResult Result = {};
-
-    XelRBInsertNode InsertNode = XRBT_FindInsertSlot(TreePtr, CompFunc, KeyPtr);
-    if (!InsertNode.ParentPtr) { // root
-        assert(!TreePtr->RootPtr);
-        TreePtr->RootPtr = NodePtr;
-        Result.Inserted = true;
-        return Result;
-    }
-
-    if (!InsertNode.SubNodeRefPtr) { // Replacement
-        if (!AllowReplace) {
-            Result.PrevNode = InsertNode.ParentPtr;
-            return Result;
-        }
-        XelRBNode * ReplaceNodePtr = InsertNode.ParentPtr;
-        if ((NodePtr->LeftNodePtr = ReplaceNodePtr->LeftNodePtr)) {
-            NodePtr->LeftNodePtr->ParentPtr = NodePtr;
-        }
-        if ((NodePtr->RightNodePtr = ReplaceNodePtr->RightNodePtr)) {
-            NodePtr->RightNodePtr->ParentPtr = NodePtr;
-        }
-        NodePtr->Flags = ReplaceNodePtr->Flags;
-
-        if ((NodePtr->ParentPtr = ReplaceNodePtr->ParentPtr)) {
-            XelRBNode * ParentNodePtr = NodePtr->ParentPtr;
-            if (ParentNodePtr->LeftNodePtr == ReplaceNodePtr) {
-                ParentNodePtr->LeftNodePtr = NodePtr;
-            } else {
-                ParentNodePtr->RightNodePtr = NodePtr;
-            }
-        } else { // root
-            assert(TreePtr->RootPtr == ReplaceNodePtr);
-            TreePtr->RootPtr = NodePtr;
-        }
-        XRBN_Init(ReplaceNodePtr);
-        Result.Inserted = true;
-        Result.PrevNode = ReplaceNodePtr;
-        return Result;
-    }
-
-    *InsertNode.SubNodeRefPtr = NodePtr;
-    NodePtr->ParentPtr = InsertNode.ParentPtr;
-    // TODO: fix: (rb-rebalance)
-
-
-    // return insert done
-    Result.Inserted = true;
-    return Result;
-}
-
 #define XRBT_FOR_EACH(_iter, _tree) \
     for (XelRBNode *_iter = XRBT_First((_tree)); _iter; _iter = XRBN_Next(_iter))
 
 #define XRBT_FOR_EACH_SAFE(_iter, _tree) \
     for (XelRBNode *_iter = XRBT_First((_tree)), *_safe = XRBN_Next(_iter); _iter; _iter = _safe, _safe = XRBN_Next(_iter))
 
-ZEC_API bool XRBT_Check(XelRBTree * TreePtr);
+
+ZEC_API XelRBInsertResult   XRBT_Insert(XelRBTree * TreePtr, XelRBNode * NodePtr, XRBT_KeyCompare * CompFunc, const void * KeyPtr, bool AllowReplace);
+ZEC_API void                XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr);
+ZEC_API bool                XRBT_Check(XelRBTree * TreePtr);
 
 #ifdef __cplusplus
 }
