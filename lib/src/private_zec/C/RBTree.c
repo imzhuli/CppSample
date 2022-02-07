@@ -7,6 +7,7 @@ static size_t XRBN_CountBlack(XelRBNode * RootPtr, XelRBNode * NodePtr)
         if (XRBN_IsBlack(NodePtr)) {
             ++Counter;
         }
+        NodePtr = NodePtr->ParentPtr;
     }
     return Counter;
 }

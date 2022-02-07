@@ -12,12 +12,7 @@ int main(int, char **)
     xUuid u2{s};
     xUuid u3{GeneratorInit};
 
-
     u1 = u2;
-    cout << u1.GetData() << endl;
-    cout << u2.GetData() << endl;
-    cout << u3.GetData() << endl;
-
     if (!(u1 == u2 && u0 < u1 && u0 < u2 && u0 < u3)) {
         return -1;
     }

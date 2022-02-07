@@ -151,8 +151,6 @@ static inline bool XRBT_IsEmpty(XelRBTree* TreePtr) {
     return !TreePtr->RootPtr;
 }
 
-ZEC_API bool XRBT_Check(XelRBTree * TreePtr);
-
 static inline void* XRBT_Cast(XelRBTree* TreePtr, size_t NodeMemberOffset) {
     if (!TreePtr) {
         return NULL;
@@ -283,6 +281,8 @@ static inline XelRBInsertResult XRBT_Insert(XelRBTree * TreePtr, XelRBNode * Nod
 
 #define XRBT_FOR_EACH_SAFE(_iter, _tree) \
     for (XelRBNode *_iter = XRBT_First((_tree)), *_safe = XRBN_Next(_iter); _iter; _iter = _safe, _safe = XRBN_Next(_iter))
+
+ZEC_API bool XRBT_Check(XelRBTree * TreePtr);
 
 #ifdef __cplusplus
 }

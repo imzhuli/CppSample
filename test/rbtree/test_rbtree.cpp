@@ -5,6 +5,7 @@
 #include <zec/C/RBTree.h>
 
 using namespace std;
+using namespace zec;
 
 struct TestNode
 {
@@ -75,8 +76,18 @@ void test1()
     }
     cout << "GeneratedCount: " << Counter << endl;
 
+    size_t Last = 0;
     XRBT_FOR_EACH(Iter, &Tree) {
-        cout << "Index: " << XRBN_ENTRY(Iter, TestNode, Node)->Key << endl;
+        size_t Key = XRBN_ENTRY(Iter, TestNode, Node)->Key;
+        if (Key && Key <= Last) {
+            Fatal("TreeOrderError");
+            return;
+        }
+        Last = Key;
+    }
+
+    if (!XRBT_Check(&Tree)) {
+        cout << "XRBT_Check failed" << endl;
     }
 
     ClearNodePool();
