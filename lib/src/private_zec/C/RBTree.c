@@ -211,6 +211,22 @@ static inline XelRBNode * XRBT_Minimum(XelRBNode * NodePtr)
     return NodePtr;
 }
 
+static inline void XRBT_TransplantStale(XelRBNode * TargetNodePtr, XelRBNode * SubTreeNodePtr)
+{
+    XelRBNode * ParentPtr = TargetNodePtr->ParentPtr->LeftNodePtr;
+    assert(ParentPtr);
+
+    if (TargetNodePtr == ParentPtr->LeftNodePtr) {
+        ParentPtr->LeftNodePtr = SubTreeNodePtr;
+    }
+    else { // right
+        ParentPtr->RightNodePtr = SubTreeNodePtr;
+    }
+    if (SubTreeNodePtr) {
+        SubTreeNodePtr->ParentPtr = ParentPtr;
+    }
+}
+
 static inline void XRBT_TransplantStale(XelRBTree * TreePtr, XelRBNode * TargetNodePtr, XelRBNode * SubTreeNodePtr)
 {
     XelRBNode * ParentPtr = TargetNodePtr->ParentPtr->LeftNodePtr;
@@ -224,7 +240,9 @@ static inline void XRBT_TransplantStale(XelRBTree * TreePtr, XelRBNode * TargetN
     else { // right
         ParentPtr->RightNodePtr = SubTreeNodePtr;
     }
-    SubTreeNodePtr->ParentPtr = ParentPtr;
+    if (SubTreeNodePtr) {
+        SubTreeNodePtr->ParentPtr = ParentPtr;
+    }
 }
 
 void XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr)
