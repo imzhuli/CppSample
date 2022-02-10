@@ -213,15 +213,15 @@ static inline XelRBNode * XRBT_Minimum(XelRBNode * NodePtr)
 
 static inline void XRBN_TransplantStale(XelRBNode * TargetNodePtr, XelRBNode * SubTreeNodePtr)
 {
-    XelRBNode * ParentPtr = TargetNodePtr->ParentPtr->LeftNodePtr;
+    XelRBNode * ParentPtr = TargetNodePtr->ParentPtr;
     assert(ParentPtr);
 
     if (TargetNodePtr == ParentPtr->LeftNodePtr) {
         ParentPtr->LeftNodePtr = SubTreeNodePtr;
-    }
-    else { // right
+    } else { // right
         ParentPtr->RightNodePtr = SubTreeNodePtr;
     }
+
     if (SubTreeNodePtr) {
         SubTreeNodePtr->ParentPtr = ParentPtr;
     }
@@ -229,17 +229,16 @@ static inline void XRBN_TransplantStale(XelRBNode * TargetNodePtr, XelRBNode * S
 
 static inline void XRBT_TransplantStale(XelRBTree * TreePtr, XelRBNode * TargetNodePtr, XelRBNode * SubTreeNodePtr)
 {
-    XelRBNode * ParentPtr = TargetNodePtr->ParentPtr->LeftNodePtr;
+    XelRBNode * ParentPtr = TargetNodePtr->ParentPtr;
     if (!ParentPtr) {
         assert(TargetNodePtr == TreePtr->RootPtr);
         TreePtr->RootPtr = SubTreeNodePtr;
-    }
-    else if (TargetNodePtr == ParentPtr->LeftNodePtr) {
+    } else if (TargetNodePtr == ParentPtr->LeftNodePtr) {
         ParentPtr->LeftNodePtr = SubTreeNodePtr;
-    }
-    else { // right
+    } else { // right
         ParentPtr->RightNodePtr = SubTreeNodePtr;
     }
+
     if (SubTreeNodePtr) {
         SubTreeNodePtr->ParentPtr = ParentPtr;
     }
@@ -247,41 +246,43 @@ static inline void XRBT_TransplantStale(XelRBTree * TreePtr, XelRBNode * TargetN
 
 void XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr)
 {
-    // bool IsPrevNodeRed = XRBN_IsRed(NodePtr);
-    // XelRBNode * FixNodePtr = NULL;
-    // if (!NodePtr->LeftNodePtr) {
-    //     FixNodePtr = NodePtr->RightNodePtr;
-    //     XRBT_TransplantStale(TreePtr, NodePtr, FixNodePtr);
-    // } else if (!NodePtr->RightNodePtr) {
-    //     FixNodePtr = NodePtr->LeftNodePtr;
-    //     XRBT_TransplantStale(TreePtr, NodePtr, FixNodePtr);
-    // } else {
-    //     XelRBNode * SubTreePtr = XRBT_Minimum(NodePtr->RightNodePtr);
-    //     IsPrevNodeRed = XRBN_IsRed(SubTreePtr);
+    // Phase 1: replace
+    bool IsPrevNodeRed = XRBN_IsRed(NodePtr);
+    XelRBNode * FixNodePtr = NULL;
+    if (!NodePtr->LeftNodePtr) {
+        FixNodePtr = NodePtr->RightNodePtr;
+        XRBT_TransplantStale(TreePtr, NodePtr, FixNodePtr);
+    } else if (!NodePtr->RightNodePtr) {
+        FixNodePtr = NodePtr->LeftNodePtr;
+        XRBT_TransplantStale(TreePtr, NodePtr, FixNodePtr);
+    } else {
+        XelRBNode * SubTreePtr = XRBT_Minimum(NodePtr->RightNodePtr);
+        IsPrevNodeRed = XRBN_IsRed(SubTreePtr);
 
-    //     FixNodePtr = SubTreePtr->RightNodePtr;
-    //     if (NodePtr == SubTreePtr->ParentPtr) {
-    //         FixNodePtr->RightNodePtr = SubTreePtr;
-    //     } else {
-    //         XRBT_TransplantStale(TreePtr, SubTreePtr, SubTreePtr->RightNodePtr);
-    //         XelRBNode * SubTreeRightPtr = NodePtr->RightNodePtr;
-    //         SubTreePtr->RightNodePtr = SubTreeRightPtr;
-    //         SubTreeRightPtr->ParentPtr = SubTreePtr;
-    //     }
-    //     XRBT_TransplantStale(TreePtr, NodePtr, SubTreePtr);
+        FixNodePtr = SubTreePtr->RightNodePtr;
+        if (NodePtr == SubTreePtr->ParentPtr) {
+            FixNodePtr->RightNodePtr = SubTreePtr;
+        } else {
+            XRBT_TransplantStale(TreePtr, SubTreePtr, SubTreePtr->RightNodePtr);
+            XelRBNode * SubTreeRightPtr = NodePtr->RightNodePtr;
+            SubTreePtr->RightNodePtr = SubTreeRightPtr;
+            SubTreeRightPtr->ParentPtr = SubTreePtr;
+        }
+        XRBT_TransplantStale(TreePtr, NodePtr, SubTreePtr);
 
-    //     XelRBNode * SubTreeLeftPtr = NodePtr->LeftNodePtr;
-    //     SubTreePtr->LeftNodePtr = SubTreeLeftPtr;
-    //     SubTreeLeftPtr->ParentPtr = SubTreePtr;
-    //     SubTreePtr->RedFlag = NodePtr->RedFlag;
-    // }
+        XelRBNode * SubTreeLeftPtr = NodePtr->LeftNodePtr;
+        SubTreePtr->LeftNodePtr = SubTreeLeftPtr;
+        SubTreeLeftPtr->ParentPtr = SubTreePtr;
+        SubTreePtr->RedFlag = NodePtr->RedFlag;
+    }
+    XRBN_Init(NodePtr);
 
-    // if (!IsPrevNodeRed) {
+    // Phase 2 : fix:
+    if (!IsPrevNodeRed) {
     //     // delete - fix
 
 
-    // }
+    }
 
 
-    XRBN_Init(NodePtr);
 }

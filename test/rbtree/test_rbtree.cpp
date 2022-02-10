@@ -107,16 +107,33 @@ void test1()
     // cout << "MaxKey: " << MaxKey << endl;
 
     size_t Last = 0;
-    Counter = 0;
     XRBT_FOR_EACH(Iter, &Tree) {
         size_t Key = XRBN_ENTRY(Iter, TestNode, Node)->Key;
-        // cout << "Counter: " << Counter << ", Key: " << Key << ", MaxKey:" << MaxKey << endl;
         if (Key && Key <= Last) {
             cerr << ("TreeOrderError") << endl;
             continue;
         }
         Last = Key;
     }
+
+    for (size_t i = 0 ; i < Total / 5; ++i) {
+        TestNode * TestNodePtr = NodePool[i];
+        if (!TestNodePtr) {
+            continue;
+        }
+        XRBT_Remove(&Tree, &TestNodePtr->Node);
+    }
+
+    Last = 0;
+    XRBT_FOR_EACH(Iter, &Tree) {
+        size_t Key = XRBN_ENTRY(Iter, TestNode, Node)->Key;
+        if (Key && Key <= Last) {
+            cerr << ("TreeOrderError") << endl;
+            exit(-1);
+        }
+        Last = Key;
+    }
+
 
     ClearNodePool();
 }
