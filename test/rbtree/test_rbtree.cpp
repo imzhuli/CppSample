@@ -1,4 +1,5 @@
 #include <zec/Common.hpp>
+#include <vector>
 #include <cmath>
 #include <ctime>
 #include <iostream>
@@ -13,7 +14,7 @@ struct TestNode
     size_t Key;
 };
 
-static constexpr const size_t Total = 102400;
+static constexpr const size_t Total = 10240;
 static TestNode * NodePool[Total] = {};
 
 size_t GenerateNodePool()
@@ -22,7 +23,7 @@ size_t GenerateNodePool()
     size_t Counter = 0;
     for (size_t i = 0 ; i < Total; ++i) {
         size_t Index = rand() % Total;
-        if (NodePool[Index]) {
+        if (!Index || NodePool[Index]) {
             continue;
         }
         auto TestNodePtr = new TestNode {};
@@ -33,6 +34,22 @@ size_t GenerateNodePool()
         ++Counter;
     }
     return Counter;
+}
+
+void PrintTree(XelRBTree * TreePtr) {
+    XRBT_FOR_EACH(Iter, TreePtr) {
+        TestNode * NodePtr = XRBN_ENTRY(Iter, TestNode, Node);
+        TestNode * ParentNodePtr = XRBN_ENTRY(Iter->ParentPtr, TestNode, Node);
+        TestNode * LeftNodePtr = XRBN_ENTRY(Iter->LeftNodePtr, TestNode, Node);
+        TestNode * RightNodePtr = XRBN_ENTRY(Iter->RightNodePtr, TestNode, Node);
+        printf("Node(%c):%zi    P:%zi    L:%zi,    R:%zi\n",
+            (XRBN_IsRed(Iter) ? 'R' : 'B'),
+            NodePtr->Key,
+            (ParentNodePtr ? ParentNodePtr->Key : 0),
+            (LeftNodePtr ? LeftNodePtr->Key : 0),
+            (RightNodePtr ? RightNodePtr->Key : 0)
+            );
+    }
 }
 
 void ClearNodePool()
@@ -60,20 +77,30 @@ void test1()
     srand(time(nullptr));
     size_t Counter = 0;
     size_t MaxKey = 0;
+    std::vector<size_t> PushOrder;
     for (size_t i = 0 ; i < Total; ++i) {
         size_t Index = rand() % Total;
         // cout << "Trying to insert " << Index << endl;
+        if (!Index || NodePool[Index]) {
+            continue;
+        }
         if (Index > MaxKey) {
             MaxKey = Index;
         }
-
         auto TestNodePtr = new TestNode {};
         TestNodePtr->Key = Index;
         XRBN_Init(&TestNodePtr->Node);
 
+        NodePool[Index] = TestNodePtr;
+        PushOrder.push_back(Index);
         XRBT_Insert(&Tree, &TestNodePtr->Node, &Compare, &TestNodePtr->Key, false);
 
-        NodePool[Index] = TestNodePtr;
+        // cout << "Push:" << Index << endl;
+        // PrintTree(&Tree);
+        // if (!XRBT_Check(&Tree)) {
+        //     exit(-1);
+        // }
+
         ++Counter;
     }
     // cout << "GeneratedCount: " << Counter << endl;
@@ -89,10 +116,6 @@ void test1()
             continue;
         }
         Last = Key;
-    }
-
-    if (!XRBT_Check(&Tree)) {
-        cout << "XRBT_Check failed" << endl;
     }
 
     ClearNodePool();
