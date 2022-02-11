@@ -15,7 +15,7 @@ struct TestNode
 };
 
 
-static constexpr const size_t Total = 8192;
+static constexpr const size_t Total = 81920;
 static TestNode * NodePool[Total] = {};
 static XelRBTree Tree;
 
@@ -90,6 +90,19 @@ TestNode * TreeInsert(size_t Index)
     return TestNodePtr;
 }
 
+bool CheckOrder(XelRBTree * TreePtr)
+{
+    size_t Last = 0;
+    XRBT_FOR_EACH(Iter, TreePtr) {
+        size_t Key = XRBN_ENTRY(Iter, TestNode, Node)->Key;
+        if (Key && Key <= Last) {
+            return false;
+        }
+        Last = Key;
+    }
+    return true;
+}
+
 void test0()
 {
     XRBT_Init(&Tree);
@@ -110,14 +123,9 @@ void test0()
         XRBT_Insert(&Tree, &TestNodePtr->Node, &Compare, &TestNodePtr->Key, false);
         ++Counter;
     }
-    size_t Last = 0;
-    XRBT_FOR_EACH(Iter, &Tree) {
-        size_t Key = XRBN_ENTRY(Iter, TestNode, Node)->Key;
-        if (Key && Key <= Last) {
-            cerr << ("TreeOrderError") << endl;
-            exit(-1);
-        }
-        Last = Key;
+    if (!CheckOrder(&Tree)) {
+        cerr << "RB order error" << endl;
+        exit(-1);
     }
     if (!XRBT_Check(&Tree)) {
         cerr << "RB balance error" << endl;
@@ -183,7 +191,6 @@ void test2()
     ClearAll();
 }
 
-
 void test3()
 {
     XRBT_Init(&Tree);
@@ -222,6 +229,66 @@ void test3()
     ClearAll();
 }
 
+
+void test4()
+{
+    XRBT_Init(&Tree);
+
+    srand(time(nullptr));
+    size_t Counter = 0;
+    std::vector<size_t> PushOrder;
+    for (size_t i = 0 ; i < Total; ++i) {
+        size_t Index = rand() % Total;
+        auto TestNodePtr = TreeInsert(Index) ;
+        if (!TestNodePtr) {
+            continue;
+        }
+        PushOrder.push_back(Index);
+        ++Counter;
+    }
+
+    // XelRBNode * NodeLeftPtr = Tree.RootPtr->LeftNodePtr;
+    // size_t Index = XRBN_ENTRY(NodeLeftPtr, TestNode, Node)->Key;
+    // XRBT_Remove(&Tree, NodeLeftPtr);
+    // delete NodePool[Index];
+    // NodePool[Index] = NULL;
+
+    // NodeLeftPtr = Tree.RootPtr->LeftNodePtr;
+    // Index = XRBN_ENTRY(NodeLeftPtr, TestNode, Node)->Key;
+    // XRBT_Remove(&Tree, NodeLeftPtr);
+    // delete NodePool[Index];
+    // NodePool[Index] = NULL;
+
+    // NodeLeftPtr = Tree.RootPtr->LeftNodePtr;
+    // Index = XRBN_ENTRY(NodeLeftPtr, TestNode, Node)->Key;
+    // XRBT_Remove(&Tree, NodeLeftPtr);
+    // delete NodePool[Index];
+    // NodePool[Index] = NULL;
+
+    for (size_t i = 0 ; i < Total; ++i) {
+        TestNode * TestNodePtr = NodePool[i];
+        if (!TestNodePtr) {
+            continue;
+        }
+        XelRBNode * NodePtr = &TestNodePtr->Node;
+        if (rand() % 2) {
+            XRBT_Remove(&Tree, NodePtr);
+        }
+    }
+
+    if (!CheckOrder(&Tree)) {
+        cerr << "RB order error" << endl;
+        PrintTree(&Tree);
+        exit(-1);
+    }
+    // if (!XRBT_Check(&Tree)) {
+    //     cerr << "Remove Error" << endl;
+    //     exit(-1);
+    // }
+
+    ClearAll();
+}
+
 int main(int, char **)
 {
     try {
@@ -229,6 +296,7 @@ int main(int, char **)
         test1();
         test2();
         test3();
+        test4();
     }
     catch (...) {
         return -1;
