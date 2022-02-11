@@ -219,35 +219,53 @@ static inline XelRBNode * XRBT_Maximum(XelRBNode * NodePtr)
     return NodePtr;
 }
 
-static inline void XRBN_TransplantStale(XelRBNode * TargetNodePtr, XelRBNode * SubTreeNodePtr)
+void XRBT_ReBalance(XelRBTree * TreePtr, XelRBNode * FixNodePtr)
 {
-    XelRBNode * ParentPtr = TargetNodePtr->ParentPtr;
-
-    assert(ParentPtr && SubTreeNodePtr);
-    if (TargetNodePtr == ParentPtr->LeftNodePtr) {
-        ParentPtr->LeftNodePtr = SubTreeNodePtr;
-    } else { // right
-        ParentPtr->RightNodePtr = SubTreeNodePtr;
+    for(XelRBNode * FP = FixNodePtr->ParentPtr; XRBN_IsGenericRed(FP); FP = FixNodePtr->ParentPtr) {
+        XelRBNode * FPP = FP->ParentPtr;
+        if (FP == FPP->LeftNodePtr) {
+            XelRBNode * FPPR = FPP->RightNodePtr;
+            if (XRBN_IsGenericRed(FPPR)) {
+                XRBN_MarkBlack(FP);
+                XRBN_MarkBlack(FPPR);
+                XRBN_MarkRed(FPP);
+                FixNodePtr = FPP;
+            }
+            else {
+                if (FixNodePtr == FP->RightNodePtr) {
+                    FixNodePtr = FP;
+                    XRBT_LeftRotate(TreePtr, FixNodePtr);
+                    FP = FixNodePtr->ParentPtr;
+                    FPP = FP->ParentPtr;
+                }
+                XRBN_MarkBlack(FP);
+                XRBN_MarkRed(FPP);
+                XRBT_RightRotate(TreePtr, FPP);
+            }
+        }
+        else {
+            XelRBNode * FPPL = FPP->LeftNodePtr;
+            if (XRBN_IsGenericRed(FPPL)) {
+                XRBN_MarkBlack(FP);
+                XRBN_MarkBlack(FPPL);
+                XRBN_MarkRed(FPP);
+                FixNodePtr = FPP;
+            }
+            else {
+                if (FixNodePtr == FP->LeftNodePtr) {
+                    FixNodePtr = FP;
+                    XRBT_RightRotate(TreePtr, FixNodePtr);
+                    FP = FixNodePtr->ParentPtr;
+                    FPP = FP->ParentPtr;
+                }
+                XRBN_MarkBlack(FP);
+                XRBN_MarkRed(FPP);
+                XRBT_LeftRotate(TreePtr, FPP);
+            }
+        }
     }
-    SubTreeNodePtr->ParentPtr = ParentPtr;
+    XRBN_MarkBlack(TreePtr->RootPtr);
 }
-
-// static inline void XRBT_TransplantStale(XelRBTree * TreePtr, XelRBNode * TargetNodePtr, XelRBNode * SubTreeNodePtr)
-// {
-//     XelRBNode * ParentPtr = TargetNodePtr->ParentPtr;
-//     if (!ParentPtr) {
-//         assert(TargetNodePtr == TreePtr->RootPtr);
-//         TreePtr->RootPtr = SubTreeNodePtr;
-//     } else if (TargetNodePtr == ParentPtr->LeftNodePtr) {
-//         ParentPtr->LeftNodePtr = SubTreeNodePtr;
-//     } else { // right
-//         ParentPtr->RightNodePtr = SubTreeNodePtr;
-//     }
-
-//     if (SubTreeNodePtr) {
-//         SubTreeNodePtr->ParentPtr = ParentPtr;
-//     }
-// }
 
 void XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr)
 {
@@ -281,6 +299,7 @@ void XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr)
                 XRBN_Init(NodePtr);
                 return;
             }
+            XRBN_Init(NodePtr);
             // TODO: FIX
 
             return;
