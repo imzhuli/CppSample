@@ -39,10 +39,6 @@ size_t GenerateNodePool()
 }
 
 void PrintTree(XelRBTree * TreePtr) {
-    if (!TreePtr->RootPtr) {
-        printf("Empty Tree\n");
-        return;
-    }
     XRBT_FOR_EACH(Iter, TreePtr) {
         TestNode * NodePtr = XRBN_ENTRY(Iter, TestNode, Node);
         TestNode * ParentNodePtr = XRBN_ENTRY(Iter->ParentPtr, TestNode, Node);

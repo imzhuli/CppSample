@@ -156,12 +156,12 @@ static inline void* XRBT_Cast(XelRBTree* TreePtr, size_t NodeMemberOffset) {
 
 static inline XelRBNode * XRBT_First(XelRBTree * TreePtr)
 {
-    return XRBN_LeftMost(TreePtr->RootPtr);
+    return TreePtr->RootPtr ? XRBN_LeftMost(TreePtr->RootPtr) : NULL;
 }
 
 static inline XelRBNode * XRBT_Last(XelRBTree * TreePtr)
 {
-    return XRBN_RightMost(TreePtr->RootPtr);
+    return TreePtr->RootPtr ? XRBN_RightMost(TreePtr->RootPtr) : NULL;
 }
 
 static inline XelRBNode *XRBT_Find(XelRBTree * TreePtr, XRBT_KeyCompare * CompFunc, const void * KeyPtr) {
