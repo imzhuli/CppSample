@@ -70,6 +70,12 @@ void ClearAll()
     XRBT_Init(&Tree);
 }
 
+static int Compare(XelRBTree * TreePtr, const void * KeyPtr, XelRBNode * NodePtr)
+{
+    TestNode * TestNodePtr = XRBN_ENTRY(NodePtr, TestNode, Node);
+    return (int)(*(size_t*)KeyPtr - TestNodePtr->Key);
+}
+
 TestNode * TreeInsert(size_t Index)
 {
     if (NodePool[Index]) {
@@ -78,15 +84,10 @@ TestNode * TreeInsert(size_t Index)
     auto TestNodePtr = new TestNode;
     TestNodePtr->Key = Index;
     XRBN_Init(&TestNodePtr->Node);
+    XRBT_Insert(&Tree, &TestNodePtr->Node, &Compare, &TestNodePtr->Key, false);
 
     NodePool[Index] = TestNodePtr;
     return TestNodePtr;
-}
-
-static int Compare(XelRBTree * TreePtr, const void * KeyPtr, XelRBNode * NodePtr)
-{
-    TestNode * TestNodePtr = XRBN_ENTRY(NodePtr, TestNode, Node);
-    return (int)(*(size_t*)KeyPtr - TestNodePtr->Key);
 }
 
 void test0()
@@ -130,8 +131,6 @@ void test1()
 {
     XRBT_Init(&Tree);
 
-    srand(time(nullptr));
-
     TreeInsert(5);
     PrintTree(&Tree);
     for (size_t i = 0 ; i < Total; ++i) {
@@ -169,7 +168,7 @@ void test2()
             continue;
         }
         XelRBNode * NodePtr = &TestNodePtr->Node;
-        if (NodePtr->RightNodePtr) {
+        if (!NodePtr->RightNodePtr) {
             if (XRBN_IsRoot(NodePtr) || XRBN_IsRed(NodePtr)) {
                 XRBT_Remove(&Tree, &TestNodePtr->Node);
             }
@@ -198,9 +197,7 @@ void test3()
         if (!TestNodePtr) {
             continue;
         }
-        NodePool[Index] = TestNodePtr;
         PushOrder.push_back(Index);
-        XRBT_Insert(&Tree, &TestNodePtr->Node, &Compare, &TestNodePtr->Key, false);
         ++Counter;
     }
 
