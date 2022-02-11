@@ -348,6 +348,11 @@ void XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr)
             ReplacePtr->RightNodePtr = RPtr;
             RPtr->ParentPtr = ReplacePtr;
         } else {
+            if (PPtr->LeftNodePtr == NodePtr) {
+                PPtr->LeftNodePtr = ReplacePtr;
+            } else {
+                PPtr->RightNodePtr = ReplacePtr;
+            }
             ReplacePtr->ParentPtr = PPtr;
             ReplacePtr->LeftNodePtr = LPtr;
             LPtr->ParentPtr = ReplacePtr;
