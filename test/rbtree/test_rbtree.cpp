@@ -247,23 +247,13 @@ void test4()
         ++Counter;
     }
 
-    // XelRBNode * NodeLeftPtr = Tree.RootPtr->LeftNodePtr;
-    // size_t Index = XRBN_ENTRY(NodeLeftPtr, TestNode, Node)->Key;
-    // XRBT_Remove(&Tree, NodeLeftPtr);
-    // delete NodePool[Index];
-    // NodePool[Index] = NULL;
-
-    // NodeLeftPtr = Tree.RootPtr->LeftNodePtr;
-    // Index = XRBN_ENTRY(NodeLeftPtr, TestNode, Node)->Key;
-    // XRBT_Remove(&Tree, NodeLeftPtr);
-    // delete NodePool[Index];
-    // NodePool[Index] = NULL;
-
-    // NodeLeftPtr = Tree.RootPtr->LeftNodePtr;
-    // Index = XRBN_ENTRY(NodeLeftPtr, TestNode, Node)->Key;
-    // XRBT_Remove(&Tree, NodeLeftPtr);
-    // delete NodePool[Index];
-    // NodePool[Index] = NULL;
+    for (int i = 0 ; i < 10; ++i) {
+        XelRBNode * NodeLeftPtr = Tree.RootPtr->LeftNodePtr;
+        size_t Index = XRBN_ENTRY(NodeLeftPtr, TestNode, Node)->Key;
+        XRBT_Remove(&Tree, NodeLeftPtr);
+        delete NodePool[Index];
+        NodePool[Index] = NULL;
+    }
 
     for (size_t i = 0 ; i < Total; ++i) {
         TestNode * TestNodePtr = NodePool[i];
