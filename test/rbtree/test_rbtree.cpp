@@ -133,18 +133,20 @@ void test1()
     srand(time(nullptr));
 
     TreeInsert(5);
+    PrintTree(&Tree);
     for (size_t i = 0 ; i < Total; ++i) {
         TestNode * TestNodePtr = NodePool[i];
         if (!TestNodePtr) {
             continue;
         }
         XelRBNode * NodePtr = &TestNodePtr->Node;
-        if (NodePtr->RightNodePtr) {
+        if (!NodePtr->RightNodePtr) {
             if (XRBN_IsRoot(NodePtr) || XRBN_IsRed(NodePtr)) {
                 XRBT_Remove(&Tree, &TestNodePtr->Node);
             }
         }
     }
+    PrintTree(&Tree);
     if (!XRBT_Check(&Tree)) {
         cerr << "Remove Error" << endl;
         exit(-1);
@@ -173,6 +175,7 @@ void test2()
             }
         }
     }
+    PrintTree(&Tree);
     if (!XRBT_Check(&Tree)) {
         cerr << "Remove Error" << endl;
         exit(-1);
@@ -207,20 +210,17 @@ void test3()
             continue;
         }
         XelRBNode * NodePtr = &TestNodePtr->Node;
-        if (NodePtr->RightNodePtr) {
+        if (!NodePtr->RightNodePtr) {
             if (XRBN_IsRoot(NodePtr) || XRBN_IsRed(NodePtr)) {
                 XRBT_Remove(&Tree, &TestNodePtr->Node);
             }
         }
     }
 
-    /*
-    PrintTree(&Tree);
     if (!XRBT_Check(&Tree)) {
         cerr << "Remove Error" << endl;
         exit(-1);
     }
-    */
 
     ClearAll();
 }
