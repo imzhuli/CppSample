@@ -219,54 +219,6 @@ static inline XelRBNode * XRBT_Maximum(XelRBNode * NodePtr)
     return NodePtr;
 }
 
-void XRBT_ReBalance(XelRBTree * TreePtr, XelRBNode * FixNodePtr)
-{
-    for(XelRBNode * FP = FixNodePtr->ParentPtr; XRBN_IsGenericRed(FP); FP = FixNodePtr->ParentPtr) {
-        XelRBNode * FPP = FP->ParentPtr;
-        if (FP == FPP->LeftNodePtr) {
-            XelRBNode * FPPR = FPP->RightNodePtr;
-            if (XRBN_IsGenericRed(FPPR)) {
-                XRBN_MarkBlack(FP);
-                XRBN_MarkBlack(FPPR);
-                XRBN_MarkRed(FPP);
-                FixNodePtr = FPP;
-            }
-            else {
-                if (FixNodePtr == FP->RightNodePtr) {
-                    FixNodePtr = FP;
-                    XRBT_LeftRotate(TreePtr, FixNodePtr);
-                    FP = FixNodePtr->ParentPtr;
-                    FPP = FP->ParentPtr;
-                }
-                XRBN_MarkBlack(FP);
-                XRBN_MarkRed(FPP);
-                XRBT_RightRotate(TreePtr, FPP);
-            }
-        }
-        else {
-            XelRBNode * FPPL = FPP->LeftNodePtr;
-            if (XRBN_IsGenericRed(FPPL)) {
-                XRBN_MarkBlack(FP);
-                XRBN_MarkBlack(FPPL);
-                XRBN_MarkRed(FPP);
-                FixNodePtr = FPP;
-            }
-            else {
-                if (FixNodePtr == FP->LeftNodePtr) {
-                    FixNodePtr = FP;
-                    XRBT_RightRotate(TreePtr, FixNodePtr);
-                    FP = FixNodePtr->ParentPtr;
-                    FPP = FP->ParentPtr;
-                }
-                XRBN_MarkBlack(FP);
-                XRBN_MarkRed(FPP);
-                XRBT_LeftRotate(TreePtr, FPP);
-            }
-        }
-    }
-    XRBN_MarkBlack(TreePtr->RootPtr);
-}
-
 void XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr)
 {
     // Phase 1: replace
@@ -291,10 +243,11 @@ void XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr)
         // check and fix
         if (LPtr) {
             LPtr->ParentPtr = PPtr;
+            // *LPtr must be red, so just mark its color as *NodePtr
             LPtr->RedFlag = NodePtr->RedFlag;
             XRBN_Init(NodePtr);
             return;
-        } else {
+        } else { // both children are null
             if (XRBN_IsRed(NodePtr)) {
                 XRBN_Init(NodePtr);
                 return;
@@ -385,6 +338,9 @@ void XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr)
         XRBN_Init(NodePtr);
         return;
     }
+
+    ReplacePtr->RedFlag = NodePtr->RedFlag;
+    XRBN_Init(NodePtr);
 
     // FIX
 
