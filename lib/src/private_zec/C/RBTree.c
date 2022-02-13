@@ -52,6 +52,48 @@ bool XRBT_Check(XelRBTree * TreePtr)
     return true;
 }
 
+void XRBN_LeftRotate(XelRBNode * NodePtr)
+{
+    XelRBNode * XPtr = NodePtr;
+    XelRBNode * YPtr = NodePtr->RightNodePtr;
+    XelRBNode * SubPtr = YPtr->LeftNodePtr;
+    if ((XPtr->RightNodePtr = SubPtr)) {
+        SubPtr->ParentPtr = XPtr;
+    }
+
+    XelRBNode * ParentPtr = XPtr->ParentPtr;
+    YPtr->ParentPtr = ParentPtr;
+    if (ParentPtr->LeftNodePtr == XPtr) {
+        ParentPtr->LeftNodePtr = YPtr;
+    } else {
+        ParentPtr->RightNodePtr = YPtr;
+    }
+
+    XPtr->ParentPtr = YPtr;
+    YPtr->LeftNodePtr = XPtr;
+}
+
+void XRBN_RightRotate(XelRBNode * NodePtr)
+{
+    XelRBNode * XPtr = NodePtr;
+    XelRBNode * YPtr = NodePtr->LeftNodePtr;
+    XelRBNode * SubPtr = YPtr->RightNodePtr;
+    if ((XPtr->LeftNodePtr = SubPtr)) {
+        SubPtr->ParentPtr = XPtr;
+    }
+
+    XelRBNode * ParentPtr = XPtr->ParentPtr;
+    YPtr->ParentPtr = ParentPtr;
+    if (ParentPtr->RightNodePtr == XPtr) {
+        ParentPtr->RightNodePtr = YPtr;
+    } else {
+        ParentPtr->LeftNodePtr = YPtr;
+    }
+
+    XPtr->ParentPtr = YPtr;
+    YPtr->RightNodePtr = XPtr;
+}
+
 void XRBT_LeftRotate(XelRBTree * TreePtr, XelRBNode * NodePtr)
 {
     XelRBNode * XPtr = NodePtr;
@@ -219,6 +261,85 @@ static inline XelRBNode * XRBT_Maximum(XelRBNode * NodePtr)
     return NodePtr;
 }
 
+void XRBT_Fix(XelRBTree * TreePtr, XelRBNode * FixNodePtr, XelRBNode * ParentPtr, bool Left)
+{
+    while(true) {
+        if (Left) {
+            XelRBNode * SiblingPtr = ParentPtr->RightNodePtr;
+            if (XRBN_IsBlack(ParentPtr) && XRBN_IsRed(SiblingPtr)) { // case 1
+                XRBT_LeftRotate(TreePtr, ParentPtr);
+                XRBN_MarkBlack(SiblingPtr);
+                XRBN_MarkRed(ParentPtr);
+                SiblingPtr = ParentPtr->RightNodePtr;
+            }
+
+            XelRBNode * RNephew = SiblingPtr->RightNodePtr;
+            if (XRBN_IsGenericRed(RNephew)) { // case 4
+                SiblingPtr->RedFlag = ParentPtr->RedFlag;
+                XRBT_LeftRotate(TreePtr, ParentPtr);
+                XRBN_MarkBlack(ParentPtr);
+                XRBN_MarkBlack(RNephew);
+                XRBN_MarkBlack(TreePtr->RootPtr);
+                return;
+            }
+
+            XelRBNode * LNephew = SiblingPtr->LeftNodePtr;
+            if (XRBN_IsGenericRed(LNephew)) { // case 3
+                LNephew->RedFlag = ParentPtr->RedFlag;
+                XRBN_MarkBlack(ParentPtr);
+                XRBN_RightRotate(SiblingPtr);
+                XRBT_LeftRotate(TreePtr, ParentPtr);
+                XRBN_MarkBlack(TreePtr->RootPtr);
+                return;
+            }
+
+            XRBN_MarkRed(SiblingPtr);
+        }
+        else {
+            XelRBNode * SiblingPtr = ParentPtr->LeftNodePtr;
+            if (XRBN_IsBlack(ParentPtr) && XRBN_IsRed(SiblingPtr)) { // case 1
+                XRBT_RightRotate(TreePtr, ParentPtr);
+                XRBN_MarkBlack(SiblingPtr);
+                XRBN_MarkRed(ParentPtr);
+                SiblingPtr = ParentPtr->LeftNodePtr;
+            }
+
+            XelRBNode * LNephew = SiblingPtr->LeftNodePtr;
+            if (XRBN_IsGenericRed(LNephew)) { // case 4
+                SiblingPtr->RedFlag = ParentPtr->RedFlag;
+                XRBT_RightRotate(TreePtr, ParentPtr);
+                XRBN_MarkBlack(ParentPtr);
+                XRBN_MarkBlack(LNephew);
+                XRBN_MarkBlack(TreePtr->RootPtr);
+                return;
+            }
+
+
+            XelRBNode * RNephew = SiblingPtr->RightNodePtr;
+            if (XRBN_IsGenericRed(RNephew)) { // case 3
+                RNephew->RedFlag = ParentPtr->RedFlag;
+                XRBN_MarkBlack(ParentPtr);
+
+                XRBN_LeftRotate(SiblingPtr);
+                XRBT_RightRotate(TreePtr, ParentPtr);
+                XRBN_MarkBlack(TreePtr->RootPtr);
+                return;
+            }
+
+            XRBN_MarkRed(SiblingPtr);
+        }
+
+        if (XRBN_IsRed(ParentPtr)) {
+            XRBN_MarkRed(ParentPtr);
+            return;
+        };
+        FixNodePtr = ParentPtr;
+        ParentPtr = FixNodePtr->ParentPtr;
+        Left = (ParentPtr->LeftNodePtr == FixNodePtr);
+        continue;
+    }
+}
+
 void XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr)
 {
     // Phase 1: replace
@@ -235,7 +356,8 @@ void XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr)
             return;
         }
         // move to parent
-        if (NodePtr == PPtr->LeftNodePtr) {
+        bool Left = NodePtr == PPtr->LeftNodePtr;
+        if (Left) {
             PPtr->LeftNodePtr = LPtr;
         } else {
             PPtr->RightNodePtr = LPtr;
@@ -252,9 +374,8 @@ void XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr)
                 XRBN_Init(NodePtr);
                 return;
             }
+            XRBT_Fix(TreePtr, NULL, PPtr, Left);
             XRBN_Init(NodePtr);
-            // TODO: FIX
-
             return;
         }
     }
@@ -281,6 +402,7 @@ void XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr)
 
     // both children exist:
     XelRBNode * ReplacePtr = XRBN_RightMost(LPtr);
+    XelRBNode * SubPtr = ReplacePtr->LeftNodePtr;
 
     // move replace node to target node:
     if (ReplacePtr == LPtr) {
@@ -299,17 +421,28 @@ void XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr)
             ReplacePtr->RightNodePtr = RPtr;
             RPtr->ParentPtr = ReplacePtr;
         }
+        if (SubPtr) {
+            assert(XRBN_IsRed(SubPtr));
+            SubPtr->RedFlag = ReplacePtr->RedFlag;
+            ReplacePtr->RedFlag = NodePtr->RedFlag;
+            XRBN_Init(NodePtr);
+            return;
+        }
+        if (XRBN_IsRed(ReplacePtr)) {
+            ReplacePtr->RedFlag = NodePtr->RedFlag;
+            XRBN_Init(NodePtr);
+            return;
+        }
+        ReplacePtr->RedFlag = NodePtr->RedFlag;
+        XRBN_Init(NodePtr);
+        XRBT_Fix(TreePtr, NULL, ReplacePtr, true);
     }
     else {
-        XelRBNode * SubPtr = ReplacePtr->LeftNodePtr;
         XelRBNode * RelpacePPtr = ReplacePtr->ParentPtr;
         if (RelpacePPtr->LeftNodePtr == ReplacePtr) {
             RelpacePPtr->LeftNodePtr = SubPtr;
         } else {
             RelpacePPtr->RightNodePtr = SubPtr;
-        }
-        if (SubPtr) {
-            SubPtr->ParentPtr = RelpacePPtr;
         }
 
         if (!PPtr) { // root
@@ -331,17 +464,21 @@ void XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr)
             ReplacePtr->RightNodePtr = RPtr;
             RPtr->ParentPtr = ReplacePtr;
         }
-    }
-
-    if (XRBN_IsRed(ReplacePtr)) {
+        if (SubPtr) {
+            assert(XRBN_IsRed(SubPtr));
+            SubPtr->ParentPtr = RelpacePPtr;
+            SubPtr->RedFlag = ReplacePtr->RedFlag;
+            ReplacePtr->RedFlag = NodePtr->RedFlag;
+            XRBN_Init(NodePtr);
+            return;
+        }
+        if (XRBN_IsRed(ReplacePtr)) {
+            ReplacePtr->RedFlag = NodePtr->RedFlag;
+            XRBN_Init(NodePtr);
+            return;
+        }
         ReplacePtr->RedFlag = NodePtr->RedFlag;
         XRBN_Init(NodePtr);
-        return;
+        XRBT_Fix(TreePtr, NULL, RelpacePPtr, false);
     }
-
-    ReplacePtr->RedFlag = NodePtr->RedFlag;
-    XRBN_Init(NodePtr);
-
-    // FIX
-
 }
