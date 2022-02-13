@@ -314,7 +314,6 @@ void XRBT_Fix(XelRBTree * TreePtr, XelRBNode * FixNodePtr, XelRBNode * ParentPtr
                 return;
             }
 
-
             XelRBNode * RNephew = SiblingPtr->RightNodePtr;
             if (XRBN_IsGenericRed(RNephew)) { // case 3
                 RNephew->RedFlag = ParentPtr->RedFlag;
@@ -330,11 +329,13 @@ void XRBT_Fix(XelRBTree * TreePtr, XelRBNode * FixNodePtr, XelRBNode * ParentPtr
         }
 
         if (XRBN_IsRed(ParentPtr)) {
-            XRBN_MarkRed(ParentPtr);
+            XRBN_MarkBlack(ParentPtr); // case 2
             return;
         };
         FixNodePtr = ParentPtr;
-        ParentPtr = FixNodePtr->ParentPtr;
+        if (!(ParentPtr = FixNodePtr->ParentPtr)) {
+            return;
+        }
         Left = (ParentPtr->LeftNodePtr == FixNodePtr);
         continue;
     }
@@ -438,11 +439,11 @@ void XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr)
         XRBT_Fix(TreePtr, NULL, ReplacePtr, true);
     }
     else {
-        XelRBNode * RelpacePPtr = ReplacePtr->ParentPtr;
-        if (RelpacePPtr->LeftNodePtr == ReplacePtr) {
-            RelpacePPtr->LeftNodePtr = SubPtr;
+        XelRBNode * ReplacePPtr = ReplacePtr->ParentPtr;
+        if (ReplacePPtr->LeftNodePtr == ReplacePtr) {
+            ReplacePPtr->LeftNodePtr = SubPtr;
         } else {
-            RelpacePPtr->RightNodePtr = SubPtr;
+            ReplacePPtr->RightNodePtr = SubPtr;
         }
 
         if (!PPtr) { // root
@@ -466,7 +467,7 @@ void XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr)
         }
         if (SubPtr) {
             assert(XRBN_IsRed(SubPtr));
-            SubPtr->ParentPtr = RelpacePPtr;
+            SubPtr->ParentPtr = ReplacePPtr;
             SubPtr->RedFlag = ReplacePtr->RedFlag;
             ReplacePtr->RedFlag = NodePtr->RedFlag;
             XRBN_Init(NodePtr);
@@ -479,6 +480,6 @@ void XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr)
         }
         ReplacePtr->RedFlag = NodePtr->RedFlag;
         XRBN_Init(NodePtr);
-        XRBT_Fix(TreePtr, NULL, RelpacePPtr, false);
+        XRBT_Fix(TreePtr, NULL, ReplacePPtr, false);
     }
 }

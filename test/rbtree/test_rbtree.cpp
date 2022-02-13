@@ -15,7 +15,7 @@ struct TestNode
 };
 
 
-static constexpr const size_t Total = 20;
+static constexpr const size_t Total = 102400;
 static TestNode * NodePool[Total] = {};
 static XelRBTree Tree;
 
@@ -229,26 +229,47 @@ void test3()
 void test4()
 {
     XRBT_Init(&Tree);
-    TreeInsert(2);
-    TreeInsert(17);
-    TreeInsert(4);
-    TreeInsert(1);
-    TreeInsert(16);
-    TreeInsert(6);
-    TreeInsert(11);
-    TreeInsert(8);
-    TreeInsert(5);
-    TreeInsert(13);
+    TreeInsert(7);
+    TreeInsert(18);
+    TreeInsert(19);
+    TreeInsert(20);
     TreeInsert(12);
-    TreeInsert(10);
-    TreeInsert(15);
-    TreeInsert(3);
-    // PrintTree(&Tree);
 
-    // cout << "=========" << endl;
+    TreeInsert(17);
+    TreeInsert(22);
+    TreeInsert(23);
+    TreeInsert(4);
+    TreeInsert(10);
+
+    TreeInsert(24);
+    TreeInsert(14);
+    TreeInsert(5);
+    TreeInsert(16);
+    TreeInsert(0);
+
+    TreeInsert(2);
+    TreeInsert(11);
+
+    cout << "=========" << endl;
+    XRBT_Remove(&Tree, &NodePool[7]->Node);
+    XRBT_Remove(&Tree, &NodePool[5]->Node);
     XRBT_Remove(&Tree, &NodePool[4]->Node);
-    XRBT_Remove(&Tree, &NodePool[3]->Node);
-    // PrintTree(&Tree);
+    XRBT_Remove(&Tree, &NodePool[2]->Node);
+    XRBT_Remove(&Tree, &NodePool[0]->Node);
+
+    XRBT_Remove(&Tree, &NodePool[12]->Node);
+    XRBT_Remove(&Tree, &NodePool[11]->Node);
+    XRBT_Remove(&Tree, &NodePool[16]->Node);
+
+    PrintTree(&Tree);
+    XRBT_Remove(&Tree, &NodePool[18]->Node);
+    XRBT_Remove(&Tree, &NodePool[14]->Node);
+
+
+    if (!XRBT_Check(&Tree)) {
+        cerr << "Remove Error" << endl;
+        exit(-1);
+    }
 
     ClearAll();
 }
@@ -270,43 +291,27 @@ void test5()
         ++Counter;
     }
 
-    for(auto & i : PushOrder) {
-        cout << "Push " << i << endl;
+    for (size_t i = 0 ; i < Total; ++i) {
+        TestNode * TestNodePtr = NodePool[i];
+        if (!TestNodePtr) {
+            continue;
+        }
+        XelRBNode * NodePtr = &TestNodePtr->Node;
+        if (rand() % 2) {
+            cout << "Remove: " << XRBN_ENTRY(NodePtr, TestNode, Node)->Key << endl;
+            XRBT_Remove(&Tree, NodePtr);
+        }
     }
-
-    for (int i = 0 ; i < 10; ++i) {
-        XelRBNode * NodeLeftPtr = Tree.RootPtr->LeftNodePtr;
-        size_t Index = XRBN_ENTRY(NodeLeftPtr, TestNode, Node)->Key;
-        PrintTree(&Tree);
-        cout << "Remove: " << Index << endl;
-        XRBT_Remove(&Tree, NodeLeftPtr);
-        delete NodePool[Index];
-        NodePool[Index] = NULL;
-    }
-
-    // cout << "===========" << endl;
-
-    // for (size_t i = 0 ; i < Total; ++i) {
-    //     TestNode * TestNodePtr = NodePool[i];
-    //     if (!TestNodePtr) {
-    //         continue;
-    //     }
-    //     XelRBNode * NodePtr = &TestNodePtr->Node;
-    //     if (rand() % 2) {
-    //         cout << "Remove: " << XRBN_ENTRY(NodePtr, TestNode, Node)->Key << endl;
-    //         XRBT_Remove(&Tree, NodePtr);
-    //     }
-    // }
 
     if (!CheckOrder(&Tree)) {
         cerr << "RB order error" << endl;
         PrintTree(&Tree);
         exit(-1);
     }
-    // if (!XRBT_Check(&Tree)) {
-    //     cerr << "Remove Error" << endl;
-    //     exit(-1);
-    // }
+    if (!XRBT_Check(&Tree)) {
+        cerr << "Remove Error" << endl;
+        exit(-1);
+    }
 
     ClearAll();
 }
@@ -319,7 +324,7 @@ int main(int, char **)
         test2();
         test3();
         test4();
-        // test5();
+        test5();
     }
     catch (...) {
         return -1;
