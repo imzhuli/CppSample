@@ -58,7 +58,7 @@ static inline void* XRBN_Cast(XelRBNode* NodePtr, size_t NodeMemberOffset) {
 }
 
 static inline XelRBNode * XRBN_LeftMost(XelRBNode * NodePtr) {
-    assert(NodePtr);
+    // assert(NodePtr);
     while (NodePtr->LeftNodePtr) {
         NodePtr = NodePtr->LeftNodePtr;
     }
@@ -66,41 +66,9 @@ static inline XelRBNode * XRBN_LeftMost(XelRBNode * NodePtr) {
 }
 
 static inline XelRBNode * XRBN_RightMost(XelRBNode * NodePtr) {
-    assert(NodePtr);
+    // assert(NodePtr);
     while (NodePtr->RightNodePtr) {
         NodePtr = NodePtr->RightNodePtr;
-    }
-    return NodePtr;
-}
-
-static inline XelRBNode * XRBN_LeftDeepest(XelRBNode * NodePtr) {
-    assert(NodePtr);
-    while(true) {
-        if (NodePtr->LeftNodePtr) {
-            NodePtr = NodePtr->LeftNodePtr;
-        }
-        else if (NodePtr) {
-            NodePtr = NodePtr->RightNodePtr;
-        }
-        else {
-            break;
-        }
-    }
-    return NodePtr;
-}
-
-static inline XelRBNode * XRBN_RightDeepest(XelRBNode * NodePtr) {
-    assert(NodePtr);
-    while(true) {
-        if (NodePtr) {
-            NodePtr = NodePtr->RightNodePtr;
-        }
-        else if (NodePtr->LeftNodePtr) {
-            NodePtr = NodePtr->LeftNodePtr;
-        }
-        else {
-            break;
-        }
     }
     return NodePtr;
 }
