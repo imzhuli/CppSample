@@ -27,6 +27,7 @@ ZEC_NS
     void xSocks5Client::Clean()
     {
         assert(_SocketHolder.IsValid());
+        _SocketHolder->close(X2Ref(asio::error_code{}));
         _SocketHolder.Delete();
         Reset(_IoContextPtr);
         Reset(_Username);
@@ -65,6 +66,7 @@ ZEC_NS
     void xSocks5Proxy::Clean()
     {
         assert(_AcceptorHolder.IsValid());
+        _AcceptorHolder->close(X2Ref(asio::error_code{}));
         _AcceptorHolder.Delete();
         Reset(_Address);
         Reset(_IoContextPtr);
