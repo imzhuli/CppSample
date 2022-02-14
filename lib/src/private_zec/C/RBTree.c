@@ -52,7 +52,7 @@ bool XRBT_Check(XelRBTree * TreePtr)
     return true;
 }
 
-void XRBN_LeftRotate(XelRBNode * NodePtr)
+static void XRBN_LeftRotate(XelRBNode * NodePtr)
 {
     XelRBNode * XPtr = NodePtr;
     XelRBNode * YPtr = NodePtr->RightNodePtr;
@@ -73,7 +73,7 @@ void XRBN_LeftRotate(XelRBNode * NodePtr)
     YPtr->LeftNodePtr = XPtr;
 }
 
-void XRBN_RightRotate(XelRBNode * NodePtr)
+static void XRBN_RightRotate(XelRBNode * NodePtr)
 {
     XelRBNode * XPtr = NodePtr;
     XelRBNode * YPtr = NodePtr->LeftNodePtr;
@@ -94,7 +94,7 @@ void XRBN_RightRotate(XelRBNode * NodePtr)
     YPtr->RightNodePtr = XPtr;
 }
 
-void XRBT_LeftRotate(XelRBTree * TreePtr, XelRBNode * NodePtr)
+static void XRBT_LeftRotate(XelRBTree * TreePtr, XelRBNode * NodePtr)
 {
     XelRBNode * XPtr = NodePtr;
     XelRBNode * YPtr = NodePtr->RightNodePtr;
@@ -118,7 +118,7 @@ void XRBT_LeftRotate(XelRBTree * TreePtr, XelRBNode * NodePtr)
     YPtr->LeftNodePtr = XPtr;
 }
 
-void XRBT_RightRotate(XelRBTree * TreePtr, XelRBNode * NodePtr)
+static void XRBT_RightRotate(XelRBTree * TreePtr, XelRBNode * NodePtr)
 {
     XelRBNode * XPtr = NodePtr;
     XelRBNode * YPtr = NodePtr->LeftNodePtr;
@@ -259,7 +259,7 @@ static inline XelRBNode * XRBT_Maximum(XelRBNode * NodePtr)
     return NodePtr;
 }
 
-void XRBT_Fix(XelRBTree * TreePtr, XelRBNode * FixNodePtr, XelRBNode * ParentPtr, bool Left)
+static void XRBT_Fix(XelRBTree * TreePtr, XelRBNode * FixNodePtr, XelRBNode * ParentPtr, bool Left)
 {
     while(true) {
         if (Left) {
