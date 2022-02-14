@@ -69,36 +69,36 @@ extern "C" {
 	#error("Mixed endian is not supported by Xel");
 #endif
 
-typedef unsigned char X_Byte;
+typedef unsigned char xel_byte;
 
 typedef union {
 	uint8_t  _1;
 	uint16_t _2;
     uint32_t _4;
 	uint64_t _8;
-	X_Byte _[8];
+	xel_byte _[8];
 } XelBytePunning;
 
 typedef struct {
-	const X_Byte * Current;
-	const X_Byte * Start;
+	const xel_byte * Current;
+	const xel_byte * Start;
 } XelStreamReaderContext;
 
 typedef struct {
-	X_Byte * Current;
-	X_Byte * Start;
+	xel_byte * Current;
+	xel_byte * Start;
 } XelStreamWriterContext;
 
 /* StreamReader */
 static inline XelStreamReaderContext XSR(const void * SourcePtr) {
 	XelStreamReaderContext Ctx;
-	Ctx.Current = Ctx.Start = (const X_Byte *)SourcePtr;
+	Ctx.Current = Ctx.Start = (const xel_byte *)SourcePtr;
 	return Ctx;
 }
 static inline void XSR_Rewind(XelStreamReaderContext * CtxPtr) {
 	CtxPtr->Current = CtxPtr->Start;
 }
-static inline X_Byte XSR_B(XelStreamReaderContext * CtxPtr) {
+static inline xel_byte XSR_B(XelStreamReaderContext * CtxPtr) {
 	return (*(CtxPtr->Current++));
 }
 static inline uint8_t XSR_1(XelStreamReaderContext * CtxPtr) {
@@ -173,17 +173,17 @@ static inline size_t XSR_Pos(XelStreamReaderContext * CtxPtr) {
 /* StreamWriter */
 static inline XelStreamWriterContext XSW(void * SourcePtr) {
 	XelStreamWriterContext Ctx;
-	Ctx.Current = Ctx.Start = (X_Byte *)SourcePtr;
+	Ctx.Current = Ctx.Start = (xel_byte *)SourcePtr;
 	return Ctx;
 }
 static inline void XSW_Rewind(XelStreamWriterContext * CtxPtr) {
 	CtxPtr->Current = CtxPtr->Start;
 }
-static inline void XSW_B(XelStreamWriterContext * CtxPtr, X_Byte Value) {
+static inline void XSW_B(XelStreamWriterContext * CtxPtr, xel_byte Value) {
 	(*(CtxPtr->Current++)) = Value;
 }
 static inline void XSW_1(XelStreamWriterContext * CtxPtr, uint8_t Value) {
-	(*(CtxPtr->Current++)) = (X_Byte)Value;
+	(*(CtxPtr->Current++)) = (xel_byte)Value;
 }
 static inline void XSW_2(XelStreamWriterContext * CtxPtr, uint16_t Value) {
 	XelBytePunning Punning;
@@ -212,7 +212,7 @@ static inline void XSW_8(XelStreamWriterContext * CtxPtr, uint64_t Value) {
 	(*(CtxPtr->Current++)) = Punning._[7];
 }
 static inline void XSW_1L(XelStreamWriterContext * CtxPtr, uint8_t Value) {
-	(*(CtxPtr->Current++)) = (X_Byte)Value;
+	(*(CtxPtr->Current++)) = (xel_byte)Value;
 }
 static inline void XSW_2L(XelStreamWriterContext * CtxPtr, uint16_t Value) {
 	XelBytePunning Punning;
