@@ -5,6 +5,48 @@
     #define XelNoWriteSignal       MSG_NOSIGNAL
 #endif
 
+bool XL_Init(XelLink * LinkPtr)
+{
+    LinkPtr->Status = XLS_Idle;
+    LinkPtr->Flags = 0;
+    LinkPtr->SocketFd = XelInvalidSocket;
+    LinkPtr->ReadBufferDataSize = 0;
+    LinkPtr->BufferChain = XWBC_Init(NULL);
+    return true;
+}
+
+void XL_Clean(XelLink * LinkPtr)
+{
+    if (LinkPtr->SocketFd != XelInvalidSocket) {
+        XelCloseSocket(LinkPtr->SocketFd);
+        LinkPtr->SocketFd = XelInvalidSocket;
+    }
+    LinkPtr->ReadBufferDataSize = 0;
+    XWBC_Clean(&LinkPtr->BufferChain);
+    LinkPtr->Status = XLS_Idle;
+}
+
+bool XL_AppendData(XelLink * LinkPtr, const void * DataPtr, size_t DataSize)
+{
+    XelWriteBufferChain * ChainPtr = &LinkPtr->BufferChain;
+    const xel_byte * Cursor = DataPtr;
+    size_t RemainSize = DataSize;
+    while(RemainSize) {
+        XelWriteBuffer * BufferPtr = XWBC_Alloc(ChainPtr);
+        if (!BufferPtr) {
+            XL_SetError(LinkPtr);
+            return false;
+        }
+        size_t CopySize = RemainSize < XelMaxLinkPacketSize ? RemainSize : XelMaxLinkPacketSize;
+        memcpy(BufferPtr->Buffer, Cursor, CopySize);
+        BufferPtr->BufferDataSize = CopySize;
+        XWBC_Append(ChainPtr, BufferPtr);
+        Cursor += CopySize;
+        RemainSize -= CopySize;
+    }
+    return true;
+}
+
 bool XL_FlushData(XelLink * LinkPtr)
 {
     assert(LinkPtr->Status == XLS_Connected);

@@ -234,6 +234,41 @@ ZEC_NS
 		xResourceGuard(T & Resource, tArgs&& ... Args) -> xResourceGuard<T>;
 
 		template<typename T>
+		class xHolder final
+		: xNonCopyable
+		{
+		public:
+			ZEC_INLINE xHolder() = default;
+			ZEC_INLINE ~xHolder() { assert(!_Valid); }
+
+			template<typename ... tArgs>
+			ZEC_INLINE void New(tArgs && ... Args) {
+				assert(!_Valid);
+				new ((void*)_Dummy) T(std::forward<tArgs>(Args)...);
+				_Valid = true;
+			}
+			ZEC_INLINE void Delete() {
+				assert(_Valid);
+				Get().~T();
+				_Valid = false;
+			}
+			ZEC_INLINE bool IsValid() const { return _Valid; }
+
+			ZEC_INLINE T * operator->() { return &Get(); }
+			ZEC_INLINE const T * operator->() const { return &Get(); }
+
+			ZEC_INLINE T & operator*() { return Get(); }
+			ZEC_INLINE const T & operator*() const { return Get(); }
+
+		private:
+			alignas(T) ubyte _Dummy [sizeof(T)];
+			bool _Valid = false;
+
+			ZEC_INLINE T & Get() { return reinterpret_cast<T&>(_Dummy); }
+			ZEC_INLINE const T & Get() const { return reinterpret_cast<const T&>(_Dummy); }
+		};
+
+		template<typename T>
 		class xOptional final {
 			static_assert(!std::is_reference_v<T> && !std::is_const_v<T>);
 			using Type = std::remove_cv_t<std::remove_reference_t<T>>;

@@ -1,6 +1,8 @@
 #pragma once
 
 #include <zec/Common.hpp>
+#include <asio/asio.hpp>
+#include <atomic>
 #include <string_view>
 
 ZEC_NS
@@ -11,23 +13,21 @@ ZEC_NS
         virtual bool CheckUserPass(const std::string_view & Username, const std::string_view & Password) = 0;
     };
 
-    class xS5Proxy
+    class xSocks5Proxy
+    : xNonCopyable
     {
     public:
-        bool Init(uint16_t port, iProxyAuth * AuthCallback) {
-            assert(!_AuthCallback);
-            _AuthCallback = AuthCallback;
-            return true;
-        };
-        void Clean() {
-            assert(_AuthCallback);
-            Reset(_AuthCallback);
-        }
+        bool Init(asio::io_context * IoContextPtr, const asio::ip::tcp::endpoint & BindAddress, iProxyAuth * AuthCallback);
+        void Clean();
         void Run();
         void Stop();
 
     private:
-        iProxyAuth * _AuthCallback = {};
+        std::atomic_bool                   _StopFlag = {};
+        iProxyAuth *                       _AuthCallback = {};
+        asio::io_context *                 _IoContextPtr = {};
+        asio::ip::address                  _Address = {};
+        xHolder<asio::ip::tcp::acceptor>   _AcceptorHolder = {};
     };
 
 }

@@ -8,12 +8,14 @@
 #ifdef ZEC_SYSTEM_WINDOWS
 #include <winsock2.h>
     typedef SOCKET XelSocket;
+    #define XelInvalidSocket           (INVALID_SOCKET)
     #define XelCloseSocket(sockfd)     closesocket((sockfd))
 #else
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
     typedef int XelSocket;
+    #define XelInvalidSocket           ((XelSocket) -1)
     #define XelCloseSocket(sockfd)     close((sockfd))
 #endif
 
@@ -24,7 +26,9 @@
 #define XelMaxLinkPacketSize       ((size_t)(4096 & XelLinkLengthMask))
 #define XelMaxLinkPayloadSize      ((size_t)(XelMaxLinkPacketSize - XelLinkHeaderSize))
 
-#define XelInvalidSocket           ((XelSocket) -1)
+#ifdef __cplusplus
+extern "C" {
+#endif
 
 typedef uint32_t xel_in4;
 
@@ -117,6 +121,10 @@ typedef struct {
     struct XelLinkCallbacks *   CallbacksPtr;
 } XelLink;
 
+static inline bool XL_IsWorking(const XelLink* LinkPtr) {
+    return LinkPtr->Status == XLS_Connecting || LinkPtr->Status == XLS_Connected;
+}
+
 typedef struct XelLinkCallbacks {
     // system event callbacks
     bool (*OnReadEvent)(void * CtxPtr, XelLink* LinkPtr);
@@ -199,49 +207,11 @@ static inline void XWBC_Append(XelWriteBufferChain * ChainPtr, XelWriteBuffer * 
     }
 }
 
-static inline bool XL_AppendData(XelLink * LinkPtr, const void * DataPtr, size_t DataSize)
-{
-    XelWriteBufferChain * ChainPtr = &LinkPtr->BufferChain;
-    const xel_byte * Cursor = DataPtr;
-    size_t RemainSize = DataSize;
-    while(RemainSize) {
-        XelWriteBuffer * BufferPtr = XWBC_Alloc(ChainPtr);
-        if (!BufferPtr) {
-            XL_SetError(LinkPtr);
-            return false;
-        }
-        size_t CopySize = RemainSize < XelMaxLinkPacketSize ? RemainSize : XelMaxLinkPacketSize;
-        memcpy(BufferPtr->Buffer, Cursor, CopySize);
-        BufferPtr->BufferDataSize = CopySize;
-        XWBC_Append(ChainPtr, BufferPtr);
-        Cursor += CopySize;
-        RemainSize -= CopySize;
-    }
-    return true;
-}
-
+ZEC_API bool XL_Init(XelLink * LinkPtr);
+ZEC_API void XL_Clean(XelLink * LinkPtr);
+ZEC_API bool XL_AppendData(XelLink * LinkPtr, const void * DataPtr, size_t DataSize);
 ZEC_API bool XL_FlushData(XelLink * LinkPtr);
 
-
-static inline bool XL_Init(XelLink * LinkPtr) {
-    LinkPtr->Status = XLS_Idle;
-    LinkPtr->Flags = 0;
-    LinkPtr->SocketFd = XelInvalidSocket;
-    LinkPtr->ReadBufferDataSize = 0;
-    LinkPtr->BufferChain = XWBC_Init(NULL);
-    return true;
+#ifdef __cplusplus
 }
-
-static inline void XL_Clean(XelLink * LinkPtr) {
-    if (LinkPtr->SocketFd != XelInvalidSocket) {
-        XelCloseSocket(LinkPtr->SocketFd);
-        LinkPtr->SocketFd = XelInvalidSocket;
-    }
-    LinkPtr->ReadBufferDataSize = 0;
-    XWBC_Clean(&LinkPtr->BufferChain);
-    LinkPtr->Status = XLS_Idle;
-}
-
-static inline bool XL_IsWorking(const XelLink* LinkPtr) {
-    return LinkPtr->Status == XLS_Connecting || LinkPtr->Status == XLS_Connected;
-}
+#endif
