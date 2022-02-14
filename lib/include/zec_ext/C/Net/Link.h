@@ -29,12 +29,12 @@
 typedef uint32_t xel_in4;
 
 /* Ip utils */
-typedef union {
+typedef union XelIpv4Addr {
     xel_in4 Addr;
     uint8_t Segs[4];
 } XelIpv4Addr;
 
-typedef struct {
+typedef struct XelIpv4Str {
     char Data[16];
 } XelIpv4Str;
 
@@ -52,7 +52,7 @@ static inline XelIpv4Str Ip4ToStr(const xel_in4 SockAddrIn)
     return Ret;
 }
 
-typedef struct {
+typedef struct XelLinkHeader {
     uint32_t     PacketLength; // header size included, lower 24 bits as length, higher 8 bits as a magic check
     uint8_t      PackageSequenceId; // the index of the packet in a full package, (this is no typo)
     uint8_t      PackageSequenceTotalMax;
@@ -65,10 +65,10 @@ size_t XLH_Read(XelLinkHeader * HeaderPtr, const void * SourcePtr);
 void   XLH_Write(const XelLinkHeader * HeaderPtr, void * DestPtr);
 
 /* WriteBuffer(Chain) */
-typedef struct __XelWriteBuffer {
-    xel_byte                     Buffer[XelMaxLinkPacketSize];
-    size_t                       BufferDataSize;
-    struct __XelWriteBuffer *    NextPtr;
+typedef struct XelWriteBuffer {
+    xel_byte                   Buffer[XelMaxLinkPacketSize];
+    size_t                     BufferDataSize;
+    struct XelWriteBuffer *    NextPtr;
 } XelWriteBuffer;
 
 static inline void XWB_Init(XelWriteBuffer * BufferPtr) {
@@ -88,7 +88,7 @@ typedef struct {
 } XelWriteBuffer_Allocator;
 extern XelWriteBuffer_Allocator * const XWB_DefaultAllocatorPtr;
 
-typedef struct __XelWriteBufferChain {
+typedef struct XelWriteBufferChain {
     XelWriteBuffer * FirstPtr;
     XelWriteBuffer * LastPtr;
     XelWriteBuffer_Allocator *  AllocatorPtr;
@@ -107,7 +107,7 @@ struct XelLinkCallbacks;
 #define XLF_NONE      ((uint32_t)0x00000000)
 #define XLF_ERROR     ((uint32_t)0x00000001)
 
-typedef struct __XelLink {
+typedef struct {
     XelLinkStatus               Status;
     uint32_t                    Flags;
     int                         SocketFd;

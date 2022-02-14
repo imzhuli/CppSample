@@ -3,7 +3,7 @@
 #include <ctype.h>
 #include <inttypes.h>
 
-#define XS_INNER_BUFFER_SIZE          ((size_t)(64))
+#define XS_INNER_BUFFER_SIZE        ((size_t)(64))
 #define XS_LENGTH_EXTEND_SIZE       ((size_t)256)
 #define XS_LENGTH_MAX_EXTEND_SIZE   ((size_t)1024*1024)
 
