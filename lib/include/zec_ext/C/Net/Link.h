@@ -6,6 +6,7 @@
 #include <errno.h>
 
 #ifdef ZEC_SYSTEM_WINDOWS
+#include <ws2def.h>
 #include <winsock2.h>
     typedef SOCKET XelSocket;
     #define XelInvalidSocket           (INVALID_SOCKET)
@@ -14,6 +15,7 @@
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
+#include <netinet/in.h>
     typedef int XelSocket;
     #define XelInvalidSocket           ((XelSocket) -1)
     #define XelCloseSocket(sockfd)     close((sockfd))
