@@ -31,7 +31,6 @@ class TestWS
     {
         cout << "Disconnected" << endl;
     }
-
 };
 
 static xWebSocketContext Context;
