@@ -1,7 +1,10 @@
 project(test_${libname})
 
+
+find_package(LightWebsockets   REQUIRED)
+
 # dependencies:
-set(shared_lib_dependency_private)
+set(shared_lib_dependency_private ${LightWebsockets_LIBRARIES})
 
 # local dependencies
 include_directories(
@@ -26,6 +29,16 @@ endif()
 		)
 endfunction()
 
+function(add_sub_buildonly sub_dir_name)
+	aux_source_directory(${sub_dir_name} LOCAL_SOURCE_CODE)
+	add_executable(test_${sub_dir_name}  ${LOCAL_SOURCE_CODE})
+	target_link_libraries(test_${sub_dir_name} PRIVATE ${libname})
+	target_link_libraries(test_${sub_dir_name} PRIVATE ${shared_lib_dependency_private})
+if (ZEC_OPTION_STATIC)
+	target_compile_definitions(test_${sub_dir_name} PRIVATE ZEC_OPTION_STATIC)
+endif()
+endfunction()
+
 #test lib:
 add_sub_test(alignment)
 add_sub_test(cmd)
@@ -34,6 +47,8 @@ add_sub_test(optional)
 add_sub_test(rbtree)
 add_sub_test(uuid)
 #add_sub_test(thread)
+
+add_sub_buildonly(ws)
 
 add_test(
 	NAME cmd_short_long_empty

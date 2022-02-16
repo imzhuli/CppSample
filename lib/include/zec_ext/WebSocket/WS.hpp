@@ -13,7 +13,7 @@ ZEC_NS
     class xWebSocketContext;
     class xWebSocketClient;
 
-    class xWebSocketContext
+    class xWebSocketContext final
     {
     public:
         bool Init();
@@ -37,18 +37,17 @@ ZEC_NS
             std::string Origin;
             std::string Path;
         };
-        ZEC_INLINE bool IsConnected() const { return _WSContextPtr; }
+        ZEC_INLINE bool IsConnected() const { return _WSSocketSessionPtr; }
         ZEC_API_MEMBER bool Init(xWebSocketContext * WSContextPtr, const xConfig & Config);
         ZEC_API_MEMBER void Post(const void * DataPtr, size_t Size);
         ZEC_API_MEMBER void Clean();
 
     protected:
-        virtual bool OnWSDisconnected() = 0;
         virtual bool OnWSDataIn(const void * DataPtr, size_t DataSize) = 0;
+        virtual void OnWSDisconnected() = 0;
         virtual void OnWSDataOutReady() {};
 
     private:
-        xWebSocketContext *    _WSContextPtr = nullptr;
         xWebSocketSession *    _WSSocketSessionPtr = nullptr;
         std::list<std::string> _RelayMessages;
 

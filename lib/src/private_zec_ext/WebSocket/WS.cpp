@@ -1,8 +1,6 @@
 #include <zec_ext/WebSocket/WS.hpp>
 #include <libwebsockets.h>
 
-// light websockets callback
-
 ZEC_NS
 {
     static constexpr const size_t LWSMaxFrameSize = 1024*1024;
@@ -21,7 +19,7 @@ ZEC_NS
             static int LWSCallback(lws * WSIPtr, enum lws_callback_reasons Reason, void * UserCtxPtr, void * InPtr, size_t InLength)
             {
                 auto SessionPtr = (xWebSocketSession*)UserCtxPtr;
-                auto WSClientPtr = SessionPtr->ClientPtr;
+                auto WSClientPtr = SessionPtr ? SessionPtr->ClientPtr : nullptr;
                 switch (Reason) {
                     case LWS_CALLBACK_CLIENT_RECEIVE: {
                         if (!WSClientPtr || !WSClientPtr->OnWSDataIn(InPtr, InLength)) {
@@ -60,12 +58,14 @@ ZEC_NS
     }
 
     static lws_protocols WSProtocols[] = {
-        { "ws", __detail__::xWebSocketWrapper::LWSCallback, sizeof(xWebSocketSession), LWSMaxFrameSize },
+        { "ws", __detail__::xWebSocketWrapper::LWSCallback, 0, LWSMaxFrameSize },
         { nullptr, nullptr, 0 }
     };
 
     bool xWebSocketContext::Init()
     {
+        lws_set_log_level(LLL_DEBUG, nullptr);
+
         lws_context_creation_info WSCreateInfo = {};
         WSCreateInfo.port = CONTEXT_PORT_NO_LISTEN;
         WSCreateInfo.protocols = WSProtocols;
@@ -109,8 +109,8 @@ ZEC_NS
         WSConnectionInfo.origin = Origin.c_str();
 
         if ((SessionPtr->ConnectionPtr = lws_client_connect_via_info(&WSConnectionInfo))) {
-            _WSSocketSessionPtr = SessionPtr;
             SessionPtr->ClientPtr = this;
+            _WSSocketSessionPtr = SessionPtr;
             return true;
         }
         delete SessionPtr;
@@ -123,16 +123,14 @@ ZEC_NS
             return;
         }
         _RelayMessages.emplace_back((const char*)DataPtr, Size);
+        lws_callback_on_writable(_WSSocketSessionPtr->ConnectionPtr);
     }
 
     void xWebSocketClient::Clean()
     {
         if (auto SessionPtr = Steal(_WSSocketSessionPtr)) {
-            _WSSocketSessionPtr->ClientPtr = nullptr;
+            SessionPtr->ClientPtr = nullptr;
             lws_callback_on_writable(SessionPtr->ConnectionPtr);
-        }
-        if (_WSSocketSessionPtr) {
-            delete Steal(_WSSocketSessionPtr);
         }
     }
 
