@@ -8,6 +8,7 @@
 libboost
 liblua
 ffmpeg
+libwebsockets
 
 # included 3rd party library versions:
 asio:       1.20

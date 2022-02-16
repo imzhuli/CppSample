@@ -2,9 +2,10 @@ project(lib_${libname})
 
 ##FindPackages here
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost  REQUIRED)
-find_package(FFmpeg REQUIRED)
-find_package(Lua    REQUIRED)
+find_package(Boost             REQUIRED)
+find_package(FFmpeg            REQUIRED)
+find_package(Lua               REQUIRED)
+find_package(LightWebsockets   REQUIRED)
 
 # enable specific macors by system type:
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
@@ -51,6 +52,7 @@ aux_source_directory(./src/private_zec/Container                   ZEC_SRC)
 
 aux_source_directory(./src/private_zec_ext/Lua                     ZEC_SRC)
 aux_source_directory(./src/private_zec_ext/Net                     ZEC_SRC)
+aux_source_directory(./src/private_zec_ext/WebSocket               ZEC_SRC)
 aux_source_directory(./src/private_zec_ext/Utility                 ZEC_SRC)
 
 # 3rd party

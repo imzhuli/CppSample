@@ -233,6 +233,23 @@ ZEC_NS
 		template<typename T, typename ... tArgs>
 		xResourceGuard(T & Resource, tArgs&& ... Args) -> xResourceGuard<T>;
 
+		/* change variable value, and reset it to its original value after scope of the guard */
+		template<typename T>
+		class xValueGuard final : xNonCopyable
+		{
+		public:
+			template<typename tU>
+			xValueGuard(T & Ref, tU && U) : _Ref(Ref), _OriginalValue(std::move(Ref)) {
+				_Ref = std::forward<tU>(U);
+			}
+			~xValueGuard() {
+				_Ref = std::move(_OriginalValue);
+			}
+		private:
+			T & _Ref;
+			T _OriginalValue;
+		};
+
 		template<typename T>
 		class xHolder final
 		: xNonCopyable
