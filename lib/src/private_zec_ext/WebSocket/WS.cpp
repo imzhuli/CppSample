@@ -1,5 +1,6 @@
 #include <zec_ext/WebSocket/WS.hpp>
 #include <libwebsockets.h>
+#include <mutex>
 
 ZEC_NS
 {
@@ -62,9 +63,12 @@ ZEC_NS
         { nullptr, nullptr, 0 }
     };
 
+    static std::once_flag DisableLogFlag;
+    static void IgnoreLWSLogging(int level, const char *line) {}
+
     bool xWebSocketContext::Init()
     {
-        lws_set_log_level(LLL_DEBUG, nullptr);
+        std::call_once(DisableLogFlag, []{ lws_set_log_level(LLL_ERR, &IgnoreLWSLogging); });
 
         lws_context_creation_info WSCreateInfo = {};
         WSCreateInfo.port = CONTEXT_PORT_NO_LISTEN;
