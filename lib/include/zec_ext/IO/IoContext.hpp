@@ -4,6 +4,10 @@
 ZEC_NS
 {
 
+    namespace __detail__ {
+        class IOUtil;
+    }
+
     class xIoContext
     : xNonCopyable
     {
@@ -11,10 +15,13 @@ ZEC_NS
         ZEC_API_MEMBER bool Init();
         ZEC_API_MEMBER void Clean();
 
-        ZEC_INLINE void * Native() const { return _RealIoContextPtr; }
+        ZEC_INLINE void * Native() { return (void*)_Dummy; }
 
     private:
-        void * _RealIoContextPtr = nullptr;
+        alignas(max_align_t) ubyte _Dummy[32];
+
+    private:
+        friend class __detail__::IOUtil;
     };
 
 }
