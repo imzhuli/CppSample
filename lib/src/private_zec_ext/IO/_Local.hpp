@@ -24,6 +24,6 @@ ZEC_NS
         };
     }
 
-    ZEC_STATIC_INLINE xNativeIoContextHolder& RealRef(xIoContext * IoContextPtr) { return *static_cast<xNativeIoContextHolder *>(IoContextPtr->Native()); }
+    ZEC_STATIC_INLINE xNativeIoContextHolder& GetHolderRef(xIoContext * IoContextPtr) { return *static_cast<xNativeIoContextHolder *>(IoContextPtr->Native()); }
 
 }

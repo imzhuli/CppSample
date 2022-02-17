@@ -14,6 +14,7 @@ ZEC_NS
     public:
         ZEC_API_MEMBER bool Init();
         ZEC_API_MEMBER void Clean();
+        ZEC_API_MEMBER void LoopOnce(int TimeoutMS);
 
         ZEC_INLINE void * Native() { return (void*)_Dummy; }
 
@@ -22,6 +23,18 @@ ZEC_NS
 
     private:
         friend class __detail__::IOUtil;
+    };
+
+    enum struct eNetAddressType : uint8_t {
+        None, Ipv4, Ipv6
+    };
+
+    struct xNetAddress {
+        eNetAddressType   Type;
+        union {
+            ubyte Ipv4[4];
+            ubyte Ipv6[16];
+        };
     };
 
 }
