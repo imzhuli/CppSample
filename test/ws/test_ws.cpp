@@ -54,7 +54,7 @@ int main(int, char **)
             Client.Clean();
             Client.Init(&Context, Config);
         }
-        Context.LoopOnce(1000);
+        Context.LoopOnce();
     }
     Client.Clean();
 

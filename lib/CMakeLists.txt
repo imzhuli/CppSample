@@ -51,7 +51,7 @@ aux_source_directory(./src/private_zec/Util                        ZEC_SRC)
 aux_source_directory(./src/private_zec/Container                   ZEC_SRC)
 
 aux_source_directory(./src/private_zec_ext/Lua                     ZEC_SRC)
-aux_source_directory(./src/private_zec_ext/Net                     ZEC_SRC)
+aux_source_directory(./src/private_zec_ext/IO                     ZEC_SRC)
 aux_source_directory(./src/private_zec_ext/WebSocket               ZEC_SRC)
 aux_source_directory(./src/private_zec_ext/Utility                 ZEC_SRC)
 

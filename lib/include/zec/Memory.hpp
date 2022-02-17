@@ -84,7 +84,7 @@ ZEC_NS
 		}
 
 		template<typename T, typename ... Args>
-		ZEC_INLINE T * CreateWith(Args&& ... args) {
+		ZEC_INLINE T * CreateValue(Args&& ... args) {
 			void * p = this->Alloc(sizeof(T), AllocAlignSize<T>);
 			try { new (p) T{ std::forward<Args>(args)... }; }
 			catch (...) { this->Free(p); throw; }

@@ -258,13 +258,19 @@ ZEC_NS
 			ZEC_INLINE xHolder() = default;
 			ZEC_INLINE ~xHolder() { assert(!_Valid); }
 
+			ZEC_INLINE void Create() {
+				assert(!_Valid);
+				new ((void*)_Dummy) T;
+				_Valid = true;
+			}
+
 			template<typename ... tArgs>
-			ZEC_INLINE void New(tArgs && ... Args) {
+			ZEC_INLINE void CreateValue(tArgs && ... Args) {
 				assert(!_Valid);
 				new ((void*)_Dummy) T(std::forward<tArgs>(Args)...);
 				_Valid = true;
 			}
-			ZEC_INLINE void Delete() {
+			ZEC_INLINE void Destroy() {
 				assert(_Valid);
 				Get().~T();
 				_Valid = false;

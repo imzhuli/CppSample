@@ -1,4 +1,4 @@
-#include <zec_ext/Net/Socks5Proxy.hpp>
+#include <zec_ext/IO/Socks5Proxy.hpp>
 
 ZEC_NS
 {
@@ -6,7 +6,7 @@ ZEC_NS
     bool xSocks5Client::Init(asio::io_context * IoContextPtr, const asio::ip::tcp::endpoint & TargetAddress, const std::string_view & Username, const std::string_view & Password)
     {
         try {
-            _SocketHolder.New(*IoContextPtr);
+            _SocketHolder.CreateValue(*IoContextPtr);
             _Username = Username;
             _Password = Password;
             _SocketHolder->non_blocking(true);
@@ -14,7 +14,7 @@ ZEC_NS
         }
         catch (...) {
             if (_SocketHolder.IsValid()) {
-                _SocketHolder.Delete();
+                _SocketHolder.Destroy();
             }
             Reset(_IoContextPtr);
             Reset(_Username);
@@ -28,7 +28,7 @@ ZEC_NS
     {
         assert(_SocketHolder.IsValid());
         _SocketHolder->close(X2Ref(asio::error_code{}));
-        _SocketHolder.Delete();
+        _SocketHolder.Destroy();
         Reset(_IoContextPtr);
         Reset(_Username);
         Reset(_Password);
@@ -43,7 +43,7 @@ ZEC_NS
     {
         assert(AuthCallback);
         try {
-            _AcceptorHolder.New(*IoContextPtr);
+            _AcceptorHolder.CreateValue(*IoContextPtr);
             _AcceptorHolder->open(BindAddress.protocol());
             _AcceptorHolder->non_blocking(true);
             _AcceptorHolder->set_option(asio::ip::tcp::acceptor::reuse_address(true));
@@ -53,7 +53,7 @@ ZEC_NS
         catch (...)
         {
             if (_AcceptorHolder.IsValid()) {
-                _AcceptorHolder.Delete();
+                _AcceptorHolder.Destroy();
             }
             Reset(_Address);
             Reset(_IoContextPtr);
@@ -67,7 +67,7 @@ ZEC_NS
     {
         assert(_AcceptorHolder.IsValid());
         _AcceptorHolder->close(X2Ref(asio::error_code{}));
-        _AcceptorHolder.Delete();
+        _AcceptorHolder.Destroy();
         Reset(_Address);
         Reset(_IoContextPtr);
         Reset(_AuthCallback);

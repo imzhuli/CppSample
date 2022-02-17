@@ -17,7 +17,7 @@ ZEC_NS
     {
     public:
         bool Init();
-        void LoopOnce(int timeout);
+        void LoopOnce();
         void Clean();
 
     private:

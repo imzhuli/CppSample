@@ -92,7 +92,7 @@ typedef struct {
     void (*Free)(void *, XelWriteBuffer *);
     void * CtxPtr;
 } XelWriteBuffer_Allocator;
-extern XelWriteBuffer_Allocator * const XWB_DefaultAllocatorPtr;
+ZEC_PRIVATE XelWriteBuffer_Allocator * const XWB_DefaultAllocatorPtr;
 
 typedef struct XelWriteBufferChain {
     XelWriteBuffer * FirstPtr;
@@ -139,17 +139,17 @@ typedef struct XelLinkCallbacks {
 #define XEL_LINK_CALLBACK(LinkPtr, CallbackName) (*((LinkPtr)->CallbacksPtr->CallbackName))((LinkPtr)->CallbacksPtr->CtxPtr, (LinkPtr))
 
 typedef bool XelPacketCallback(void * CtxPtr, const XelLinkHeader * HeaderPtr, const void * PayloadPtr, size_t PayloadSize);
-extern bool XL_Connect(XelLink * LinkPtr, xel_in4 Addr, uint16_t Port);
-extern bool XL_ReadRawData(XelLink * LinkPtr, void * DestBufferPtr, size_t * DestBufferSize);
-extern bool XL_ReadPacketLoop(XelLink * LinkPtr, XelPacketCallback * CallbackPtr, void * CallbackCtxPtr);
-extern bool XL_WriteRawData(XelLink * LinkPtr, const void * DataPtr, size_t Length);
-extern void XL_SetError(XelLink* LinkPtr);
-inline bool XL_IsError(XelLink* LinkPtr) { return LinkPtr->Flags & XLF_ERROR; }
+ZEC_PRIVATE bool XL_Connect(XelLink * LinkPtr, xel_in4 Addr, uint16_t Port);
+ZEC_PRIVATE bool XL_ReadRawData(XelLink * LinkPtr, void * DestBufferPtr, size_t * DestBufferSize);
+ZEC_PRIVATE bool XL_ReadPacketLoop(XelLink * LinkPtr, XelPacketCallback * CallbackPtr, void * CallbackCtxPtr);
+ZEC_PRIVATE bool XL_WriteRawData(XelLink * LinkPtr, const void * DataPtr, size_t Length);
+ZEC_PRIVATE void XL_SetError(XelLink* LinkPtr);
+ZEC_PRIVATE bool XL_IsError(XelLink* LinkPtr) { return LinkPtr->Flags & XLF_ERROR; }
 
-extern bool XL_ReadEventCallback(void * CtxPtr, XelLink* LinkPtr);
-extern bool XL_WriteEventCallback(void * CtxPtr, XelLink* LinkPtr);
-extern void XL_ErrorEventCallback(void * CtxPtr, XelLink* LinkPtr);
-extern void XL_OnSetClose(void * CtxPtr, XelLink* LinkPtr);
+ZEC_PRIVATE bool XL_ReadEventCallback(void * CtxPtr, XelLink* LinkPtr);
+ZEC_PRIVATE bool XL_WriteEventCallback(void * CtxPtr, XelLink* LinkPtr);
+ZEC_PRIVATE void XL_ErrorEventCallback(void * CtxPtr, XelLink* LinkPtr);
+ZEC_PRIVATE void XL_OnSetClose(void * CtxPtr, XelLink* LinkPtr);
 
 static inline XelWriteBuffer * XWBC_Alloc(XelWriteBufferChain * ChainPtr)
 {

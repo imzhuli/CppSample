@@ -81,9 +81,9 @@ ZEC_NS
         return (_WSContextPtr.Ptr = lws_create_context(&WSCreateInfo));
     }
 
-    void xWebSocketContext::LoopOnce(int TimeoutMS)
+    void xWebSocketContext::LoopOnce()
     {
-        lws_service((lws_context*)_WSContextPtr.Ptr, TimeoutMS);
+        lws_service((lws_context*)_WSContextPtr.Ptr, -1);
     }
 
     void xWebSocketContext::Clean()
