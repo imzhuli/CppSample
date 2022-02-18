@@ -5,13 +5,10 @@ ZEC_NS
 {
     using namespace std::literals::string_view_literals;
 
-    bool xResolver::Init(xIoContext * IoContextPtr, iListener * ObserverPtr, size32_t MaxRequestHint)
+    bool xResolver::Init(xIoContext * IoContextPtr, iListener * ObserverPtr)
     {
         assert(IoContextPtr);
         assert(ObserverPtr);
-        if (!MaxRequestHint) {
-            MaxRequestHint = 1024;
-        }
 
         assert(!_IoContextPtr);
         assert(!_ListenerPtr);
@@ -103,7 +100,7 @@ ZEC_NS
                 _ListenerPtr->OnResolve(Node.Hostname, Node.Address, Context, false);
             }
             _ResolveMap.erase(Node.Hostname);
-            });
+        });
     }
 
     void xResolver::ClearTimeoutCacheNode()
@@ -114,7 +111,7 @@ ZEC_NS
                 _ListenerPtr->OnResolve(Node.Hostname, Node.Address, Context, false);
             }
             _ResolveMap.erase(Node.Hostname);
-            });
+        });
     }
 
 }

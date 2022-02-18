@@ -33,7 +33,7 @@ ZEC_NS
         };
 
     public:
-        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, iListener * ObserverPtr, size32_t MaxRequestHint = 0);
+        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, iListener * ObserverPtr);
         ZEC_API_MEMBER void Clean();
         ZEC_API_MEMBER bool Request(const std::string & Hostname, const xVariable RequestContext = {});
         ZEC_API_MEMBER void ClearTimeoutRequest();
