@@ -128,7 +128,7 @@ ZEC_NS
 		using xForwardConstIterator = xForwardIteratorTemplate<true>;
 
 	public:
-		ZEC_INLINE bool IsEmpty() { return _Head.pNext == &_Head;  }
+		ZEC_INLINE bool IsEmpty() const { return _Head.pNext == &_Head;  }
 		ZEC_INLINE void AddHead(tNode& rTarget) {
 			static_cast<xListNode&>(rTarget).AppendTo(_Head);
 		}

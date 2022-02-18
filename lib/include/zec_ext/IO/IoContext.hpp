@@ -1,5 +1,6 @@
 #pragma once
 #include <zec/Common.hpp>
+#include <string>
 
 ZEC_NS
 {
@@ -21,20 +22,20 @@ ZEC_NS
     private:
         alignas(max_align_t) ubyte _Dummy[32];
 
-    private:
         friend class __detail__::IOUtil;
     };
 
-    enum struct eNetAddressType : uint8_t {
-        None, Ipv4, Ipv6
-    };
-
     struct xNetAddress {
-        eNetAddressType   Type;
+        enum : uint8_t {
+            eUnknown, eIpv4, eIpv6
+        } Type = eUnknown;
+
         union {
             ubyte Ipv4[4];
             ubyte Ipv6[16];
         };
+
+        ZEC_API_MEMBER std::string ToString() const;
     };
 
 }
