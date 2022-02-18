@@ -32,4 +32,16 @@ ZEC_NS
         Reset(_ServerPort);
     }
 
+    size_t xTcpClient::Read(void * BufferPtr, size_t BufferSize)
+    {
+        // TODO
+        return 0;
+    }
+
+    void xTcpClient::Write(const void * DataPtr, size_t DataSize)
+    {
+        // TODO
+
+    }
+
 }
