@@ -1,48 +1,49 @@
 #pragma once
 
 #include <zec/Common.hpp>
-#include <asio/asio.hpp>
 #include <atomic>
 #include <string_view>
 #include <string>
 
+#include "./IoContext.hpp"
+
 ZEC_NS
 {
 
-    class iProxyAuth
-    {
-        virtual bool CheckUserPass(const std::string_view & Username, const std::string_view & Password) = 0;
-    };
+    namespace __detail__ {
+        class IOUtil;
+    }
 
     class xSocks5Client
     : xNonCopyable
     {
     public:
-        bool Init(asio::io_context * IoContextPtr, const asio::ip::tcp::endpoint & TargetAddress, const std::string_view & Username, const std::string_view & Password);
-        void Clean();
-
-    protected:
-        virtual void ConnectionHandler(const asio::error_code& ErrorCode);
+        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, const std::string & Username, const std::string & Password);
+        ZEC_API_MEMBER void Clean();
 
     private:
-        asio::io_context *              _IoContextPtr {};
-        xHolder<asio::ip::tcp::socket>  _SocketHolder {};
-        std::string                     _Username {};
-        std::string                     _Password {};
+        ZEC_INLINE void * Native() { return (void*)_Dummy; }
+
+    private:
+        enum : uint8_t
+        {
+            Inited, Challenging, AuthPosed, Authorized, Connecting, Connected, Closed
+        } _Phase;
+
+        xIoContext *                  _IoContextPtr {};
+        std::string                   _Username {};
+        std::string                   _Password {};
+        xNetAddress                   _ProxyAddress {};
+        uint16_t                      _ProxyPort {};
+
+        alignas(max_align_t) ubyte    _Dummy[64];
+        friend class __detail__::IOUtil;
     };
 
-    class xSocks5Proxy
+    class xHttp2Socks5
     : xNonCopyable
     {
-    public:
-        bool Init(asio::io_context * IoContextPtr, const asio::ip::tcp::endpoint & BindAddress, iProxyAuth * AuthCallback);
-        void Clean();
 
-    private:
-        asio::io_context *                 _IoContextPtr = {};
-        asio::ip::address                  _Address = {};
-        xHolder<asio::ip::tcp::acceptor>   _AcceptorHolder = {};
-        iProxyAuth *                       _AuthCallback = {};
     };
 
 }

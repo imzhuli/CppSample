@@ -3,11 +3,12 @@
 #include <zec/Common.hpp>
 #include <zec/List.hpp>
 #include <zec_ext/Utility/TimeoutList.hpp>
-#include "./IoContext.hpp"
 #include <string_view>
 #include <string>
 #include <vector>
 #include <map>
+
+#include "./IoContext.hpp"
 
 ZEC_NS
 {
@@ -15,7 +16,7 @@ ZEC_NS
         class IOUtil;
     }
 
-    class xResolver
+    class xTcpResolver
     : xNonCopyable
     {
     public:
@@ -50,8 +51,8 @@ ZEC_NS
         xTimeoutList                                _RequestTimeoutList;
         xTimeoutList                                _CacheTimeoutList;
         std::map<std::string, xResolveNode>         _ResolveMap;
-        alignas(max_align_t) ubyte                  _Dummy[48];
 
+        alignas(max_align_t) ubyte                  _Dummy[48];
         friend class __detail__::IOUtil;
     };
 

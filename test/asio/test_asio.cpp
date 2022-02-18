@@ -6,8 +6,8 @@
 using namespace zec;
 using namespace std;
 
-class xResolverListener
-: public xResolver::iListener
+class xTcpResolverListener
+: public xTcpResolver::iListener
 {
     void OnResolve(const std::string & Hostname, const xNetAddress & Address, const xVariable & RequestContext, bool DirectCall) override
     {
@@ -17,17 +17,12 @@ class xResolverListener
 
 void test0 ()
 {
-    xNetAddress Addr = {};
-    Addr.Type = xNetAddress::eIpv4;
-    Addr.Ipv4[0] = 192;
-    Addr.Ipv4[1] = 168;
-    Addr.Ipv4[2] = 123;
-    Addr.Ipv4[3] = 24;
+    xNetAddress Addr = xNetAddress::MakeV4("192.168.123.455");
     cout << Addr.ToString() << endl;
 
     xIoContext          IoContext;
-    xResolver           Resolver;
-    xResolverListener   Listener;
+    xTcpResolver           Resolver;
+    xTcpResolverListener   Listener;
 
     if (!IoContext.Init()) {
         throw "Failed to init io context";
@@ -44,15 +39,17 @@ void test0 ()
     Resolver.Request("www.invalid_    _name.com", { .I = 6 });
 
     xTimer Timer;
-    while(!Timer.TestAndTag(3s)) {
+    while(!Timer.TestAndTag(2s)) {
         IoContext.LoopOnce(100);
-        // Resolver.ClearTimeoutRequest();
+        Resolver.ClearTimeoutRequest();
     }
     Resolver.ClearTimeoutCacheNode();
     Resolver.Request("www.baidu.com", { .I = 100 });
 
     Resolver.Clean();
+    cout << "Resolver cleaned" << endl;
     IoContext.Clean();
+    cout << "IoContext cleaned" << endl;
 }
 
 

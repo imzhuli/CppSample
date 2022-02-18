@@ -5,7 +5,7 @@ ZEC_NS
 {
     using namespace std::literals::string_view_literals;
 
-    bool xResolver::Init(xIoContext * IoContextPtr, iListener * ObserverPtr)
+    bool xTcpResolver::Init(xIoContext * IoContextPtr, iListener * ObserverPtr)
     {
         assert(IoContextPtr);
         assert(ObserverPtr);
@@ -19,11 +19,11 @@ ZEC_NS
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ObserverPtr;
 
-        NativeResolverHolderRef(Native()).CreateValue(*IOUtil::Native(_IoContextPtr));
+        NativeTcpResolverHolderRef(Native()).CreateValue(*IOUtil::Native(_IoContextPtr));
         return true;
     }
 
-    void xResolver::Clean()
+    void xTcpResolver::Clean()
     {
         _RequestTimeoutList.Finish([this](xTimeoutNode& TimeoutNode, xVariable){
                 auto & Node = (xResolveNode&)TimeoutNode;
@@ -35,11 +35,13 @@ ZEC_NS
         _ResolveMap.clear();
         _ListenerPtr = nullptr;
 
-        NativeResolverHolderRef(Native()).Destroy();
+        auto & Holder = NativeTcpResolverHolderRef(Native());
+        Holder->cancel();
+        Holder.Destroy();
         _IoContextPtr = nullptr;
     }
 
-    bool xResolver::Request(const std::string & Hostname, const xVariable RequestContext)
+    bool xTcpResolver::Request(const std::string & Hostname, const xVariable RequestContext)
     {
         auto & Node = _ResolveMap[Hostname];
         if (Node.Address.Type == xNetAddress::eUnknown) {
@@ -49,8 +51,8 @@ ZEC_NS
             }
             Node.Hostname = Hostname;
             _RequestTimeoutList.PushBack(Node);
-            auto & NativeHolder = NativeResolverHolderRef(Native());
-            NativeHolder->async_resolve(Hostname, ""sv, [this, Hostname] (error_code error, const xNativeResolver::results_type & results) {
+            auto & NativeHolder = NativeTcpResolverHolderRef(Native());
+            NativeHolder->async_resolve(Hostname, ""sv, [this, Hostname] (error_code error, const xNativeTcpResolver::results_type & results) {
                 auto Iter = _ResolveMap.find(Hostname);
                 if (Iter == _ResolveMap.end()) { // request timeout
                     return;
@@ -63,11 +65,11 @@ ZEC_NS
                         if (address.is_v4()) {
                             Node.Address.Type = xNetAddress::eIpv4;
                             auto AddrBytes = address.to_v4().to_bytes();
-                            memcpy(Node.Address.Ipv4, AddrBytes.data(), AddrBytes.size());
+                            memcpy(Node.Address.Ipv4, AddrBytes.data(), sizeof(Node.Address.Ipv4));
                         } else if (address.is_v6()) {
                             Node.Address.Type = xNetAddress::eIpv6;
                             auto AddrBytes = address.to_v6().to_bytes();
-                            memcpy(Node.Address.Ipv6, AddrBytes.data(), AddrBytes.size());
+                            memcpy(Node.Address.Ipv6, AddrBytes.data(), sizeof(Node.Address.Ipv6));
                         } else {
                             /* Node.Address.Type == xNetAddress::eUnknown; */
                         }
@@ -92,7 +94,7 @@ ZEC_NS
         return true;
     }
 
-    void xResolver::ClearTimeoutRequest()
+    void xTcpResolver::ClearTimeoutRequest()
     {
         _RequestTimeoutList.PopTimeoutNodes(_RequestTimeout, [this](xTimeoutNode& TimeoutNode, xVariable){
             auto & Node = (xResolveNode&)TimeoutNode;
@@ -103,7 +105,7 @@ ZEC_NS
         });
     }
 
-    void xResolver::ClearTimeoutCacheNode()
+    void xTcpResolver::ClearTimeoutCacheNode()
     {
         _RequestTimeoutList.PopTimeoutNodes(_RequestTimeout, [this](xTimeoutNode& TimeoutNode, xVariable){
             auto & Node = (xResolveNode&)TimeoutNode;

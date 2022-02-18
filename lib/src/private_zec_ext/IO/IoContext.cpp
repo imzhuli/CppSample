@@ -64,4 +64,55 @@ ZEC_NS
         IoContextHolder->run_for(std::chrono::microseconds(TimeoutMS));
     }
 
+    xNetAddress xNetAddress::Make(const char * IpStr)
+    {
+        boost::system::error_code ErrorCode;
+        auto Address = asio::ip::make_address(IpStr, ErrorCode);
+        if (ErrorCode) {
+            return {};
+        }
+
+        xNetAddress Ret;
+        if (Address.is_v4()) {
+            Ret.Type = xNetAddress::eIpv4;
+            auto AddrBytes = Address.to_v4().to_bytes();
+            memcpy(Ret.Ipv4, AddrBytes.data(), sizeof(Ret.Ipv4));
+        } else if (Address.is_v6()) {
+            Ret.Type = xNetAddress::eIpv6;
+            auto AddrBytes = Address.to_v6().to_bytes();
+            memcpy(Ret.Ipv6, AddrBytes.data(), sizeof(Ret.Ipv6));
+        }
+        return Ret;
+    }
+
+    xNetAddress xNetAddress::MakeV4(const char * IpStr)
+    {
+        try {
+            auto Address = asio::ip::make_address_v4(IpStr);
+            auto bytes = Address.to_bytes();
+
+            xNetAddress Ret;
+            memcpy(Ret.Ipv4, bytes.data(), sizeof(Ret.Ipv4));
+            Ret.Type = eIpv4;
+            return Ret;
+        }
+        catch (...) {}
+        return {};
+    }
+
+    xNetAddress xNetAddress::MakeV6(const char * IpStr)
+    {
+        try {
+            auto Address = asio::ip::make_address_v6(IpStr);
+            auto bytes = Address.to_bytes();
+
+            xNetAddress Ret;
+            memcpy(Ret.Ipv6, bytes.data(), sizeof(Ret.Ipv6));
+            Ret.Type = eIpv6;
+            return Ret;
+        }
+        catch (...) {}
+        return {};
+    }
+
 }
