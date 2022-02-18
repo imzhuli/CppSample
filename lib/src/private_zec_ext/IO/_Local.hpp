@@ -3,7 +3,7 @@
 #include <boost/beast.hpp>
 #include <zec_ext/IO/IoContext.hpp>
 #include <zec_ext/IO/Resolver.hpp>
-#include <zec_ext/IO/Socks5Proxy.hpp>
+#include <zec_ext/IO/TcpClient.hpp>
 
 namespace asio = boost::asio;
 namespace beast = boost::beast;
@@ -30,7 +30,7 @@ ZEC_NS
 
             static inline xNativeIoContext *    Native(xIoContext * IoContextPtr)  { return NativeIoContextHolderRef(IoContextPtr->Native()).Get(); }
             static inline xNativeTcpResolver *  Native(xTcpResolver * ResolverPtr)  { return NativeTcpResolverHolderRef(ResolverPtr->Native()).Get(); }
-            static inline xNativeTcpSocket *    Native(xSocks5Client * Sock5ClientPtr)  { return NativeTcpSocketHolderRef(Sock5ClientPtr->Native()).Get(); }
+            static inline xNativeTcpSocket *    Native(xTcpClient * TcpClientPtr)  { return NativeTcpSocketHolderRef(TcpClientPtr->Native()).Get(); }
 
         private:
             static_assert(sizeof(xIoContext::_Dummy) >= sizeof(xNativeIoContextHolder));
@@ -41,9 +41,9 @@ ZEC_NS
             static_assert(alignof(xTcpResolver::_Dummy) >= alignof(xNativeTcpResolverHolder));
             static_assert(!(alignof(xTcpResolver::_Dummy) % alignof(xNativeTcpResolverHolder)));
 
-            static_assert(sizeof(xSocks5Client::_Dummy) >= sizeof(xNativeTcpSocketHolder));
-            static_assert(alignof(xSocks5Client::_Dummy) >= alignof(xNativeTcpSocketHolder));
-            static_assert(!(alignof(xSocks5Client::_Dummy) % alignof(xNativeTcpSocketHolder)));
+            static_assert(sizeof(xTcpClient::_Dummy) >= sizeof(xNativeTcpSocketHolder));
+            static_assert(alignof(xTcpClient::_Dummy) >= alignof(xNativeTcpSocketHolder));
+            static_assert(!(alignof(xTcpClient::_Dummy) % alignof(xNativeTcpSocketHolder)));
         };
     }
     using IOUtil = __detail__::IOUtil;
