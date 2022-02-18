@@ -36,10 +36,10 @@ void test0 ()
     Resolver.Request("www.qq.com", { .I = 3 });
     Resolver.Request("www.google.somethingiswrong.com", { .I = 4 });
     Resolver.Request("www.verylong_maybe_unresolved_name.com", { .I = 5 });
-    Resolver.Request("www.invalid_    _name.com", { .I = 6 });
+    Resolver.Request("www.zengine.cc", { .I = 6 });
 
     xTimer Timer;
-    while(!Timer.TestAndTag(2s)) {
+    while(!Timer.TestAndTag(4s)) {
         IoContext.LoopOnce(100);
         Resolver.ClearTimeoutRequest();
     }

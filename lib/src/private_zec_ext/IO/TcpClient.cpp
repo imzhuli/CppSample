@@ -25,12 +25,11 @@ ZEC_NS
 
     void xTcpClient::Clean()
     {
+        assert(_PacketBufferQueue.IsEmpty());
         NativeTcpSocketHolderRef(Native()).Destroy();
         Reset(_IoContextPtr);
         Reset(_ServerAddress);
         Reset(_ServerPort);
     }
-
-
 
 }

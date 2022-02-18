@@ -35,9 +35,7 @@ ZEC_NS
         _ResolveMap.clear();
         _ListenerPtr = nullptr;
 
-        auto & Holder = NativeTcpResolverHolderRef(Native());
-        Holder->cancel();
-        Holder.Destroy();
+        NativeTcpResolverHolderRef(Native()).Destroy();
         _IoContextPtr = nullptr;
     }
 

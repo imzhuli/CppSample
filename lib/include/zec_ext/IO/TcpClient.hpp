@@ -3,6 +3,7 @@
 #include <zec/Common.hpp>
 #include <atomic>
 #include "./IoContext.hpp"
+#include "./PacketData.hpp"
 
 ZEC_NS
 {
@@ -34,6 +35,7 @@ ZEC_NS
         xNetAddress                   _ServerAddress {};
         uint16_t                      _ServerPort {};
         iListener *                   _ListenerPtr = nullptr;
+        xPacketBufferQueue            _PacketBufferQueue;
 
         alignas(max_align_t) ubyte    _Dummy[64];
         friend class __detail__::IOUtil;

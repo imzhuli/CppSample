@@ -46,7 +46,7 @@ ZEC_NS
     private:
         xIoContext *                                _IoContextPtr = nullptr;
         iListener *                                 _ListenerPtr = nullptr;
-        uint64_t                                    _RequestTimeout = 100'000;
+        uint64_t                                    _RequestTimeout = 3'000;
         uint64_t                                    _CacheTimeout = 600'000;
         xTimeoutList                                _RequestTimeoutList;
         xTimeoutList                                _CacheTimeoutList;
