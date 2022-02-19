@@ -62,6 +62,7 @@ ZEC_NS
             ZEC_STATIC_INLINE xNativeIoContext *    Native(xIoContext * IoContextPtr)  { return NativeIoContextHolderRef(IoContextPtr->Native()).Get(); }
             ZEC_STATIC_INLINE xNativeTcpResolver *  Native(xTcpResolver * ResolverPtr)  { return NativeTcpResolverHolderRef(ResolverPtr->Native()).Get(); }
             ZEC_STATIC_INLINE xNativeTcpSocket *    Native(xTcpClient * TcpClientPtr)  { return NativeTcpSocketHolderRef(TcpClientPtr->Native()).Get(); }
+            ZEC_STATIC_INLINE xNativeWebSocket *    Native(xWebSocketClient * WebSocketClientPtr)  { return NativeWebSocketHolderRef(WebSocketClientPtr->Native()).Get(); }
 
         private:
             static_assert(sizeof(xIoContext::_Dummy) >= sizeof(xNativeIoContextHolder));
@@ -75,6 +76,10 @@ ZEC_NS
             static_assert(sizeof(xTcpClient::_Dummy) >= sizeof(xNativeTcpSocketHolder));
             static_assert(alignof(xTcpClient::_Dummy) >= alignof(xNativeTcpSocketHolder));
             static_assert(!(alignof(xTcpClient::_Dummy) % alignof(xNativeTcpSocketHolder)));
+
+            static_assert(sizeof(xWebSocketClient::_Dummy) >= sizeof(xNativeWebSocketHolder));
+            static_assert(alignof(xWebSocketClient::_Dummy) >= alignof(xNativeWebSocketHolder));
+            static_assert(!(alignof(xWebSocketClient::_Dummy) % alignof(xNativeWebSocketHolder)));
         };
     }
     using IOUtil = __detail__::IOUtil;

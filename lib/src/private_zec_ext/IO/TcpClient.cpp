@@ -10,9 +10,6 @@ ZEC_NS
     bool xTcpClient::Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr)
     {
         xNetAddress Address = xNetAddress::Make(Ip);
-        if (!Address || !Port) {
-            return false;
-        }
         return Init(IoContextPtr, Address, Port, ListenerPtr);
     }
 
@@ -20,12 +17,12 @@ ZEC_NS
     {
         assert(IoContextPtr);
         assert(ListenerPtr);
+        assert(Address);
+        assert(Port);
         assert(_State == eUnspecified);
 
         assert(!_IoContextPtr);
         _IoContextPtr = IoContextPtr;
-        _ServerAddress = Address;
-        _ServerPort = Port;
         _ListenerPtr = ListenerPtr;
         _ReadDataSize = 0;
         _State = eInited;
@@ -59,8 +56,6 @@ ZEC_NS
         }
         NativeTcpSocketHolderRef(Native()).Destroy();
         Reset(_IoContextPtr);
-        Reset(_ServerAddress);
-        Reset(_ServerPort);
         _State = eUnspecified;
     }
 

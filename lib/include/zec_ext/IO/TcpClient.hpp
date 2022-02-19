@@ -55,8 +55,6 @@ ZEC_NS
 
     private:
         xIoContext *                  _IoContextPtr {};
-        xNetAddress                   _ServerAddress {};
-        uint16_t                      _ServerPort {};
         iListener *                   _ListenerPtr = nullptr;
         xPacketBufferQueue            _WritePacketBufferQueue;
 
