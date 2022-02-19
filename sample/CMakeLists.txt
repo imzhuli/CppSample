@@ -32,7 +32,6 @@ endfunction()
 
 #test lib:
 
-add_sub_sample(aio)
 add_sub_sample(app)
 add_sub_sample(glm)
 add_sub_sample(lua)
