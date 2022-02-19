@@ -1,13 +1,17 @@
 #pragma once
 #include <boost/asio.hpp>
+#include <boost/asio/ssl.hpp>
 #include <boost/beast.hpp>
+#include <boost/beast/websocket/ssl.hpp>
 #include <zec_ext/IO/IoContext.hpp>
 #include <zec_ext/IO/Resolver.hpp>
 #include <zec_ext/IO/TcpClient.hpp>
+#include <zec_ext/IO/WebSocket.hpp>
 
-namespace asio  = boost::asio;
-namespace beast = boost::beast;
-namespace ip    = boost::asio::ip;
+namespace asio        = boost::asio;
+namespace beast       = boost::beast;
+namespace ip          = boost::asio::ip;
+namespace websocket   = boost::beast::websocket;
 
 using tcp   = boost::asio::ip::tcp;
 using udp   = boost::asio::ip::udp;
@@ -29,6 +33,11 @@ ZEC_NS
     using xNativeTcpSocketHolder = xHolder<xNativeTcpSocket>;
     ZEC_STATIC_INLINE xNativeTcpSocket * NativeTcpSocket(void * NativePtr) { return static_cast<xNativeTcpSocketHolder*>(NativePtr)->Get(); }
     ZEC_STATIC_INLINE xNativeTcpSocketHolder & NativeTcpSocketHolderRef(void * NativePtr) { return *static_cast<xNativeTcpSocketHolder*>(NativePtr); }
+
+    using xNativeWebSocket = websocket::stream<tcp::socket>;
+    using xNativeWebSocketHolder = xHolder<xNativeWebSocket>;
+    ZEC_STATIC_INLINE xNativeWebSocket * NativeWebSocket(void * NativePtr) { return static_cast<xNativeWebSocketHolder*>(NativePtr)->Get(); }
+    ZEC_STATIC_INLINE xNativeWebSocketHolder & NativeWebSocketHolderRef(void * NativePtr) { return *static_cast<xNativeWebSocketHolder*>(NativePtr); }
 
     ZEC_STATIC_INLINE tcp::endpoint MakeAddress(const xNetAddress & Address, uint16_t Port) {
         if (Address.IsV4()) {

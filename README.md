@@ -11,6 +11,5 @@ ffmpeg
 libwebsockets
 
 # included 3rd party library versions:
-asio:       1.20
 glm:        20210902
 rapidjson:  20211124

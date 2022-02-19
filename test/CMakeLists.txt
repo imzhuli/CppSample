@@ -49,7 +49,6 @@ add_sub_test(uuid)
 #add_sub_test(thread)
 
 add_sub_buildonly(asio)
-add_sub_buildonly(ws)
 
 add_test(
 	NAME cmd_short_long_empty
