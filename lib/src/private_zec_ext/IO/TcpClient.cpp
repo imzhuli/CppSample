@@ -69,7 +69,7 @@ ZEC_NS
         auto SocketPtr = NativeTcpSocket(Native());
         size_t BufferSize = MaxPacketPayloadSize - _ReadDataSize;
         assert(BufferSize);
-        SocketPtr->async_read_some(xAsioBuffer{_ReadBuffer + _ReadDataSize, BufferSize}, [this, SocketPtr](const xAsioError & Error, size_t TransferedSize) {
+        SocketPtr->async_read_some(xAsioMutableBuffer{_ReadBuffer + _ReadDataSize, BufferSize}, [this, SocketPtr](const xAsioError & Error, size_t TransferedSize) {
             if (Error) {
                 if (Error == asio::error::eof) {
                     _ListenerPtr->OnPeerClose(this);
@@ -97,7 +97,7 @@ ZEC_NS
         auto SocketPtr = NativeTcpSocket(Native());
         auto BufferPtr = _WritePacketBufferQueue.Peek();
         assert (BufferPtr);
-        SocketPtr->async_write_some(xAsioBuffer{BufferPtr->Buffer, BufferPtr->DataSize}, [this, BufferPtr](const xAsioError & Error, size_t TransferedBytes) {
+        SocketPtr->async_write_some(xAsioConstBuffer{BufferPtr->Buffer, BufferPtr->DataSize}, [this, BufferPtr](const xAsioError & Error, size_t TransferedBytes) {
             assert(BufferPtr == _WritePacketBufferQueue.Peek());
             assert(TransferedBytes <= BufferPtr->DataSize);
             if (Error) {

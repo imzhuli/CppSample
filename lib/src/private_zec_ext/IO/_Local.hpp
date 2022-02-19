@@ -17,7 +17,9 @@ using tcp   = boost::asio::ip::tcp;
 using udp   = boost::asio::ip::udp;
 
 using xAsioError = boost::system::error_code;
-using xAsioBuffer = boost::asio::mutable_buffer;
+using xAsioConstBuffer = boost::asio::const_buffer;
+using xAsioMutableBuffer = boost::asio::mutable_buffer;
+using xBeastDynamicBuffer = boost::beast::multi_buffer;
 
 ZEC_NS
 {

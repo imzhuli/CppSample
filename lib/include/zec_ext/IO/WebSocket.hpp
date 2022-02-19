@@ -27,6 +27,10 @@ ZEC_NS
         ZEC_API_MEMBER void Clean();
 
     private:
+        ZEC_API_MEMBER void DoConnect();
+        ZEC_API_MEMBER void DoClose();
+
+    private:
         xIoContext *  _IoContextPtr = nullptr;
         iListener *   _ListenerPtr = nullptr;
         ubyte *       _FrameBufferPtr = nullptr;
