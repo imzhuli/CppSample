@@ -32,6 +32,9 @@ ZEC_NS
         ubyte *       _FrameBufferPtr = nullptr;
         size_t        _FrameBufferSize = 0;
         size_t        _FrameDataSize = 0;
+        enum : uint8_t {
+            eUnspecified, eInited, eConnected, eClosing, eClosed
+        } _State = eUnspecified;
 
         alignas(max_align_t) ubyte    _Dummy[64];
         friend class __detail__::IOUtil;

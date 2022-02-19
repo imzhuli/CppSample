@@ -18,6 +18,7 @@ ZEC_NS
         _FrameBufferPtr = new ubyte [FrameBufferSize];
         _FrameBufferSize = FrameBufferSize;
         _FrameDataSize = 0;
+        _State = eInited;
         return true;
     }
 
@@ -28,6 +29,7 @@ ZEC_NS
         Reset(_FrameBufferSize);
         Reset(_ListenerPtr);
         Reset(_IoContextPtr);
+        _State = eUnspecified;
     }
 
 }

@@ -52,7 +52,8 @@ ZEC_NS
     void xTcpClient::Clean()
     {
         assert(_State != eUnspecified);
-        if (!IsClosed()) {
+        if (_State < eClosing) {
+            assert(_State != eClosing || "Do cleanup during callback is forbidden");
             // explicitly close socket to avoid later callbacks reentrance;
             DoClose();
         }
@@ -113,9 +114,6 @@ ZEC_NS
             if (_WriteDataSize -= TransferedBytes) {
                 DoWrite();
             }
-
-            std::cout << "pushed remained " << _WriteDataSize << " ========================" << std::endl;
-
         });
     }
 

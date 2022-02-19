@@ -50,7 +50,6 @@ ZEC_NS
         ZEC_PRIVATE_MEMBER void DoRead();
         ZEC_PRIVATE_MEMBER void DoWrite();
 
-        ZEC_INLINE bool IsClosed() const { return _State == eClosed; }
         ZEC_INLINE void ErrorClose() { if (_State >= eClosing) return; _ListenerPtr->OnError(this); DoClose(); }
         ZEC_PRIVATE_MEMBER void DoClose(); // cleanup socket, but not the object
 
