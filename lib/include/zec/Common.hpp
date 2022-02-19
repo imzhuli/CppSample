@@ -256,26 +256,20 @@ ZEC_NS
 		{
 		public:
 			ZEC_INLINE xHolder() = default;
-			ZEC_INLINE ~xHolder() { assert(!_Valid); }
+			ZEC_INLINE ~xHolder() = default;
 
 			ZEC_INLINE void Create() {
-				assert(!_Valid);
 				new ((void*)_Dummy) T;
-				_Valid = true;
 			}
 
 			template<typename ... tArgs>
 			ZEC_INLINE T* CreateValue(tArgs && ... Args) {
-				assert(!_Valid);
 				auto ObjectPtr = new ((void*)_Dummy) T(std::forward<tArgs>(Args)...);
-				_Valid = true;
 				return ObjectPtr;
 			}
 
 			ZEC_INLINE void Destroy() {
-				assert(_Valid);
 				Get()->~T();
-				_Valid = false;
 			}
 
 			ZEC_INLINE T * operator->() { return Get(); }
@@ -284,13 +278,11 @@ ZEC_NS
 			ZEC_INLINE T & operator*() { return *Get(); }
 			ZEC_INLINE const T & operator*() const { return *Get(); }
 
-			ZEC_INLINE bool IsValid() const { return _Valid; }
 			ZEC_INLINE T * Get() { return reinterpret_cast<T*>(_Dummy); }
 			ZEC_INLINE const T * Get() const { return reinterpret_cast<const T*>(_Dummy); }
 
 		private:
 			alignas(T) ubyte _Dummy [sizeof(T)];
-			bool _Valid = false;
 		};
 
 		template<typename T>

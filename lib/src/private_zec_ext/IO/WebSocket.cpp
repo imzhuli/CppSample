@@ -68,13 +68,18 @@ ZEC_NS
 
     void xWebSocketClient::DoClose()
     {
-        _State = eClosing;
+        assert(_State == eClosing);
+        NativeWebSocketHolderRef(Native()).Destroy();
         _State = eClosed;
     }
 
     void xWebSocketClient::Clean()
     {
-        NativeTcpSocketHolderRef(Native()).Destroy();
+        if (_State != eClosed) {
+            assert(_State != eClosing || "Do cleanup during callback is forbidden");
+            _State = eClosing;
+            DoClose();
+        }
         delete NativeBuffer(Steal(_FrameBufferPtr));
         Reset(_Hostname);
         Reset(_Target);

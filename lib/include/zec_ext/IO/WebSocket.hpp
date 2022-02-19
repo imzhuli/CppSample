@@ -31,7 +31,7 @@ ZEC_NS
         ZEC_INLINE void * Native() { return (void*)_Dummy; }
         ZEC_API_MEMBER void DoHandshake();
         ZEC_API_MEMBER void DoClose();
-        ZEC_API_MEMBER void ErrorClose() { if (_State >= eClosing) { return; } _ListenerPtr->OnError(this); DoClose(); }
+        ZEC_API_MEMBER void ErrorClose() { if (_State >= eClosing) { return; } _State = eClosing; _ListenerPtr->OnError(this); DoClose(); }
 
     private:
         xIoContext *     _IoContextPtr = nullptr;
@@ -44,7 +44,7 @@ ZEC_NS
             eUnspecified, eInited, eConnected, eClosing, eClosed
         } _State = eUnspecified;
 
-        alignas(max_align_t) ubyte    _Dummy[32];
+        alignas(max_align_t) ubyte    _Dummy[24];
         friend class __detail__::IOUtil;
     };
 

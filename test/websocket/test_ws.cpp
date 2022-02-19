@@ -57,7 +57,7 @@ void test0 ()
     }
 
     xTimer Timer;
-    while(!Timer.TestAndTag(5s)) {
+    while(!Timer.TestAndTag(2s)) {
         IoContext.LoopOnce(100);
     }
 

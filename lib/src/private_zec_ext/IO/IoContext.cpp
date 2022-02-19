@@ -49,7 +49,7 @@ ZEC_NS
     {
         auto & IoContextHolder = NativeIoContextHolderRef(Native());
         IoContextHolder.Create();
-        return IoContextHolder.IsValid();
+        return true;
     }
 
     void xIoContext::Clean()

@@ -19,7 +19,7 @@ ZEC_NS
 
     private:
         ZEC_INLINE void * Native() { return (void*)_Dummy; }
-        alignas(max_align_t) ubyte _Dummy[32];
+        alignas(max_align_t) ubyte _Dummy[24];
         friend class __detail__::IOUtil;
     };
 

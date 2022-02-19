@@ -66,7 +66,7 @@ ZEC_NS
             eUnspecified, eInited, eConnected, eClosing, eClosed
         } _State = eUnspecified;
 
-        alignas(max_align_t) ubyte    _Dummy[64];
+        alignas(max_align_t) ubyte    _Dummy[88];
         friend class __detail__::IOUtil;
     };
 
