@@ -54,12 +54,13 @@ ZEC_NS
         ZEC_INLINE xPacketBuffer * Peek() {
             return _FirstPtr;
         }
-        ZEC_INLINE void RemoveFront() {
+        ZEC_INLINE xPacketBuffer * RemoveFront() {
             assert(_FirstPtr);
             if (!(_FirstPtr = Steal(_FirstPtr->NextBufferPtr))) {
                 _LastPtr = nullptr;
             }
             --TotalBufferCount;
+            return _FirstPtr;
         }
         ZEC_INLINE xPacketBuffer * Pop() {
             if (auto TargetPtr = Peek()) {

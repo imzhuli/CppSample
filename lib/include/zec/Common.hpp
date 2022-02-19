@@ -265,10 +265,11 @@ ZEC_NS
 			}
 
 			template<typename ... tArgs>
-			ZEC_INLINE void CreateValue(tArgs && ... Args) {
+			ZEC_INLINE T* CreateValue(tArgs && ... Args) {
 				assert(!_Valid);
-				new ((void*)_Dummy) T(std::forward<tArgs>(Args)...);
+				auto ObjectPtr = new ((void*)_Dummy) T(std::forward<tArgs>(Args)...);
 				_Valid = true;
+				return ObjectPtr;
 			}
 
 			ZEC_INLINE void Destroy() {

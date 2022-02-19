@@ -50,7 +50,7 @@ ZEC_NS
             Node.Hostname = Hostname;
             _RequestTimeoutList.PushBack(Node);
             auto & NativeHolder = NativeTcpResolverHolderRef(Native());
-            NativeHolder->async_resolve(Hostname, ""sv, [this, Hostname] (error_code error, const xNativeTcpResolver::results_type & results) {
+            NativeHolder->async_resolve(Hostname, ""sv, [this, Hostname] (xAsioError error, const xNativeTcpResolver::results_type & results) {
                 auto Iter = _ResolveMap.find(Hostname);
                 if (Iter == _ResolveMap.end()) { // request timeout
                     return;
