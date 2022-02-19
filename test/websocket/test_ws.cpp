@@ -14,6 +14,9 @@ static uint16_t    ServerPort = 8002;
 static std::string Hostname = "www.baidu.com";
 static std::string Path = "/device";
 
+static std::string TestJson0 = R"({"requestId":0, "head":1004, "body":{ "userName":"101114653296-Kaie1cmC", "passWord":"948f8c8e81d8c5800e40cafdb7481aae" }})";
+static std::string TestJson1 = R"({"requestId":1, "head":1004, "body":{ "userName":"101114653296-EPVvFYLs", "passWord":"76111148810f6fb6efe1f0da9db68c92" }})";
+
 class xWSTest
 : public xWebSocketClient::iListener
 {
@@ -23,11 +26,12 @@ private:
     }
     void OnHandshakeDone(xWebSocketClient * WebSocketClientPtr) {
         cout << "WS Handshake done" << endl;
+        WSClient.PostData(TestJson0);
+        WSClient.PostData(TestJson1);
     }
-    bool OnMessage(xWebSocketClient * WebSocketClientPtr, const void * DataPtr, size_t DataSize) { return false; }
-    void OnPeerClose(xWebSocketClient * WebSocketClientPtr) {
-        cout << "Peer close" << endl;
-    }
+    void OnMessage(xWebSocketClient * WebSocketClientPtr, bool Binary, const void * DataPtr, size_t DataSize) {
+        cout << "ReceiveData(Text=" << YN(!Binary) << "): " << string_view((const char *)DataPtr, DataSize) << endl;
+     }
     void OnError(xWebSocketClient * WebSocketClientPtr) {
         cout << "Error" << endl;// crash here
     }

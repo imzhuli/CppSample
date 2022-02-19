@@ -30,16 +30,19 @@ ZEC_NS
         auto SocketPtr = NativeTcpSocketHolderRef(Native()).CreateValue(*IOUtil::Native(_IoContextPtr));
         SocketPtr->async_connect(MakeAddress(Address, Port), [this](const xAsioError & Error) {
             if (Error) {
-                ErrorClose();
+                if (_State != eShuttingDown) {
+                    _ListenerPtr->OnError(this);
+                    _State = eShuttingDown;
+                }
                 return;
             }
             if (!_ListenerPtr->OnConnected(this)) {
-                DoClose();
+                _State = eShuttingDown;
                 return;
             }
             _State = eConnected;
             if (_WriteDataSize) {
-                DoWrite();
+                DoFlush();
             }
             DoRead();
         });
@@ -49,12 +52,14 @@ ZEC_NS
     void xTcpClient::Clean()
     {
         assert(_State != eUnspecified);
-        if (_State < eClosing) {
-            assert(_State != eClosing || "Do cleanup during callback is forbidden");
-            // explicitly close socket to avoid later callbacks reentrance;
-            DoClose();
-        }
         NativeTcpSocketHolderRef(Native()).Destroy();
+        // clear read buffer:
+        _ReadDataSize = 0;
+        // clear write buffers:
+        while(auto WriteBufferPtr = _WritePacketBufferQueue.Pop()) {
+            DeleteWriteBuffer(WriteBufferPtr);
+        }
+        _WriteDataSize = 0;
         Reset(_IoContextPtr);
         _State = eUnspecified;
     }
@@ -70,14 +75,17 @@ ZEC_NS
                     _ListenerPtr->OnPeerClose(this);
                     return;
                 }
-                ErrorClose();
+                if (_State != eShuttingDown) {
+                    _ListenerPtr->OnError(this);
+                    _State = eShuttingDown;
+                }
                 return;
             }
             _ReadDataSize += TransferedSize;
             assert(_ReadDataSize <= MaxPacketSize);
             size_t ConsumedDataSize = _ListenerPtr->OnReceiveData(this, _ReadBuffer, _ReadDataSize);
             if (InvalidDataSize == ConsumedDataSize) {
-                DoClose();
+                _State = eShuttingDown;
                 return;
             }
             if (ConsumedDataSize && (_ReadDataSize -= ConsumedDataSize)) {
@@ -87,7 +95,7 @@ ZEC_NS
         });
     }
 
-    void xTcpClient::DoWrite()
+    void xTcpClient::DoFlush()
     {
         auto SocketPtr = NativeTcpSocket(Native());
         auto BufferPtr = _WritePacketBufferQueue.Peek();
@@ -96,7 +104,10 @@ ZEC_NS
             assert(BufferPtr == _WritePacketBufferQueue.Peek());
             assert(TransferedBytes <= BufferPtr->DataSize);
             if (Error) {
-                ErrorClose();
+                if (_State != eShuttingDown) {
+                    _ListenerPtr->OnError(this);
+                    _State = eShuttingDown;
+                }
                 return;
             }
             if (auto RemainedDataSize = BufferPtr->DataSize - TransferedBytes) {
@@ -107,7 +118,7 @@ ZEC_NS
                 DeleteWriteBuffer(BufferPtr);
             }
             if (_WriteDataSize -= TransferedBytes) {
-                DoWrite();
+                DoFlush();
             }
         });
     }
@@ -115,46 +126,30 @@ ZEC_NS
     size_t xTcpClient::PostData(const void * DataPtr_, size_t DataSize)
     {
         assert(DataSize);
-        if (_State == eClosed) {
-            return DataSize;
-        }
-        bool ExecWriteCall = (_State == eConnected && !_WriteDataSize);
+        assert(_State != eShuttingDown);
+
+        bool ExecWriteCall = (!_WriteDataSize && _State == eConnected);
         auto DataPtr = (const ubyte *)DataPtr_;
-        auto PostedSize = _WritePacketBufferQueue.Push(DataPtr, DataSize);
-        auto RemainedDataSize = DataSize - PostedSize;
+        auto PostSize = _WritePacketBufferQueue.Push(DataPtr, DataSize);
+        auto RemainedDataSize = DataSize - PostSize;
         while(RemainedDataSize) {
-            DataPtr += PostedSize;
+            DataPtr += PostSize;
             auto BufferPtr = NewWriteBuffer();
             if (!BufferPtr) {
                 if (DataSize == RemainedDataSize) {
-                    return DataSize;
+                    return 0;
                 }
                 break;
             }
-            RemainedDataSize -= (PostedSize = BufferPtr->Push(DataPtr, RemainedDataSize));
             _WritePacketBufferQueue.Push(BufferPtr);
+            RemainedDataSize -= (PostSize = BufferPtr->Push(DataPtr, RemainedDataSize));
         }
-        _WriteDataSize += (DataSize - RemainedDataSize);
+        size_t TotalPostedSize = DataSize - RemainedDataSize;
+        _WriteDataSize += TotalPostedSize;
         if (ExecWriteCall) {
-            DoWrite();
+            DoFlush();
         }
-        return RemainedDataSize;
-    }
-
-    void xTcpClient::DoClose()
-    {
-        _State = eClosing;
-        auto SocketPtr = NativeTcpSocket(Native());
-        xAsioError Error;
-        SocketPtr->close(Error);
-        // clear read buffer:
-        _ReadDataSize = 0;
-        // clear write buffers:
-        while(auto WriteBufferPtr = _WritePacketBufferQueue.Pop()) {
-            DeleteWriteBuffer(WriteBufferPtr);
-        }
-        _WriteDataSize = 0;
-        _State = eClosed;
+        return TotalPostedSize;
     }
 
 }

@@ -48,25 +48,22 @@ ZEC_NS
     private:
         ZEC_INLINE void * Native() { return (void*)_Dummy; }
         ZEC_PRIVATE_MEMBER void DoRead();
-        ZEC_PRIVATE_MEMBER void DoWrite();
-
-        ZEC_INLINE void ErrorClose() { if (_State >= eClosing) return; _ListenerPtr->OnError(this); DoClose(); }
-        ZEC_PRIVATE_MEMBER void DoClose(); // cleanup socket, but not the object
+        ZEC_PRIVATE_MEMBER void DoFlush();
 
     private:
         xIoContext *                  _IoContextPtr {};
         iListener *                   _ListenerPtr = nullptr;
         xPacketBufferQueue            _WritePacketBufferQueue;
+        size_t                        _WriteDataSize = 0;
 
         ubyte                         _ReadBuffer[MaxPacketSize];
         size_t                        _ReadDataSize = 0;
-        size_t                        _WriteDataSize = 0;
 
         enum : uint8_t {
-            eUnspecified, eInited, eConnected, eClosing, eClosed
+            eUnspecified, eInited, eConnected, eShuttingDown
         } _State = eUnspecified;
 
-        alignas(max_align_t) ubyte    _Dummy[88];
+        alignas(max_align_t) ubyte    _Dummy[80];
         friend class __detail__::IOUtil;
     };
 

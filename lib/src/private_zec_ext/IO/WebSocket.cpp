@@ -30,11 +30,11 @@ ZEC_NS
         _ListenerPtr = ListenerPtr;
         _Hostname = Hostname;
         _Target = Target;
-        _FrameBufferPtr = new xBeastDynamicBuffer;
+        _ReadBufferPtr = new xBeastDynamicBuffer;
 
         auto WSPtr = NativeWebSocketHolderRef(Native()).CreateValue(*IOUtil::Native(_IoContextPtr));
         if (!WSPtr) {
-            delete NativeBuffer(Steal(_FrameBufferPtr));
+            delete NativeBuffer(Steal(_ReadBufferPtr));
             Reset(_ListenerPtr);
             Reset(_IoContextPtr);
             return false;
@@ -43,7 +43,10 @@ ZEC_NS
 
         WSPtr->next_layer().async_connect(MakeAddress(Address, Port), [this](const xAsioError & Error) {
             if (Error) {
-                ErrorClose();
+                if (_State != eShuttingDown) {
+                    _ListenerPtr->OnError(this);
+                    _State = eShuttingDown;
+                }
                 return;
             }
             _ListenerPtr->OnConnected(this);
@@ -54,33 +57,98 @@ ZEC_NS
 
     void xWebSocketClient::DoHandshake()
     {
-        cout << "Do handshake" << endl;
         auto WSPtr = NativeWebSocket(Native());
         WSPtr->async_handshake(_Hostname, _Target, [this](const xAsioError & Error) {
             if (Error) {
-                ErrorClose();
+                if (_State != eShuttingDown) {
+                    _ListenerPtr->OnError(this);
+                    _State = eShuttingDown;
+                }
                 return;
             }
             _ListenerPtr->OnHandshakeDone(this);
-            // TODO: start waiting for reading/writing
+            _State = eConnected;
+            if (!_MessageBufferList.IsEmpty()) {
+                DoFlush();
+            }
+            DoRead();
         });
     }
 
-    void xWebSocketClient::DoClose()
+    void xWebSocketClient::DoRead()
     {
-        assert(_State == eClosing);
-        NativeWebSocketHolderRef(Native()).Destroy();
-        _State = eClosed;
+        auto WSPtr = NativeWebSocket(Native());
+        auto ReadBufferPtr = NativeBuffer(_ReadBufferPtr);
+        WSPtr->async_read(*ReadBufferPtr, [this, WSPtr, ReadBufferPtr](const xAsioError & Error, size_t TransferedSize){
+            if (Error) {
+                if (_State != eShuttingDown) {
+                    _ListenerPtr->OnError(this);
+                    _State = eShuttingDown;
+                }
+                return;
+            }
+            std::string Data;
+            auto BufferSeq = ReadBufferPtr->data();
+            for (auto Buffer : BufferSeq) {
+                Data.append((const char *)Buffer.data(), Buffer.size());
+            }
+            _ListenerPtr->OnMessage(this, WSPtr->got_binary(), Data.data(), Data.size());
+            ReadBufferPtr->clear();
+            DoRead();
+        });
+    }
+
+    void xWebSocketClient::DoFlush()
+    {
+        auto WSPtr = NativeWebSocket(Native());
+        auto MessagePtr = _MessageBufferList.Head();
+        if (!MessagePtr) {
+            return;
+        }
+        auto & MessageData = MessagePtr->Data;
+
+        WSPtr->binary(MessagePtr->Binary);
+        WSPtr->async_write(xAsioConstBuffer(MessageData.data(), MessageData.size()), [this, MessagePtr](const xAsioError & Error, size_t TransferedSize) {
+            if (Error) {
+                if (_State != eShuttingDown) {
+                    _ListenerPtr->OnError(this);
+                    _State = eShuttingDown;
+                }
+                return;
+            }
+            cout << "SendData: " << MessagePtr->Data << endl;
+            DeleteMessageBuffer(MessagePtr);
+            if (_MessageBufferList.IsEmpty()) {
+                return;
+            }
+            DoFlush();
+        });
+    }
+
+    bool xWebSocketClient::PostData(const std::string_view & DataView, bool Binary)
+    {
+        assert(_State != eShuttingDown);
+        bool ExecWriteCall = (_MessageBufferList.IsEmpty() && _State == eConnected);
+        auto BufferPtr = NewMessageBuffer();
+        if (!BufferPtr) {
+            return false;
+        }
+        BufferPtr->Data = DataView;
+        BufferPtr->Binary = Binary;
+        _MessageBufferList.AddTail(*BufferPtr);
+        if (ExecWriteCall) {
+            DoFlush();
+        }
+        return true;
     }
 
     void xWebSocketClient::Clean()
     {
-        if (_State != eClosed) {
-            assert(_State != eClosing || "Do cleanup during callback is forbidden");
-            _State = eClosing;
-            DoClose();
+        NativeWebSocketHolderRef(Native()).Destroy();
+        for (auto & MessageBuffer : _MessageBufferList) {
+            DeleteMessageBuffer(&MessageBuffer);
         }
-        delete NativeBuffer(Steal(_FrameBufferPtr));
+        delete NativeBuffer(Steal(_ReadBufferPtr));
         Reset(_Hostname);
         Reset(_Target);
         Reset(_ListenerPtr);
