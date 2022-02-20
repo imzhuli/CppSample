@@ -77,6 +77,7 @@ ZEC_NS
                         _ListenerPtr->OnResolve(Node.Hostname, Node.Address, Context, false);
                     }
                     _CacheTimeoutList.PushBack(Node);
+                    Node.RequestContexts.clear();
                 } else {
                     /* Node.Address.Type = xNetAddress::eUnknown; */
                     for (const auto & Context : Node.RequestContexts) {
