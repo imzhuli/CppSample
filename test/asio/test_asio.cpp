@@ -121,8 +121,8 @@ void test0 ()
     Resolver.Request(TestHostname, { .I = 1 });
     xTimer Timer;
     while(!Timer.TestAndTag(4s)) {
-        IoContext.LoopOnce(100);
         Resolver.ClearTimeoutRequest();
+        IoContext.LoopOnce(100);
     }
     Resolver.ClearTimeoutCacheNode();
     Resolver.Request("www.baidu.com", { .I = 100 });
