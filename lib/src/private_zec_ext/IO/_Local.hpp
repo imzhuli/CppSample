@@ -23,25 +23,17 @@ using xBeastDynamicBuffer = boost::beast::multi_buffer;
 
 ZEC_NS
 {
-    using xNativeIoContext = asio::io_context;
-    using xNativeIoContextHolder = xHolder<xNativeIoContext>;
-    ZEC_STATIC_INLINE xNativeIoContextHolder & NativeIoContextHolderRef(void * NativePtr) { return *static_cast<xNativeIoContextHolder*>(NativePtr); }
 
+    using xNativeIoContext = asio::io_context;
     using xNativeTcpResolver = tcp::resolver;
+    using xNativeTcpSocket = tcp::socket;
+    using xNativeWebSocket = websocket::stream<tcp::socket>;
+
     using xNativeTcpResolverHolder = xHolder<xNativeTcpResolver>;
     ZEC_STATIC_INLINE xNativeTcpResolverHolder & NativeTcpResolverHolderRef(void * NativePtr) { return *static_cast<xNativeTcpResolverHolder*>(NativePtr); }
 
-    using xNativeTcpSocket = tcp::socket;
-    using xNativeTcpSocketHolder = xHolder<xNativeTcpSocket>;
-    ZEC_STATIC_INLINE xNativeTcpSocket * NativeTcpSocket(void * NativePtr) { return static_cast<xNativeTcpSocketHolder*>(NativePtr)->Get(); }
-    ZEC_STATIC_INLINE xNativeTcpSocketHolder & NativeTcpSocketHolderRef(void * NativePtr) { return *static_cast<xNativeTcpSocketHolder*>(NativePtr); }
-
-    using xNativeWebSocket = websocket::stream<tcp::socket>;
-    using xNativeWebSocketHolder = xHolder<xNativeWebSocket>;
-    ZEC_STATIC_INLINE xNativeWebSocket * NativeWebSocket(void * NativePtr) { return static_cast<xNativeWebSocketHolder*>(NativePtr)->Get(); }
-    ZEC_STATIC_INLINE xNativeWebSocketHolder & NativeWebSocketHolderRef(void * NativePtr) { return *static_cast<xNativeWebSocketHolder*>(NativePtr); }
-
-    ZEC_STATIC_INLINE tcp::endpoint MakeAddress(const xNetAddress & Address, uint16_t Port) {
+    using xTcpEndpoint = tcp::endpoint;
+    ZEC_STATIC_INLINE xTcpEndpoint MakeEndpoint(const xNetAddress & Address, uint16_t Port) {
         if (Address.IsV4()) {
             static_assert(std::tuple_size<ip::address_v4::bytes_type>() == 4);
             ip::address_v4::bytes_type Bytes;
@@ -59,31 +51,8 @@ ZEC_NS
     namespace __detail__ {
         class IOUtil {
         public:
-            ZEC_STATIC_INLINE xNativeIoContext *    Native(xIoContext * IoContextPtr)  { return NativeIoContextHolderRef(IoContextPtr->Native()).Get(); }
+            ZEC_STATIC_INLINE xNativeIoContext *    Native(xIoContext * IoContextPtr)  { return &IoContextPtr->Native().As<xNativeIoContext>(); }
             ZEC_STATIC_INLINE xNativeTcpResolver *  Native(xTcpResolver * ResolverPtr)  { return NativeTcpResolverHolderRef(ResolverPtr->Native()).Get(); }
-            ZEC_STATIC_INLINE xNativeTcpSocket *    Native(xTcpClient * TcpClientPtr)  { return NativeTcpSocketHolderRef(TcpClientPtr->Native()).Get(); }
-            ZEC_STATIC_INLINE xNativeWebSocket *    Native(xWebSocketClient * WebSocketClientPtr)  { return NativeWebSocketHolderRef(WebSocketClientPtr->Native()).Get(); }
-
-        private:
-            static constexpr const size_t NativeIoContextHolderSize = sizeof(xNativeIoContextHolder);
-            static_assert(sizeof(xIoContext::_Dummy) >= sizeof(xNativeIoContextHolder));
-            static_assert(alignof(xIoContext::_Dummy) >= alignof(xNativeIoContextHolder));
-            static_assert(!(alignof(xIoContext::_Dummy) % alignof(xNativeIoContextHolder)));
-
-            static constexpr const size_t NativeTcpResolverHolderSize = sizeof(xNativeTcpResolverHolder);
-            static_assert(sizeof(xTcpResolver::_Dummy) >= sizeof(xNativeTcpResolverHolder));
-            static_assert(alignof(xTcpResolver::_Dummy) >= alignof(xNativeTcpResolverHolder));
-            static_assert(!(alignof(xTcpResolver::_Dummy) % alignof(xNativeTcpResolverHolder)));
-
-            static constexpr const size_t NativeTcpSocketHolderSize = sizeof(xNativeTcpSocketHolder);
-            static_assert(sizeof(xTcpClient::_Dummy) >= sizeof(xNativeTcpSocketHolder));
-            static_assert(alignof(xTcpClient::_Dummy) >= alignof(xNativeTcpSocketHolder));
-            static_assert(!(alignof(xTcpClient::_Dummy) % alignof(xNativeTcpSocketHolder)));
-
-            static constexpr const size_t NativeWebSocketHolderSize = sizeof(xNativeWebSocketHolder);
-            static_assert(sizeof(xWebSocketClient::_Dummy) >= sizeof(xNativeWebSocketHolder));
-            static_assert(alignof(xWebSocketClient::_Dummy) >= alignof(xNativeWebSocketHolder));
-            static_assert(!(alignof(xWebSocketClient::_Dummy) % alignof(xNativeWebSocketHolder)));
         };
     }
     using IOUtil = __detail__::IOUtil;

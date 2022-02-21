@@ -2,6 +2,7 @@
 #include <zec/Common.hpp>
 #include <zec/List.hpp>
 #include <string>
+#include <memory>
 #include "./IoContext.hpp"
 
 ZEC_NS
@@ -11,59 +12,51 @@ ZEC_NS
         class IOUtil;
     }
 
-    class xWebSocketClient
+    class xWebSocketSession
     : xNonCopyable
     {
     public:
         struct iListener
         {
-            virtual void OnConnected(xWebSocketClient * WebSocketClientPtr) {}
-            virtual void OnHandshakeDone(xWebSocketClient * WebSocketClientPtr) {}
-            virtual void OnMessage(xWebSocketClient * WebSocketClientPtr, bool Binary, const void * DataPtr, size_t DataSize) {}
-            virtual void OnError(xWebSocketClient * WebSocketClientPtr) {}
+            virtual void OnHandshakeDone(xWebSocketSession * WebSocketClientPtr) {}
+            virtual void OnMessage(xWebSocketSession * WebSocketClientPtr, bool Binary, const void * DataPtr, size_t DataSize) {}
+            virtual void OnError(xWebSocketSession * WebSocketClientPtr) {}
         };
 
-        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * IpStr, uint64_t Port, const std::string & Hostname, const std::string &Target, iListener * ListenerPtr);
-        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port, const std::string & Hostname, const std::string &Target, iListener * ListenerPtr);
-        ZEC_API_MEMBER void Clean();
+    public:
+        xWebSocketSession();
+        ~xWebSocketSession();
 
-        ZEC_INLINE     bool PostData(const void * DataPtr, size_t DataSize, bool Binary = false) { return PostData({ (const char *)DataPtr, DataSize }, Binary); }
-        ZEC_API_MEMBER bool PostData(const std::string_view & DataView, bool Binary = false);
+        bool Init(xIoContext * IoContextPtr, const char * IpStr, uint64_t Port, const std::string & Origin, const std::string &Target, iListener * ListenerPtr);
+        void Clean();
 
-    private:
-        struct xMessageBuffer : xListNode
-        {
+        bool PostTextData(const std::string_view & Data);
+        bool PostBinaryData(const void * DataPtr, size_t DataSize);
+
+    protected:
+        struct xMessageBuffer : xListNode {
             std::string Data;
             bool        Binary = false;
         };
         using xMessageBufferList = xList<xMessageBuffer>;
 
-    protected:
-        ZEC_API_MEMBER virtual xMessageBuffer * NewMessageBuffer() { return new (std::nothrow) xMessageBuffer(); }
-        ZEC_API_MEMBER virtual void DeleteMessageBuffer(xMessageBuffer * BufferPtr) { delete BufferPtr; }
+        bool OnError(const void * CallbackObjectPtr); // return value : processed
+        void OnConnected(const void * CallbackObjectPtr);
+        void OnHandshakeDone(const void * CallbackObjectPtr);
+        bool DoPostMessage(xMessageBuffer * MessagePtr);
+        void DoRead();
+        void DoFlush();
 
     private:
-        ZEC_INLINE void * Native() { return (void*)_Dummy; }
-        ZEC_API_MEMBER void DoHandshake();
-        ZEC_API_MEMBER void DoRead();
-        ZEC_API_MEMBER void DoFlush();
+        xDummy<16>   _Native; // active websocket object
+        iListener*   _Listener;
+        std::string  _Origin;
+        std::string  _Path;
+        bool         _Connected = false;
+        bool         _Error = false;
 
-    private:
-        xIoContext *           _IoContextPtr = nullptr;
-        iListener *            _ListenerPtr = nullptr;
-
-        std::string            _Hostname;
-        std::string            _Target;
-
-        void *                 _ReadBufferPtr = nullptr;
-        xMessageBufferList       _MessageBufferList;
-
-        enum : uint8_t {
-            eUnspecified, eInited, eConnected, eShuttingDown
-        } _State = eUnspecified;
-
-        alignas(max_align_t) ubyte    _Dummy[16];
-        friend class __detail__::IOUtil;
+        xDummy<16>           _ReadBuffer; // active websocket object
+        xMessageBufferList   _MessageBufferList;
     };
 
 }

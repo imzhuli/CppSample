@@ -18,25 +18,25 @@ static std::string TestJson0 = R"({"requestId":0, "head":1004, "body":{ "userNam
 static std::string TestJson1 = R"({"requestId":1, "head":1004, "body":{ "userName":"101114653296-EPVvFYLs", "passWord":"76111148810f6fb6efe1f0da9db68c92" }})";
 
 class xWSTest
-: public xWebSocketClient::iListener
+: public xWebSocketSession::iListener
 {
 private:
-    void OnConnected(xWebSocketClient * WebSocketClientPtr) {
+    void OnConnected(xWebSocketSession * WebSocketClientPtr) {
         cout << "WS Connected" << endl;
     }
-    void OnHandshakeDone(xWebSocketClient * WebSocketClientPtr) {
+    void OnHandshakeDone(xWebSocketSession * WebSocketClientPtr) {
         cout << "WS Handshake done" << endl;
-        WSClient.PostData(TestJson0);
-        WSClient.PostData(TestJson1);
+        WSClient.PostTextData(TestJson0);
+        WSClient.PostTextData(TestJson1);
     }
-    void OnMessage(xWebSocketClient * WebSocketClientPtr, bool Binary, const void * DataPtr, size_t DataSize) {
+    void OnMessage(xWebSocketSession * WebSocketClientPtr, bool Binary, const void * DataPtr, size_t DataSize) {
         cout << "ReceiveData(Text=" << YN(!Binary) << "): " << string_view((const char *)DataPtr, DataSize) << endl;
      }
-    void OnError(xWebSocketClient * WebSocketClientPtr) {
+    void OnError(xWebSocketSession * WebSocketClientPtr) {
         cout << "Error" << endl;// crash here
     }
 
-    xWebSocketClient WSClient;
+    xWebSocketSession WSClient;
 
 public:
     bool Init() {
@@ -53,6 +53,8 @@ void test0 ()
 {
     xWSTest                Tester;
     xWSTest                Tester1;
+    xWSTest                Tester2;
+    xWSTest                Tester3;
 
     if (!IoContext.Init()) {
         throw "Failed to init io context";
@@ -63,14 +65,23 @@ void test0 ()
     if (!Tester1.Init()) {
         throw "Failed to init test object";
     }
+    if (!Tester2.Init()) {
+        throw "Failed to init test object";
+    }
+    if (!Tester3.Init()) {
+        throw "Failed to init test object";
+    }
 
     Tester1.Clean();
     Tester1.Init();
 
-    while(true) {
+    xTimer Timeup;
+    while(!Timeup.TestAndTag(5s)) {
         IoContext.LoopOnce(100);
     }
 
+    Tester3.Clean();
+    Tester2.Clean();
     Tester1.Clean();
     Tester.Clean();
 

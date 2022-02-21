@@ -7,6 +7,8 @@ ZEC_NS
 
     namespace __detail__ {
         class IOUtil;
+
+        static constexpr const size_t ResolverDummySize = 72;
     }
 
     class xIoContext
@@ -16,10 +18,11 @@ ZEC_NS
         ZEC_API_MEMBER bool Init();
         ZEC_API_MEMBER void Clean();
         ZEC_API_MEMBER void LoopOnce(int TimeoutMS);
+        ZEC_API_MEMBER auto & Native() { return _Native; }
+        ZEC_API_MEMBER auto & Native() const { return _Native; }
 
     private:
-        ZEC_INLINE void * Native() { return (void*)_Dummy; }
-        alignas(max_align_t) ubyte _Dummy[16];
+        xDummy<16> _Native;
         friend class __detail__::IOUtil;
     };
 

@@ -47,21 +47,18 @@ ZEC_NS
 
     bool xIoContext::Init()
     {
-        auto & IoContextHolder = NativeIoContextHolderRef(Native());
-        IoContextHolder.Create();
+        _Native.CreateAs<xNativeIoContext>();
         return true;
     }
 
     void xIoContext::Clean()
     {
-        auto & IoContextHolder = NativeIoContextHolderRef(Native());
-        IoContextHolder.Destroy();
+        _Native.DestroyAs<xNativeIoContext>();
     }
 
     void xIoContext::LoopOnce(int TimeoutMS)
     {
-        auto & IoContextHolder = NativeIoContextHolderRef(Native());
-        IoContextHolder->run_for(std::chrono::microseconds(TimeoutMS));
+        _Native.As<xNativeIoContext>().run_for(std::chrono::microseconds(TimeoutMS));
     }
 
     xNetAddress xNetAddress::Make(const char * IpStr)

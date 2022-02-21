@@ -1,6 +1,7 @@
 #include <zec_ext/IO/WebSocket.hpp>
 #include <array>
 #include <iostream>
+#include <memory>
 #include "./_Local.hpp"
 
 using namespace std;
@@ -8,83 +9,105 @@ using namespace std;
 ZEC_NS
 {
 
-    static inline xBeastDynamicBuffer * NativeBuffer(void * BufferPtr) { return (xBeastDynamicBuffer*)BufferPtr; }
+    using xWsPtr = std::shared_ptr<xNativeWebSocket>;
+    using xWSReadBufferPtr = std::shared_ptr<xBeastDynamicBuffer>;
 
-    bool xWebSocketClient::Init(xIoContext * IoContextPtr, const char * IpStr, uint64_t Port, const std::string & Hostname, const std::string &Target, iListener * ListenerPtr)
+    xWebSocketSession::xWebSocketSession()
     {
-        xNetAddress Address = xNetAddress::Make(IpStr);
-        return Init(IoContextPtr, Address, Port, Hostname, Target, ListenerPtr);
+        _ReadBuffer.CreateAs<xWSReadBufferPtr>();
+        _Native.CreateAs<xWsPtr>();
+    }
+    xWebSocketSession::~xWebSocketSession()
+    {
+        Clean();
+        _Native.DestroyAs<xWsPtr>();
+        _ReadBuffer.DestroyAs<xWSReadBufferPtr>();
     }
 
-    bool xWebSocketClient::Init(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port, const std::string & Hostname, const std::string &Target, iListener * ListenerPtr)
+    bool xWebSocketSession::Init(xIoContext * IoContextPtr, const char * IpStr, uint64_t Port, const std::string & Hostname, const std::string &Target, iListener * ListenerPtr)
     {
-        assert(IoContextPtr);
-        assert(ListenerPtr);
-        assert(Address);
-        assert(Port);
+        _Origin = Hostname;
+        _Path = Target;
+        _Listener = ListenerPtr;
+        _ReadBuffer.As<xWSReadBufferPtr>() = std::make_shared<xBeastDynamicBuffer>();
 
-        assert(!_IoContextPtr);
-        assert(!_ListenerPtr);
-
-        _IoContextPtr = IoContextPtr;
-        _ListenerPtr = ListenerPtr;
-        _Hostname = Hostname;
-        _Target = Target;
-        _ReadBufferPtr = new xBeastDynamicBuffer;
-
-        auto WSPtr = NativeWebSocketHolderRef(Native()).CreateValue(*IOUtil::Native(_IoContextPtr));
-        if (!WSPtr) {
-            delete NativeBuffer(Steal(_ReadBufferPtr));
-            Reset(_ListenerPtr);
-            Reset(_IoContextPtr);
-            return false;
-        }
-        _State = eInited;
-
-        WSPtr->next_layer().async_connect(MakeAddress(Address, Port), [this](const xAsioError & Error) {
+        auto & WS = _Native.As<xWsPtr>();
+        WS = std::make_shared<xNativeWebSocket>(*IOUtil::Native(IoContextPtr));
+        WS->next_layer().async_connect(ip::tcp::endpoint(ip::make_address(IpStr), Port), [this, Retainer=WS](xAsioError Error) mutable {
             if (Error) {
-                if (_State != eShuttingDown) {
-                    _ListenerPtr->OnError(this);
-                    _State = eShuttingDown;
-                }
+                cerr << "WS Connect Error" << endl;
+                OnError(Retainer.get());
                 return;
             }
-            _ListenerPtr->OnConnected(this);
-            DoHandshake();
+            OnConnected(Retainer.get());
         });
         return true;
     }
 
-    void xWebSocketClient::DoHandshake()
+    void xWebSocketSession::Clean()
     {
-        auto WSPtr = NativeWebSocket(Native());
-        WSPtr->async_handshake(_Hostname, _Target, [this](const xAsioError & Error) {
+        auto & WS = _Native.As<xWsPtr>();
+        if (WS) {
+            WS->next_layer().close(X2Ref(xAsioError{}));
+            WS.reset();
+        }
+        _ReadBuffer.As<xWSReadBufferPtr>().reset();
+        for(auto & Message : _MessageBufferList) {
+            delete &Message;
+        }
+        _Connected = false;
+        _Error = false;
+    }
+
+    bool xWebSocketSession::OnError(const void * CallbackObjectPtr)
+    {
+        auto & WS = _Native.As<xWsPtr>();
+        if (WS.get() != CallbackObjectPtr) {
+            cerr << "OnError: Callback from abandoned object" << endl;
+            return false;
+        }
+        if (!Steal(_Error, true)) {
+            _Connected = false;
+            _Listener->OnError(this);
+        }
+        return true;
+    }
+
+    void xWebSocketSession::OnConnected(const void * CallbackObjectPtr) {
+        auto & WS = _Native.As<xWsPtr>();
+        if (WS.get() != CallbackObjectPtr) {
+            cerr << "OnConnected: Callback from abandoned object" << endl;
+            return;
+        }
+        WS->async_handshake(_Origin, _Path, [this, Retainer=WS] (const xAsioError & Error) mutable {
             if (Error) {
-                if (_State != eShuttingDown) {
-                    _ListenerPtr->OnError(this);
-                    _State = eShuttingDown;
-                }
+                cerr << "Handshake Error" << endl;
+                OnError(Retainer.get());
                 return;
             }
-            _ListenerPtr->OnHandshakeDone(this);
-            _State = eConnected;
-            if (!_MessageBufferList.IsEmpty()) {
-                DoFlush();
-            }
-            DoRead();
+            OnHandshakeDone(Retainer.get());
         });
     }
 
-    void xWebSocketClient::DoRead()
+    void xWebSocketSession::OnHandshakeDone(const void * CallbackObjectPtr) {
+        auto & WS = _Native.As<xWsPtr>();
+        if (WS.get() != CallbackObjectPtr) {
+            cerr << "OnConnected: Callback from abandoned object" << endl;
+            return;
+        }
+        _Connected = true;
+        _Listener->OnHandshakeDone(this);
+        DoRead();
+    }
+
+    void xWebSocketSession::DoRead()
     {
-        auto WSPtr = NativeWebSocket(Native());
-        auto ReadBufferPtr = NativeBuffer(_ReadBufferPtr);
-        WSPtr->async_read(*ReadBufferPtr, [this, WSPtr, ReadBufferPtr](const xAsioError & Error, size_t TransferedSize){
+        auto & WS = _Native.As<xWsPtr>();
+        auto & RB = _ReadBuffer.As<xWSReadBufferPtr>();
+        WS->async_read(*RB, [this, ReadBufferPtr = RB, Retainer=WS](const xAsioError & Error, size_t TransferedSize){
             if (Error) {
-                if (_State != eShuttingDown) {
-                    _ListenerPtr->OnError(this);
-                    _State = eShuttingDown;
-                }
+                cerr << "WS Read Error" << endl;
+                OnError(Retainer.get());
                 return;
             }
             std::string Data;
@@ -92,71 +115,59 @@ ZEC_NS
             for (auto Buffer : BufferSeq) {
                 Data.append((const char *)Buffer.data(), Buffer.size());
             }
-            _ListenerPtr->OnMessage(this, WSPtr->got_binary(), Data.data(), Data.size());
+            _Listener->OnMessage(this, Retainer->got_binary(), Data.data(), Data.size());
             ReadBufferPtr->clear();
             DoRead();
         });
     }
 
-    void xWebSocketClient::DoFlush()
+    void xWebSocketSession::DoFlush()
     {
-        auto WSPtr = NativeWebSocket(Native());
         auto MessagePtr = _MessageBufferList.Head();
         if (!MessagePtr) {
             return;
         }
         auto & MessageData = MessagePtr->Data;
 
-        WSPtr->binary(MessagePtr->Binary);
-        WSPtr->async_write(xAsioConstBuffer(MessageData.data(), MessageData.size()), [this, MessagePtr](const xAsioError & Error, size_t TransferedSize) {
-            if (Error) {
-                if (_State != eShuttingDown) {
-                    _ListenerPtr->OnError(this);
-                    _State = eShuttingDown;
+        auto & WS = _Native.As<xWsPtr>();
+        WS->binary(MessagePtr->Binary);
+        WS->async_write(xAsioConstBuffer(MessageData.data(), MessageData.size()), [this, Retainer=WS, MessagePtr](const xAsioError & Error, size_t TransferedSize) {
+            do {
+                auto MessageCleaner = xScopeGuard{ [MessagePtr] { delete MessagePtr; } };
+                if (Error) {
+                    cerr << "WS Flush Error" << endl;
+                    OnError(Retainer.get());
+                    return;
                 }
-                return;
-            }
-            cout << "SendData: " << MessagePtr->Data << endl;
-            DeleteMessageBuffer(MessagePtr);
-            if (_MessageBufferList.IsEmpty()) {
-                return;
-            }
+                cout << "SendData: " << MessagePtr->Data << endl;
+            } while(false);
             DoFlush();
         });
     }
 
-    bool xWebSocketClient::PostData(const std::string_view & DataView, bool Binary)
+    bool xWebSocketSession::PostTextData(const std::string_view & Data)
     {
-        assert(_State != eShuttingDown);
-        bool ExecWriteCall = (_MessageBufferList.IsEmpty() && _State == eConnected);
-        auto BufferPtr = NewMessageBuffer();
-        if (!BufferPtr) {
-            return false;
-        }
-        BufferPtr->Data = DataView;
-        BufferPtr->Binary = Binary;
-        _MessageBufferList.AddTail(*BufferPtr);
+        xMessageBuffer * BufferPtr = new xMessageBuffer;
+        BufferPtr->Data = Data;
+        return DoPostMessage(BufferPtr);
+    }
+
+    bool xWebSocketSession::PostBinaryData(const void * DataPtr, size_t DataSize)
+    {
+        xMessageBuffer * BufferPtr = new xMessageBuffer;
+        BufferPtr->Binary = true;
+        BufferPtr->Data = std::string((const char *)DataPtr,  DataSize);
+        return DoPostMessage(BufferPtr);
+    }
+
+    bool xWebSocketSession::DoPostMessage(xMessageBuffer * MessagePtr)
+    {
+        bool ExecWriteCall = (_MessageBufferList.IsEmpty() && _Connected);
+        _MessageBufferList.AddTail(*MessagePtr);
         if (ExecWriteCall) {
             DoFlush();
         }
         return true;
-    }
-
-    void xWebSocketClient::Clean()
-    {
-        auto WSPtr = NativeWebSocket(Native());
-        WSPtr->next_layer().close();
-
-        NativeWebSocketHolderRef(Native()).Destroy();
-        for (auto & MessageBuffer : _MessageBufferList) {
-            DeleteMessageBuffer(&MessageBuffer);
-        }
-        delete NativeBuffer(Steal(_ReadBufferPtr));
-        Reset(_Hostname);
-        Reset(_Target);
-        Reset(_ListenerPtr);
-        Reset(_IoContextPtr);
-        _State = eUnspecified;
     }
 
 }

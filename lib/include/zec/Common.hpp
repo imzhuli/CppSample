@@ -250,6 +250,46 @@ ZEC_NS
 			T _OriginalValue;
 		};
 
+		template<size_t TargetSize, size_t Alignment = alignof(std::max_align_t)>
+		class xDummy final
+		: xNonCopyable
+		{
+		public:
+			template<typename T>
+			ZEC_INLINE void CreateAs() {
+				static_assert(alignof(_PlaceHolder) >= alignof(T));
+				static_assert(sizeof(_PlaceHolder) >= sizeof(T));
+				new ((void*)_PlaceHolder) T;
+			}
+
+			template<typename T, typename ... tArgs>
+			ZEC_INLINE T& CreateValueAs(tArgs && ... Args) {
+				static_assert(alignof(_PlaceHolder) >= alignof(T));
+				static_assert(sizeof(_PlaceHolder) >= sizeof(T));
+				return *(new ((void*)_PlaceHolder) T(std::forward<tArgs>(Args)...));
+			}
+
+			template<typename T>
+			ZEC_INLINE void DestroyAs() {
+				static_assert(alignof(_PlaceHolder) >= alignof(T));
+				static_assert(sizeof(_PlaceHolder) >= sizeof(T));
+				reinterpret_cast<T*>(_PlaceHolder)->~T();
+			}
+
+			template<typename T>
+			ZEC_INLINE T & As() {
+				static_assert(alignof(_PlaceHolder) >= alignof(T));
+				static_assert(sizeof(_PlaceHolder) >= sizeof(T));
+				return reinterpret_cast<T&>(_PlaceHolder);
+			}
+
+			static constexpr const size_t Size = TargetSize;
+
+		private:
+			alignas(Alignment) ubyte _PlaceHolder[TargetSize];
+		};
+
+
 		template<typename T>
 		class xHolder final
 		: xNonCopyable
@@ -259,12 +299,12 @@ ZEC_NS
 			ZEC_INLINE ~xHolder() = default;
 
 			ZEC_INLINE void Create() {
-				new ((void*)_Dummy) T;
+				new ((void*)_PlaceHolder) T;
 			}
 
 			template<typename ... tArgs>
 			ZEC_INLINE T* CreateValue(tArgs && ... Args) {
-				auto ObjectPtr = new ((void*)_Dummy) T(std::forward<tArgs>(Args)...);
+				auto ObjectPtr = new ((void*)_PlaceHolder) T(std::forward<tArgs>(Args)...);
 				return ObjectPtr;
 			}
 
@@ -278,11 +318,11 @@ ZEC_NS
 			ZEC_INLINE T & operator*() { return *Get(); }
 			ZEC_INLINE const T & operator*() const { return *Get(); }
 
-			ZEC_INLINE T * Get() { return reinterpret_cast<T*>(_Dummy); }
-			ZEC_INLINE const T * Get() const { return reinterpret_cast<const T*>(_Dummy); }
+			ZEC_INLINE T * Get() { return reinterpret_cast<T*>(_PlaceHolder); }
+			ZEC_INLINE const T * Get() const { return reinterpret_cast<const T*>(_PlaceHolder); }
 
 		private:
-			alignas(T) ubyte _Dummy [sizeof(T)];
+			alignas(T) ubyte _PlaceHolder [sizeof(T)];
 		};
 
 		template<typename T>
