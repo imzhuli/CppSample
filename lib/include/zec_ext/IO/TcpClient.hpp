@@ -16,19 +16,18 @@ ZEC_NS
     : xNonCopyable
     {
     public:
-        static constexpr const size_t InvalidDataSize = static_cast<size_t>(-1);
         struct iListener
         {
             // callback on connected, normally this is not needed to be handled
-            virtual bool   OnConnected(xTcpClient * TcpClientPtr)  { return true; }
+            virtual void   OnConnected(xTcpClient * TcpClientPtr)  { }
             /***
              * OnReceivedData:
              * called when there is some data in,
              * @return consumed bytes, if return value equeals -1, something wrong happened, auto closing is involved
              * */
-            virtual size_t OnReceiveData(xTcpClient * TcpClientPtr, const void * DataPtr, size_t DataSize) { return -1; }
-            virtual void   OnPeerClose(xTcpClient * TcpClientPtr)  {}
-            virtual void   OnError(xTcpClient * TcpClientPtr) {}
+            virtual size_t  OnReceiveData(xTcpClient * TcpClientPtr, const void * DataPtr, size_t DataSize) { return 0; }
+            virtual void    OnPeerClose(xTcpClient * TcpClientPtr)  {}
+            virtual void    OnError(xTcpClient * TcpClientPtr) {}
         };
 
     public:
@@ -46,12 +45,11 @@ ZEC_NS
         ZEC_API_MEMBER virtual void DeleteWriteBuffer(xPacketBuffer * BufferPtr) { delete BufferPtr; }
 
     private:
-        ZEC_INLINE void * Native() { return (void*)_Dummy; }
+        ZEC_PRIVATE_MEMBER void OnError();
         ZEC_PRIVATE_MEMBER void DoRead();
         ZEC_PRIVATE_MEMBER void DoFlush();
 
     private:
-        xIoContext *                  _IoContextPtr {};
         iListener *                   _ListenerPtr = nullptr;
         xPacketBufferQueue            _WritePacketBufferQueue;
         size_t                        _WriteDataSize = 0;
@@ -59,11 +57,10 @@ ZEC_NS
         ubyte                         _ReadBuffer[MaxPacketSize];
         size_t                        _ReadDataSize = 0;
 
-        enum : uint8_t {
-            eUnspecified, eInited, eConnected, eShuttingDown
-        } _State = eUnspecified;
+        xDummy<80>                    _Native;
+        bool                          _Connected = false;
+        bool                          _Error = false;
 
-        alignas(max_align_t) ubyte    _Dummy[80];
         friend class __detail__::IOUtil;
     };
 

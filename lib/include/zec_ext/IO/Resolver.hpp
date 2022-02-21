@@ -52,7 +52,7 @@ ZEC_NS
         xTimeoutList                                _CacheTimeoutList;
         std::map<std::string, xResolveNode>         _ResolveMap;
 
-        alignas(max_align_t) ubyte                  _Dummy[__detail__::ResolverDummySize];
+        alignas(max_align_t) ubyte                  _Dummy[72];
         friend class __detail__::IOUtil;
     };
 

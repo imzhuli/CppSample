@@ -24,14 +24,14 @@ ZEC_NS
         };
 
     public:
-        xWebSocketSession();
-        ~xWebSocketSession();
+        ZEC_PRIVATE_MEMBER xWebSocketSession();
+        ZEC_PRIVATE_MEMBER ~xWebSocketSession();
 
-        bool Init(xIoContext * IoContextPtr, const char * IpStr, uint64_t Port, const std::string & Origin, const std::string &Target, iListener * ListenerPtr);
-        void Clean();
+        ZEC_PRIVATE_MEMBER bool Init(xIoContext * IoContextPtr, const char * IpStr, uint64_t Port, const std::string & Origin, const std::string &Target, iListener * ListenerPtr);
+        ZEC_PRIVATE_MEMBER void Clean();
 
-        bool PostTextData(const std::string_view & Data);
-        bool PostBinaryData(const void * DataPtr, size_t DataSize);
+        ZEC_PRIVATE_MEMBER bool PostTextData(const std::string_view & Data);
+        ZEC_PRIVATE_MEMBER bool PostBinaryData(const void * DataPtr, size_t DataSize);
 
     protected:
         struct xMessageBuffer : xListNode {
@@ -40,12 +40,12 @@ ZEC_NS
         };
         using xMessageBufferList = xList<xMessageBuffer>;
 
-        bool OnError(const void * CallbackObjectPtr); // return value : processed
-        void OnConnected(const void * CallbackObjectPtr);
-        void OnHandshakeDone(const void * CallbackObjectPtr);
-        bool DoPostMessage(xMessageBuffer * MessagePtr);
-        void DoRead();
-        void DoFlush();
+        ZEC_PRIVATE_MEMBER bool OnError(const void * CallbackObjectPtr); // return value : processed
+        ZEC_PRIVATE_MEMBER void OnConnected(const void * CallbackObjectPtr);
+        ZEC_PRIVATE_MEMBER void OnHandshakeDone(const void * CallbackObjectPtr);
+        ZEC_PRIVATE_MEMBER bool DoPostMessage(xMessageBuffer * MessagePtr);
+        ZEC_PRIVATE_MEMBER void DoRead();
+        ZEC_PRIVATE_MEMBER void DoFlush();
 
     private:
         xDummy<16>   _Native; // active websocket object

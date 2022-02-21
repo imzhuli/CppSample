@@ -7,8 +7,6 @@ ZEC_NS
 
     namespace __detail__ {
         class IOUtil;
-
-        static constexpr const size_t ResolverDummySize = 72;
     }
 
     class xIoContext

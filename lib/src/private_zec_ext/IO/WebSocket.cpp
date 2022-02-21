@@ -35,7 +35,7 @@ ZEC_NS
         WS = std::make_shared<xNativeWebSocket>(*IOUtil::Native(IoContextPtr));
         WS->next_layer().async_connect(ip::tcp::endpoint(ip::make_address(IpStr), Port), [this, Retainer=WS](xAsioError Error) mutable {
             if (Error) {
-                cerr << "WS Connect Error" << endl;
+                // cerr << "WS Connect Error" << endl;
                 OnError(Retainer.get());
                 return;
             }
@@ -63,10 +63,11 @@ ZEC_NS
     {
         auto & WS = _Native.As<xWsPtr>();
         if (WS.get() != CallbackObjectPtr) {
-            cerr << "OnError: Callback from abandoned object" << endl;
+            // cerr << "OnError: Callback from abandoned object" << endl;
             return false;
         }
-        if (!Steal(_Error, true)) {
+        if (_Error) {
+            _Error = true;
             _Connected = false;
             _Listener->OnError(this);
         }
@@ -76,12 +77,12 @@ ZEC_NS
     void xWebSocketSession::OnConnected(const void * CallbackObjectPtr) {
         auto & WS = _Native.As<xWsPtr>();
         if (WS.get() != CallbackObjectPtr) {
-            cerr << "OnConnected: Callback from abandoned object" << endl;
+            // cerr << "OnConnected: Callback from abandoned object" << endl;
             return;
         }
         WS->async_handshake(_Origin, _Path, [this, Retainer=WS] (const xAsioError & Error) mutable {
             if (Error) {
-                cerr << "Handshake Error" << endl;
+                // cerr << "Handshake Error" << endl;
                 OnError(Retainer.get());
                 return;
             }
@@ -92,7 +93,7 @@ ZEC_NS
     void xWebSocketSession::OnHandshakeDone(const void * CallbackObjectPtr) {
         auto & WS = _Native.As<xWsPtr>();
         if (WS.get() != CallbackObjectPtr) {
-            cerr << "OnConnected: Callback from abandoned object" << endl;
+            // cerr << "OnConnected: Callback from abandoned object" << endl;
             return;
         }
         _Connected = true;
@@ -106,7 +107,7 @@ ZEC_NS
         auto & RB = _ReadBuffer.As<xWSReadBufferPtr>();
         WS->async_read(*RB, [this, ReadBufferPtr = RB, Retainer=WS](const xAsioError & Error, size_t TransferedSize){
             if (Error) {
-                cerr << "WS Read Error" << endl;
+                // cerr << "WS Read Error" << endl;
                 OnError(Retainer.get());
                 return;
             }
@@ -135,11 +136,10 @@ ZEC_NS
             do {
                 auto MessageCleaner = xScopeGuard{ [MessagePtr] { delete MessagePtr; } };
                 if (Error) {
-                    cerr << "WS Flush Error" << endl;
+                    // cerr << "WS Flush Error" << endl;
                     OnError(Retainer.get());
                     return;
                 }
-                cout << "SendData: " << MessagePtr->Data << endl;
             } while(false);
             DoFlush();
         });
