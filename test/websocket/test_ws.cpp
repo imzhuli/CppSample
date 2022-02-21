@@ -52,6 +52,7 @@ public:
 void test0 ()
 {
     xWSTest                Tester;
+    xWSTest                Tester1;
 
     if (!IoContext.Init()) {
         throw "Failed to init io context";
@@ -59,13 +60,20 @@ void test0 ()
     if (!Tester.Init()) {
         throw "Failed to init test object";
     }
+    if (!Tester1.Init()) {
+        throw "Failed to init test object";
+    }
 
-    xTimer Timer;
-    while(!Timer.TestAndTag(2s)) {
+    Tester1.Clean();
+    Tester1.Init();
+
+    while(true) {
         IoContext.LoopOnce(100);
     }
 
+    Tester1.Clean();
     Tester.Clean();
+
     IoContext.Clean();
     cout << "IoContext cleaned" << endl;
 }

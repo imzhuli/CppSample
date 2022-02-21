@@ -144,6 +144,9 @@ ZEC_NS
 
     void xWebSocketClient::Clean()
     {
+        auto WSPtr = NativeWebSocket(Native());
+        WSPtr->next_layer().close();
+
         NativeWebSocketHolderRef(Native()).Destroy();
         for (auto & MessageBuffer : _MessageBufferList) {
             DeleteMessageBuffer(&MessageBuffer);
