@@ -16,7 +16,6 @@ ZEC_NS
         ZEC_API_MEMBER bool Init();
         ZEC_API_MEMBER void Clean();
         ZEC_API_MEMBER void LoopOnce(int TimeoutMS);
-        ZEC_API_MEMBER auto & Native() { return _Native; }
         ZEC_API_MEMBER auto & Native() const { return _Native; }
 
     private:

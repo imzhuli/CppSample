@@ -10,16 +10,14 @@ ZEC_NS
         assert(IoContextPtr);
         assert(ObserverPtr);
 
-        assert(!_IoContextPtr);
         assert(!_ListenerPtr);
         assert(_RequestTimeoutList.IsEmpty());
         assert(_CacheTimeoutList.IsEmpty());
         assert(_ResolveMap.empty());
 
-        _IoContextPtr = IoContextPtr;
         _ListenerPtr = ObserverPtr;
 
-        NativeTcpResolverHolderRef(Native()).CreateValue(*IOUtil::Native(_IoContextPtr));
+        _Native.CreateValueAs<xNativeTcpResolver>(*IOUtil::Native(IoContextPtr));
         return true;
     }
 
@@ -35,8 +33,7 @@ ZEC_NS
         _ResolveMap.clear();
         _ListenerPtr = nullptr;
 
-        NativeTcpResolverHolderRef(Native()).Destroy();
-        _IoContextPtr = nullptr;
+        _Native.DestroyAs<xNativeTcpResolver>();
     }
 
     bool xTcpResolver::Request(const std::string & Hostname, const xVariable RequestContext)
@@ -49,8 +46,8 @@ ZEC_NS
             }
             Node.Hostname = Hostname;
             _RequestTimeoutList.PushBack(Node);
-            auto & NativeHolder = NativeTcpResolverHolderRef(Native());
-            NativeHolder->async_resolve(Hostname, ""sv, [this, Hostname] (xAsioError error, const xNativeTcpResolver::results_type & results) {
+            auto & Resolver = _Native.As<xNativeTcpResolver>();
+            Resolver.async_resolve(Hostname, ""sv, [this, Hostname] (xAsioError error, const xNativeTcpResolver::results_type & results) {
                 auto Iter = _ResolveMap.find(Hostname);
                 if (Iter == _ResolveMap.end()) { // request timeout
                     return;

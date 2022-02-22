@@ -1,6 +1,6 @@
 #include <zec_ext/IO/IoContext.hpp>
 #include <zec_ext/IO/Resolver.hpp>
-#include <zec_ext/IO/TcpClient.hpp>
+#include <zec_ext/IO/TcpConnection.hpp>
 #include <zec/Util/Chrono.hpp>
 #include <zec/String.hpp>
 #include <iostream>
@@ -37,7 +37,7 @@ static std::string Request =
 
 class xTcpTest
 : public xTcpResolver::iListener
-, public xTcpClient::iListener
+, public xTcpConnection::iListener
 {
 private:
     void OnResolve(const std::string & Hostname, const xNetAddress & Address, const xVariable & RequestContext, bool DirectCall) override
@@ -46,30 +46,30 @@ private:
         if (Hostname != TestHostname || Connection) {
             return;
         }
-        if (!(Connection = TcpClient.Init(_IoContextPtr, Address, 80, this))) {
+        if (!(Connection = TcpConnection.Init(_IoContextPtr, Address, 80, this))) {
             cerr << "Failed to init connection" << endl;
             return;
         }
-        TcpClient.PostData(Request.data(), Request.length());
+        TcpConnection.PostData(Request.data(), Request.length());
     }
 
-    void OnConnected(xTcpClient * xTcpClient)
+    void OnConnected(xTcpConnection * xTcpConnection)
     {
         cout << "Connected" << endl;
     }
 
-    size_t OnReceiveData(xTcpClient * TcpClientPtr, const void * DataPtr, size_t DataSize) override
+    size_t OnReceiveData(xTcpConnection * TcpConnectionPtr, const void * DataPtr, size_t DataSize) override
     {
         Data.append((const char *)DataPtr, DataSize);
         return DataSize;
     }
 
-    void OnPeerClose(xTcpClient * TcpClientPtr) override
+    void OnPeerClose(xTcpConnection * TcpConnectionPtr) override
     {
         cout << "PeerClose" << endl;
     }
 
-    void OnError(xTcpClient * TcpClientPtr) override
+    void OnError(xTcpConnection * TcpConnectionPtr) override
     {
         cerr << "Error" << endl;
     }
@@ -77,7 +77,7 @@ private:
     bool Connection = false;
     std::string Data;
 
-    xTcpClient TcpClient;
+    xTcpConnection TcpConnection;
     xIoContext * _IoContextPtr = nullptr;
 
 public:
@@ -97,7 +97,7 @@ public:
         }
 
         if (Steal(Connection)) {
-            TcpClient.Clean();
+            TcpConnection.Clean();
         }
     }
 };

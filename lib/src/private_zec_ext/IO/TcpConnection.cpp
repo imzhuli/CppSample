@@ -1,4 +1,4 @@
-#include <zec_ext/IO/TcpClient.hpp>
+#include <zec_ext/IO/TcpConnection.hpp>
 #include <cstring>
 #include "./_Local.hpp"
 
@@ -7,13 +7,20 @@
 ZEC_NS
 {
 
-    bool xTcpClient::Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr)
+    bool xTcpConnection::Init(xIoContext * IoContextPtr, iListener * ListenerPtr)
+    {
+        _ListenerPtr = ListenerPtr;
+        _Native.CreateValueAs<xNativeTcpSocket>(*IOUtil::Native(IoContextPtr));
+        return true;
+    }
+
+    bool xTcpConnection::Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr)
     {
         xNetAddress Address = xNetAddress::Make(Ip);
         return Init(IoContextPtr, Address, Port, ListenerPtr);
     }
 
-    bool xTcpClient::Init(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port, iListener * ListenerPtr)
+    bool xTcpConnection::Init(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port, iListener * ListenerPtr)
     {
         assert(IoContextPtr);
         assert(ListenerPtr);
@@ -35,7 +42,7 @@ ZEC_NS
         return true;
     }
 
-    void xTcpClient::OnConnected()
+    void xTcpConnection::OnConnected()
     {
         _Connected = true;
         _ListenerPtr->OnConnected(this);
@@ -45,8 +52,9 @@ ZEC_NS
         }
     }
 
-    void xTcpClient::Clean()
+    void xTcpConnection::Clean()
     {
+        _ListenerPtr = nullptr;
         _Native.DestroyAs<xNativeTcpSocket>();
         // clear read buffer:
         _ReadDataSize = 0;
@@ -59,7 +67,7 @@ ZEC_NS
         _Error = false;
     }
 
-    void xTcpClient::OnError()
+    void xTcpConnection::OnError()
     {
         if (_Error) {
             return;
@@ -69,7 +77,7 @@ ZEC_NS
         _ListenerPtr->OnError(this);
     }
 
-    void xTcpClient::DoRead()
+    void xTcpConnection::DoRead()
     {
         auto & Socket = _Native.As<xNativeTcpSocket>();
         size_t BufferSize = MaxPacketPayloadSize - _ReadDataSize;
@@ -94,7 +102,7 @@ ZEC_NS
         });
     }
 
-    void xTcpClient::DoFlush()
+    void xTcpConnection::DoFlush()
     {
         auto & Socket = _Native.As<xNativeTcpSocket>();
         auto BufferPtr = _WritePacketBufferQueue.Peek();
@@ -119,7 +127,7 @@ ZEC_NS
         });
     }
 
-    size_t xTcpClient::PostData(const void * DataPtr_, size_t DataSize)
+    size_t xTcpConnection::PostData(const void * DataPtr_, size_t DataSize)
     {
         assert(DataSize);
         bool ExecWriteCall = (!_WriteDataSize && _Connected);

@@ -6,14 +6,14 @@
 #include <string>
 
 #include "./IoContext.hpp"
-#include "./TcpClient.hpp"
+#include "./TcpConnection.hpp"
 
 ZEC_NS
 {
 
     class xSocks5Client
     : xNonCopyable
-    , xTcpClient::iListener
+    , xTcpConnection::iListener
     {
     public:
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, const std::string & Username, const std::string & Password);
@@ -25,7 +25,7 @@ ZEC_NS
             Inited, Challenging, AuthPosed, Authorized, Connecting, Connected, Closed
         } _Phase;
 
-        xTcpClient                    _TcpClient {};
+        xTcpConnection                    _TcpConnection {};
         std::string                   _Username {};
         std::string                   _Password {};
     };

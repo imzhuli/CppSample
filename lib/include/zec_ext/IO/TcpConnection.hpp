@@ -11,26 +11,29 @@ ZEC_NS
     namespace __detail__ {
         class IOUtil;
     }
+    class xTcpConnection;
+    class xTcpServer;
 
-    class xTcpClient
+    class xTcpConnection final
     : xNonCopyable
     {
     public:
         struct iListener
         {
             // callback on connected, normally this is not needed to be handled
-            virtual void   OnConnected(xTcpClient * TcpClientPtr)  { }
+            virtual void   OnConnected(xTcpConnection * TcpConnectionPtr)  { }
             /***
              * OnReceivedData:
              * called when there is some data in,
-             * @return consumed bytes, if return value equeals -1, something wrong happened, auto closing is involved
+             * @return consumed bytes
              * */
-            virtual size_t  OnReceiveData(xTcpClient * TcpClientPtr, const void * DataPtr, size_t DataSize) { return 0; }
-            virtual void    OnPeerClose(xTcpClient * TcpClientPtr)  {}
-            virtual void    OnError(xTcpClient * TcpClientPtr) {}
+            virtual size_t  OnReceiveData(xTcpConnection * TcpConnectionPtr, const void * DataPtr, size_t DataSize) { return 0; }
+            virtual void    OnPeerClose(xTcpConnection * TcpConnectionPtr)  {}
+            virtual void    OnError(xTcpConnection * TcpConnectionPtr) {}
         };
 
     public:
+        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, iListener * ListenerPtr);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port, iListener * ListenerPtr);
         /***
@@ -63,6 +66,7 @@ ZEC_NS
         bool                          _Error = false;
 
         friend class __detail__::IOUtil;
+        friend class xTcpServer;
     };
 
 }

@@ -49,6 +49,7 @@ add_sub_test(uuid)
 #add_sub_test(thread)
 
 add_sub_buildonly(asio)
+add_sub_buildonly(asio_tcpserver)
 add_sub_buildonly(websocket)
 
 add_test(

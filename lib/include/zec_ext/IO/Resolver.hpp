@@ -41,10 +41,6 @@ ZEC_NS
         ZEC_API_MEMBER void ClearTimeoutCacheNode();
 
     private:
-        ZEC_INLINE void * Native() { return (void*)_Dummy; }
-
-    private:
-        xIoContext *                                _IoContextPtr = nullptr;
         iListener *                                 _ListenerPtr = nullptr;
         uint64_t                                    _RequestTimeout = 3'000;
         uint64_t                                    _CacheTimeout = 600'000;
@@ -52,7 +48,7 @@ ZEC_NS
         xTimeoutList                                _CacheTimeoutList;
         std::map<std::string, xResolveNode>         _ResolveMap;
 
-        alignas(max_align_t) ubyte                  _Dummy[72];
+        xDummy<72>                                  _Native;
         friend class __detail__::IOUtil;
     };
 

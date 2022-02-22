@@ -4,9 +4,7 @@
 #include <boost/beast.hpp>
 #include <boost/beast/websocket/ssl.hpp>
 #include <zec_ext/IO/IoContext.hpp>
-#include <zec_ext/IO/Resolver.hpp>
-#include <zec_ext/IO/TcpClient.hpp>
-#include <zec_ext/IO/WebSocket.hpp>
+#include <zec_ext/IO/TcpConnection.hpp>
 
 namespace asio        = boost::asio;
 namespace beast       = boost::beast;
@@ -27,10 +25,8 @@ ZEC_NS
     using xNativeIoContext = asio::io_context;
     using xNativeTcpResolver = tcp::resolver;
     using xNativeTcpSocket = tcp::socket;
+    using xNativeTcpAcceptor = tcp::acceptor;
     using xNativeWebSocket = websocket::stream<tcp::socket>;
-
-    using xNativeTcpResolverHolder = xHolder<xNativeTcpResolver>;
-    ZEC_STATIC_INLINE xNativeTcpResolverHolder & NativeTcpResolverHolderRef(void * NativePtr) { return *static_cast<xNativeTcpResolverHolder*>(NativePtr); }
 
     using xTcpEndpoint = tcp::endpoint;
     ZEC_STATIC_INLINE xTcpEndpoint MakeEndpoint(const xNetAddress & Address, uint16_t Port) {
@@ -51,8 +47,8 @@ ZEC_NS
     namespace __detail__ {
         class IOUtil {
         public:
-            ZEC_STATIC_INLINE xNativeIoContext *    Native(xIoContext * IoContextPtr)  { return &IoContextPtr->Native().As<xNativeIoContext>(); }
-            ZEC_STATIC_INLINE xNativeTcpResolver *  Native(xTcpResolver * ResolverPtr)  { return NativeTcpResolverHolderRef(ResolverPtr->Native()).Get(); }
+            ZEC_STATIC_INLINE xNativeIoContext *    Native(xIoContext * IoContextPtr)  { return &IoContextPtr->_Native.As<xNativeIoContext>(); }
+	        ZEC_STATIC_INLINE xNativeTcpSocket *    Native(xTcpConnection * ConnectionPtr) { return &ConnectionPtr->_Native.As<xNativeTcpSocket>(); }
         };
     }
     using IOUtil = __detail__::IOUtil;
