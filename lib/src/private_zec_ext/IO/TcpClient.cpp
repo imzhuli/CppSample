@@ -30,14 +30,19 @@ ZEC_NS
                 OnError();
                 return;
             }
-            _Connected = true;
-            _ListenerPtr->OnConnected(this);
-            DoRead();
-            if (_WriteDataSize) {
-                DoFlush();
-            }
+            OnConnected();
         });
         return true;
+    }
+
+    void xTcpClient::OnConnected()
+    {
+        _Connected = true;
+        _ListenerPtr->OnConnected(this);
+        DoRead();
+        if (_WriteDataSize) {
+            DoFlush();
+        }
     }
 
     void xTcpClient::Clean()

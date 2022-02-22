@@ -45,6 +45,7 @@ ZEC_NS
         ZEC_API_MEMBER virtual void DeleteWriteBuffer(xPacketBuffer * BufferPtr) { delete BufferPtr; }
 
     private:
+        ZEC_PRIVATE_MEMBER void OnConnected();
         ZEC_PRIVATE_MEMBER void OnError();
         ZEC_PRIVATE_MEMBER void DoRead();
         ZEC_PRIVATE_MEMBER void DoFlush();
