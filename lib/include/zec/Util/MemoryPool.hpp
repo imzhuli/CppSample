@@ -95,7 +95,7 @@ ZEC_NS
 				 */
 				hAlloc->Free(&block);
 			}
-			_BlockList.Release();
+			_BlockList.ReleaseUnsafe();
 			_NextFreeNode = nullptr;
 			_TotalSize = 0;
 		}

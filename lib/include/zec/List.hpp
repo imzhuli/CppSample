@@ -209,7 +209,7 @@ ZEC_NS
 		ZEC_INLINE xForwardConstIterator begin() const { return xForwardConstIterator(_Head.pNext); }
 		ZEC_INLINE xForwardConstIterator end() const { return xForwardConstIterator(&_Head, nullptr); }
 
-		ZEC_INLINE void Release() { _Head.Reset(); }
+		ZEC_INLINE void ReleaseUnsafe() { _Head.Reset(); }
 	};
 
 }
