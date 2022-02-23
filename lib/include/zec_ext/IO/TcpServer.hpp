@@ -17,24 +17,24 @@ ZEC_NS
     class xTcpServer
     : xNonCopyable
     {
+	public:
+		struct iListener
+		{
+			virtual xTcpConnection * OnNewConnection(NativeTcpSocketHandle NativeHandle) = 0;
+		};
+
     public:
-        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, xTcpConnection::iListener * ListenerPtr);
-        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port, xTcpConnection::iListener * ListenerPtr);
+        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr);
+        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port, iListener * ListenerPtr);
 		ZEC_API_MEMBER void Clean();
 
-		ZEC_API_MEMBER virtual void RecycleConnection(xTcpConnection *);
-
 	private:
-		ZEC_API_MEMBER virtual xTcpConnection * CreateConnection();
 		ZEC_API_MEMBER void DoAccept();
-		ZEC_API_MEMBER void OnAccept(xTcpConnection * ConnectionPtr);
-		ZEC_API_MEMBER void OnError(xTcpConnection * ConnectionPtr);
+		ZEC_API_MEMBER void OnAccept(NativeTcpSocketHandle NativeHandle);
 
 	private:
-		xIoContext *                  _IoContextPtr;
-		xTcpConnection::iListener *   _ClientListenerPtr;
-
-		bool                          _Error = false;
+		xIoContext *  _IoContextPtr;
+		iListener *   _ListenerPtr;
 
 		xDummy<80>                _Native;
         friend class __detail__::IOUtil;

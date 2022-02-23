@@ -12,28 +12,37 @@ static size_t ConnectionCount = 0;
 
 class xTestListener
 : public xTcpConnection::iListener
+, public xTcpServer::iListener
 {
-	virtual void   OnConnected(xTcpConnection * TcpConnectionPtr)  {
+	virtual xTcpConnection * OnNewConnection(NativeTcpSocketHandle NativeHandle) override
+	{
+		auto ConnPtr = new xTcpConnection;
+		ConnPtr->Init(NativeHandle, this);
+		return ConnPtr;
+	}
+	virtual void OnConnected(xTcpConnection * TcpConnectionPtr) override {
 		cout << "NewConnection, Total Connections:" << ++ConnectionCount << endl;
 	 }
 	virtual size_t OnReceiveData(xTcpConnection * TcpConnectionPtr, const void * DataPtr, size_t DataSize) {
 		cout << "OnReceiveData:" << endl;
 		cout << HexShow(DataPtr, DataSize) << endl;
-
-
 		return DataSize;
 	}
-	virtual void   OnPeerClose(xTcpConnection * TcpConnectionPtr)  {
+	virtual void   OnPeerClose(xTcpConnection * TcpConnectionPtr) override {
 		cout << "OnPeerClose" << endl;
 		if (0 == --ConnectionCount){
 			Running = false;
 		}
+		TcpConnectionPtr->Clean();
+		delete TcpConnectionPtr;
 	}
-	virtual void   OnError(xTcpConnection * TcpConnectionPtr) {
+	virtual void   OnError(xTcpConnection * TcpConnectionPtr) override {
 		cout << "OnError" << endl;
 		if (0 == --ConnectionCount){
 			Running = false;
 		}
+		TcpConnectionPtr->Clean();
+		delete TcpConnectionPtr;
 	}
 };
 
