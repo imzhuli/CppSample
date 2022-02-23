@@ -45,7 +45,7 @@ ZEC_NS
 
 	void xTcpServer::OnAccept(xTcpConnection::xNativeHandle NativeHandle)
 	{
-		auto NewConnectionPtr = _ListenerPtr->OnNewConnection(NativeHandle);
+		auto NewConnectionPtr = _ListenerPtr->OnNewConnection(_IoContextPtr, NativeHandle);
 		NewConnectionPtr->OnConnected();
 	}
 

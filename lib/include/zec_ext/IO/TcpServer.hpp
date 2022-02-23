@@ -20,7 +20,7 @@ ZEC_NS
 	public:
 		struct iListener
 		{
-			virtual xTcpConnection * OnNewConnection(xTcpConnection::xNativeHandle NativeHandle) = 0;
+			virtual xTcpConnection * OnNewConnection(xIoContext * IoContextPtr, xTcpConnection::xNativeHandle NativeHandle) = 0;
 		};
 
     public:
