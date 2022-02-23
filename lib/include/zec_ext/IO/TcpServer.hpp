@@ -14,7 +14,7 @@ ZEC_NS
     }
     class xTcpServer;
 
-    class xTcpServer final
+    class xTcpServer
     : xNonCopyable
     {
     public:
@@ -22,10 +22,10 @@ ZEC_NS
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port, xTcpConnection::iListener * ListenerPtr);
 		ZEC_API_MEMBER void Clean();
 
-		ZEC_API_MEMBER void RecycleConnection(xTcpConnection *);
+		ZEC_API_MEMBER virtual void RecycleConnection(xTcpConnection *);
 
 	private:
-		ZEC_API_MEMBER xTcpConnection * CreateConnection();
+		ZEC_API_MEMBER virtual xTcpConnection * CreateConnection();
 		ZEC_API_MEMBER void DoAccept();
 		ZEC_API_MEMBER void OnAccept(xTcpConnection * ConnectionPtr);
 		ZEC_API_MEMBER void OnError(xTcpConnection * ConnectionPtr);
