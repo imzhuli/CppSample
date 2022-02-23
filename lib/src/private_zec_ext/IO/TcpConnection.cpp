@@ -42,19 +42,10 @@ ZEC_NS
         return true;
     }
 
-    void xTcpConnection::OnConnected()
-    {
-        _Connected = true;
-        _ListenerPtr->OnConnected(this);
-        DoRead();
-        if (_WriteDataSize) {
-            DoFlush();
-        }
-    }
-
     void xTcpConnection::Clean()
     {
-        _ListenerPtr = nullptr;
+        // Set error true to prevent callbacks with "error caused by operation aborted"
+        _Error = true;
         _Native.DestroyAs<xNativeTcpSocket>();
         // clear read buffer:
         _ReadDataSize = 0;
@@ -65,6 +56,7 @@ ZEC_NS
         _WriteDataSize = 0;
         _Connected = false;
         _Error = false;
+        _ListenerPtr = nullptr;
     }
 
     void xTcpConnection::OnError()
@@ -75,6 +67,16 @@ ZEC_NS
         _Error = true;
         _Connected = false;
         _ListenerPtr->OnError(this);
+    }
+
+    void xTcpConnection::OnConnected()
+    {
+        _ListenerPtr->OnConnected(this);
+        _Connected = true;
+        DoRead();
+        if (_WriteDataSize) {
+            DoFlush();
+        }
     }
 
     void xTcpConnection::DoRead()
@@ -108,12 +110,12 @@ ZEC_NS
         auto BufferPtr = _WritePacketBufferQueue.Peek();
         assert (BufferPtr);
         Socket.async_write_some(xAsioConstBuffer{BufferPtr->Buffer, BufferPtr->DataSize}, [this, BufferPtr](const xAsioError & Error, size_t TransferedBytes) {
-            assert(BufferPtr == _WritePacketBufferQueue.Peek());
-            assert(TransferedBytes <= BufferPtr->DataSize);
             if (Error) {
                 OnError();
                 return;
             }
+            assert(BufferPtr == _WritePacketBufferQueue.Peek());
+            assert(TransferedBytes <= BufferPtr->DataSize);
             if (auto RemainedDataSize = BufferPtr->DataSize - TransferedBytes) {
                 memcpy(BufferPtr->Buffer, BufferPtr->Buffer + TransferedBytes, RemainedDataSize);
                 BufferPtr->DataSize = RemainedDataSize;
