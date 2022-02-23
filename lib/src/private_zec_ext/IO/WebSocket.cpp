@@ -96,9 +96,10 @@ ZEC_NS
             // cerr << "OnConnected: Callback from abandoned object" << endl;
             return;
         }
-        _Connected = true;
         _Listener->OnHandshakeDone(this);
+        _Connected = true;
         DoRead();
+        DoFlush();
     }
 
     void xWebSocketSession::DoRead()
@@ -129,7 +130,6 @@ ZEC_NS
             return;
         }
         auto & MessageData = MessagePtr->Data;
-
         auto & WS = _Native.As<xWsPtr>();
         WS->binary(MessagePtr->Binary);
         WS->async_write(xAsioConstBuffer(MessageData.data(), MessageData.size()), [this, Retainer=WS, MessagePtr](const xAsioError & Error, size_t TransferedSize) {
