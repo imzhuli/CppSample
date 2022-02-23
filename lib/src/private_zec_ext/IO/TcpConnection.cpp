@@ -47,6 +47,8 @@ ZEC_NS
         // Set error true to prevent callbacks with "error caused by operation aborted"
         _Error = true;
         _Native.DestroyAs<xNativeTcpSocket>();
+        _ListenerPtr = nullptr;
+
         // clear read buffer:
         _ReadDataSize = 0;
         // clear write buffers:
@@ -56,7 +58,6 @@ ZEC_NS
         _WriteDataSize = 0;
         _Connected = false;
         _Error = false;
-        _ListenerPtr = nullptr;
     }
 
     void xTcpConnection::OnError()
