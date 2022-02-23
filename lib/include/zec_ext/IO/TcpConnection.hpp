@@ -14,7 +14,7 @@ ZEC_NS
     class xTcpConnection;
     class xTcpServer;
 
-    class xTcpConnection final
+    class xTcpConnection
     : xNonCopyable
     {
     public:
