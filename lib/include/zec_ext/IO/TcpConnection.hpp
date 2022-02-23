@@ -15,7 +15,7 @@ ZEC_NS
     class xTcpServer;
 
     class xTcpConnection
-    : xNonCopyable
+    : xAbstract
     {
     public:
         struct iListener
