@@ -199,6 +199,9 @@ ZEC_NS
 			ret->Detach();
 			return static_cast<tNode*>(ret);
 		}
+		ZEC_STATIC_INLINE void Remove(tNode& Node) {
+			Node.Detach();
+		}
 
 		ZEC_INLINE xForwardIterator begin() { return xForwardIterator(_Head.pNext); }
 		ZEC_INLINE xForwardIterator end() { return xForwardIterator(&_Head, nullptr); }
