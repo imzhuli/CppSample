@@ -51,7 +51,7 @@ ZEC_NS
         ZEC_API_MEMBER void Clean();
 
     protected:
-        ZEC_API_MEMBER virtual xPacketBuffer * NewWriteBuffer() { return new (std::nothrow) xPacketBuffer(); }
+        ZEC_API_MEMBER virtual xPacketBuffer * NewWriteBuffer() { return new xPacketBuffer(); }
         ZEC_API_MEMBER virtual void DeleteWriteBuffer(xPacketBuffer * BufferPtr) { delete BufferPtr; }
 
     private:

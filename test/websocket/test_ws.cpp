@@ -9,13 +9,16 @@ using namespace zec;
 using namespace std;
 
 xIoContext IoContext;
-static std::string ServerIp = "192.168.123.36";
+static std::string ServerIp = "192.168.123.44";
 static uint16_t    ServerPort = 8002;
 static std::string Hostname = "www.baidu.com";
 static std::string Path = "/device";
 
-static std::string TestJson0 = R"({"requestId":0, "head":1004, "body":{ "userName":"101114653296-Kaie1cmC", "passWord":"948f8c8e81d8c5800e40cafdb7481aae" }})";
-static std::string TestJson1 = R"({"requestId":1, "head":1004, "body":{ "userName":"101114653296-EPVvFYLs", "passWord":"76111148810f6fb6efe1f0da9db68c92" }})";
+static uint64_t RequestIdConter = 1024;
+static std::string TestJson0_  = R"({"requestId":)";
+static std::string TestJson0__ = R"(, "head":1004, "body":{ "userName":"101114653296-Kaie1cmC", "passWord":"948f8c8e81d8c5800e40cafdb7481aae" }})";
+static std::string TestJson1_  = R"({"requestId":)";
+static std::string TestJson1__ = R"(, "head":1004, "body":{ "userName":"101114653296-EPVvFYLs", "passWord":"76111148810f6fb6efe1f0da9db68c92" }})";
 
 class xWSTest
 : public xWebSocketSession::iListener
@@ -26,8 +29,8 @@ private:
     }
     void OnHandshakeDone(xWebSocketSession * WebSocketClientPtr) {
         cout << "WS Handshake done" << endl;
-        WSClient.PostTextData(TestJson0);
-        WSClient.PostTextData(TestJson1);
+        WSClient.PostTextData(TestJson0_ + std::to_string(RequestIdConter++) + TestJson0__);
+        WSClient.PostTextData(TestJson1_ + std::to_string(RequestIdConter++) + TestJson1__);
     }
     void OnMessage(xWebSocketSession * WebSocketClientPtr, bool Binary, const void * DataPtr, size_t DataSize) {
         cout << "ReceiveData(Text=" << YN(!Binary) << "): " << string_view((const char *)DataPtr, DataSize) << endl;
