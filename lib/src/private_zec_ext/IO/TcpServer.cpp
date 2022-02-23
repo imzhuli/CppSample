@@ -36,14 +36,14 @@ ZEC_NS
 		auto & Acceptor = _Native.As<xNativeTcpAcceptor>();
 		Acceptor.async_accept(*IOUtil::Native(_IoContextPtr), [this](const xAsioError & Error, xNativeTcpSocket Peer) {
 			if (!Error) {
-				OnAccept(NativeTcpSocketHandle{&Peer});
+				OnAccept(xTcpConnection::xNativeHandle{&Peer});
 			}
 			DoAccept();
 		});
 		return;
 	}
 
-	void xTcpServer::OnAccept(NativeTcpSocketHandle NativeHandle)
+	void xTcpServer::OnAccept(xTcpConnection::xNativeHandle NativeHandle)
 	{
 		auto NewConnectionPtr = _ListenerPtr->OnNewConnection(NativeHandle);
 		NewConnectionPtr->OnConnected();

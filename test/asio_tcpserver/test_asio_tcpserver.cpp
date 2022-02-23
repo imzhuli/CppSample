@@ -14,7 +14,7 @@ class xTestListener
 : public xTcpConnection::iListener
 , public xTcpServer::iListener
 {
-	virtual xTcpConnection * OnNewConnection(NativeTcpSocketHandle NativeHandle) override
+	virtual xTcpConnection * OnNewConnection(xTcpConnection::xNativeHandle NativeHandle) override
 	{
 		auto ConnPtr = new xTcpConnection;
 		ConnPtr->Init(NativeHandle, this);

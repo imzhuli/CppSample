@@ -14,19 +14,17 @@ ZEC_NS
     class xTcpConnection;
     class xTcpServer;
 
-    class NativeTcpSocketHandle
-    {
-        void * ObjectPtr;
-        ZEC_INLINE NativeTcpSocketHandle(void * NativeObjectPtr) : ObjectPtr(NativeObjectPtr) {}
-
-        friend class xTcpConnection;
-        friend class xTcpServer;
-    };
-
     class xTcpConnection
     : xAbstract
     {
     public:
+        class xNativeHandle
+        {
+            ZEC_INLINE xNativeHandle(void * NativeObjectPtr) : ObjectPtr(NativeObjectPtr) {}
+            void * ObjectPtr;
+            friend class xTcpConnection;
+            friend class xTcpServer;
+        };
         struct iListener
         {
             // callback on connected, normally this is not needed to be handled
@@ -42,7 +40,7 @@ ZEC_NS
         };
 
     public:
-        ZEC_API_MEMBER bool Init(NativeTcpSocketHandle NativeHandle, iListener * ListenerPtr);
+        ZEC_API_MEMBER bool Init(xNativeHandle NativeHandle, iListener * ListenerPtr);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port, iListener * ListenerPtr);
         /***

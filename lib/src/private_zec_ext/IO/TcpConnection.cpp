@@ -7,7 +7,7 @@
 ZEC_NS
 {
 
-    bool xTcpConnection::Init(NativeTcpSocketHandle NativeHandle, iListener * ListenerPtr)
+    bool xTcpConnection::Init(xNativeHandle NativeHandle, iListener * ListenerPtr)
     {
         _ListenerPtr = ListenerPtr;
         _Native.CreateValueAs<xNativeTcpSocket>(std::move(*(xNativeTcpSocket*)NativeHandle.ObjectPtr));
