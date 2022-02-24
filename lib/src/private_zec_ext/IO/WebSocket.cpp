@@ -66,7 +66,7 @@ ZEC_NS
             // cerr << "OnError: Callback from abandoned object" << endl;
             return false;
         }
-        if (_Error) {
+        if (!_Error) {
             _Error = true;
             _Connected = false;
             _Listener->OnError(this);
