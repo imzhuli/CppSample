@@ -86,6 +86,7 @@ ZEC_NS
         auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
         if(Context) {
             Context->IsAbandoned = true;
+            Context->Socket.close();
             Context.reset();
         }
     }
