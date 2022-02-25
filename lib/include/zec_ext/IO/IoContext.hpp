@@ -9,6 +9,27 @@ ZEC_NS
         class IOUtil;
     }
 
+
+    class xIoNativeHandle
+    {
+    public:
+        ZEC_INLINE xIoNativeHandle(void * NativeObjectPtr) : ObjectPtr(NativeObjectPtr) {}
+        template<typename T>
+        ZEC_INLINE T* GetPtrAs() const {
+            return static_cast<T*>(ObjectPtr);
+        };
+        template<typename T>
+        ZEC_INLINE T& GetRefAs() const {
+            return *static_cast<T*>(ObjectPtr);
+        };
+
+    private:
+        void * ObjectPtr;
+
+        friend class xTcpConnection;
+        friend class xTcpServer;
+    };
+
     class xIoContext
     : xNonCopyable
     {

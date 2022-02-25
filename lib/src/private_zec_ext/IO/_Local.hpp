@@ -22,11 +22,21 @@ using xBeastDynamicBuffer = boost::beast::multi_buffer;
 ZEC_NS
 {
 
+
     using xNativeIoContext = asio::io_context;
     using xNativeTcpResolver = tcp::resolver;
     using xNativeTcpSocket = tcp::socket;
     using xNativeTcpAcceptor = tcp::acceptor;
     using xNativeWebSocket = websocket::stream<tcp::socket>;
+
+    struct xTcpSocketContext {
+        xTcpSocketContext(xIoContext * IoContextPtr);
+        xTcpSocketContext(xIoNativeHandle Handle);
+
+        tcp::socket Socket;
+        bool IsAbandoned = false;
+    };
+    using xSharedTcpSocketContextPtr = std::shared_ptr<xTcpSocketContext>;
 
     using xTcpEndpoint = tcp::endpoint;
     ZEC_STATIC_INLINE xTcpEndpoint MakeEndpoint(const xNetAddress & Address, uint16_t Port) {

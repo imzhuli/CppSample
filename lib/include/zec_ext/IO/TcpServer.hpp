@@ -20,7 +20,7 @@ ZEC_NS
 	public:
 		struct iListener
 		{
-			virtual xTcpConnection * OnNewConnection(xIoContext * IoContextPtr, xTcpConnection::xNativeHandle NativeHandle) = 0;
+			virtual xTcpConnection * OnNewConnection(xIoContext * IoContextPtr, xIoNativeHandle NativeHandle) = 0;
 		};
 
     public:
@@ -30,7 +30,7 @@ ZEC_NS
 
 	private:
 		ZEC_API_MEMBER void DoAccept();
-		ZEC_API_MEMBER void OnAccept(xTcpConnection::xNativeHandle NativeHandle);
+		ZEC_API_MEMBER void OnAccept(xIoNativeHandle NativeHandle);
 
 	private:
 		xIoContext *  _IoContextPtr;

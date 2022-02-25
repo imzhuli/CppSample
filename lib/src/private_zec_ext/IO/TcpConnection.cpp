@@ -7,8 +7,29 @@
 ZEC_NS
 {
 
-    bool xTcpConnection::Init(xNativeHandle NativeHandle, iListener * ListenerPtr)
+    xTcpSocketContext::xTcpSocketContext(xIoContext * IoContextPtr)
+    : Socket(*IOUtil::Native(IoContextPtr))
+    {}
+
+    xTcpSocketContext::xTcpSocketContext(xIoNativeHandle NativeHandle)
+    : Socket(std::move(NativeHandle.GetRefAs<xNativeTcpSocket>()))
+    {}
+
+    xTcpConnection::xTcpConnection()
     {
+        _NativeContext.CreateAs<xSharedTcpSocketContextPtr>();
+    }
+
+    xTcpConnection::~xTcpConnection()
+    {
+        _NativeContext.DestroyAs<xSharedTcpSocketContextPtr>();
+    }
+
+    bool xTcpConnection::Init(xIoNativeHandle NativeHandle, iListener * ListenerPtr)
+    {
+        auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
+        Context.reset(new xTcpSocketContext(NativeHandle));
+
         _ListenerPtr = ListenerPtr;
         _Native.CreateValueAs<xNativeTcpSocket>(std::move(*(xNativeTcpSocket*)NativeHandle.ObjectPtr));
         return true;
@@ -29,6 +50,9 @@ ZEC_NS
 
         assert(!_ReadDataSize);
         assert(!_WriteDataSize);
+
+        auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
+        Context.reset(new xTcpSocketContext(IoContextPtr));
 
         _ListenerPtr = ListenerPtr;
         auto & Socket = _Native.CreateValueAs<xNativeTcpSocket>(*IOUtil::Native(IoContextPtr));
@@ -58,6 +82,9 @@ ZEC_NS
         _WriteDataSize = 0;
         _Connected = false;
         _Error = false;
+
+        auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
+        Context.reset();
     }
 
     void xTcpConnection::OnError()
