@@ -22,6 +22,8 @@ ZEC_NS
 
     xTcpConnection::~xTcpConnection()
     {
+        auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
+        assert(!Context);
         _NativeContext.DestroyAs<xSharedTcpSocketContextPtr>();
     }
 
@@ -84,6 +86,8 @@ ZEC_NS
         _Error = false;
 
         auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
+        assert(Context);
+        Context->IsAbandoned = true;
         Context.reset();
     }
 
