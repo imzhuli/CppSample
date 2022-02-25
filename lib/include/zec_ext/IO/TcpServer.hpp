@@ -36,7 +36,7 @@ ZEC_NS
 		xIoContext *  _IoContextPtr;
 		iListener *   _ListenerPtr;
 
-		xDummy<80>                _Native;
+		xDummy<80>    _Native;
         friend class __detail__::IOUtil;
 	};
 

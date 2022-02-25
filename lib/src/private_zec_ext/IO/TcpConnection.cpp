@@ -81,8 +81,8 @@ ZEC_NS
         }
         _WriteDataSize = 0;
         _Connected = false;
-
         _ListenerPtr = nullptr;
+
         auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
         if(Context) {
             Context->IsAbandoned = true;
@@ -111,7 +111,7 @@ ZEC_NS
     void xTcpConnection::DoRead()
     {
         auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
-        size_t BufferSize = MaxPacketPayloadSize - _ReadDataSize;
+        size_t BufferSize = MaxPacketSize - _ReadDataSize;
         Context->Socket.async_read_some(xAsioMutableBuffer{_ReadBuffer + _ReadDataSize, BufferSize}, [this, Context](const xAsioError & Error, size_t TransferedSize) {
             if (Context->IsAbandoned) {
                 return;

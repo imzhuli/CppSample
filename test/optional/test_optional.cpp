@@ -45,6 +45,18 @@ int main(int, char *[])
 		Error();
 	}
 
+	int i = 0;
+	int &j = i;
+	do {
+		auto Guard = xScopeGuard([j]() mutable {
+			cout << (j = 100) << endl;
+		});
+ 	} while(false);
+	cout << "I=" << i << endl;
+	if (i) {
+		return -1;
+	}
+
 	cout << "befored guarded ref call" << endl;
 	return 0;
 }

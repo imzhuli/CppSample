@@ -9,7 +9,6 @@ ZEC_NS
         class IOUtil;
     }
 
-
     class xIoNativeHandle
     {
     public:

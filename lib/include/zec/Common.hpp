@@ -201,13 +201,13 @@ ZEC_NS
 			 *  so that it be compatible with:
 			 *     function,
 			 *     lambda (w/o worrying about capturing-lambda function's lifetime),
-			 *     and const func-object (which is often with inline trivial ctor(default/copy/move) and dtor).
+			 *     and func-object (which is often with inline trivial ctor(default/copy/move) and dtor).
 			 *  if caller is quite aware of the lifetime of a func-object and if:
 			 *       the fuct-object is non-copyable, or
 			 *       avoiding ctor/copy ctor/dtor really matters
 			 *     use xRef(some_non_const_object) above as a const-wrapper-object
 			 * */
-			const tExit _ExitCallback;
+			tExit _ExitCallback;
 		public:
 			[[nodiscard]] ZEC_INLINE xScopeGuard(const tEntry& Entry, const tExit& Exit) : _ExitCallback(Exit) { Entry(); }
 			[[nodiscard]] ZEC_INLINE xScopeGuard(const tExit& Exit) : _ExitCallback(Exit) {}
