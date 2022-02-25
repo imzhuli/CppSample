@@ -15,6 +15,9 @@ ZEC_NS
     : Socket(std::move(NativeHandle.GetRefAs<xNativeTcpSocket>()))
     {}
 
+    xTcpSocketContext::~xTcpSocketContext()
+    { assert(IsAbandoned); }
+
     xTcpConnection::xTcpConnection()
     {
         _NativeContext.CreateAs<xSharedTcpSocketContextPtr>();
@@ -31,9 +34,7 @@ ZEC_NS
     {
         auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
         Context.reset(new xTcpSocketContext(NativeHandle));
-
         _ListenerPtr = ListenerPtr;
-        _Native.CreateValueAs<xNativeTcpSocket>(std::move(*(xNativeTcpSocket*)NativeHandle.ObjectPtr));
         return true;
     }
 
@@ -55,10 +56,12 @@ ZEC_NS
 
         auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
         Context.reset(new xTcpSocketContext(IoContextPtr));
-
         _ListenerPtr = ListenerPtr;
-        auto & Socket = _Native.CreateValueAs<xNativeTcpSocket>(*IOUtil::Native(IoContextPtr));
-        Socket.async_connect(MakeEndpoint(Address, Port), [this](const xAsioError & Error) {
+
+        Context->Socket.async_connect(MakeEndpoint(Address, Port), [this, Context](const xAsioError & Error) {
+            if (Context->IsAbandoned) {
+                return;
+            }
             if (Error) {
                 OnError();
                 return;
@@ -70,11 +73,6 @@ ZEC_NS
 
     void xTcpConnection::Clean()
     {
-        // Set error true to prevent callbacks with "error caused by operation aborted"
-        _Error = true;
-        _Native.DestroyAs<xNativeTcpSocket>();
-        _ListenerPtr = nullptr;
-
         // clear read buffer:
         _ReadDataSize = 0;
         // clear write buffers:
@@ -83,20 +81,19 @@ ZEC_NS
         }
         _WriteDataSize = 0;
         _Connected = false;
-        _Error = false;
 
+        _ListenerPtr = nullptr;
         auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
-        assert(Context);
-        Context->IsAbandoned = true;
-        Context.reset();
+        if(Context) {
+            Context->IsAbandoned = true;
+            Context.reset();
+        }
     }
 
     void xTcpConnection::OnError()
     {
-        if (_Error) {
-            return;
-        }
-        _Error = true;
+        auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
+        Context->IsAbandoned = true;
         _Connected = false;
         _ListenerPtr->OnError(this);
     }
@@ -113,10 +110,12 @@ ZEC_NS
 
     void xTcpConnection::DoRead()
     {
-        auto & Socket = _Native.As<xNativeTcpSocket>();
+        auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
         size_t BufferSize = MaxPacketPayloadSize - _ReadDataSize;
-        assert(BufferSize);
-        Socket.async_read_some(xAsioMutableBuffer{_ReadBuffer + _ReadDataSize, BufferSize}, [this](const xAsioError & Error, size_t TransferedSize) {
+        Context->Socket.async_read_some(xAsioMutableBuffer{_ReadBuffer + _ReadDataSize, BufferSize}, [this, Context](const xAsioError & Error, size_t TransferedSize) {
+            if (Context->IsAbandoned) {
+                return;
+            }
             if (Error) {
                 if (Error == asio::error::eof) {
                     _Connected = false;
@@ -138,10 +137,12 @@ ZEC_NS
 
     void xTcpConnection::DoFlush()
     {
-        auto & Socket = _Native.As<xNativeTcpSocket>();
+        auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
         auto BufferPtr = _WritePacketBufferQueue.Peek();
-        assert (BufferPtr);
-        Socket.async_write_some(xAsioConstBuffer{BufferPtr->Buffer, BufferPtr->DataSize}, [this, BufferPtr](const xAsioError & Error, size_t TransferedBytes) {
+        Context->Socket.async_write_some(xAsioConstBuffer{BufferPtr->Buffer, BufferPtr->DataSize}, [this, Context, BufferPtr](const xAsioError & Error, size_t TransferedBytes) {
+            if (Context->IsAbandoned) {
+                return;
+            }
             if (Error) {
                 OnError();
                 return;

@@ -64,10 +64,8 @@ ZEC_NS
         ubyte                         _ReadBuffer[MaxPacketSize];
         size_t                        _ReadDataSize = 0;
 
-        xDummy<80>                    _Native;
         xDummy<16>                    _NativeContext;
         bool                          _Connected = false;
-        bool                          _Error = false;
 
         friend class __detail__::IOUtil;
         friend class xTcpServer;

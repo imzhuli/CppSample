@@ -29,9 +29,10 @@ ZEC_NS
     using xNativeTcpAcceptor = tcp::acceptor;
     using xNativeWebSocket = websocket::stream<tcp::socket>;
 
-    struct xTcpSocketContext {
+    struct xTcpSocketContext : xNonCopyable{
         xTcpSocketContext(xIoContext * IoContextPtr);
         xTcpSocketContext(xIoNativeHandle Handle);
+        ~xTcpSocketContext();
 
         tcp::socket Socket;
         bool IsAbandoned = false;
@@ -58,7 +59,6 @@ ZEC_NS
         class IOUtil {
         public:
             ZEC_STATIC_INLINE xNativeIoContext *    Native(xIoContext * IoContextPtr)  { return &IoContextPtr->_Native.As<xNativeIoContext>(); }
-	        ZEC_STATIC_INLINE xNativeTcpSocket *    Native(xTcpConnection * ConnectionPtr) { return &ConnectionPtr->_Native.As<xNativeTcpSocket>(); }
         };
     }
     using IOUtil = __detail__::IOUtil;
