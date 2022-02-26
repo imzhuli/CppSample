@@ -103,7 +103,7 @@ ZEC_NS
 
     void xTcpResolver::ClearTimeoutCacheNode()
     {
-        _RequestTimeoutList.PopTimeoutNodes(_RequestTimeout, [this](xTimeoutNode& TimeoutNode, xVariable){
+        _CacheTimeoutList.PopTimeoutNodes(_CacheTimeout, [this](xTimeoutNode& TimeoutNode, xVariable){
             auto & Node = (xResolveNode&)TimeoutNode;
             for (const auto & Context : Node.RequestContexts) {
                 _ListenerPtr->OnResolve(Node.Hostname, Node.Address, Context, false);
