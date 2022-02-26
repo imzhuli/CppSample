@@ -7,6 +7,7 @@ ZEC_NS
 {
 
     class xTimeoutNode;
+    template<typename T>
     class xTimeoutList;
 
     class xTimeoutNode
@@ -17,11 +18,14 @@ ZEC_NS
     private:
         uint64_t   _TimestampMS = 0;
         xVariable  _UserContext = {};
+        template<typename T>
         friend class xTimeoutList;
     };
 
+    template<typename tNodeType = xTimeoutNode>
     class xTimeoutList final
     {
+        static_assert(std::is_base_of_v<xTimeoutNode, tNodeType>);
     public:
         template<typename tCallback>
         ZEC_INLINE void PopTimeoutNodes(uint64_t TimeoutMS, tCallback && Callback) {
@@ -59,10 +63,7 @@ ZEC_NS
         }
 
     private:
-        xList<xTimeoutNode>   _TimeoutList;
+        xList<tNodeType>   _TimeoutList;
     };
-
-
-
 
 }

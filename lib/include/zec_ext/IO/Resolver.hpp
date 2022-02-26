@@ -44,8 +44,8 @@ ZEC_NS
         iListener *                                 _ListenerPtr = nullptr;
         uint64_t                                    _RequestTimeout = 3'000;
         uint64_t                                    _CacheTimeout = 600'000;
-        xTimeoutList                                _RequestTimeoutList;
-        xTimeoutList                                _CacheTimeoutList;
+        xTimeoutList<>                              _RequestTimeoutList;
+        xTimeoutList<>                              _CacheTimeoutList;
         std::map<std::string, xResolveNode>         _ResolveMap;
 
         xDummy<72>                                  _Native;
