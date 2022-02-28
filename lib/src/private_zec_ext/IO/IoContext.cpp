@@ -45,9 +45,10 @@ ZEC_NS
             (int)Ipv6[15])};
     }
 
-    bool xIoContext::Init()
+    bool xIoContext::Init(uint64_t RemoveTimeMS)
     {
         _Native.CreateAs<xNativeIoContext>();
+        _ExpireTimeout = RemoveTimeMS;
         return true;
     }
 
@@ -58,6 +59,14 @@ ZEC_NS
 
     void xIoContext::LoopOnce(int TimeoutMS)
     {
+        auto Now = GetMicroTimestamp();
+        for(auto & Iter : _ExpiringNodelist) {
+            if (Iter.TimestampMS > Now) {
+                break;
+            }
+            Iter.Detach();
+            Iter.OnFinalIoExpired();
+        }
         _Native.As<xNativeIoContext>().run_for(std::chrono::microseconds(TimeoutMS));
     }
 
