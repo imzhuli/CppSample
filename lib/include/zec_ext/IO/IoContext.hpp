@@ -26,7 +26,6 @@ ZEC_NS
 
     private:
         void * ObjectPtr;
-
         friend class xTcpConnection;
         friend class xTcpServer;
     };
@@ -35,9 +34,9 @@ ZEC_NS
     : xNonCopyable
     {
     public:
-        struct xIoExpiringNode : xListNode {
+        struct xExpiringNode : xListNode {
         protected:
-            virtual void OnFinalIoExpired();
+            virtual void OnExpired() = 0;
         private:
             uint64_t TimestampMS = 0;
             friend xIoContext;
@@ -47,12 +46,12 @@ ZEC_NS
         ZEC_API_MEMBER bool Init(uint64_t RemoveTimeMS = 3000);
         ZEC_API_MEMBER void Clean();
         ZEC_API_MEMBER void LoopOnce(int TimeoutMS);
-        ZEC_INLINE void SetFinalExpiration(xIoExpiringNode & Node) { Node.TimestampMS = GetMicroTimestamp(); _ExpiringNodelist.GrabTail(Node); }
+        ZEC_INLINE void SetFinalExpiration(xExpiringNode & Node) { Node.TimestampMS = GetMicroTimestamp(); _ExpiringNodelist.GrabTail(Node); }
 
     private:
-        xDummy<16>                  _Native;
-        uint64_t                    _ExpireTimeout;
-        xList<xIoExpiringNode>      _ExpiringNodelist;
+        xDummy<16>                _Native;
+        uint64_t                  _ExpireTimeout;
+        xList<xExpiringNode>      _ExpiringNodelist;
         friend class __detail__::IOUtil;
     };
 

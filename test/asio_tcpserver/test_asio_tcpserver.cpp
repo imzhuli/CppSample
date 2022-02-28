@@ -17,7 +17,7 @@ class xTestListener
 	virtual xTcpConnection * OnNewConnection(xIoContext * IoContextPtr,  xIoNativeHandle NativeHandle) override
 	{
 		auto ConnPtr = new xTcpConnection;
-		ConnPtr->Init(NativeHandle, this);
+		ConnPtr->Init(IoContextPtr, NativeHandle, this);
 		return ConnPtr;
 	}
 	virtual void OnConnected(xTcpConnection * TcpConnectionPtr) override {

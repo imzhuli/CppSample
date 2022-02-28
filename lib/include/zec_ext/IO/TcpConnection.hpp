@@ -36,7 +36,7 @@ ZEC_NS
         ZEC_API_MEMBER xTcpConnection();
         ZEC_API_MEMBER ~xTcpConnection();
 
-        ZEC_API_MEMBER bool Init(xIoNativeHandle NativeHandle, iListener * ListenerPtr);
+        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, xIoNativeHandle NativeHandle, iListener * ListenerPtr);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port, iListener * ListenerPtr);
         /***
@@ -46,24 +46,14 @@ ZEC_NS
         ZEC_API_MEMBER size_t PostData(const void * DataPtr, size_t DataSize);
         ZEC_API_MEMBER void Clean();
 
-    protected:
-        ZEC_API_MEMBER virtual xPacketBuffer * NewWriteBuffer() { return new xPacketBuffer(); }
-        ZEC_API_MEMBER virtual void DeleteWriteBuffer(xPacketBuffer * BufferPtr) { delete BufferPtr; }
-
     private:
         ZEC_PRIVATE_MEMBER void OnConnected();
         ZEC_PRIVATE_MEMBER void OnError();
         ZEC_PRIVATE_MEMBER void DoRead();
-        ZEC_PRIVATE_MEMBER void DoFlush();
 
     private:
+        xIoContext *                  _IoContextPtr = nullptr;
         iListener *                   _ListenerPtr = nullptr;
-        xPacketBufferQueue            _WritePacketBufferQueue;
-        size_t                        _WriteDataSize = 0;
-
-        ubyte                         _ReadBuffer[MaxPacketSize + 1];
-        size_t                        _ReadDataSize = 0;
-
         xDummy<16>                    _NativeContext;
         bool                          _Connected = false;
 

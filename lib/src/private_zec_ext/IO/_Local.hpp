@@ -22,20 +22,42 @@ using xBeastDynamicBuffer = boost::beast::multi_buffer;
 ZEC_NS
 {
 
-
     using xNativeIoContext = asio::io_context;
     using xNativeTcpResolver = tcp::resolver;
     using xNativeTcpSocket = tcp::socket;
     using xNativeTcpAcceptor = tcp::acceptor;
     using xNativeWebSocket = websocket::stream<tcp::socket>;
 
-    struct xTcpSocketContext : xNonCopyable{
-        xTcpSocketContext(xIoContext * IoContextPtr);
+    class xTcpSocketContext
+    : public xIoContext::xExpiringNode
+    , xNonCopyable
+    {
+    public:
+        xTcpSocketContext(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port);
         xTcpSocketContext(xIoNativeHandle Handle);
         ~xTcpSocketContext();
 
         tcp::socket Socket;
-        bool IsAbandoned = false;
+        xPacketBufferQueue            _WritePacketBufferQueue;
+        size_t                        _WriteDataSize = 0;
+        ubyte                         _ReadBuffer[MaxPacketSize + 1];
+        size_t                        _ReadDataSize = 0;
+
+        size_t PostData(const void * DataPtr, size_t DataSize);
+        void   Close();
+
+    private:
+        xPacketBuffer * NewWriteBuffer() { return new xPacketBuffer(); }
+        void DeleteWriteBuffer(xPacketBuffer * BufferPtr) { delete BufferPtr; }
+
+        void OnExpired();
+        void OnConnected();
+        void DoRead();
+        void DoFlush();
+        void OnError();
+        bool _Connected = false;
+        bool _Closing = false;
+        bool _Error = false;
     };
     using xSharedTcpSocketContextPtr = std::shared_ptr<xTcpSocketContext>;
 

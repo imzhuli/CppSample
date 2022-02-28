@@ -65,7 +65,7 @@ ZEC_NS
                 break;
             }
             Iter.Detach();
-            Iter.OnFinalIoExpired();
+            Iter.OnExpired();
         }
         _Native.As<xNativeIoContext>().run_for(std::chrono::microseconds(TimeoutMS));
     }
