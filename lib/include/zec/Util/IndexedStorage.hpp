@@ -224,7 +224,7 @@ ZEC_NS
 			if (Index >= _IdPoolSize || !(Key & xIndexId::KeyInUseBitmask) || Key != _IdPoolPtr[Index]) {
 				return {};
 			}
-			auto DeferedRelese = xScopeGuard{[&](){
+			auto DeferredRelese = xScopeGuard{[&](){
 				_StoragePtr[Index].~tValue();
 			}};
 			_IdPoolPtr[Index] = Steal(_NextFreeIdIndex, Index);

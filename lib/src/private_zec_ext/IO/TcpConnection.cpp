@@ -34,6 +34,7 @@ ZEC_NS
     {
         auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
         Context.reset(new xTcpSocketContext(NativeHandle));
+        _ReadBuffer[MaxPacketSize] = '\0';
         _ListenerPtr = ListenerPtr;
         return true;
     }

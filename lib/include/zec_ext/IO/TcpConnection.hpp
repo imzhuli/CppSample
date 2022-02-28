@@ -61,7 +61,7 @@ ZEC_NS
         xPacketBufferQueue            _WritePacketBufferQueue;
         size_t                        _WriteDataSize = 0;
 
-        ubyte                         _ReadBuffer[MaxPacketSize];
+        ubyte                         _ReadBuffer[MaxPacketSize + 1];
         size_t                        _ReadDataSize = 0;
 
         xDummy<16>                    _NativeContext;
