@@ -1,4 +1,14 @@
 #pragma once
+
+#define BOOST_ASIO_NO_DEPRECATED
+#define BOOST_ASIO_NO_TS_EXECUTORS
+#define BOOST_ASIO_DISABLE_BUFFER_DEBUGGING
+#define BOOST_ASIO_NO_TYPEID
+
+#ifndef ZEC_ASIO_MULTITHREAD
+#define BOOST_ASIO_DISABLE_THREADS
+#endif
+
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/beast.hpp>
@@ -21,6 +31,9 @@ using xBeastDynamicBuffer = boost::beast::multi_buffer;
 
 ZEC_NS
 {
+
+
+
 
     using xNativeIoContext = asio::io_context;
     using xNativeTcpResolver = tcp::resolver;
