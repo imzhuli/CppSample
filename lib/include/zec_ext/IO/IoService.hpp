@@ -2,11 +2,18 @@
 #include <zec/Common.hpp>
 #include <zec/List.hpp>
 #include <zec/Util/IniReader.hpp>
+#include <zec/Util/IndexedStorage.hpp>
 #include <zec/Util/Chrono.hpp>
 #include <string>
 
 ZEC_NS
 {
+    class xTcpServer;
+    class xTcpServerListener;
+    class xTcpConnection;
+    class xTcpConnectionListener;
+    class xResolver;
+    class xResolverListener;
 
     class xIoHandle
     {
