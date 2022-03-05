@@ -4,7 +4,8 @@
 ZEC_NS
 {
 
-    struct xNetAddress {
+    struct xNetAddress
+    {
         enum : uint8_t {
             eUnknown, eIpv4, eIpv6
         } Type = eUnknown;
@@ -23,5 +24,17 @@ ZEC_NS
         ZEC_API_STATIC_MEMBER xNetAddress MakeV4(const char * IpStr);
         ZEC_API_STATIC_MEMBER xNetAddress MakeV6(const char * IpStr);
     };
+
+    struct xTcpConnection {
+
+        enum ePhase : uint8_t {
+            eUnspecified,
+            eConnected,
+            eClosed,
+        } Phase = eUnspecified;
+
+
+
+    }
 
 }
