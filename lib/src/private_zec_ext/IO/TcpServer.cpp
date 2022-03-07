@@ -36,14 +36,14 @@
 // 		auto & Acceptor = _Native.As<xNativeTcpAcceptor>();
 // 		Acceptor.async_accept(*IOUtil::Native(_IoContextPtr), [this](const xAsioError & Error, xNativeTcpSocket Peer) {
 // 			if (!Error) {
-// 				OnAccept(xIoNativeHandle{&Peer});
+// 				OnAccept(xIoHandle{&Peer});
 // 			}
 // 			DoAccept();
 // 		});
 // 		return;
 // 	}
 
-// 	void xTcpServer::OnAccept(xIoNativeHandle NativeHandle)
+// 	void xTcpServer::OnAccept(xIoHandle NativeHandle)
 // 	{
 // 		auto NewConnectionPtr = _ListenerPtr->OnNewConnection(_IoContextPtr, NativeHandle);
 // 		NewConnectionPtr->OnConnected();

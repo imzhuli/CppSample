@@ -100,7 +100,7 @@ ZEC_NS
 		}
 
 		template<typename T, typename ... Args>
-		ZEC_INLINE T * AlignedCreateWith(size_t vxAlignment, Args&& ... args) {
+		ZEC_INLINE T * AlignedCreateValue(size_t vxAlignment, Args&& ... args) {
 			void * p = this->Alloc(sizeof(T), vxAlignment);
 			try { new (p) T{ std::forward<Args>(args)... }; }
 			catch (...) { this->Free(p); throw; }
@@ -118,7 +118,7 @@ ZEC_NS
 		}
 
 		template<typename T, typename ... Args>
-		ZEC_INLINE T * CreateArrayWith(size_t n, Args&& ... args) {
+		ZEC_INLINE T * CreateValueArray(size_t n, Args&& ... args) {
 			void * p = this->Alloc(sizeof(T) * n, AllocAlignSize<T>);
 			try { new (p) T[n] { std::forward<Args>(args)... }; }
 			catch (...) { this->Free(p); throw; }

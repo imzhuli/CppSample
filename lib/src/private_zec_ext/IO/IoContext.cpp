@@ -6,7 +6,7 @@ ZEC_NS
 
     bool xIoContext::Init()
     {
-        _Native.CreateAs<xNativeIoContext>();
+        _Native.CreateValueAs<xNativeIoContext>(1);
         return true;
     }
 

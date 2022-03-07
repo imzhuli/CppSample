@@ -3,6 +3,7 @@
 #include <zec/Common.hpp>
 #include <atomic>
 #include "./IoContext.hpp"
+#include "./NetBase.hpp"
 #include "./Packet.hpp"
 #include "./PacketBuffer.hpp"
 
@@ -37,7 +38,7 @@ ZEC_NS
         ZEC_API_MEMBER xTcpConnection();
         ZEC_API_MEMBER ~xTcpConnection();
 
-        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, xIoNativeHandle NativeHandle, iListener * ListenerPtr);
+        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, xIoHandle NativeHandle, iListener * ListenerPtr);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port, iListener * ListenerPtr);
         /***
@@ -57,6 +58,7 @@ ZEC_NS
         iListener *                   _ListenerPtr = nullptr;
         xDummy<16>                    _NativeContext;
         bool                          _Connected = false;
+        bool                          _Suspend = false;
 
         friend class __detail__::IOUtil;
         friend class xTcpServer;

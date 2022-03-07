@@ -14,7 +14,7 @@
 // : public xTcpConnection::iListener
 // , public xTcpServer::iListener
 // {
-// 	virtual xTcpConnection * OnNewConnection(xIoContext * IoContextPtr,  xIoNativeHandle NativeHandle) override
+// 	virtual xTcpConnection * OnNewConnection(xIoContext * IoContextPtr,  xIoHandle NativeHandle) override
 // 	{
 // 		auto ConnPtr = new xTcpConnection;
 // 		ConnPtr->Init(IoContextPtr, NativeHandle, this);

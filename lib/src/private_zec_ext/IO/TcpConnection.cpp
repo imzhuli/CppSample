@@ -1,26 +1,26 @@
-// #include <zec_ext/IO/TcpConnection.hpp>
-// #include <cstring>
-// #include "./_Local.hpp"
+#include <zec_ext/IO/TcpConnection.hpp>
+#include <cstring>
+#include "./_Local.hpp"
 
-// #include <iostream>
+#include <iostream>
 
-// ZEC_NS
-// {
+ZEC_NS
+{
 
-//     xTcpSocketContext::xTcpSocketContext(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port)
-//     : Socket(*IOUtil::Native(IoContextPtr))
-//     {
-//         _ReadBuffer[MaxPacketSize] = '\0';
-//         Socket.async_connect(MakeEndpoint(Address, Port), [this](const xAsioError & Error) {
-//             if (Error) {
-//                 OnError();
-//                 return;
-//             }
-//             OnConnected();
-//         });
-//     }
+    xTcpSocketContext::xTcpSocketContext(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port)
+    : Socket(*IOUtil::Native(IoContextPtr))
+    {
+        _ReadBuffer[MaxPacketSize] = '\0';
+        Socket.async_connect(MakeEndpoint(Address, Port), [this](const xAsioError & Error) {
+            if (Error) {
+                OnError();
+                return;
+            }
+            OnConnected();
+        });
+    }
 
-//     xTcpSocketContext::xTcpSocketContext(xIoNativeHandle NativeHandle)
+//     xTcpSocketContext::xTcpSocketContext(xIoHandle NativeHandle)
 //     : Socket(std::move(NativeHandle.GetRefAs<xNativeTcpSocket>()))
 //     {
 //         _ReadBuffer[MaxPacketSize] = '\0';
@@ -120,7 +120,7 @@
 //         _NativeContext.DestroyAs<xSharedTcpSocketContextPtr>();
 //     }
 
-//     bool xTcpConnection::Init(xIoContext * IoContextPtr, xIoNativeHandle NativeHandle, iListener * ListenerPtr)
+//     bool xTcpConnection::Init(xIoContext * IoContextPtr, xIoHandle NativeHandle, iListener * ListenerPtr)
 //     {
 //         _IoContextPtr = IoContextPtr;
 //         auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
@@ -167,4 +167,4 @@
 //         return Context->PostData(DataPtr, DataSize);
 //     }
 
-// }
+}
