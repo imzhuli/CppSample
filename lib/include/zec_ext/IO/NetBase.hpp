@@ -1,5 +1,6 @@
 #pragma once
 #include <zec/Common.hpp>
+#include <string>
 
 ZEC_NS
 {
@@ -14,27 +15,39 @@ ZEC_NS
             ubyte Ipv4[4];
             ubyte Ipv6[16];
         };
+        uint16_t Port = 0;
 
         ZEC_INLINE bool IsV4() const { return Type == eIpv4; }
         ZEC_INLINE bool IsV6() const { return Type == eIpv6; }
         ZEC_INLINE operator bool () const { return Type != eUnknown; }
         ZEC_API_MEMBER std::string ToString() const;
 
-        ZEC_API_STATIC_MEMBER xNetAddress Make(const char * IpStr);
-        ZEC_API_STATIC_MEMBER xNetAddress MakeV4(const char * IpStr);
-        ZEC_API_STATIC_MEMBER xNetAddress MakeV6(const char * IpStr);
+        ZEC_API_STATIC_MEMBER xNetAddress Make(const char * IpStr,   uint16_t Port = 0);
+        ZEC_API_STATIC_MEMBER xNetAddress MakeV4(const char * IpStr, uint16_t Port = 0);
+        ZEC_API_STATIC_MEMBER xNetAddress MakeV6(const char * IpStr, uint16_t Port = 0);
     };
 
-    struct xTcpConnection {
-
+    class xTcpConnection
+    {
         enum ePhase : uint8_t {
             eUnspecified,
             eConnected,
             eClosed,
         } Phase = eUnspecified;
 
+    };
+
+    class xTcpServer
+    {
+    public:
+        bool Init(const xNetAddress & Address);
+        void Clean();
+
+    private:
 
 
-    }
+    };
+
+
 
 }

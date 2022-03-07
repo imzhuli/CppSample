@@ -283,6 +283,13 @@ ZEC_NS
 				return reinterpret_cast<T&>(_PlaceHolder);
 			}
 
+			template<typename T>
+			ZEC_INLINE const T & As() const {
+				static_assert(alignof(_PlaceHolder) >= alignof(T));
+				static_assert(sizeof(_PlaceHolder) >= sizeof(T));
+				return reinterpret_cast<const T&>(_PlaceHolder);
+			}
+
 			static constexpr const size_t Size = TargetSize;
 
 		private:

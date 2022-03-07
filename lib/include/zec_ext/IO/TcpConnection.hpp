@@ -3,7 +3,8 @@
 #include <zec/Common.hpp>
 #include <atomic>
 #include "./IoContext.hpp"
-#include "./PacketData.hpp"
+#include "./Packet.hpp"
+#include "./PacketBuffer.hpp"
 
 ZEC_NS
 {

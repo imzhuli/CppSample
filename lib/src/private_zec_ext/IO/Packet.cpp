@@ -1,4 +1,4 @@
-#include <zec_ext/IO/PacketData.hpp>
+#include <zec_ext/IO/Packet.hpp>
 #include <zec/Byte.hpp>
 
 ZEC_NS

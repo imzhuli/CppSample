@@ -5,16 +5,14 @@
 #define BOOST_ASIO_DISABLE_BUFFER_DEBUGGING
 #define BOOST_ASIO_NO_TYPEID
 
-#ifndef ZEC_ASIO_MULTITHREAD
-#define BOOST_ASIO_DISABLE_THREADS
-#endif
-
 #include <boost/asio.hpp>
 #include <boost/asio/ssl.hpp>
 #include <boost/beast.hpp>
 #include <boost/beast/websocket/ssl.hpp>
 #include <zec_ext/IO/IoContext.hpp>
-#include <zec_ext/IO/TcpConnection.hpp>
+#include <zec_ext/IO/NetBase.hpp>
+#include <zec_ext/IO/Packet.hpp>
+#include <zec_ext/IO/PacketBuffer.hpp>
 
 namespace asio        = boost::asio;
 namespace beast       = boost::beast;
@@ -32,25 +30,28 @@ using xBeastDynamicBuffer = boost::beast::multi_buffer;
 ZEC_NS
 {
 
-
-
-
     using xNativeIoContext = asio::io_context;
-    using xNativeTcpResolver = tcp::resolver;
-    using xNativeTcpSocket = tcp::socket;
-    using xNativeTcpAcceptor = tcp::acceptor;
-    using xNativeWebSocket = websocket::stream<tcp::socket>;
+    // using xNativeTcpSocket = tcp::socket;
+    // using xNativeTcpAcceptor = tcp::acceptor;
+    // using xNativeWebSocket = websocket::stream<tcp::socket>;
+
+    class xIoCaster final
+    : xNonCopyable
+    {
+    public:
+        ZEC_INLINE xNativeIoContext & operator ()(xIoContext & IoContext) const { return IoContext._Native.As<xNativeIoContext>(); }
+
+    };
 
     class xTcpSocketContext
-    : public xIoContext::xExpiringNode
-    , xNonCopyable
+    :  xNonCopyable
     {
     public:
         xTcpSocketContext(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port);
-        xTcpSocketContext(xIoNativeHandle Handle);
+        xTcpSocketContext(xIoHandle Handle);
         ~xTcpSocketContext();
 
-        tcp::socket Socket;
+        tcp::socket                   _Socket;
         xPacketBufferQueue            _WritePacketBufferQueue;
         size_t                        _WriteDataSize = 0;
         ubyte                         _ReadBuffer[MaxPacketSize + 1];
@@ -75,27 +76,20 @@ ZEC_NS
     using xSharedTcpSocketContextPtr = std::shared_ptr<xTcpSocketContext>;
 
     using xTcpEndpoint = tcp::endpoint;
-    ZEC_STATIC_INLINE xTcpEndpoint MakeEndpoint(const xNetAddress & Address, uint16_t Port) {
+    ZEC_STATIC_INLINE xTcpEndpoint MakeEndpoint(const xNetAddress & Address) {
         if (Address.IsV4()) {
             static_assert(std::tuple_size<ip::address_v4::bytes_type>() == 4);
             ip::address_v4::bytes_type Bytes;
             memcpy(Bytes.data(), Address.Ipv4, 4);
-            return { ip::make_address_v4(Bytes), Port };
+            return { ip::make_address_v4(Bytes), Address.Port };
         } else if (Address.IsV6()) {
             static_assert(std::tuple_size<ip::address_v6::bytes_type>() == 16);
             ip::address_v6::bytes_type Bytes;
             memcpy(Bytes.data(), Address.Ipv6, 16);
-            return { ip::make_address_v6(Bytes), Port };
+            return { ip::make_address_v6(Bytes), Address.Port };
         }
         return {};
     }
 
-    namespace __detail__ {
-        class IOUtil {
-        public:
-            ZEC_STATIC_INLINE xNativeIoContext *    Native(xIoContext * IoContextPtr)  { return &IoContextPtr->_Native.As<xNativeIoContext>(); }
-        };
-    }
-    using IOUtil = __detail__::IOUtil;
 
 }

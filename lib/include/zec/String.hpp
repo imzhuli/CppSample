@@ -7,6 +7,7 @@
 
 ZEC_NS
 {
+    using namespace std::literals::string_view_literals;
 
 	ZEC_API               std::vector<std::string> Split(const std::string_view & s, const char * d, size_t len);
 	ZEC_STATIC_INLINE     std::vector<std::string> Split(const std::string_view & s, const char * d) { return Split(s, d, strlen(d)); }

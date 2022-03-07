@@ -1,20 +1,17 @@
 #pragma once
 
 #include <zec/Common.hpp>
+#include <zec/String.hpp>
 #include <zec/List.hpp>
 #include <zec_ext/Utility/TimeoutList.hpp>
-#include <string_view>
 #include <string>
 #include <vector>
 #include <map>
-
 #include "./IoContext.hpp"
+#include "./NetBase.hpp"
 
 ZEC_NS
 {
-    namespace __detail__ {
-        class IOUtil;
-    }
 
     class xTcpResolver
     : xNonCopyable
@@ -47,9 +44,7 @@ ZEC_NS
         xTimeoutList<>                              _RequestTimeoutList;
         xTimeoutList<>                              _CacheTimeoutList;
         std::map<std::string, xResolveNode>         _ResolveMap;
-
-        xDummy<72>                                  _Native;
-        friend class __detail__::IOUtil;
+        xDummy<16>                                  _Native;
     };
 
 }

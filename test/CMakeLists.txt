@@ -51,7 +51,7 @@ add_sub_test(uuid)
 add_sub_buildonly(asio)
 add_sub_buildonly(asio_connection)
 add_sub_buildonly(asio_tcpserver)
-add_sub_buildonly(websocket)
+add_sub_buildonly(asio_websocket)
 
 add_test(
 	NAME cmd_short_long_empty
