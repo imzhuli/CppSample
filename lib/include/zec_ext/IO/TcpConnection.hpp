@@ -44,6 +44,8 @@ ZEC_NS
          * @return Unbuffered Data Size
          * */
         ZEC_API_MEMBER size_t PostData(const void * DataPtr, size_t DataSize);
+        ZEC_API_MEMBER void SuspendReading();
+        ZEC_API_MEMBER void ResumeReading();
         ZEC_API_MEMBER void Clean();
 
     private:

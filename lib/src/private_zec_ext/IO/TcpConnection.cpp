@@ -2,7 +2,6 @@
 #include "./_Local.hpp"
 #include "./TcpConnection.hpp"
 #include <cstring>
-#include <iostream>
 
 ZEC_NS
 {
@@ -72,7 +71,7 @@ ZEC_NS
             return;
         }
         size_t BufferSize = MaxPacketSize - _ReadDataSize;
-        _Socket.async_read_some(xAsioMutableBuffer{_ReadBuffer + _ReadDataSize, BufferSize}, [this, R=Retainer{*this}](const xAsioError & Error, size_t TransferedSize) {
+        _Socket.async_read_some(xAsioMutableBuffer{_ReadBuffer + _ReadDataSize, BufferSize}, [this, R=Retainer{*this}, EntryGuard=_ReadCallbackEntry.Guard()](const xAsioError & Error, size_t TransferedSize) {
             if (Error) {
                 if (Error == asio::error::eof) {
                     _ConnectionState = eConnectionClosed;
@@ -85,8 +84,8 @@ ZEC_NS
                 OnError();
                 return;
             }
-            auto EntryGuard = _ReadCallbackEntry.Guard();
             _ReadDataSize += TransferedSize;
+
             auto DataPtr = _ReadBuffer;
             auto DataSize = _ReadDataSize;
             while(DataSize) {
@@ -117,8 +116,7 @@ ZEC_NS
     void xTcpSocketContext::ResumeReading()
     {
         _ReadState = eReading;
-        auto Guard = _ReadCallbackEntry.Guard();
-        if (!Guard) {
+        if (auto Guard = _ReadCallbackEntry.Guard()) {
             DoRead();
         }
     }
@@ -171,7 +169,9 @@ ZEC_NS
         _ConnectionState = eConnected;
         if (_ListenerPtr) {
             _ListenerPtr->OnConnected(_ListenerContextPtr);
-            DoRead();
+            if (auto Guard = _ReadCallbackEntry.Guard()) {
+                DoRead();
+            }
             if (!_WritePacketBufferQueue.IsEmpty()) {
                 DoFlush();
             }
@@ -241,6 +241,16 @@ ZEC_NS
     {
         assert(_SocketPtr);
         return _SocketPtr->PostData(DataPtr, DataSize);
+    }
+    void xTcpConnection::SuspendReading()
+    {
+        assert(_SocketPtr);
+        _SocketPtr->SuspendReading();
+    }
+    void xTcpConnection::ResumeReading()
+    {
+        assert(_SocketPtr);
+        _SocketPtr->ResumeReading();
     }
 
 }

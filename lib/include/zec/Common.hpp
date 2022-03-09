@@ -228,8 +228,8 @@ ZEC_NS
 				class xGuard : xNonCopyable
 				{
 				public:
-					xGuard(xCounter& CounterRef) : _CounterRef(CounterRef), _Reentry(CounterRef++) {};
-					// xGuard(xGuard && Other) : _CounterRef(Other._CounterRef), _Reentry(Other._Reentry) { ++_CounterRef; };
+					xGuard(xCounter& CounterRef) : _CounterRef(CounterRef), _Reentry(!CounterRef++) {};
+					xGuard(xGuard && Other) : _CounterRef(Other._CounterRef), _Reentry(Other._Reentry) { ++_CounterRef; };
 					~xGuard() { --_CounterRef; }
 					operator bool () const { return _Reentry; }
 

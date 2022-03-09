@@ -55,14 +55,20 @@ private:
         TcpConnection.PostData(Request.data(), Request.length());
     }
 
-    void OnConnected(xTcpConnection * xTcpConnection)
+    void OnConnected(xTcpConnection * TcpConnectionPtr)
     {
         cout << "Connected" << endl;
+        TcpConnectionPtr->SuspendReading();
+        TcpConnectionPtr->ResumeReading();
     }
 
     size_t OnData(xTcpConnection * TcpConnectionPtr, const void * DataPtr, size_t DataSize) override
     {
         Data.append((const char *)DataPtr, DataSize);
+        cout << "Data: " << endl;
+        cout << HexShow(DataPtr, DataSize) << endl;
+        TcpConnectionPtr->SuspendReading();
+        TcpConnectionPtr->ResumeReading();
         return DataSize;
     }
 
