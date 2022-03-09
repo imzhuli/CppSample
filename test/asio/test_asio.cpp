@@ -57,13 +57,16 @@ private:
 
     void OnConnected(xTcpConnection * TcpConnectionPtr)
     {
+        assert(&TcpConnection == TcpConnectionPtr);
         cout << "Connected" << endl;
         TcpConnectionPtr->SuspendReading();
         TcpConnectionPtr->ResumeReading();
     }
 
+    size_t Counter = 0;
     size_t OnData(xTcpConnection * TcpConnectionPtr, const void * DataPtr, size_t DataSize) override
     {
+        assert(&TcpConnection == TcpConnectionPtr);
         Data.append((const char *)DataPtr, DataSize);
         cout << "Data: " << endl;
         cout << HexShow(DataPtr, DataSize) << endl;
@@ -129,12 +132,12 @@ void test0 ()
         IoContext.LoopOnce(100);
     }
     Resolver.ClearTimeoutCacheNode();
-    Resolver.Request("www.baidu.com", { .I = 100 });
 
     Resolver.Clean();
     cout << "Resolver cleaned" << endl;
 
     Tester.Clean();
+    cout << "Tester cleaned" << endl;
 
     IoContext.Clean();
     cout << "IoContext cleaned" << endl;

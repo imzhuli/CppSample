@@ -154,7 +154,12 @@ ZEC_NS
 
     void xTcpSocketContext::Close()
     {
+        if (_ConnectionState >= eConnectionClosing) {
+            return;
+        }
         _ListenerPtr = nullptr;
+        _ConnectionState = eConnectionClosing;
+        _ReadState = eReadSuspended;
         DoClose();
     }
 
@@ -190,7 +195,7 @@ ZEC_NS
         return;
     }
 
-//     /* xTcpConnection */
+    /* xTcpConnection */
 
     xTcpConnection::xTcpConnection()
     {}
@@ -202,6 +207,10 @@ ZEC_NS
 
     bool xTcpConnection::Init(xIoContext * IoContextPtr, xIoHandle NativeHandle, iListener * ListenerPtr)
     {
+        assert(!_IoContextPtr);
+        assert(!_ListenerPtr);
+        assert(!_SocketPtr);
+
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
         _SocketPtr = new xTcpSocketContext(NativeHandle);
@@ -217,9 +226,9 @@ ZEC_NS
 
     bool xTcpConnection::Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr)
     {
-        assert(IoContextPtr);
-        assert(ListenerPtr);
-        assert(Address);
+        assert(!_IoContextPtr);
+        assert(!_ListenerPtr);
+        assert(!_SocketPtr);
 
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
@@ -230,12 +239,22 @@ ZEC_NS
 
     void xTcpConnection::Clean()
     {
-        _ListenerPtr = nullptr;
-        if(auto SocketPtr = Steal(_SocketPtr)) {
-            SocketPtr->Close();
-            SocketPtr->Release();
-        }
+        auto SocketPtr = Steal(_SocketPtr);
+        assert(SocketPtr);
+        SocketPtr->Close();
+        SocketPtr->Release();
     }
+
+    void xTcpConnection::ResizeSendBuffer(size_t Size)
+    {
+        _SocketPtr->ResizeSendBuffer(Size);
+    }
+
+    void xTcpConnection::ResizeReceiveBuffer(size_t Size)
+    {
+        _SocketPtr->ResizeReceiveBuffer(Size);
+    }
+
 
     size_t xTcpConnection::PostData(const void * DataPtr, size_t DataSize)
     {

@@ -39,6 +39,11 @@ ZEC_NS
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, xIoHandle NativeHandle, iListener * ListenerPtr);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr);
+        ZEC_API_MEMBER void Clean();
+
+        ZEC_API_MEMBER void ResizeSendBuffer(size_t Size);
+        ZEC_API_MEMBER void ResizeReceiveBuffer(size_t Size);
+
         /***
          * @brief aync post data, try to buffer(copy) data into internal buffer
          * @return Unbuffered Data Size
@@ -46,7 +51,6 @@ ZEC_NS
         ZEC_API_MEMBER size_t PostData(const void * DataPtr, size_t DataSize);
         ZEC_API_MEMBER void SuspendReading();
         ZEC_API_MEMBER void ResumeReading();
-        ZEC_API_MEMBER void Clean();
 
     private:
         ZEC_PRIVATE_MEMBER void OnConnected();
