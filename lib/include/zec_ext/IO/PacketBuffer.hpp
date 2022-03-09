@@ -1,3 +1,4 @@
+#pragma once
 #include "./Packet.hpp"
 
 ZEC_NS

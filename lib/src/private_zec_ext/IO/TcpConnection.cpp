@@ -1,17 +1,17 @@
-#include <zec_ext/IO/TcpConnection.hpp>
-#include <cstring>
-#include "./_Local.hpp"
 
+#include "./_Local.hpp"
+#include "./TcpConnection.hpp"
+#include <cstring>
 #include <iostream>
 
 ZEC_NS
 {
 
     xTcpSocketContext::xTcpSocketContext(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port)
-    : Socket(*IOUtil::Native(IoContextPtr))
+    : _Socket(xIoCaster()(*IoContextPtr))
     {
         _ReadBuffer[MaxPacketSize] = '\0';
-        Socket.async_connect(MakeEndpoint(Address, Port), [this](const xAsioError & Error) {
+        _Socket.async_connect(MakeTcpEndpoint(Address), [this](const xAsioError & Error) {
             if (Error) {
                 OnError();
                 return;

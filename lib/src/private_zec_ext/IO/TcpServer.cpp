@@ -17,7 +17,7 @@
 // 		_IoContextPtr = IoContextPtr;
 // 		_ListenerPtr = ListenerPtr;
 
-// 		auto & Acceptor = _Native.CreateValueAs<xNativeTcpAcceptor>(*IOUtil::Native(IoContextPtr), MakeEndpoint(Address, Port));
+// 		auto & Acceptor = _Native.CreateValueAs<xNativeTcpAcceptor>(*IOUtil::Native(IoContextPtr), MakeTcpEndpoint(Address, Port));
 // 		xNativeTcpSocket::reuse_address Option(true);
 // 		Acceptor.set_option(Option);
 // 		DoAccept();

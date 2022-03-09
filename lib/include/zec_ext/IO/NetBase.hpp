@@ -27,16 +27,6 @@ ZEC_NS
         ZEC_API_STATIC_MEMBER xNetAddress MakeV6(const char * IpStr, uint16_t Port = 0);
     };
 
-    class xTcpConnection
-    {
-        enum ePhase : uint8_t {
-            eUnspecified,
-            eConnected,
-            eClosed,
-        } Phase = eUnspecified;
-
-    };
-
     class xTcpServer
     {
     public:

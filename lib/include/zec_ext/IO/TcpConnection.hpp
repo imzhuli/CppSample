@@ -10,9 +10,6 @@
 ZEC_NS
 {
 
-    namespace __detail__ {
-        class IOUtil;
-    }
     class xTcpConnection;
     class xTcpServer;
 
@@ -54,14 +51,15 @@ ZEC_NS
         ZEC_PRIVATE_MEMBER void DoRead();
 
     private:
+        enum ePhase : uint8_t {
+            eUnspecified,
+            eConnecting,
+            eConnected,
+        } _Phase = eUnspecified;
+
         xIoContext *                  _IoContextPtr = nullptr;
         iListener *                   _ListenerPtr = nullptr;
         xDummy<16>                    _NativeContext;
-        bool                          _Connected = false;
-        bool                          _Suspend = false;
-
-        friend class __detail__::IOUtil;
-        friend class xTcpServer;
     };
 
 }
