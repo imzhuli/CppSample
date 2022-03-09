@@ -26,18 +26,11 @@ ZEC_NS
     , xNonCopyable
     {
     public:
-        struct iListener {
-            virtual void OnConnected(xTcpSocketContext * ContextPtr) {};
-            virtual void OnPeerClose(xTcpSocketContext * ContextPtr) {};
-            virtual void OnError(xTcpSocketContext * ContextPtr) {};
-            virtual size_t OnData(xTcpSocketContext * ContextPtr, const void * DataPtr, size_t DataSize);
-        };
-
-        ZEC_API_MEMBER xTcpSocketContext(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port);
+        ZEC_API_MEMBER xTcpSocketContext(xIoContext * IoContextPtr, const xNetAddress & Address);
         ZEC_API_MEMBER xTcpSocketContext(xIoHandle Handle);
         ZEC_API_MEMBER ~xTcpSocketContext();
 
-        ZEC_INLINE void BindListener(iListener * ListenerPtr) { _ListenerPtr = ListenerPtr; }
+        ZEC_INLINE void BindListener(xTcpConnection::iListener * ListenerPtr, xTcpConnection * ListenerContextPtr) { _ListenerPtr = ListenerPtr; _ListenerContextPtr = ListenerContextPtr; }
         ZEC_INLINE bool IsReadingSusppended() { return eReading != _ReadState; }
 
         ZEC_API_MEMBER size_t PostData(const void * DataPtr, size_t DataSize);
@@ -62,7 +55,8 @@ ZEC_NS
         ubyte                         _ReadBuffer[MaxPacketSize + 1];
         size_t                        _ReadDataSize = 0;
         xReentryFlag                  _ReadCallbackEntry;
-        iListener *                   _ListenerPtr;
+        xTcpConnection::iListener *   _ListenerPtr;
+        xTcpConnection *              _ListenerContextPtr;
 
         enum eConnectionState {
             eUnspecified,

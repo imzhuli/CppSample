@@ -10,6 +10,7 @@
 ZEC_NS
 {
 
+    class xTcpSocketContext;
     class xTcpConnection;
     class xTcpServer;
 
@@ -26,7 +27,7 @@ ZEC_NS
              * called when there is some data in,
              * @return consumed bytes
              * */
-            virtual size_t  OnReceiveData(xTcpConnection * TcpConnectionPtr, const void * DataPtr, size_t DataSize) { return 0; }
+            virtual size_t  OnData(xTcpConnection * TcpConnectionPtr, const void * DataPtr, size_t DataSize) { return 0; }
             virtual void    OnPeerClose(xTcpConnection * TcpConnectionPtr)  {}
             virtual void    OnError(xTcpConnection * TcpConnectionPtr) {}
         };
@@ -37,7 +38,7 @@ ZEC_NS
 
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, xIoHandle NativeHandle, iListener * ListenerPtr);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr);
-        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port, iListener * ListenerPtr);
+        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr);
         /***
          * @brief aync post data, try to buffer(copy) data into internal buffer
          * @return Unbuffered Data Size
@@ -59,7 +60,7 @@ ZEC_NS
 
         xIoContext *                  _IoContextPtr = nullptr;
         iListener *                   _ListenerPtr = nullptr;
-        xDummy<16>                    _NativeContext;
+        xTcpSocketContext *           _SocketPtr = nullptr;
     };
 
 }

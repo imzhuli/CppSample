@@ -7,7 +7,7 @@
 ZEC_NS
 {
 
-    xTcpSocketContext::xTcpSocketContext(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port)
+    xTcpSocketContext::xTcpSocketContext(xIoContext * IoContextPtr, const xNetAddress & Address)
     : _Socket(xIoCaster()(*IoContextPtr))
     {
         _ReadBuffer[MaxPacketSize] = '\0';
@@ -24,11 +24,13 @@ ZEC_NS
     xTcpSocketContext::xTcpSocketContext(xIoHandle Handle)
     : _Socket(std::move(Handle.AsRef<xTcpSocket>()))
     {
+        _ConnectionState = eConnected;
         _ReadBuffer[MaxPacketSize] = '\0';
     }
 
     xTcpSocketContext::~xTcpSocketContext()
     {
+        assert(_ConnectionState >= eConnectionClosed);
         while(auto WriteBufferPtr = _WritePacketBufferQueue.Pop()) {
             DeleteWriteBuffer(WriteBufferPtr);
         }
@@ -75,7 +77,7 @@ ZEC_NS
                 if (Error == asio::error::eof) {
                     _ConnectionState = eConnectionClosed;
                     if (auto ListenerPtr = Steal(_ListenerPtr)) {
-                        ListenerPtr->OnPeerClose(this);
+                        ListenerPtr->OnPeerClose(_ListenerContextPtr);
                         DoClose();
                     }
                     return;
@@ -93,7 +95,7 @@ ZEC_NS
                     _ReadDataSize = 0;
                     return;
                 }
-                size_t ConsumedDataSize = _ListenerPtr->OnData(this, DataPtr, DataSize);
+                size_t ConsumedDataSize = _ListenerPtr->OnData(_ListenerContextPtr, DataPtr, DataSize);
                 DataPtr += ConsumedDataSize;
                 DataSize -= ConsumedDataSize;
                 if (!ConsumedDataSize || _ReadState != eReading) {
@@ -161,13 +163,14 @@ ZEC_NS
     void xTcpSocketContext::DoClose()
     {
         _Socket.close(X2Ref(xAsioError{}));
+        _ConnectionState = eConnectionClosed;
     }
 
     void xTcpSocketContext::OnConnected()
     {
         _ConnectionState = eConnected;
         if (_ListenerPtr) {
-            _ListenerPtr->OnConnected(this);
+            _ListenerPtr->OnConnected(_ListenerContextPtr);
             DoRead();
             if (!_WritePacketBufferQueue.IsEmpty()) {
                 DoFlush();
@@ -182,70 +185,62 @@ ZEC_NS
         }
         _ConnectionState = eConnectionError;
         if (auto ListenerPtr = Steal(_ListenerPtr)) {
-            ListenerPtr->OnError(this);
+            ListenerPtr->OnError(_ListenerContextPtr);
         }
         return;
     }
 
 //     /* xTcpConnection */
 
-//     xTcpConnection::xTcpConnection()
-//     {
-//         _NativeContext.CreateAs<xSharedTcpSocketContextPtr>();
-//     }
+    xTcpConnection::xTcpConnection()
+    {}
 
-//     xTcpConnection::~xTcpConnection()
-//     {
-//         auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
-//         assert(!Context);
-//         _NativeContext.DestroyAs<xSharedTcpSocketContextPtr>();
-//     }
+    xTcpConnection::~xTcpConnection()
+    {
+        assert(!_SocketPtr);
+    }
 
-//     bool xTcpConnection::Init(xIoContext * IoContextPtr, xIoHandle NativeHandle, iListener * ListenerPtr)
-//     {
-//         _IoContextPtr = IoContextPtr;
-//         auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
-//         Context.reset(new xTcpSocketContext(NativeHandle));
-//         _ListenerPtr = ListenerPtr;
-//         return true;
-//     }
+    bool xTcpConnection::Init(xIoContext * IoContextPtr, xIoHandle NativeHandle, iListener * ListenerPtr)
+    {
+        _IoContextPtr = IoContextPtr;
+        _ListenerPtr = ListenerPtr;
+        _SocketPtr = new xTcpSocketContext(NativeHandle);
+        _SocketPtr->BindListener(_ListenerPtr, this);
+        return true;
+    }
 
-//     bool xTcpConnection::Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr)
-//     {
-//         xNetAddress Address = xNetAddress::Make(Ip);
-//         return Init(IoContextPtr, Address, Port, ListenerPtr);
-//     }
+    bool xTcpConnection::Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr)
+    {
+        xNetAddress Address = xNetAddress::Make(Ip, Port);
+        return Init(IoContextPtr, Address, ListenerPtr);
+    }
 
-//     bool xTcpConnection::Init(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port, iListener * ListenerPtr)
-//     {
-//         assert(IoContextPtr);
-//         assert(ListenerPtr);
-//         assert(Address);
-//         assert(Port);
+    bool xTcpConnection::Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr)
+    {
+        assert(IoContextPtr);
+        assert(ListenerPtr);
+        assert(Address);
 
-//         _IoContextPtr = IoContextPtr;
-//         auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
-//         Context.reset(new xTcpSocketContext(IoContextPtr));
-//         _ListenerPtr = ListenerPtr;
-//         return true;
-//     }
+        _IoContextPtr = IoContextPtr;
+        _ListenerPtr = ListenerPtr;
+        _SocketPtr = new xTcpSocketContext(IoContextPtr, Address);
+        _SocketPtr->BindListener(_ListenerPtr, this);
+        return true;
+    }
 
-//     void xTcpConnection::Clean()
-//     {
-//         _Connected = false;
-//         _ListenerPtr = nullptr;
+    void xTcpConnection::Clean()
+    {
+        _ListenerPtr = nullptr;
+        if(auto SocketPtr = Steal(_SocketPtr)) {
+            SocketPtr->Close();
+            SocketPtr->Release();
+        }
+    }
 
-//         auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
-//         if(Context) {
-//             _IoContextPtr->SetFinalExpiration(*Context);
-//             Context.reset();
-//         }
-//     }
-
-//     size_t xTcpConnection::PostData(const void * DataPtr, size_t DataSize)
-//     {
-//         auto & Context = _NativeContext.As<xSharedTcpSocketContextPtr>();
-//         return Context->PostData(DataPtr, DataSize);
-//     }
+    size_t xTcpConnection::PostData(const void * DataPtr, size_t DataSize)
+    {
+        assert(_SocketPtr);
+        return _SocketPtr->PostData(DataPtr, DataSize);
+    }
 
 }
