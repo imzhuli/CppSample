@@ -65,6 +65,28 @@ ZEC_NS
         return TotalPostedSize;
     }
 
+    void xTcpSocketContext::DoReadCallback()
+    {
+        auto DataPtr = _ReadBuffer;
+        auto DataSize = _ReadDataSize;
+        while(DataSize) {
+            if (!_ListenerPtr) {
+                _ReadState = eReadSuspended;
+                _ReadDataSize = 0;
+                return;
+            }
+            size_t ConsumedDataSize = _ListenerPtr->OnData(_ListenerContextPtr, DataPtr, DataSize);
+            DataPtr += ConsumedDataSize;
+            DataSize -= ConsumedDataSize;
+            if (!ConsumedDataSize || _ReadState != eReading) {
+                assert(DataSize);
+                memmove(_ReadBuffer, DataPtr, DataSize);
+                break;
+            }
+        }
+        _ReadDataSize = DataSize;
+    }
+
     void xTcpSocketContext::DoRead()
     {
         if (_ReadState != eReading) {
@@ -85,25 +107,7 @@ ZEC_NS
                 return;
             }
             _ReadDataSize += TransferedSize;
-
-            auto DataPtr = _ReadBuffer;
-            auto DataSize = _ReadDataSize;
-            while(DataSize) {
-                if (!_ListenerPtr) {
-                    _ReadState = eReadSuspended;
-                    _ReadDataSize = 0;
-                    return;
-                }
-                size_t ConsumedDataSize = _ListenerPtr->OnData(_ListenerContextPtr, DataPtr, DataSize);
-                DataPtr += ConsumedDataSize;
-                DataSize -= ConsumedDataSize;
-                if (!ConsumedDataSize || _ReadState != eReading) {
-                    assert(DataSize);
-                    memmove(_ReadBuffer, DataPtr, DataSize);
-                    break;
-                }
-            }
-            _ReadDataSize = DataSize;
+            DoReadCallback();
             DoRead();
         });
     }
@@ -117,6 +121,7 @@ ZEC_NS
     {
         _ReadState = eReading;
         if (auto Guard = _ReadCallbackEntry.Guard()) {
+            DoReadCallback();
             DoRead();
         }
     }
@@ -254,7 +259,6 @@ ZEC_NS
     {
         _SocketPtr->ResizeReceiveBuffer(Size);
     }
-
 
     size_t xTcpConnection::PostData(const void * DataPtr, size_t DataSize)
     {

@@ -49,6 +49,7 @@ ZEC_NS
         ZEC_API_MEMBER void OnExpired();
         ZEC_API_MEMBER void OnConnected();
         ZEC_API_MEMBER void DoRead();
+        ZEC_API_MEMBER void DoReadCallback();
         ZEC_API_MEMBER void DoFlush();
         ZEC_API_MEMBER void DoClose();
         ZEC_API_MEMBER void OnError();
