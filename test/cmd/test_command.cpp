@@ -6,7 +6,6 @@ using namespace std;
 
 int main(int argc, char * argv[])
 {
-
     // -abcv "Value for V" Arg1 --LongValue "LongValue" Arg2 --EmptyValue)
     // -abcv "Value for V" Arg1 --LongValue "LongValue" Arg2 -- SubCmd1 SubCmd2)
 	xCommandLine CommandLine(argc, argv, {

@@ -48,6 +48,7 @@ add_sub_test(rbtree)
 add_sub_test(uuid)
 #add_sub_test(thread)
 
+add_sub_buildonly(_)
 add_sub_buildonly(asio)
 add_sub_buildonly(asio_connection)
 add_sub_buildonly(asio_tcpserver)

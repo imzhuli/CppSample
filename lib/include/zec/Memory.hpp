@@ -1,6 +1,7 @@
 #pragma once
 #include "./Common.hpp"
 #include <atomic>
+#include <memory>
 #include <functional>
 
 ZEC_NS
@@ -17,12 +18,13 @@ ZEC_NS
 	public:
 		using RealType = std::conditional_t<cAtomic, std::atomic<T>, T>;
 
-	public:
+	protected:
 		ZEC_INLINE xRetainableBase() = default;
 		ZEC_INLINE xRetainableBase(T initCount) : _Count(initCount) {}
 		ZEC_INLINE xRetainableBase(const xRetainableBase &) {};
 		ZEC_INLINE xRetainableBase & operator = (const xRetainableBase &) { return *this; }
 
+	public:
 		ZEC_INLINE void Retain(T increment = 1) const { _Count += increment; }
 		ZEC_INLINE T Release(T decrement = 1) const { return _Count -= decrement; }
 		ZEC_INLINE T GetRetainCount() const { return static_cast<T>(_Count); }
@@ -31,6 +33,41 @@ ZEC_NS
 	private:
 		mutable RealType _Count{ 1 };
 	};
+
+	template<typename tRetainable, typename tDeleter>
+	class Retainer : xNonCopyable
+	{
+	public:
+		ZEC_INLINE Retainer(tRetainable & Target)
+		: _Target(Target), _Deleter{}
+		{
+			_Target.Retain();
+		}
+		ZEC_INLINE Retainer(tRetainable & Target, tDeleter & Deleter)
+		: _Target(Target), _Deleter(Deleter) {
+			_Target.Retain();
+		}
+		ZEC_INLINE Retainer(const Retainer &Other)
+		: _Target(Other._Target), _Deleter(Other._Deleter)
+		{
+			_Target.Retain();
+		}
+		ZEC_INLINE ~Retainer() {
+			if (_Target.Release()) {
+				return;
+			}
+			_Deleter(&_Target);
+		}
+
+	private:
+		tRetainable &  _Target;
+		tDeleter       _Deleter;
+	};
+	template<typename tRetainable>
+	Retainer(tRetainable &) -> Retainer<tRetainable, std::default_delete<tRetainable>>;
+
+	template<typename tRetainable, typename tDeleter>
+	Retainer(tRetainable &, tDeleter &) -> Retainer<tRetainable, tDeleter>;
 
 	using xRetainable8  = xRetainableBase<false, int8_t>;
 	using xRetainable16 = xRetainableBase<false, int16_t>;

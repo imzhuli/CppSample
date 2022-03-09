@@ -12,7 +12,7 @@ ZEC_NS
     {
         _ReadBuffer[MaxPacketSize] = '\0';
         _ConnectionState = eConnecting;
-        _Socket.async_connect(MakeTcpEndpoint(Address), [this](const xAsioError & Error) {
+        _Socket.async_connect(MakeTcpEndpoint(Address), [this, R=Retainer{*this}] (const xAsioError & Error) mutable {
             if (Error) {
                 OnError();
                 return;
@@ -64,10 +64,74 @@ ZEC_NS
         return TotalPostedSize;
     }
 
+    void xTcpSocketContext::DoRead()
+    {
+        if (_ReadState != eReading) {
+            return;
+        }
+        size_t BufferSize = MaxPacketSize - _ReadDataSize;
+        _Socket.async_read_some(xAsioMutableBuffer{_ReadBuffer + _ReadDataSize, BufferSize}, [this, R=Retainer{*this}](const xAsioError & Error, size_t TransferedSize) {
+            if (Error) {
+                if (Error == asio::error::eof) {
+                    _ConnectionState = eConnectionClosed;
+                    if (auto ListenerPtr = Steal(_ListenerPtr)) {
+                        ListenerPtr->OnPeerClose(this);
+                        DoClose();
+                    }
+                    return;
+                }
+                OnError();
+                return;
+            }
+            auto EntryGuard = _ReadCallbackEntry.Guard();
+            _ReadDataSize += TransferedSize;
+            auto DataPtr = _ReadBuffer;
+            auto DataSize = _ReadDataSize;
+            while(DataSize) {
+                if (!_ListenerPtr) {
+                    _ReadState = eReadSuspended;
+                    _ReadDataSize = 0;
+                    return;
+                }
+                size_t ConsumedDataSize = _ListenerPtr->OnData(this, DataPtr, DataSize);
+                DataPtr += ConsumedDataSize;
+                DataSize -= ConsumedDataSize;
+                if (!ConsumedDataSize || _ReadState != eReading) {
+                    assert(DataSize);
+                    memmove(_ReadBuffer, DataPtr, DataSize);
+                    break;
+                }
+            }
+            _ReadDataSize = DataSize;
+            DoRead();
+        });
+    }
+
+    void xTcpSocketContext::SuspendReading()
+    {
+        _ReadState = eReadSuspended;
+    }
+
+    void xTcpSocketContext::ResumeReading()
+    {
+        _ReadState = eReading;
+        auto Guard = _ReadCallbackEntry.Guard();
+        if (!Guard) {
+            DoRead();
+        }
+    }
+
     void xTcpSocketContext::DoFlush()
     {
         auto BufferPtr = _WritePacketBufferQueue.Peek();
-        _Socket.async_write_some(xAsioConstBuffer{BufferPtr->Buffer, BufferPtr->DataSize}, [this, BufferPtr](const xAsioError & Error, size_t TransferedBytes) {
+        if (!BufferPtr) {
+            if (_ConnectionState == eConnectionClosing) {
+                DoClose();
+            }
+            return;
+        }
+
+        _Socket.async_write_some(xAsioConstBuffer{BufferPtr->Buffer, BufferPtr->DataSize}, [this, R=Retainer{*this}, BufferPtr](const xAsioError & Error, size_t TransferedBytes) {
             if (Error) {
                 OnError();
                 return;
@@ -88,12 +152,26 @@ ZEC_NS
         });
     }
 
+    void xTcpSocketContext::Close()
+    {
+        _ListenerPtr = nullptr;
+        DoClose();
+    }
+
+    void xTcpSocketContext::DoClose()
+    {
+        _Socket.close(X2Ref(xAsioError{}));
+    }
+
     void xTcpSocketContext::OnConnected()
     {
         _ConnectionState = eConnected;
-        DoRead();
-        if (!_WritePacketBufferQueue.IsEmpty()) {
-            DoFlush();
+        if (_ListenerPtr) {
+            _ListenerPtr->OnConnected(this);
+            DoRead();
+            if (!_WritePacketBufferQueue.IsEmpty()) {
+                DoFlush();
+            }
         }
     }
 
@@ -103,6 +181,9 @@ ZEC_NS
             return;
         }
         _ConnectionState = eConnectionError;
+        if (auto ListenerPtr = Steal(_ListenerPtr)) {
+            ListenerPtr->OnError(this);
+        }
         return;
     }
 

@@ -1,4 +1,5 @@
 #pragma once
+#include <zec/Memory.hpp>
 #include <zec_ext/IO/TcpConnection.hpp>
 
 ZEC_NS
@@ -21,21 +22,27 @@ ZEC_NS
     }
 
     class xTcpSocketContext
-    :  xNonCopyable
+    : public xRetainable
+    , xNonCopyable
     {
     public:
+        struct iListener {
+            virtual void OnConnected(xTcpSocketContext * ContextPtr) {};
+            virtual void OnPeerClose(xTcpSocketContext * ContextPtr) {};
+            virtual void OnError(xTcpSocketContext * ContextPtr) {};
+            virtual size_t OnData(xTcpSocketContext * ContextPtr, const void * DataPtr, size_t DataSize);
+        };
+
         ZEC_API_MEMBER xTcpSocketContext(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port);
         ZEC_API_MEMBER xTcpSocketContext(xIoHandle Handle);
         ZEC_API_MEMBER ~xTcpSocketContext();
 
-        xTcpSocket                    _Socket;
-        xPacketBufferQueue            _WritePacketBufferQueue;
-        size_t                        _WriteDataSize = 0;
-        ubyte                         _ReadBuffer[MaxPacketSize + 1];
-        size_t                        _ReadDataSize = 0;
+        ZEC_INLINE void BindListener(iListener * ListenerPtr) { _ListenerPtr = ListenerPtr; }
+        ZEC_INLINE bool IsReadingSusppended() { return eReading != _ReadState; }
 
         ZEC_API_MEMBER size_t PostData(const void * DataPtr, size_t DataSize);
         ZEC_API_MEMBER void   SuspendReading();
+        ZEC_API_MEMBER void   ResumeReading();
         ZEC_API_MEMBER void   Close();
 
     private:
@@ -46,7 +53,16 @@ ZEC_NS
         ZEC_API_MEMBER void OnConnected();
         ZEC_API_MEMBER void DoRead();
         ZEC_API_MEMBER void DoFlush();
+        ZEC_API_MEMBER void DoClose();
         ZEC_API_MEMBER void OnError();
+
+        xTcpSocket                    _Socket;
+        xPacketBufferQueue            _WritePacketBufferQueue;
+        size_t                        _WriteDataSize = 0;
+        ubyte                         _ReadBuffer[MaxPacketSize + 1];
+        size_t                        _ReadDataSize = 0;
+        xReentryFlag                  _ReadCallbackEntry;
+        iListener *                   _ListenerPtr;
 
         enum eConnectionState {
             eUnspecified,
@@ -59,7 +75,6 @@ ZEC_NS
 
         enum eReadState {
             eReading,
-            eReadToBeSuspended,
             eReadSuspended,
         } _ReadState;
     };

@@ -5,6 +5,7 @@
 #include <new>
 #include <utility>
 #include <type_traits>
+#include <atomic>
 #include <cstdint>
 #include <cstddef>
 #include <cstdlib>
@@ -217,6 +218,38 @@ ZEC_NS
 		xScopeGuard(const tEntry& Entry, const tExit& Exit) -> xScopeGuard<std::decay_t<tEntry>, std::decay_t<tExit>>;
 		template<typename tExit>
 		xScopeGuard(const tExit& Exit) -> xScopeGuard<xPass, std::decay_t<tExit>>;
+
+		namespace __detail__ {
+			template<bool IsAtomic = false>
+			class xReentryFlag final : xNonCopyable
+			{
+			private:
+				using xCounter = std::conditional_t<IsAtomic, std::atomic_uint64_t, uint64_t>;
+				class xGuard : xNonCopyable
+				{
+				public:
+					xGuard(xCounter& CounterRef) : _CounterRef(CounterRef), _Reentry(CounterRef++) {};
+					// xGuard(xGuard && Other) : _CounterRef(Other._CounterRef), _Reentry(Other._Reentry) { ++_CounterRef; };
+					~xGuard() { --_CounterRef; }
+					operator bool () const { return _Reentry; }
+
+				private:
+					xCounter &   _CounterRef;
+					bool         _Reentry;
+					friend class xReentryFlag;
+				};
+			public:
+				xGuard Guard() { return xGuard(_Counter); }
+
+			private:
+				xCounter _Counter {};
+
+			};
+		}
+
+		using xReentryFlag = __detail__::xReentryFlag<false>;
+		using xAtomicReentryFlag = __detail__::xReentryFlag<true>;
+
 
 		template<typename T>
 		class xResourceGuard final : xNonCopyable {
