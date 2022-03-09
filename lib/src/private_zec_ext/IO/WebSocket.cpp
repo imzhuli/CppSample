@@ -1,8 +1,7 @@
+#include "./_Local.hpp"
 #include <zec_ext/IO/WebSocket.hpp>
 #include <array>
-#include <iostream>
 #include <memory>
-#include "./_Local.hpp"
 
 ZEC_NS
 {
