@@ -11,6 +11,7 @@ ZEC_NS
     : _Socket(xIoCaster()(*IoContextPtr))
     {
         _ReadBuffer[MaxPacketSize] = '\0';
+        _ConnectionState = eConnecting;
         _Socket.async_connect(MakeTcpEndpoint(Address), [this](const xAsioError & Error) {
             if (Error) {
                 OnError();
@@ -20,91 +21,90 @@ ZEC_NS
         });
     }
 
-//     xTcpSocketContext::xTcpSocketContext(xIoHandle NativeHandle)
-//     : Socket(std::move(NativeHandle.GetRefAs<xNativeTcpSocket>()))
-//     {
-//         _ReadBuffer[MaxPacketSize] = '\0';
-//     }
+    xTcpSocketContext::xTcpSocketContext(xIoHandle Handle)
+    : _Socket(std::move(Handle.AsRef<xTcpSocket>()))
+    {
+        _ReadBuffer[MaxPacketSize] = '\0';
+    }
 
-//     xTcpSocketContext::~xTcpSocketContext()
-//     {
-//         while(auto WriteBufferPtr = _WritePacketBufferQueue.Pop()) {
-//             DeleteWriteBuffer(WriteBufferPtr);
-//         }
-//     }
+    xTcpSocketContext::~xTcpSocketContext()
+    {
+        while(auto WriteBufferPtr = _WritePacketBufferQueue.Pop()) {
+            DeleteWriteBuffer(WriteBufferPtr);
+        }
+    }
 
-//     size_t xTcpSocketContext::PostData(const void * DataPtr_, size_t DataSize)
-//     {
-//         assert(DataSize);
-//         if (_Error) {
-//             return 0;
-//         }
-//         bool ExecWriteCall = (!_WriteDataSize && _Connected);
-//         auto DataPtr = (const ubyte *)DataPtr_;
-//         auto PostSize = _WritePacketBufferQueue.Push(DataPtr, DataSize);
-//         auto RemainedDataSize = DataSize - PostSize;
-//         while(RemainedDataSize) {
-//             DataPtr += PostSize;
-//             auto BufferPtr = NewWriteBuffer();
-//             if (!BufferPtr) {
-//                 if (DataSize == RemainedDataSize) {
-//                     return 0;
-//                 }
-//                 break;
-//             }
-//             _WritePacketBufferQueue.Push(BufferPtr);
-//             RemainedDataSize -= (PostSize = BufferPtr->Push(DataPtr, RemainedDataSize));
-//         }
-//         size_t TotalPostedSize = DataSize - RemainedDataSize;
-//         _WriteDataSize += TotalPostedSize;
-//         if (ExecWriteCall) {
-//             DoFlush();
-//         }
-//         return TotalPostedSize;
-//     }
+    size_t xTcpSocketContext::PostData(const void * DataPtr_, size_t DataSize)
+    {
+        assert(DataSize);
+        if (_ConnectionState >= eConnectionClosing) {
+            return 0;
+        }
+        bool ExecWriteCall = (!_WriteDataSize && _ConnectionState == eConnected);
+        auto DataPtr = (const ubyte *)DataPtr_;
+        auto PostSize = _WritePacketBufferQueue.Push(DataPtr, DataSize);
+        auto RemainedDataSize = DataSize - PostSize;
+        while(RemainedDataSize) {
+            DataPtr += PostSize;
+            auto BufferPtr = NewWriteBuffer();
+            if (!BufferPtr) {
+                if (DataSize == RemainedDataSize) {
+                    return 0;
+                }
+                break;
+            }
+            _WritePacketBufferQueue.Push(BufferPtr);
+            RemainedDataSize -= (PostSize = BufferPtr->Push(DataPtr, RemainedDataSize));
+        }
+        size_t TotalPostedSize = DataSize - RemainedDataSize;
+        _WriteDataSize += TotalPostedSize;
+        if (ExecWriteCall) {
+            DoFlush();
+        }
+        return TotalPostedSize;
+    }
 
-//     void xTcpSocketContext::DoFlush()
-//     {
-//         auto BufferPtr = _WritePacketBufferQueue.Peek();
-//         Socket.async_write_some(xAsioConstBuffer{BufferPtr->Buffer, BufferPtr->DataSize}, [this, BufferPtr](const xAsioError & Error, size_t TransferedBytes) {
-//             if (Error) {
-//                 OnError();
-//                 return;
-//             }
-//             assert(BufferPtr == _WritePacketBufferQueue.Peek());
-//             assert(TransferedBytes <= BufferPtr->DataSize);
-//             if (auto RemainedDataSize = BufferPtr->DataSize - TransferedBytes) {
-//                 memcpy(BufferPtr->Buffer, BufferPtr->Buffer + TransferedBytes, RemainedDataSize);
-//                 BufferPtr->DataSize = RemainedDataSize;
-//             } else {
-//                 _WritePacketBufferQueue.RemoveFront();
-//                 DeleteWriteBuffer(BufferPtr);
-//             }
-//             if (_WriteDataSize -= TransferedBytes) {
-//                 DoFlush();
-//                 return;
-//             }
-//         });
-//     }
+    void xTcpSocketContext::DoFlush()
+    {
+        auto BufferPtr = _WritePacketBufferQueue.Peek();
+        _Socket.async_write_some(xAsioConstBuffer{BufferPtr->Buffer, BufferPtr->DataSize}, [this, BufferPtr](const xAsioError & Error, size_t TransferedBytes) {
+            if (Error) {
+                OnError();
+                return;
+            }
+            assert(BufferPtr == _WritePacketBufferQueue.Peek());
+            assert(TransferedBytes <= BufferPtr->DataSize);
+            if (auto RemainedDataSize = BufferPtr->DataSize - TransferedBytes) {
+                memcpy(BufferPtr->Buffer, BufferPtr->Buffer + TransferedBytes, RemainedDataSize);
+                BufferPtr->DataSize = RemainedDataSize;
+            } else {
+                _WritePacketBufferQueue.RemoveFront();
+                DeleteWriteBuffer(BufferPtr);
+            }
+            if (_WriteDataSize -= TransferedBytes) {
+                DoFlush();
+                return;
+            }
+        });
+    }
 
-//     void xTcpSocketContext::OnConnected()
-//     {
-//         _Connected = true;
-//         DoRead();
-//         if (!_WritePacketBufferQueue.IsEmpty()) {
-//             DoFlush();
-//         }
-//     }
+    void xTcpSocketContext::OnConnected()
+    {
+        _ConnectionState = eConnected;
+        DoRead();
+        if (!_WritePacketBufferQueue.IsEmpty()) {
+            DoFlush();
+        }
+    }
 
-//     void xTcpSocketContext::OnError()
-//     {
-//         if (_Error) {
-//             return;
-//         }
-//         _Error = true;
-//         _Connected = false;
-//         return;
-//     }
+    void xTcpSocketContext::OnError()
+    {
+        if (_ConnectionState >= eConnectionClosing) {
+            return;
+        }
+        _ConnectionState = eConnectionError;
+        return;
+    }
 
 //     /* xTcpConnection */
 

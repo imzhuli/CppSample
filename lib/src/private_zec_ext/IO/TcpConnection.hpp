@@ -3,39 +3,7 @@
 
 ZEC_NS
 {
-
-    class xTcpSocketContext
-    :  xNonCopyable
-    {
-    public:
-        xTcpSocketContext(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port);
-        xTcpSocketContext(xIoHandle Handle);
-        ~xTcpSocketContext();
-
-        tcp::socket                   _Socket;
-        xPacketBufferQueue            _WritePacketBufferQueue;
-        size_t                        _WriteDataSize = 0;
-        ubyte                         _ReadBuffer[MaxPacketSize + 1];
-        size_t                        _ReadDataSize = 0;
-
-        size_t PostData(const void * DataPtr, size_t DataSize);
-        void   Close();
-
-    private:
-        xPacketBuffer * NewWriteBuffer() { return new xPacketBuffer(); }
-        void DeleteWriteBuffer(xPacketBuffer * BufferPtr) { delete BufferPtr; }
-
-        void OnExpired();
-        void OnConnected();
-        void DoRead();
-        void DoFlush();
-        void OnError();
-        bool _Connected = false;
-        bool _Closing = false;
-        bool _Error = false;
-    };
-    using xSharedTcpSocketContextPtr = std::shared_ptr<xTcpSocketContext>;
-
+    using xTcpSocket = tcp::socket;
     using xTcpEndpoint = tcp::endpoint;
     ZEC_STATIC_INLINE xTcpEndpoint MakeTcpEndpoint(const xNetAddress & Address) {
         if (Address.IsV4()) {
@@ -51,5 +19,50 @@ ZEC_NS
         }
         return {};
     }
+
+    class xTcpSocketContext
+    :  xNonCopyable
+    {
+    public:
+        ZEC_API_MEMBER xTcpSocketContext(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port);
+        ZEC_API_MEMBER xTcpSocketContext(xIoHandle Handle);
+        ZEC_API_MEMBER ~xTcpSocketContext();
+
+        xTcpSocket                    _Socket;
+        xPacketBufferQueue            _WritePacketBufferQueue;
+        size_t                        _WriteDataSize = 0;
+        ubyte                         _ReadBuffer[MaxPacketSize + 1];
+        size_t                        _ReadDataSize = 0;
+
+        ZEC_API_MEMBER size_t PostData(const void * DataPtr, size_t DataSize);
+        ZEC_API_MEMBER void   SuspendReading();
+        ZEC_API_MEMBER void   Close();
+
+    private:
+        xPacketBuffer * NewWriteBuffer() { return new xPacketBuffer(); }
+        void DeleteWriteBuffer(xPacketBuffer * BufferPtr) { delete BufferPtr; }
+
+        ZEC_API_MEMBER void OnExpired();
+        ZEC_API_MEMBER void OnConnected();
+        ZEC_API_MEMBER void DoRead();
+        ZEC_API_MEMBER void DoFlush();
+        ZEC_API_MEMBER void OnError();
+
+        enum eConnectionState {
+            eUnspecified,
+            eConnecting,
+            eConnected,
+            eConnectionClosing,
+            eConnectionClosed,
+            eConnectionError,
+        } _ConnectionState = eUnspecified;
+
+        enum eReadState {
+            eReading,
+            eReadToBeSuspended,
+            eReadSuspended,
+        } _ReadState;
+    };
+    using xSharedTcpSocketContextPtr = std::shared_ptr<xTcpSocketContext>;
 
 }

@@ -18,6 +18,10 @@ ZEC_NS
     void xIoContext::LoopOnce(int TimeoutMS)
     {
         _Native.As<xNativeIoContext>().run_for(std::chrono::microseconds(TimeoutMS));
+        for (auto & ExState : _ResumeList) {
+            ExState.Detach();
+            ExState.OnResume();
+        }
     }
 
 }

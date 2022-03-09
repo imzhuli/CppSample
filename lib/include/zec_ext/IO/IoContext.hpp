@@ -25,12 +25,24 @@ ZEC_NS
     : xNonCopyable
     {
     public:
+        struct iResumable : xListNode {
+        protected:
+            virtual void OnResume() {};
+        private:
+            friend class xIoContext;
+        };
+
+    public:
         ZEC_API_MEMBER bool Init();
         ZEC_API_MEMBER void Clean();
         ZEC_API_MEMBER void LoopOnce(int TimeoutMS);
 
+        ZEC_INLINE void Resume(iResumable & Resumable) { _ResumeList.GrabTail(Resumable); }
+
     private:
-        xDummy<16>                _Native;
+        xDummy<16>             _Native;
+        xList<iResumable>      _ResumeList;
+
         // uint64_t                  _ExpireTimeout;
         // xList<xExpiringNode>      _ExpiringNodelist;
 
