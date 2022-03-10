@@ -5,7 +5,6 @@ set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost             REQUIRED)
 find_package(FFmpeg            REQUIRED)
 find_package(Lua               REQUIRED)
-find_package(LightWebsockets   REQUIRED)
 
 # enable specific macors by system type:
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")

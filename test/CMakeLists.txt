@@ -1,8 +1,5 @@
 project(test_${libname})
 
-
-find_package(LightWebsockets   REQUIRED)
-
 # dependencies:
 set(shared_lib_dependency_private ${LightWebsockets_LIBRARIES})
 
