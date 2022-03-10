@@ -8,10 +8,6 @@
 ZEC_NS
 {
 
-    namespace __detail__ {
-        class IOUtil;
-    }
-
     class xWebSocketSession
     : xNonCopyable
     {
