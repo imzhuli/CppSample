@@ -11,7 +11,7 @@ ZEC_NS
     {
         _ReadBuffer[MaxPacketSize] = '\0';
         _ConnectionState = eConnecting;
-        _Socket.async_connect(MakeTcpEndpoint(Address), [this, R=Retainer{*this}] (const xAsioError & Error) mutable {
+        _Socket.async_connect(MakeTcpEndpoint(Address), [this, R=Retainer{*this}] (const xAsioError & Error) {
             if (Error) {
                 OnError();
                 return;

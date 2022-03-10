@@ -68,8 +68,8 @@ private:
     {
         assert(&TcpConnection == TcpConnectionPtr);
         Data.append((const char *)DataPtr, DataSize);
-        cout << "Data: " << endl;
-        cout << HexShow(DataPtr, DataSize) << endl;
+        // cout << "Data: " << endl;
+        // cout << HexShow(DataPtr, DataSize) << endl;
         TcpConnectionPtr->SuspendReading();
         TcpConnectionPtr->ResumeReading();
         return DataSize;

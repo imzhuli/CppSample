@@ -78,7 +78,7 @@ ZEC_NS
             // cerr << "OnConnected: Callback from abandoned object" << endl;
             return;
         }
-        WS->async_handshake(_Origin, _Path, [this, Retainer=WS] (const xAsioError & Error) mutable {
+        WS->async_handshake(_Origin, _Path, [this, Retainer=WS] (const xAsioError & Error) {
             if (Error) {
                 // cerr << "Handshake Error" << endl;
                 OnError(Retainer.get());
