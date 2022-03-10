@@ -46,7 +46,7 @@ ZEC_NS
 
 	void xTcpServer::OnAccept(xIoHandle NativeHandle)
 	{
-		_ListenerPtr->OnNewConnection(_IoContextPtr, NativeHandle);
+		_ListenerPtr->OnNewConnection(this, NativeHandle);
 	}
 
 }

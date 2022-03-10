@@ -20,13 +20,15 @@ ZEC_NS
 	public:
 		struct iListener
 		{
-			virtual void OnNewConnection(xIoContext * IoContextPtr, xIoHandle NativeHandle) = 0;
+			virtual void OnNewConnection(xTcpServer * Server, xIoHandle NativeHandle) = 0;
 		};
 
     public:
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr);
 		ZEC_API_MEMBER void Clean();
+
+		ZEC_INLINE xIoContext * GetIoContextPtr() const { return _IoContextPtr; }
 
 	private:
 		ZEC_API_MEMBER void DoAccept();
