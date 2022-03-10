@@ -22,9 +22,9 @@ ZEC_NS
         _ReadBuffer.DestroyAs<xWSReadBufferPtr>();
     }
 
-    bool xWebSocketSession::Init(xIoContext * IoContextPtr, const char * IpStr, uint64_t Port, const std::string & Hostname, const std::string &Target, iListener * ListenerPtr)
+    bool xWebSocketSession::Init(xIoContext * IoContextPtr, const char * IpStr, uint64_t Port, const std::string & Origin, const std::string &Target, iListener * ListenerPtr)
     {
-        _Origin = Hostname;
+        _Origin = Origin;
         _Path = Target;
         _Listener = ListenerPtr;
         _ReadBuffer.As<xWSReadBufferPtr>() = std::make_shared<xBeastDynamicBuffer>();
