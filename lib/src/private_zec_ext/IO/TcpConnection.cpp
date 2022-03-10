@@ -210,7 +210,7 @@ ZEC_NS
         assert(!_SocketPtr);
     }
 
-    bool xTcpConnection::Init(xIoContext * IoContextPtr, xIoHandle NativeHandle, iListener * ListenerPtr)
+    bool xTcpConnection::Init(xIoHandle NativeHandle, iListener * ListenerPtr)
     {
         assert(!_ListenerPtr);
         assert(!_SocketPtr);
