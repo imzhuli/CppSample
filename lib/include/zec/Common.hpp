@@ -256,6 +256,7 @@ ZEC_NS
 		public:
 			template<typename ... tArgs>
 			ZEC_INLINE constexpr xResourceGuard(T & Resource, tArgs&& ... Args) : _Resource(Resource), _Inited(Resource.Init(std::forward<tArgs>(Args)...)) {}
+			ZEC_INLINE constexpr xResourceGuard(T && Other) : _Resource(Other._Resource), _Inited(Steal(Other._Inited)) {}
 			ZEC_INLINE ~xResourceGuard() { if (_Inited) {_Resource.Clean();} }
 			ZEC_INLINE operator bool () const { return _Inited; }
 		private:
