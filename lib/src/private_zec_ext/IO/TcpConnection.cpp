@@ -240,6 +240,7 @@ ZEC_NS
 
     void xTcpConnection::Clean()
     {
+        _ListenerPtr = nullptr;
         auto SocketPtr = Steal(_SocketPtr);
         assert(SocketPtr);
         SocketPtr->Close();
