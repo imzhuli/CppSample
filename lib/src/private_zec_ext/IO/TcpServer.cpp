@@ -1,52 +1,52 @@
-// #include <zec_ext/IO/TcpServer.hpp>
-// #include "./_Local.hpp"
+#include "./_Local.hpp"
+#include "./TcpConnection.hpp"
+#include <zec_ext/IO/TcpServer.hpp>
 
-// ZEC_NS
-// {
+ZEC_NS
+{
+    using xNativeTcpAcceptor = tcp::acceptor;
+    using xSharedTcpAcceptorPtr = std::shared_ptr<xNativeTcpAcceptor>;
 
-// 	static constexpr const size_t AcceptorSize = sizeof(xNativeTcpAcceptor);
+	bool xTcpServer::Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr)
+	{
+        xNetAddress Address = xNetAddress::Make(Ip, Port);
+		return Init(IoContextPtr, Address, ListenerPtr);
+	}
 
-// 	bool xTcpServer::Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr)
-// 	{
-//         xNetAddress Address = xNetAddress::Make(Ip);
-// 		return Init(IoContextPtr, Address, Port, ListenerPtr);
-// 	}
+	bool xTcpServer::Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr)
+	{
+		_IoContextPtr = IoContextPtr;
+		_ListenerPtr = ListenerPtr;
 
-// 	bool xTcpServer::Init(xIoContext * IoContextPtr, const xNetAddress & Address, uint64_t Port, iListener * ListenerPtr)
-// 	{
-// 		_IoContextPtr = IoContextPtr;
-// 		_ListenerPtr = ListenerPtr;
+		auto & Acceptor = _Native.CreateValueAs<xSharedTcpAcceptorPtr>(new xNativeTcpAcceptor(xIoCaster()(*IoContextPtr), MakeTcpEndpoint(Address)));
+		xTcpSocket::reuse_address Option(true);
+		Acceptor->set_option(Option);
+		DoAccept();
+		return true;
+	}
 
-// 		auto & Acceptor = _Native.CreateValueAs<xNativeTcpAcceptor>(*IOUtil::Native(IoContextPtr), MakeTcpEndpoint(Address, Port));
-// 		xNativeTcpSocket::reuse_address Option(true);
-// 		Acceptor.set_option(Option);
-// 		DoAccept();
-// 		return true;
-// 	}
+	void xTcpServer::Clean()
+	{
+		_Native.DestroyAs<xSharedTcpAcceptorPtr>();
+		_ListenerPtr = nullptr;
+		_IoContextPtr = nullptr;
+	}
 
-// 	void xTcpServer::Clean()
-// 	{
-// 		_Native.DestroyAs<xNativeTcpAcceptor>();
-// 		_ListenerPtr = nullptr;
-// 		_IoContextPtr = nullptr;
-// 	}
+	void xTcpServer::DoAccept()
+	{
+		auto & Acceptor = _Native.As<xSharedTcpAcceptorPtr>();
+		Acceptor->async_accept(xIoCaster()(*_IoContextPtr), [this, R=Acceptor](const xAsioError & Error, xTcpSocket Peer) {
+			if (!Error) {
+				OnAccept(xIoHandle{&Peer});
+			}
+			DoAccept();
+		});
+		return;
+	}
 
-// 	void xTcpServer::DoAccept()
-// 	{
-// 		auto & Acceptor = _Native.As<xNativeTcpAcceptor>();
-// 		Acceptor.async_accept(*IOUtil::Native(_IoContextPtr), [this](const xAsioError & Error, xNativeTcpSocket Peer) {
-// 			if (!Error) {
-// 				OnAccept(xIoHandle{&Peer});
-// 			}
-// 			DoAccept();
-// 		});
-// 		return;
-// 	}
+	void xTcpServer::OnAccept(xIoHandle NativeHandle)
+	{
+		_ListenerPtr->OnNewConnection(_IoContextPtr, NativeHandle);
+	}
 
-// 	void xTcpServer::OnAccept(xIoHandle NativeHandle)
-// 	{
-// 		auto NewConnectionPtr = _ListenerPtr->OnNewConnection(_IoContextPtr, NativeHandle);
-// 		NewConnectionPtr->OnConnected();
-// 	}
-
-// }
+}

@@ -27,17 +27,5 @@ ZEC_NS
         ZEC_API_STATIC_MEMBER xNetAddress MakeV6(const char * IpStr, uint16_t Port = 0);
     };
 
-    class xTcpServer
-    {
-    public:
-        bool Init(const xNetAddress & Address);
-        void Clean();
-
-    private:
-
-
-    };
-
-
 
 }

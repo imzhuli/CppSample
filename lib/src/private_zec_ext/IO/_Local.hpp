@@ -31,9 +31,6 @@ ZEC_NS
 {
 
     using xNativeIoContext = asio::io_context;
-    // using xNativeTcpSocket = tcp::socket;
-    // using xNativeTcpAcceptor = tcp::acceptor;
-    // using xNativeWebSocket = websocket::stream<tcp::socket>;
 
     class xIoCaster final
     : xNonCopyable
