@@ -212,11 +212,9 @@ ZEC_NS
 
     bool xTcpConnection::Init(xIoContext * IoContextPtr, xIoHandle NativeHandle, iListener * ListenerPtr)
     {
-        assert(!_IoContextPtr);
         assert(!_ListenerPtr);
         assert(!_SocketPtr);
 
-        _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
         _SocketPtr = new xTcpSocketContext(NativeHandle);
         _SocketPtr->BindListener(_ListenerPtr, this);
@@ -231,11 +229,9 @@ ZEC_NS
 
     bool xTcpConnection::Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr)
     {
-        assert(!_IoContextPtr);
         assert(!_ListenerPtr);
         assert(!_SocketPtr);
 
-        _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
         _SocketPtr = new xTcpSocketContext(IoContextPtr, Address);
         _SocketPtr->BindListener(_ListenerPtr, this);

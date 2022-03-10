@@ -64,7 +64,6 @@ ZEC_NS
             eConnected,
         } _Phase = eUnspecified;
 
-        xIoContext *                  _IoContextPtr = nullptr;
         iListener *                   _ListenerPtr = nullptr;
         xTcpSocketContext *           _SocketPtr = nullptr;
     };
