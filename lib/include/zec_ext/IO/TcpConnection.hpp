@@ -58,12 +58,6 @@ ZEC_NS
         ZEC_PRIVATE_MEMBER void DoRead();
 
     private:
-        enum ePhase : uint8_t {
-            eUnspecified,
-            eConnecting,
-            eConnected,
-        } _Phase = eUnspecified;
-
         iListener *                   _ListenerPtr = nullptr;
         xTcpSocketContext *           _SocketPtr = nullptr;
     };
