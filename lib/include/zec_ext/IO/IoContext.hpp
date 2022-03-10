@@ -41,14 +41,9 @@ ZEC_NS
 
     private:
         xDummy<16>             _Native;
+        xDummy<24>             _WorkGuard;
         xList<iResumable>      _ResumeList;
-
-        // uint64_t                  _ExpireTimeout;
-        // xList<xExpiringNode>      _ExpiringNodelist;
-
         friend class xIoCaster;
     };
-
-
 
 }
