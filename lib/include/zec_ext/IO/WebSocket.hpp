@@ -14,9 +14,9 @@ ZEC_NS
     public:
         struct iListener
         {
-            virtual void OnHandshakeDone(xWebSocketSession * WebSocketClientPtr) {}
-            virtual void OnMessage(xWebSocketSession * WebSocketClientPtr, bool Binary, const void * DataPtr, size_t DataSize) {}
-            virtual void OnError(xWebSocketSession * WebSocketClientPtr) {}
+            virtual void OnWSHandshakeDone(xWebSocketSession * WebSocketClientPtr) {}
+            virtual void OnWSMessage(xWebSocketSession * WebSocketClientPtr, bool Binary, const void * DataPtr, size_t DataSize) {}
+            virtual void OnWSClose(xWebSocketSession * WebSocketClientPtr) {}
         };
 
     public:

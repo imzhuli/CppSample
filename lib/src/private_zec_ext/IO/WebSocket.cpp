@@ -67,7 +67,7 @@ ZEC_NS
         if (!_Error) {
             _Error = true;
             _Connected = false;
-            _Listener->OnError(this);
+            _Listener->OnWSClose(this);
         }
         return true;
     }
@@ -94,7 +94,7 @@ ZEC_NS
             // cerr << "OnConnected: Callback from abandoned object" << endl;
             return;
         }
-        _Listener->OnHandshakeDone(this);
+        _Listener->OnWSHandshakeDone(this);
         _Connected = true;
         DoRead();
         DoFlush();
@@ -115,7 +115,7 @@ ZEC_NS
             for (auto Buffer : BufferSeq) {
                 Data.append((const char *)Buffer.data(), Buffer.size());
             }
-            _Listener->OnMessage(this, Retainer->got_binary(), Data.data(), Data.size());
+            _Listener->OnWSMessage(this, Retainer->got_binary(), Data.data(), Data.size());
             ReadBufferPtr->clear();
             DoRead();
         });
