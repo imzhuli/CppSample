@@ -218,6 +218,7 @@ ZEC_NS
         _ListenerPtr = ListenerPtr;
         _SocketPtr = new xTcpSocketContext(NativeHandle);
         _SocketPtr->BindListener(_ListenerPtr, this);
+        _SocketPtr->ResumeReading();
         return true;
     }
 
