@@ -1,6 +1,6 @@
 
-#include "./_Local.hpp"
-#include "./TcpConnection.hpp"
+#include "TcpConnection.hpp"
+#include "NetBase.hpp"
 #include <cstring>
 
 ZEC_NS
@@ -246,6 +246,18 @@ ZEC_NS
         assert(SocketPtr);
         SocketPtr->Close();
         SocketPtr->Release();
+    }
+
+    xNetAddress xTcpConnection::GetRemoteAddress() const
+    {
+        assert(_SocketPtr);
+        return MakeNetAddress(_SocketPtr->GetRemoteAddress());
+    }
+
+    xNetAddress xTcpConnection::GetLocalAddress() const
+    {
+        assert(_SocketPtr);
+        return MakeNetAddress(_SocketPtr->GetLocalAddress());
     }
 
     void xTcpConnection::ResizeSendBuffer(size_t Size)

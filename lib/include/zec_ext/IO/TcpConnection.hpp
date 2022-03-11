@@ -41,6 +41,9 @@ ZEC_NS
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr);
         ZEC_API_MEMBER void Clean();
 
+        ZEC_API_MEMBER xNetAddress GetRemoteAddress() const;
+        ZEC_API_MEMBER xNetAddress GetLocalAddress() const;
+
         ZEC_API_MEMBER void ResizeSendBuffer(size_t Size);
         ZEC_API_MEMBER void ResizeReceiveBuffer(size_t Size);
 

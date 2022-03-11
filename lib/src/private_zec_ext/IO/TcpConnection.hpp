@@ -1,5 +1,5 @@
 #pragma once
-#include "./_Local.hpp"
+#include "_Local.hpp"
 #include <zec/Memory.hpp>
 #include <zec_ext/IO/TcpConnection.hpp>
 
@@ -30,6 +30,9 @@ ZEC_NS
         ZEC_API_MEMBER xTcpSocketContext(xIoContext * IoContextPtr, const xNetAddress & Address);
         ZEC_API_MEMBER xTcpSocketContext(xIoHandle Handle);
         ZEC_API_MEMBER ~xTcpSocketContext();
+
+        ZEC_INLINE tcp::endpoint GetLocalAddress() const { return _Socket.local_endpoint(); }
+        ZEC_INLINE tcp::endpoint GetRemoteAddress() const { return _Socket.remote_endpoint(); }
 
         ZEC_API_MEMBER void ResizeSendBuffer(size_t Size) { asio::socket_base::send_buffer_size Option(Size); _Socket.set_option(Option); }
         ZEC_API_MEMBER void ResizeReceiveBuffer(size_t Size) { asio::socket_base::receive_buffer_size Option(Size); _Socket.set_option(Option); }

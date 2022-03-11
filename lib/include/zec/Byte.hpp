@@ -144,7 +144,7 @@ ZEC_NS
 		xStreamWriter() = default;
 		ZEC_INLINE xStreamWriter(void * p) { Reset(p);	}
 
-		ZEC_INLINE void W(ubyte c)                            { *(_curr++) = c; }
+		ZEC_INLINE void W(ubyte c)                           { *(_curr++) = c; }
 		ZEC_INLINE void W(const void * s, ptrdiff_t len)     { ::memcpy(_curr, s, len); _curr += len; }
 
 		ZEC_INLINE void W1(uint8_t u)                        { *(_curr++) = u; }
