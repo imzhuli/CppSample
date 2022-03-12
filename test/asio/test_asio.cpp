@@ -64,7 +64,7 @@ private:
     }
 
     size_t Counter = 0;
-    size_t OnData(xTcpConnection * TcpConnectionPtr, const void * DataPtr, size_t DataSize) override
+    size_t OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize) override
     {
         assert(&TcpConnection == TcpConnectionPtr);
         Data.append((const char *)DataPtr, DataSize);
