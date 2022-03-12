@@ -16,7 +16,7 @@ ZEC_NS
         union {
             ubyte Ipv4[4];
             ubyte Ipv6[16];
-            ubyte IpStorage[16];
+            ubyte IpStorage[16] = {};
         };
         uint16_t Port = 0;
 
