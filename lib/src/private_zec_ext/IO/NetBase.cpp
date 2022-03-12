@@ -2,6 +2,8 @@
 
 ZEC_NS
 {
+    static_assert(sizeof(xNetAddress) == 2 + 16 + 2);
+    static_assert(std::is_standard_layout_v<xNetAddress>);
 
     std::string xNetAddress::ToString() const
     {
@@ -37,6 +39,7 @@ ZEC_NS
             return {};
         }
         xNetAddress Ret;
+        memset(Ret.IpStorage, 0, sizeof(Ret.IpStorage));
         if (Address.is_v4()) {
             Ret.Type = xNetAddress::eIpv4;
             auto AddrBytes = Address.to_v4().to_bytes();
@@ -57,6 +60,7 @@ ZEC_NS
             auto bytes = Address.to_bytes();
 
             xNetAddress Ret;
+            memset(Ret.IpStorage, 0, sizeof(Ret.IpStorage));
             memcpy(Ret.Ipv4, bytes.data(), sizeof(Ret.Ipv4));
             Ret.Type = eIpv4;
             Ret.Port = Port;
@@ -73,6 +77,7 @@ ZEC_NS
             auto bytes = Address.to_bytes();
 
             xNetAddress Ret;
+            memset(Ret.IpStorage, 0, sizeof(Ret.IpStorage));
             memcpy(Ret.Ipv6, bytes.data(), sizeof(Ret.Ipv6));
             Ret.Type = eIpv6;
             Ret.Port = Port;
@@ -81,8 +86,5 @@ ZEC_NS
         catch (...) {}
         return {};
     }
-
-
-
 
 }

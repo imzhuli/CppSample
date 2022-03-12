@@ -1,13 +1,14 @@
 #pragma once
 #include <zec/Common.hpp>
 #include <string>
+#include <string_view>
 
 ZEC_NS
 {
 
     struct xNetAddress
     {
-        enum : uint8_t {
+        enum : uint16_t {
             eUnknown, eIpv4, eIpv6
         } Type = eUnknown;
 
@@ -21,6 +22,8 @@ ZEC_NS
         ZEC_INLINE bool IsV4() const { return Type == eIpv4; }
         ZEC_INLINE bool IsV6() const { return Type == eIpv6; }
         ZEC_INLINE operator bool () const { return Type != eUnknown; }
+        ZEC_INLINE std::string_view AsKeyView() const { return { (const char *)this, sizeof(*this) }; }
+
         ZEC_API_MEMBER std::string ToString() const;
 
         ZEC_API_STATIC_MEMBER xNetAddress Make(const char * IpStr,   uint16_t Port = 0);
