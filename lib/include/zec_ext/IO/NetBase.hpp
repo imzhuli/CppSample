@@ -1,7 +1,8 @@
 #pragma once
 #include <zec/Common.hpp>
 #include <string>
-#include <string_view>
+#include <array>
+#include <cstring>
 
 ZEC_NS
 {
@@ -19,10 +20,16 @@ ZEC_NS
         };
         uint16_t Port = 0;
 
+        using xKeyType = std::array<ubyte, 20>;
+
         ZEC_INLINE bool IsV4() const { return Type == eIpv4; }
         ZEC_INLINE bool IsV6() const { return Type == eIpv6; }
         ZEC_INLINE operator bool () const { return Type != eUnknown; }
-        ZEC_INLINE std::string_view AsKeyView() const { return { (const char *)this, sizeof(*this) }; }
+        ZEC_INLINE xKeyType AsKey() const {
+            xKeyType Ret;
+            memcpy(Ret.data(), this, sizeof(*this));
+            return Ret;
+        }
 
         ZEC_API_MEMBER std::string ToString() const;
 
@@ -30,6 +37,5 @@ ZEC_NS
         ZEC_API_STATIC_MEMBER xNetAddress MakeV4(const char * IpStr, uint16_t Port = 0);
         ZEC_API_STATIC_MEMBER xNetAddress MakeV6(const char * IpStr, uint16_t Port = 0);
     };
-
 
 }

@@ -2,8 +2,10 @@
 
 ZEC_NS
 {
-    static_assert(sizeof(xNetAddress) == 2 + 16 + 2);
     static_assert(std::is_standard_layout_v<xNetAddress>);
+    static_assert(sizeof(xNetAddress) == 2 + 16 + 2);
+    static_assert(sizeof(xNetAddress) == sizeof(xNetAddress::xKeyType));
+    static_assert(sizeof(xNetAddress::xKeyType) == std::tuple_size<xNetAddress::xKeyType>());
 
     std::string xNetAddress::ToString() const
     {
