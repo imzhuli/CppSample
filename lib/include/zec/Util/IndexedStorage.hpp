@@ -70,6 +70,15 @@ ZEC_NS
 			return true;
 		}
 
+		ZEC_INLINE std::enable_if_t<!RandomKey, bool> Init(size_t Size, uint32_t CounterStep) {
+			if(!Init(Size)) {
+				return false;
+			}
+			_Counter = 0;
+			_CounterStep = CounterStep;
+			return true;
+		}
+
 		void Clean()
 		{
 			assert(_IdPoolPtr);
@@ -89,7 +98,7 @@ ZEC_NS
 			} else {
 				Index = Steal(_NextFreeIdIndex, _IdPoolPtr[_NextFreeIdIndex]);
 			}
-			uint32_t Rand = (RandomKey ? _Random32() : ++_Counter) | xIndexId::KeyInUseBitmask;
+			uint32_t Rand = (RandomKey ? _Random32() : (_Counter += _CounterStep)) | xIndexId::KeyInUseBitmask;
 			_IdPoolPtr[Index] = Rand;
 			return { (static_cast<uint64_t>(Rand) << 32) + Index };
 		}
@@ -124,6 +133,7 @@ ZEC_NS
 		uint32_t*     _IdPoolPtr  = nullptr;
 		uint32_t      _NextFreeIdIndex = InvalidIndex;
 		uint32_t      _Counter = 0;
+		uint32_t      _CounterStep = 1;
 		std::mt19937  _Random32;
 		static constexpr uint32_t InvalidIndex = static_cast<uint32_t>(-1);
 	};
@@ -152,6 +162,15 @@ ZEC_NS
 			return true;
 		}
 
+		ZEC_INLINE std::enable_if_t<!RandomKey, bool> Init(size_t Size, uint32_t CounterStep) {
+			if(!Init(Size)) {
+				return false;
+			}
+			_Counter = 0;
+			_CounterStep = CounterStep;
+			return true;
+		}
+
 		ZEC_INLINE void Clean()
 		{
 			assert(_IdPoolPtr);
@@ -172,7 +191,7 @@ ZEC_NS
 			} else {
 				Index = Steal(_NextFreeIdIndex, _IdPoolPtr[_NextFreeIdIndex]);
 			}
-			uint32_t Rand = (RandomKey ? _Random32() : ++_Counter) | xIndexId::KeyInUseBitmask;
+			uint32_t Rand = (RandomKey ? _Random32() : (_Counter += _CounterStep)) | xIndexId::KeyInUseBitmask;
 			_IdPoolPtr[Index] = Rand ;
 			new ((void*)(_StoragePtr + Index)) tValue{ Value };
 			return { (static_cast<uint64_t>(Rand) << 32) + Index };
@@ -188,7 +207,7 @@ ZEC_NS
 			} else {
 				Index = Steal(_NextFreeIdIndex, _IdPoolPtr[_NextFreeIdIndex]);
 			}
-			uint32_t Rand = (RandomKey ? _Random32() : ++_Counter) | xIndexId::KeyInUseBitmask;
+			uint32_t Rand = (RandomKey ? _Random32() : (_Counter += _CounterStep)) | xIndexId::KeyInUseBitmask;
 			_IdPoolPtr[Index] = Rand ;
 			new ((void*)(_StoragePtr + Index)) tValue{ std::move(Value) };
 			return { (static_cast<uint64_t>(Rand) << 32) + Index };
@@ -248,6 +267,7 @@ ZEC_NS
 		uint32_t      _NextFreeIdIndex = InvalidIndex;
 		tValue *      _StoragePtr = nullptr;
 		uint32_t      _Counter = 0;
+		uint32_t      _CounterStep = 1;
 		std::mt19937  _Random32;
 		static constexpr uint32_t InvalidIndex = static_cast<uint32_t>(-1);
 	};
