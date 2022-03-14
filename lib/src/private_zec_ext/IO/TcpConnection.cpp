@@ -79,8 +79,9 @@ ZEC_NS
             DataPtr += ConsumedDataSize;
             DataSize -= ConsumedDataSize;
             if (!ConsumedDataSize || _ReadState != eReading) {
-                assert(DataSize);
-                memmove(_ReadBuffer, DataPtr, DataSize);
+                if(DataSize) {
+                    memmove(_ReadBuffer, DataPtr, DataSize);
+                }
                 break;
             }
         }
