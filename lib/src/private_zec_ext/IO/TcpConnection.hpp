@@ -47,6 +47,8 @@ ZEC_NS
 
         ZEC_INLINE  size64_t GetTotalReadSize() { return _TotalReadSize; }
         ZEC_INLINE  size64_t GetTotalWriteSize() { return _TotalWriteSize; }
+        ZEC_INLINE  size64_t StealTotalReadSize() { return Steal(_TotalReadSize); }
+        ZEC_INLINE  size64_t StealTotalWriteSize() { return Steal(_TotalWriteSize); }
 
     private:
         xPacketBuffer * NewWriteBuffer() { return new xPacketBuffer(); }
