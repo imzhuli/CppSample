@@ -49,6 +49,12 @@ ZEC_NS
 
         ZEC_INLINE bool IsActive() const { return _SocketPtr; }
 
+        struct xAudit {
+            size64_t ReadSize  = 0;
+            size64_t WriteSize = 0;
+        };
+        ZEC_API_MEMBER xAudit GetAudit();
+
         /***
          * @brief aync post data, try to buffer(copy) data into internal buffer
          * @return Unbuffered Data Size

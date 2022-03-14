@@ -106,6 +106,8 @@ ZEC_NS
                 OnError();
                 return;
             }
+            _TotalReadSize += TransferedSize;
+
             _ReadDataSize += TransferedSize;
             DoReadCallback();
             DoRead();
@@ -141,6 +143,8 @@ ZEC_NS
                 OnError();
                 return;
             }
+            _TotalWriteSize += TransferedBytes;
+
             assert(BufferPtr == _WritePacketBufferQueue.Peek());
             assert(TransferedBytes <= BufferPtr->DataSize);
             if (auto RemainedDataSize = BufferPtr->DataSize - TransferedBytes) {
@@ -284,6 +288,11 @@ ZEC_NS
     {
         assert(_SocketPtr);
         _SocketPtr->ResumeReading();
+    }
+
+    xTcpConnection::xAudit xTcpConnection::GetAudit()
+    {
+        return { _SocketPtr->GetTotalReadSize(), _SocketPtr->GetTotalWriteSize() };
     }
 
 }

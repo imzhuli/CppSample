@@ -45,6 +45,9 @@ ZEC_NS
         ZEC_API_MEMBER void   ResumeReading();
         ZEC_API_MEMBER void   Close();
 
+        ZEC_INLINE  size64_t GetTotalReadSize() { return _TotalReadSize; }
+        ZEC_INLINE  size64_t GetTotalWriteSize() { return _TotalWriteSize; }
+
     private:
         xPacketBuffer * NewWriteBuffer() { return new xPacketBuffer(); }
         void DeleteWriteBuffer(xPacketBuffer * BufferPtr) { delete BufferPtr; }
@@ -65,6 +68,9 @@ ZEC_NS
         xReentryFlag                  _ReadCallbackEntry;
         xTcpConnection::iListener *   _ListenerPtr;
         xTcpConnection *              _ListenerContextPtr;
+
+        size_t                        _TotalReadSize = 0;
+        size_t                        _TotalWriteSize = 0;
 
         enum eConnectionState {
             eUnspecified,
