@@ -120,7 +120,7 @@ ZEC_NS
 		template<typename T>
 		[[nodiscard]] ZEC_STATIC_INLINE T
 		Steal(T& ExpiringTarget) {
-			T ret = ExpiringTarget;
+			T ret = std::move(ExpiringTarget);
 			ExpiringTarget = T{};
 			return ret;
 		}
@@ -128,7 +128,7 @@ ZEC_NS
 		template<typename T, typename TValue>
 		[[nodiscard]] ZEC_STATIC_INLINE T
 		Steal(T& ExpiringTarget,  TValue && value) {
-			T ret = ExpiringTarget;
+			T ret = std::move(ExpiringTarget);
 			ExpiringTarget = std::forward<TValue>(value);
 			return ret;
 		}
