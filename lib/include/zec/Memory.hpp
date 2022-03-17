@@ -34,40 +34,47 @@ ZEC_NS
 		mutable RealType _Count{ 1 };
 	};
 
+	constexpr const struct xNoRetain {} NoRetain {};
+
 	template<typename tRetainable, typename tDeleter>
-	class Retainer : xNonCopyable
+	class xRetainer : xNonCopyable
 	{
 	public:
-		ZEC_INLINE Retainer(tRetainable & Target)
-		: _Target(Target), _Deleter{}
+		ZEC_INLINE xRetainer(const xNoRetain &, tRetainable * && TargetPtr, const tDeleter & Deleter = {})
+		: _TargetPtr(TargetPtr), _Deleter(Deleter)
+		{}
+		ZEC_INLINE xRetainer(tRetainable * TargetPtr, const tDeleter & Deleter = {})
+		: _TargetPtr(TargetPtr), _Deleter(Deleter) {
+			_TargetPtr->Retain();
+		}
+		ZEC_INLINE xRetainer(const xRetainer & Other)
+		: _TargetPtr(Other._TargetPtr), _Deleter(Other._Deleter)
 		{
-			_Target.Retain();
+			_TargetPtr->Retain();
 		}
-		ZEC_INLINE Retainer(tRetainable & Target, tDeleter & Deleter)
-		: _Target(Target), _Deleter(Deleter) {
-			_Target.Retain();
-		}
-		ZEC_INLINE Retainer(const Retainer &Other)
-		: _Target(Other._Target), _Deleter(Other._Deleter)
-		{
-			_Target.Retain();
-		}
-		ZEC_INLINE ~Retainer() {
-			if (_Target.Release()) {
+		ZEC_INLINE ~xRetainer() {
+			if (_TargetPtr->Release()) {
 				return;
 			}
-			_Deleter(&_Target);
+			_Deleter(_TargetPtr);
 		}
 
+		ZEC_INLINE tRetainable & operator  *() const { return *_TargetPtr; }
+		ZEC_INLINE tRetainable * operator ->() const { return _TargetPtr; }
+
 	private:
-		tRetainable &  _Target;
-		tDeleter       _Deleter;
+		tRetainable *     _TargetPtr;
+		tDeleter          _Deleter;
 	};
 	template<typename tRetainable>
-	Retainer(tRetainable &) -> Retainer<tRetainable, std::default_delete<tRetainable>>;
+	xRetainer(tRetainable *) -> xRetainer<tRetainable, std::default_delete<tRetainable>>;
+	template<typename tRetainable>
+	xRetainer(const xNoRetain &, tRetainable * &&) -> xRetainer<tRetainable, std::default_delete<tRetainable>>;
 
 	template<typename tRetainable, typename tDeleter>
-	Retainer(tRetainable &, tDeleter &) -> Retainer<tRetainable, tDeleter>;
+	xRetainer(tRetainable *, const tDeleter &) -> xRetainer<tRetainable, tDeleter>;
+	template<typename tRetainable, typename tDeleter>
+	xRetainer(const xNoRetain &, tRetainable * &&, const tDeleter &) -> xRetainer<tRetainable, tDeleter>;
 
 	using xRetainable8  = xRetainableBase<false, int8_t>;
 	using xRetainable16 = xRetainableBase<false, int16_t>;

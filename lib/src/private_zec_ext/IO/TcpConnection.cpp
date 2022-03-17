@@ -11,7 +11,7 @@ ZEC_NS
     {
         _ReadBuffer[MaxPacketSize] = '\0';
         _ConnectionState = eConnecting;
-        _Socket.async_connect(MakeTcpEndpoint(Address), [this, R=Retainer{*this}] (const xAsioError & Error) {
+        _Socket.async_connect(MakeTcpEndpoint(Address), [this, R=xRetainer{this}] (const xAsioError & Error) {
             if (Error) {
                 OnError();
                 return;
@@ -94,7 +94,7 @@ ZEC_NS
             return;
         }
         size_t BufferSize = MaxPacketSize - _ReadDataSize;
-        _Socket.async_read_some(xAsioMutableBuffer{_ReadBuffer + _ReadDataSize, BufferSize}, [this, R=Retainer{*this}, EntryGuard=_ReadCallbackEntry.Guard()](const xAsioError & Error, size_t TransferedSize) {
+        _Socket.async_read_some(xAsioMutableBuffer{_ReadBuffer + _ReadDataSize, BufferSize}, [this, R=xRetainer{this}, EntryGuard=_ReadCallbackEntry.Guard()](const xAsioError & Error, size_t TransferedSize) {
             if (Error) {
                 if (Error == asio::error::eof) {
                     _ConnectionState = eConnectionClosed;
@@ -139,7 +139,7 @@ ZEC_NS
             return;
         }
 
-        _Socket.async_write_some(xAsioConstBuffer{BufferPtr->Buffer, BufferPtr->DataSize}, [this, R=Retainer{*this}, BufferPtr](const xAsioError & Error, size_t TransferedBytes) {
+        _Socket.async_write_some(xAsioConstBuffer{BufferPtr->Buffer, BufferPtr->DataSize}, [this, R=xRetainer{this}, BufferPtr](const xAsioError & Error, size_t TransferedBytes) {
             if (Error) {
                 OnError();
                 return;
@@ -247,8 +247,7 @@ ZEC_NS
     void xTcpConnection::Clean()
     {
         _ListenerPtr = nullptr;
-        auto SocketPtr = Steal(_SocketPtr);
-        assert(SocketPtr);
+        auto SocketPtr = xRetainer{ NoRetain, Steal(_SocketPtr) };
         SocketPtr->Close();
         SocketPtr->Release();
     }
@@ -280,11 +279,13 @@ ZEC_NS
         assert(_SocketPtr);
         return _SocketPtr->PostData(DataPtr, DataSize);
     }
+
     void xTcpConnection::SuspendReading()
     {
         assert(_SocketPtr);
         _SocketPtr->SuspendReading();
     }
+
     void xTcpConnection::ResumeReading()
     {
         assert(_SocketPtr);
