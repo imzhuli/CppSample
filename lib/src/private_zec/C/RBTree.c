@@ -142,50 +142,13 @@ static void XRBT_RightRotate(XelRBTree * TreePtr, XelRBNode * NodePtr)
     YPtr->RightNodePtr = XPtr;
 }
 
-XelRBInsertResult XRBT_Insert(XelRBTree * TreePtr, XelRBNode * NodePtr, XRBT_KeyCompare * CompFunc, const void * KeyPtr, bool AllowReplace)
+void XRBT_Insert(XelRBTree * TreePtr, XelRBInsertSlot InsertSlot, XelRBNode * NodePtr)
 {
-    // assert(!NodePtr->ParentPtr);
-    // assert(!NodePtr->LeftNodePtr);
-    // assert(!NodePtr->RightNodePtr);
-    // assert(!NodePtr->RedFlag);
-    XelRBInsertResult Result = {};
-
-    XelRBInsertSlot InsertSlot = XRBT_FindInsertSlot(TreePtr, CompFunc, KeyPtr);
     if (!InsertSlot.ParentPtr) { // root
         TreePtr->RootPtr = NodePtr;
-        Result.Inserted = true;
-        return Result;
+        return;
     }
-
-    if (!InsertSlot.SubNodeRefPtr) { // Replacement
-        if (!AllowReplace) {
-            Result.PrevNode = InsertSlot.ParentPtr;
-            return Result;
-        }
-        XelRBNode * ReplaceNodePtr = InsertSlot.ParentPtr;
-        if ((NodePtr->LeftNodePtr = ReplaceNodePtr->LeftNodePtr)) {
-            NodePtr->LeftNodePtr->ParentPtr = NodePtr;
-        }
-        if ((NodePtr->RightNodePtr = ReplaceNodePtr->RightNodePtr)) {
-            NodePtr->RightNodePtr->ParentPtr = NodePtr;
-        }
-        NodePtr->RedFlag = ReplaceNodePtr->RedFlag;
-
-        if ((NodePtr->ParentPtr = ReplaceNodePtr->ParentPtr)) {
-            XelRBNode * ParentNodePtr = NodePtr->ParentPtr;
-            if (ParentNodePtr->LeftNodePtr == ReplaceNodePtr) {
-                ParentNodePtr->LeftNodePtr = NodePtr;
-            } else {
-                ParentNodePtr->RightNodePtr = NodePtr;
-            }
-        } else { // root
-            TreePtr->RootPtr = NodePtr;
-        }
-        XRBN_Init(ReplaceNodePtr);
-        Result.Inserted = true;
-        Result.PrevNode = ReplaceNodePtr;
-        return Result;
-    }
+    assert(InsertSlot.SubNodeRefPtr);
 
     *InsertSlot.SubNodeRefPtr = NodePtr;
     NodePtr->ParentPtr = InsertSlot.ParentPtr;
@@ -236,10 +199,18 @@ XelRBInsertResult XRBT_Insert(XelRBTree * TreePtr, XelRBNode * NodePtr, XRBT_Key
         }
     }
     XRBN_MarkBlack(TreePtr->RootPtr);
+}
 
-    // return insert done
-    Result.Inserted = true;
-    return Result;
+XelRBNode * XRBT_InsertOrAssign(XelRBTree * TreePtr, XelRBNode * NodePtr, XRBT_KeyCompare * CompFunc, const void * KeyPtr)
+{
+    XelRBInsertSlot InsertSlot = XRBT_FindInsertSlot(TreePtr, CompFunc, KeyPtr);
+    XelRBNode * OriginalNodePtr = XRBT_Original(InsertSlot);
+    if (OriginalNodePtr) {
+        XRBT_Replace(TreePtr, InsertSlot, NodePtr);
+    } else {
+        XRBT_Insert(TreePtr, InsertSlot, NodePtr);
+    }
+    return OriginalNodePtr;
 }
 
 static inline XelRBNode * XRBT_Minimum(XelRBNode * NodePtr)

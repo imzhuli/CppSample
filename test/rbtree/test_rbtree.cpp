@@ -84,9 +84,11 @@ TestNode * TreeInsert(size_t Index)
     auto TestNodePtr = new TestNode;
     TestNodePtr->Key = Index;
     XRBN_Init(&TestNodePtr->Node);
-    XRBT_Insert(&Tree, &TestNodePtr->Node, &Compare, &TestNodePtr->Key, false);
-
+    auto PrevNodePtr = XRBT_InsertOrAssign(&Tree, &TestNodePtr->Node, &Compare, &TestNodePtr->Key);
     NodePool[Index] = TestNodePtr;
+    if (PrevNodePtr) {
+        delete PrevNodePtr;
+    }
     return TestNodePtr;
 }
 
@@ -120,7 +122,7 @@ void test0()
         XRBN_Init(&TestNodePtr->Node);
         NodePool[Index] = TestNodePtr;
         PushOrder.push_back(Index);
-        XRBT_Insert(&Tree, &TestNodePtr->Node, &Compare, &TestNodePtr->Key, false);
+        XRBT_InsertOrAssign(&Tree, &TestNodePtr->Node, &Compare, &TestNodePtr->Key);
         ++Counter;
     }
     if (!CheckOrder(&Tree)) {

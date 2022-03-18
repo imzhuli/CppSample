@@ -209,12 +209,6 @@ static inline void XRBT_Replace(XelRBTree * TreePtr, XelRBInsertSlot InsertSlot,
     return;
 }
 
-typedef struct XelRBInsertResult
-{
-    bool Inserted;
-    XelRBNode * PrevNode;
-} XelRBInsertResult;
-
 #define XRBT_FOR_EACH(_iter, _tree) \
     for (XelRBNode *_iter = XRBT_First((_tree)); _iter; _iter = XRBN_Next(_iter))
 
@@ -222,9 +216,10 @@ typedef struct XelRBInsertResult
     for (XelRBNode *_iter = XRBT_First((_tree)), *_safe = XRBN_Next(_iter); _iter; _iter = _safe, _safe = XRBN_Next(_iter))
 
 
-ZEC_API XelRBInsertResult   XRBT_Insert(XelRBTree * TreePtr, XelRBNode * NodePtr, XRBT_KeyCompare * CompFunc, const void * KeyPtr, bool AllowReplace);
-ZEC_API void                XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr);
-ZEC_API bool                XRBT_Check(XelRBTree * TreePtr);
+ZEC_API void         XRBT_Insert(XelRBTree * TreePtr, XelRBInsertSlot InsertSlot, XelRBNode * NodePtr);
+ZEC_API XelRBNode *  XRBT_InsertOrAssign(XelRBTree * TreePtr, XelRBNode * NodePtr, XRBT_KeyCompare * CompFunc, const void * KeyPtr);
+ZEC_API void         XRBT_Remove(XelRBTree * TreePtr, XelRBNode * NodePtr);
+ZEC_API bool         XRBT_Check(XelRBTree * TreePtr);
 
 #ifdef __cplusplus
 }
