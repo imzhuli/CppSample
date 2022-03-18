@@ -150,19 +150,19 @@ XelRBInsertResult XRBT_Insert(XelRBTree * TreePtr, XelRBNode * NodePtr, XRBT_Key
     // assert(!NodePtr->RedFlag);
     XelRBInsertResult Result = {};
 
-    XelRBInsertNode InsertNode = XRBT_FindInsertSlot(TreePtr, CompFunc, KeyPtr);
-    if (!InsertNode.ParentPtr) { // root
+    XelRBInsertSlot InsertSlot = XRBT_FindInsertSlot(TreePtr, CompFunc, KeyPtr);
+    if (!InsertSlot.ParentPtr) { // root
         TreePtr->RootPtr = NodePtr;
         Result.Inserted = true;
         return Result;
     }
 
-    if (!InsertNode.SubNodeRefPtr) { // Replacement
+    if (!InsertSlot.SubNodeRefPtr) { // Replacement
         if (!AllowReplace) {
-            Result.PrevNode = InsertNode.ParentPtr;
+            Result.PrevNode = InsertSlot.ParentPtr;
             return Result;
         }
-        XelRBNode * ReplaceNodePtr = InsertNode.ParentPtr;
+        XelRBNode * ReplaceNodePtr = InsertSlot.ParentPtr;
         if ((NodePtr->LeftNodePtr = ReplaceNodePtr->LeftNodePtr)) {
             NodePtr->LeftNodePtr->ParentPtr = NodePtr;
         }
@@ -187,11 +187,10 @@ XelRBInsertResult XRBT_Insert(XelRBTree * TreePtr, XelRBNode * NodePtr, XRBT_Key
         return Result;
     }
 
-    *InsertNode.SubNodeRefPtr = NodePtr;
-    NodePtr->ParentPtr = InsertNode.ParentPtr;
+    *InsertSlot.SubNodeRefPtr = NodePtr;
+    NodePtr->ParentPtr = InsertSlot.ParentPtr;
     XRBN_MarkRed(NodePtr);
 
-    // TODO: fix: (rb-rebalance)
     XelRBNode * FixNodePtr = NodePtr;
     for(XelRBNode * FP = FixNodePtr->ParentPtr; XRBN_IsGenericRed(FP); FP = FixNodePtr->ParentPtr) {
         XelRBNode * FPP = FP->ParentPtr;

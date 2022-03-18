@@ -14,11 +14,11 @@ struct XelRBNode {
     bool          RedFlag;
 };
 
-typedef struct XelRBInsertNode
+typedef struct XelRBInsertSlot
 {
     XelRBNode * ParentPtr;
     XelRBNode ** SubNodeRefPtr;
-} XelRBInsertNode;
+} XelRBInsertSlot;
 
 static inline void XRBN_Init(XelRBNode * NodePtr) {
     XelRBNode InitValue = {};
@@ -149,8 +149,8 @@ static inline XelRBNode *XRBT_Find(XelRBTree * TreePtr, XRBT_KeyCompare * CompFu
     return NULL;
 }
 
-static inline XelRBInsertNode XRBT_FindInsertSlot(XelRBTree * TreePtr, XRBT_KeyCompare * CompFunc, const void *KeyPtr) {
-    XelRBInsertNode InsertNode = {};
+static inline XelRBInsertSlot XRBT_FindInsertSlot(XelRBTree * TreePtr, XRBT_KeyCompare * CompFunc, const void *KeyPtr) {
+    XelRBInsertSlot InsertNode = {};
     XelRBNode ** CurrNodeRefPtr = &TreePtr->RootPtr;
     while (*CurrNodeRefPtr) {
         InsertNode.ParentPtr = *CurrNodeRefPtr;
@@ -168,6 +168,45 @@ static inline XelRBInsertNode XRBT_FindInsertSlot(XelRBTree * TreePtr, XRBT_KeyC
     }
     InsertNode.SubNodeRefPtr = CurrNodeRefPtr;
     return InsertNode;
+}
+
+/* if a FindInsertSlot result indicates replacement, return the to-bo replaced node */
+static inline XelRBNode * XRBT_Original(XelRBInsertSlot InsertSlot) {
+    if (InsertSlot.SubNodeRefPtr) {
+        return NULL;
+    }
+    return InsertSlot.ParentPtr;
+}
+
+static inline void XRBT_Replace(XelRBTree * TreePtr, XelRBInsertSlot InsertSlot, XelRBNode * NodePtr)
+{
+    assert(!InsertSlot.SubNodeRefPtr);
+    if (!InsertSlot.ParentPtr) { // root
+        TreePtr->RootPtr = NodePtr;
+        return;
+    }
+
+    XelRBNode * ReplaceNodePtr = InsertSlot.ParentPtr;
+    if ((NodePtr->LeftNodePtr = ReplaceNodePtr->LeftNodePtr)) {
+        NodePtr->LeftNodePtr->ParentPtr = NodePtr;
+    }
+    if ((NodePtr->RightNodePtr = ReplaceNodePtr->RightNodePtr)) {
+        NodePtr->RightNodePtr->ParentPtr = NodePtr;
+    }
+    NodePtr->RedFlag = ReplaceNodePtr->RedFlag;
+
+    if ((NodePtr->ParentPtr = ReplaceNodePtr->ParentPtr)) {
+        XelRBNode * ParentNodePtr = NodePtr->ParentPtr;
+        if (ParentNodePtr->LeftNodePtr == ReplaceNodePtr) {
+            ParentNodePtr->LeftNodePtr = NodePtr;
+        } else {
+            ParentNodePtr->RightNodePtr = NodePtr;
+        }
+    } else { // root
+        TreePtr->RootPtr = NodePtr;
+    }
+    XRBN_Init(ReplaceNodePtr);
+    return;
 }
 
 typedef struct XelRBInsertResult
