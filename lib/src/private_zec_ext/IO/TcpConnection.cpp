@@ -162,7 +162,7 @@ ZEC_NS
         });
     }
 
-    void xTcpSocketContext::Close()
+    void xTcpSocketContext::GracefulClose()
     {
         if (_ConnectionState >= eConnectionClosing) {
             return;
@@ -170,6 +170,16 @@ ZEC_NS
         _ListenerPtr = nullptr;
         _ConnectionState = eConnectionClosing;
         _ReadState = eReadSuspended;
+        if (!_WritePacketBufferQueue.Peek()) {
+            DoClose();
+        }
+    }
+
+    void xTcpSocketContext::Close()
+    {
+        if (_ConnectionState >= eConnectionClosed) {
+            return;
+        }
         DoClose();
     }
 
@@ -244,12 +254,17 @@ ZEC_NS
         return true;
     }
 
+    void xTcpConnection::GracefulClose()
+    {
+        assert(_SocketPtr);
+        _SocketPtr->GracefulClose();
+    }
+
     void xTcpConnection::Clean()
     {
         _ListenerPtr = nullptr;
         auto SocketPtr = xRetainer{ NoRetain, Steal(_SocketPtr) };
         SocketPtr->Close();
-        SocketPtr->Release();
     }
 
     xNetAddress xTcpConnection::GetRemoteAddress() const

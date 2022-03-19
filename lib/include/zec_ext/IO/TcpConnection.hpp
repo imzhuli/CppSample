@@ -39,6 +39,7 @@ ZEC_NS
         ZEC_API_MEMBER bool Init(xIoHandle NativeHandle, iListener * ListenerPtr);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr);
+        ZEC_API_MEMBER void GracefulClose();
         ZEC_API_MEMBER void Clean();
 
         ZEC_API_MEMBER xNetAddress GetRemoteAddress() const;

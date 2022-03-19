@@ -43,6 +43,7 @@ ZEC_NS
         ZEC_API_MEMBER size_t PostData(const void * DataPtr, size_t DataSize);
         ZEC_API_MEMBER void   SuspendReading();
         ZEC_API_MEMBER void   ResumeReading();
+        ZEC_API_MEMBER void   GracefulClose();
         ZEC_API_MEMBER void   Close();
 
         ZEC_INLINE  size64_t GetTotalReadSize() { return _TotalReadSize; }
