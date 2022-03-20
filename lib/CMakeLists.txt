@@ -54,6 +54,9 @@ aux_source_directory(./src/private_zec_ext/Lua                     ZEC_SRC)
 aux_source_directory(./src/private_zec_ext/IO                      ZEC_SRC)
 aux_source_directory(./src/private_zec_ext/Utility                 ZEC_SRC)
 
+aux_source_directory(./src/private_zec_game/Base                   ZEC_SRC)
+aux_source_directory(./src/private_zec_game/Window                 ZEC_SRC)
+
 # 3rd party
 
 # C version utils:
