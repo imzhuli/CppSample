@@ -177,7 +177,7 @@ ZEC_NS
 
     void xTcpSocketContext::Close()
     {
-        if (_ConnectionState != eConnectionClosed) {
+        if (_ConnectionState == eConnectionClosed) {
             return;
         }
         DoClose();
@@ -185,7 +185,7 @@ ZEC_NS
 
     void xTcpSocketContext::DoClose()
     {
-        assert(_ConnectionState == eConnectionClosed);
+        assert(_ConnectionState != eConnectionClosed);
         _Socket.close(X2Ref(xAsioError{}));
         _ConnectionState = eConnectionClosed;
     }
