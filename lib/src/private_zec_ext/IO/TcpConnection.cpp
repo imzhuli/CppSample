@@ -177,7 +177,7 @@ ZEC_NS
 
     void xTcpSocketContext::Close()
     {
-        if (_ConnectionState >= eConnectionClosed) {
+        if (_ConnectionState != eConnectionClosed) {
             return;
         }
         DoClose();
