@@ -177,15 +177,14 @@ ZEC_NS
 
     void xTcpSocketContext::Close()
     {
-        if (_ConnectionState == eConnectionClosed) {
-            return;
-        }
         DoClose();
     }
 
     void xTcpSocketContext::DoClose()
     {
-        assert(_ConnectionState != eConnectionClosed);
+        if (_ConnectionState == eConnectionClosed) {
+            return;
+        }
         _Socket.close(X2Ref(xAsioError{}));
         _ConnectionState = eConnectionClosed;
     }
