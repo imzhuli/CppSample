@@ -36,7 +36,6 @@ ZEC_NS
     {
     public:
         ZEC_INLINE xNativeIoContext & operator ()(xIoContext & IoContext) const { return IoContext._Native.As<xNativeIoContext>(); }
-
     };
 
 }

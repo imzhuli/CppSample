@@ -39,7 +39,7 @@ ZEC_NS
         ZEC_API_MEMBER bool Init(xIoHandle NativeHandle, iListener * ListenerPtr);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr);
-        ZEC_API_MEMBER void GracefulClose();
+        ZEC_API_MEMBER bool GracefulClose();  // return value: true: immediately closed, false pending writes
         ZEC_API_MEMBER void Clean();
 
         ZEC_API_MEMBER xNetAddress GetRemoteAddress() const;
@@ -55,6 +55,7 @@ ZEC_NS
             size64_t WriteSize = 0;
         };
         ZEC_API_MEMBER xAudit GetAudit();
+        ZEC_API_MEMBER xAudit StealAudit();
 
         /***
          * @brief aync post data, try to buffer(copy) data into internal buffer

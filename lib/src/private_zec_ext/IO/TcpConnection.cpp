@@ -29,7 +29,7 @@ ZEC_NS
 
     xTcpSocketContext::~xTcpSocketContext()
     {
-        assert(_ConnectionState >= eConnectionClosed);
+        assert(_ConnectionState == eConnectionClosed);
         while(auto WriteBufferPtr = _WritePacketBufferQueue.Pop()) {
             DeleteWriteBuffer(WriteBufferPtr);
         }
@@ -162,21 +162,24 @@ ZEC_NS
         });
     }
 
-    void xTcpSocketContext::GracefulClose()
+    bool xTcpSocketContext::GracefulClose()
     {
         if (_ConnectionState >= eConnectionClosing) {
-            return;
+            return false;
         }
         _ListenerPtr = nullptr;
         _ConnectionState = eConnectionClosing;
         _ReadState = eReadSuspended;
         if (!_WritePacketBufferQueue.Peek()) {
             DoClose();
+            return true;
         }
+        return false;
     }
 
     void xTcpSocketContext::Close()
     {
+        _ListenerPtr = nullptr;
         DoClose();
     }
 
@@ -254,10 +257,10 @@ ZEC_NS
         return true;
     }
 
-    void xTcpConnection::GracefulClose()
+    bool xTcpConnection::GracefulClose()
     {
         assert(_SocketPtr);
-        _SocketPtr->GracefulClose();
+        return _SocketPtr->GracefulClose();
     }
 
     void xTcpConnection::Clean()
@@ -309,7 +312,18 @@ ZEC_NS
 
     xTcpConnection::xAudit xTcpConnection::GetAudit()
     {
-        return { _SocketPtr->GetTotalReadSize(), _SocketPtr->GetTotalWriteSize() };
+        if (_SocketPtr) {
+            return { _SocketPtr->GetTotalReadSize(), _SocketPtr->GetTotalWriteSize() };
+        }
+        return {0, 0};
+    }
+
+    xTcpConnection::xAudit xTcpConnection::StealAudit()
+    {
+        if (_SocketPtr) {
+            return { _SocketPtr->StealTotalReadSize(), _SocketPtr->StealTotalWriteSize() };
+        }
+        return {0, 0};
     }
 
 }
