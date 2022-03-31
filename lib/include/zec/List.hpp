@@ -20,8 +20,7 @@ ZEC_NS
 	protected:
 		ZEC_INLINE xListNode() noexcept { Reset(); }
 		ZEC_INLINE ~xListNode() noexcept { DetachUnsafe(); }
-		ZEC_INLINE xListNode(const xListNode & Other) {}
-		ZEC_INLINE xListNode & operator = (const xListNode & Other) { return *this; }
+		ZEC_INLINE xListNode(const xListNode & Other) { Reset(); }
 
 		ZEC_INLINE void Reset() {
 			pPrev = pNext = this;
