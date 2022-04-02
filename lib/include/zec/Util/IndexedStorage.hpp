@@ -43,7 +43,7 @@ ZEC_NS
 		template<typename tValue, bool RandomKey>
 		friend class xIndexedStorage;
 
-		ZEC_API_STATIC_MEMBER uint_fast32_t TimeSeed();
+		ZEC_API_STATIC_MEMBER uint32_t TimeSeed();
 		static constexpr uint32_t MaxIndexValue = static_cast<uint32_t>(0x7FFF'FFFFu);
 		static constexpr const uint32_t KeyInUseBitmask = 0x8000'0000u;
 	};
