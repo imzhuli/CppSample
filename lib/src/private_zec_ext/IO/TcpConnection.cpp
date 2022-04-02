@@ -108,7 +108,6 @@ ZEC_NS
                 return;
             }
             _TotalReadSize += TransferedSize;
-
             _ReadDataSize += TransferedSize;
             DoReadCallback();
             DoRead();
@@ -194,16 +193,21 @@ ZEC_NS
 
     void xTcpSocketContext::OnConnected()
     {
-        _ConnectionState = eConnected;
         if (_ListenerPtr) {
             _ListenerPtr->OnConnected(_ListenerContextPtr);
+            if (_ConnectionState != eConnecting) { // check if Listener callback closed connection
+                return;
+            }
+            _ConnectionState = eConnected;
             if (auto Guard = _ReadCallbackEntry.Guard()) {
                 DoRead();
             }
             if (!_WritePacketBufferQueue.IsEmpty()) {
                 DoFlush();
             }
+            return;
         }
+        _ConnectionState = eConnected;
     }
 
     void xTcpSocketContext::OnError()
