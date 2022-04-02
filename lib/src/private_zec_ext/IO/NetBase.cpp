@@ -7,19 +7,18 @@ ZEC_NS
     static_assert(sizeof(xNetAddress) == sizeof(xNetAddress::xKeyType));
     static_assert(sizeof(xNetAddress::xKeyType) == std::tuple_size<xNetAddress::xKeyType>());
 
-    std::string xNetAddress::ToString() const
+    std::string xNetAddress::IpToString() const
     {
         char Buffer[64];
         if (Type == eUnknown) {
             return "Unknown";
         }
         if (Type == eIpv4) {
-            return {Buffer, (size_t)sprintf(Buffer, "%d.%d.%d.%d:%d",
+            return {Buffer, (size_t)sprintf(Buffer, "%d.%d.%d.%d",
                 (int)Ipv4[0],
                 (int)Ipv4[1],
                 (int)Ipv4[2],
-                (int)Ipv4[3],
-                (int)Port)};
+                (int)Ipv4[3])};
         }
         // ipv6
         return {Buffer, (size_t)sprintf(Buffer,
@@ -31,6 +30,34 @@ ZEC_NS
             (int)Ipv6[4],(int)Ipv6[5],(int)Ipv6[6],(int)Ipv6[7],
             (int)Ipv6[8],(int)Ipv6[9],(int)Ipv6[10],(int)Ipv6[11],
             (int)Ipv6[12],(int)Ipv6[13],(int)Ipv6[14],(int)Ipv6[15])};
+    }
+
+    std::string xNetAddress::ToString() const
+    {
+        char Buffer[64];
+        if (Type == eUnknown) {
+            return "Unknown";
+        }
+        if (Type == eIpv4) {
+            return {Buffer, (size_t)sprintf(Buffer, "%d.%d.%d.%d:%u",
+                (int)Ipv4[0],
+                (int)Ipv4[1],
+                (int)Ipv4[2],
+                (int)Ipv4[3],
+                (int)Port)};
+        }
+        // ipv6
+        return {Buffer, (size_t)sprintf(Buffer,
+            "%02x:%02x:%02x:%02x:"
+            "%02x:%02x:%02x:%02x:"
+            "%02x:%02x:%02x:%02x:"
+            "%02x:%02x:%02x:%02x:"
+            "%u",
+            (int)Ipv6[0],(int)Ipv6[1],(int)Ipv6[2],(int)Ipv6[3],
+            (int)Ipv6[4],(int)Ipv6[5],(int)Ipv6[6],(int)Ipv6[7],
+            (int)Ipv6[8],(int)Ipv6[9],(int)Ipv6[10],(int)Ipv6[11],
+            (int)Ipv6[12],(int)Ipv6[13],(int)Ipv6[14],(int)Ipv6[15],
+            (int)Port)};
     }
 
     xNetAddress xNetAddress::Make(const char * IpStr, uint16_t Port)

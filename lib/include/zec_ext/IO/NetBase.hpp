@@ -31,6 +31,7 @@ ZEC_NS
             return Ret;
         }
 
+        ZEC_API_MEMBER std::string IpToString() const;
         ZEC_API_MEMBER std::string ToString() const;
 
         ZEC_API_STATIC_MEMBER xNetAddress Make(const char * IpStr,   uint16_t Port = 0);
