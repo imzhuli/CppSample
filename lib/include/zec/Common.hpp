@@ -291,35 +291,35 @@ ZEC_NS
 		public:
 			template<typename T>
 			ZEC_INLINE void CreateAs() {
-				static_assert(alignof(_PlaceHolder) >= alignof(T));
+                static_assert(Alignment >= alignof(T));
 				static_assert(sizeof(_PlaceHolder) >= sizeof(T));
 				new ((void*)_PlaceHolder) T;
 			}
 
 			template<typename T, typename ... tArgs>
 			ZEC_INLINE T& CreateValueAs(tArgs && ... Args) {
-				static_assert(alignof(_PlaceHolder) >= alignof(T));
+                static_assert(Alignment >= alignof(T));
 				static_assert(sizeof(_PlaceHolder) >= sizeof(T));
 				return *(new ((void*)_PlaceHolder) T(std::forward<tArgs>(Args)...));
 			}
 
 			template<typename T>
 			ZEC_INLINE void DestroyAs() {
-				static_assert(alignof(_PlaceHolder) >= alignof(T));
+                static_assert(Alignment >= alignof(T));
 				static_assert(sizeof(_PlaceHolder) >= sizeof(T));
 				reinterpret_cast<T*>(_PlaceHolder)->~T();
 			}
 
 			template<typename T>
 			ZEC_INLINE T & As() {
-				static_assert(alignof(_PlaceHolder) >= alignof(T));
+                static_assert(Alignment >= alignof(T));
 				static_assert(sizeof(_PlaceHolder) >= sizeof(T));
 				return reinterpret_cast<T&>(_PlaceHolder);
 			}
 
 			template<typename T>
 			ZEC_INLINE const T & As() const {
-				static_assert(alignof(_PlaceHolder) >= alignof(T));
+                static_assert(Alignment >= alignof(T));
 				static_assert(sizeof(_PlaceHolder) >= sizeof(T));
 				return reinterpret_cast<const T&>(_PlaceHolder);
 			}
