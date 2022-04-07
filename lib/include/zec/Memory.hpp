@@ -109,7 +109,7 @@ ZEC_NS
 		/**
 		 * @brief Allocat memory,
 		 * @param vxSize must be multiple of
-		 * @param vxAlignment
+		 * @param vxAlignment alignment
 		 * @return address of Allocaed memroy
 		 * @exception bad_Alloc
 		 */

@@ -213,21 +213,21 @@ XelRBNode * XRBT_InsertOrAssign(XelRBTree * TreePtr, XelRBNode * NodePtr, XRBT_K
     return OriginalNodePtr;
 }
 
-static inline XelRBNode * XRBT_Minimum(XelRBNode * NodePtr)
-{
-    while(NodePtr->LeftNodePtr) {
-        NodePtr = NodePtr->LeftNodePtr;
-    }
-    return NodePtr;
-}
+// static inline XelRBNode * XRBT_Minimum(XelRBNode * NodePtr)
+// {
+//     while(NodePtr->LeftNodePtr) {
+//         NodePtr = NodePtr->LeftNodePtr;
+//     }
+//     return NodePtr;
+// }
 
-static inline XelRBNode * XRBT_Maximum(XelRBNode * NodePtr)
-{
-    while(NodePtr->RightNodePtr) {
-        NodePtr = NodePtr->RightNodePtr;
-    }
-    return NodePtr;
-}
+// static inline XelRBNode * XRBT_Maximum(XelRBNode * NodePtr)
+// {
+//     while(NodePtr->RightNodePtr) {
+//         NodePtr = NodePtr->RightNodePtr;
+//     }
+//     return NodePtr;
+// }
 
 static void XRBT_Fix(XelRBTree * TreePtr, XelRBNode * FixNodePtr, XelRBNode * ParentPtr, bool Left)
 {
