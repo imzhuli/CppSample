@@ -11,7 +11,7 @@ extern "C" {
 
 typedef struct { char __PlaceHolder__ [1]; } * XelString;
 
-extern XelString      XS_New();
+extern XelString      XS_New(void);
 extern XelString      XS_Duplicate(XelString Str);
 extern XelString      XS_NewData(const char * SourcePtr, size_t Length);
 extern XelString      XS_NewString(const char * StringPtr);
