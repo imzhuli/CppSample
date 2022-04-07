@@ -1,4 +1,5 @@
 #include "NetBase.hpp"
+#include <zec/String.hpp>
 
 ZEC_NS
 {
@@ -114,6 +115,15 @@ ZEC_NS
         }
         catch (...) {}
         return {};
+    }
+
+    xNetAddress Parse(const std::string & AddressStr)
+    {
+        auto TrimAddressStr = Trim(AddressStr);
+        auto SpIndex = TrimAddressStr.find(':');
+        auto Hostname = TrimAddressStr.substr(0, SpIndex);
+        auto Port = static_cast<uint16_t>((SpIndex == TrimAddressStr.npos) ? atoll(TrimAddressStr.data() + SpIndex + 1) : 0);
+        return xNetAddress::Make(Hostname.c_str(), Port);
     }
 
 }

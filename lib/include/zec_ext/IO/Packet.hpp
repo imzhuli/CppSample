@@ -59,6 +59,10 @@ ZEC_NS
             return PacketLength;
         }
 
+        ZEC_INLINE size_t GetPayloadSize() const {
+            return PacketLength - PacketHeaderSize;
+        }
+
         ZEC_STATIC_INLINE void PatchRequestId(void * PacketPtr, xPacketRequestId RequestId) {
             xStreamWriter S(PacketPtr);
             S.Skip(
