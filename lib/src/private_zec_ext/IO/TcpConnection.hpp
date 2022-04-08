@@ -34,8 +34,8 @@ ZEC_NS
         ZEC_INLINE tcp::endpoint GetLocalAddress() const { return _Socket.local_endpoint(X2Ref(xAsioError{})); }
         ZEC_INLINE tcp::endpoint GetRemoteAddress() const { return _Socket.remote_endpoint(X2Ref(xAsioError{})); }
 
-        ZEC_API_MEMBER void ResizeSendBuffer(size_t Size) { asio::socket_base::send_buffer_size Option(Size); _Socket.set_option(Option); }
-        ZEC_API_MEMBER void ResizeReceiveBuffer(size_t Size) { asio::socket_base::receive_buffer_size Option(Size); _Socket.set_option(Option); }
+        ZEC_API_MEMBER void ResizeSendBuffer(size_t Size) { asio::socket_base::send_buffer_size Option((int)Size); _Socket.set_option(Option); }
+        ZEC_API_MEMBER void ResizeReceiveBuffer(size_t Size) { asio::socket_base::receive_buffer_size Option((int)Size); _Socket.set_option(Option); }
 
         ZEC_INLINE void BindListener(xTcpConnection::iListener * ListenerPtr, xTcpConnection * ListenerContextPtr) { _ListenerPtr = ListenerPtr; _ListenerContextPtr = ListenerContextPtr; }
         ZEC_INLINE bool IsReadingSusppended() { return eReading != _ReadState; }

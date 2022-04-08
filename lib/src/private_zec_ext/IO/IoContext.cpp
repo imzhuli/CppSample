@@ -12,7 +12,7 @@ ZEC_NS
 
     bool xIoContext::Init()
     {
-        static_assert(_WorkGuard.Size >= WorkGuardSize);
+        static_assert(decltype(_WorkGuard)::Size >= WorkGuardSize);
         _WorkGuard.CreateValueAs<xIoContextWorkGuard>(
             asio::make_work_guard(_Native.CreateValueAs<xNativeIoContext>(1))
             );

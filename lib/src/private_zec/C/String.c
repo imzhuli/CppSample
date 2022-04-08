@@ -14,7 +14,7 @@ typedef struct {
     char   InnerBuffer[XS_INNER_BUFFER_SIZE];
 } __XelString;
 
-XelString XS_New()
+XelString XS_New(void)
 {
     __XelString * RealPtr = (__XelString*)malloc(sizeof(__XelString));
     RealPtr->DataPtr = RealPtr->InnerBuffer;
