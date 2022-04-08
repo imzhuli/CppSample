@@ -5,6 +5,10 @@
     #define XelNoWriteSignal       MSG_NOSIGNAL
 #endif
 
+#ifndef SOCK_CLOEXEC
+    #define SOCK_CLOEXEC 0
+#endif
+
 bool XL_Init(XelLink * LinkPtr)
 {
     LinkPtr->Status = XLS_Idle;
