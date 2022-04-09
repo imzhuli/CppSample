@@ -1,6 +1,6 @@
 #pragma once
-#include <zec_ext/IO/NetBase.hpp>
 #include "./_Local.hpp"
+#include <zec_ext/IO/NetBase.hpp>
 
 ZEC_NS
 {

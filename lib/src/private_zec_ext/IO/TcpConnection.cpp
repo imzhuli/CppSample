@@ -1,6 +1,6 @@
 
-#include "TcpConnection.hpp"
-#include "NetBase.hpp"
+#include "./TcpConnection.hpp"
+#include "./NetBase.hpp"
 #include <cstring>
 
 ZEC_NS

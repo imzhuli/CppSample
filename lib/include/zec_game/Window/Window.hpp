@@ -1,6 +1,6 @@
 #pragma once
 #include <zec/Common.hpp>
-#include "Mouse.hpp"
+#include "./Mouse.hpp"
 
 ZEC_NS
 {
@@ -15,6 +15,6 @@ ZEC_NS
         void SetFullScreen(bool FullScreen);
     };
 
-    
+
 
 }

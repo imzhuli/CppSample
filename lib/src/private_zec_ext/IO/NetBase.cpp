@@ -1,4 +1,4 @@
-#include "NetBase.hpp"
+#include "./NetBase.hpp"
 #include <zec/String.hpp>
 
 ZEC_NS

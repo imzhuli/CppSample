@@ -35,6 +35,7 @@ endfunction()
 add_sub_sample(app)
 add_sub_sample(glm)
 add_sub_sample(lua)
+add_sub_sample(udp_echo)
 
 if (CMAKE_SYSTEM_NAME MATCHES "Linux")
 add_sub_sample(get_mac)
