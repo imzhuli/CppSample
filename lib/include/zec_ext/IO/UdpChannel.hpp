@@ -11,11 +11,13 @@ ZEC_NS
     class xUdpSocketContext;
     class xUdpChannel;
 
-    class xUdpChannel
+    class xUdpChannel final
+    : xNonCopyable
     {
     public:
         struct iListener {
-            virtual void OnData(void * DataPtr, size_t DataSize, const xNetAddress & RemoteAddress) = 0;
+            virtual void OnError(xUdpChannel * ChannelPtr, const char * Message) {}
+            virtual void OnData (xUdpChannel * ChannelPtr, void * DataPtr, size_t DataSize, const xNetAddress & RemoteAddress) = 0;
         };
 
     public:

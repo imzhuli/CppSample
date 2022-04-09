@@ -117,12 +117,12 @@ ZEC_NS
         return {};
     }
 
-    xNetAddress Parse(const std::string & AddressStr)
+    xNetAddress xNetAddress::Parse(const std::string & AddressStr)
     {
         auto TrimAddressStr = Trim(AddressStr);
         auto SpIndex = TrimAddressStr.find(':');
         auto Hostname = TrimAddressStr.substr(0, SpIndex);
-        auto Port = static_cast<uint16_t>((SpIndex == TrimAddressStr.npos) ? atoll(TrimAddressStr.data() + SpIndex + 1) : 0);
+        auto Port = static_cast<uint16_t>((SpIndex == TrimAddressStr.npos) ? 0 : atoll(TrimAddressStr.data() + SpIndex + 1));
         return xNetAddress::Make(Hostname.c_str(), Port);
     }
 
