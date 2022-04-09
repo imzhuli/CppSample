@@ -35,9 +35,10 @@ ZEC_NS
         assert(IoContextPtr);
         assert(ListenerPtr);
 
+        xAsioError Error;
         _SocketPtr = new xUdpSocketContext(IoContextPtr);
-        _SocketPtr->Native().open(udp::v4());
-        if (!_SocketPtr->Native().is_open()) {
+        _SocketPtr->Native().open(udp::v4(), Error);
+        if (Error) {
             delete _SocketPtr;
             return false;
         }
