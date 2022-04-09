@@ -8,7 +8,7 @@ ZEC_NS
 	class xVersion
 	{
 	public:
-		using xId = int64_t;
+		using xId = uint64_t;
 
 		ZEC_INLINE operator    xId() const { return _Version;  }
 		ZEC_INLINE void        Set(xId ver) { _Version = ver; }
@@ -29,7 +29,7 @@ ZEC_NS
 	class xVersionAtomic
 	{
 	public:
-		using xId = int64_t;
+		using xId = uint64_t;
 
 		ZEC_INLINE operator    xId() const { return _Version;  }
 		ZEC_INLINE void        Set(xId ver) { _Version = ver; }
