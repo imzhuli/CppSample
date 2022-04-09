@@ -35,7 +35,9 @@ ZEC_NS
         ZEC_API_MEMBER std::string ToString() const;
 
         ZEC_API_STATIC_MEMBER xNetAddress Make(const char * IpStr,   uint16_t Port = 0);
+        ZEC_API_STATIC_MEMBER xNetAddress MakeV4Raw(const void * AddrRaw, uint16_t Port = 0);
         ZEC_API_STATIC_MEMBER xNetAddress MakeV4(const char * IpStr, uint16_t Port = 0);
+        ZEC_API_STATIC_MEMBER xNetAddress MakeV6Raw(const void * AddrRaw, uint16_t Port = 0);
         ZEC_API_STATIC_MEMBER xNetAddress MakeV6(const char * IpStr, uint16_t Port = 0);
         ZEC_API_STATIC_MEMBER xNetAddress Parse(const std::string & AddressStr);
     };

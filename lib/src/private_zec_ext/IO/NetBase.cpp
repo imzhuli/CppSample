@@ -83,21 +83,35 @@ ZEC_NS
         return Ret;
     }
 
+    xNetAddress xNetAddress::MakeV4Raw(const void * AddrRaw, uint16_t Port)
+    {
+        xNetAddress Ret;
+        memset(Ret.IpStorage, 0, sizeof(Ret.IpStorage));
+        memcpy(Ret.Ipv4, AddrRaw, sizeof(Ret.Ipv4));
+        Ret.Type = eIpv4;
+        Ret.Port = Port;
+        return Ret;
+    }
+
     xNetAddress xNetAddress::MakeV4(const char * IpStr, uint16_t Port)
     {
         try {
             auto Address = asio::ip::make_address_v4(IpStr);
             auto bytes = Address.to_bytes();
-
-            xNetAddress Ret;
-            memset(Ret.IpStorage, 0, sizeof(Ret.IpStorage));
-            memcpy(Ret.Ipv4, bytes.data(), sizeof(Ret.Ipv4));
-            Ret.Type = eIpv4;
-            Ret.Port = Port;
-            return Ret;
+            return MakeV4Raw(bytes.data(), Port);
         }
         catch (...) {}
         return {};
+    }
+
+    xNetAddress xNetAddress::MakeV6Raw(const void * AddrRaw, uint16_t Port)
+    {
+        xNetAddress Ret;
+        memset(Ret.IpStorage, 0, sizeof(Ret.IpStorage));
+        memcpy(Ret.Ipv6, AddrRaw, sizeof(Ret.Ipv6));
+        Ret.Type = eIpv6;
+        Ret.Port = Port;
+        return Ret;
     }
 
     xNetAddress xNetAddress::MakeV6(const char * IpStr, uint16_t Port)
@@ -105,13 +119,7 @@ ZEC_NS
         try {
             auto Address = asio::ip::make_address_v6(IpStr);
             auto bytes = Address.to_bytes();
-
-            xNetAddress Ret;
-            memset(Ret.IpStorage, 0, sizeof(Ret.IpStorage));
-            memcpy(Ret.Ipv6, bytes.data(), sizeof(Ret.Ipv6));
-            Ret.Type = eIpv6;
-            Ret.Port = Port;
-            return Ret;
+            return MakeV6Raw(bytes.data(), Port);
         }
         catch (...) {}
         return {};
