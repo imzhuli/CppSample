@@ -6,11 +6,13 @@
 ZEC_NS
 {
 
-    xTcpSocketContext::xTcpSocketContext(xIoContext * IoContextPtr, const xNetAddress & Address)
+    xTcpSocketContext::xTcpSocketContext(xIoContext * IoContextPtr, const xNetAddress & Address, xTcpConnection * TcpConnectionPtr, xTcpConnection::iListener * ListenerPtr)
     : _Socket(xIoCaster()(*IoContextPtr))
     {
         _ReadBuffer[MaxPacketSize] = '\0';
         _ConnectionState = eConnecting;
+        _ListenerContextPtr = TcpConnectionPtr;
+        _ListenerPtr = ListenerPtr;
         _Socket.async_connect(MakeTcpEndpoint(Address), [this, R=xRetainer{this}] (const xAsioError & Error) {
             if (Error) {
                 OnError();
@@ -20,11 +22,14 @@ ZEC_NS
         });
     }
 
-    xTcpSocketContext::xTcpSocketContext(xIoHandle Handle)
+    xTcpSocketContext::xTcpSocketContext(xIoHandle Handle, xTcpConnection * TcpConnectionPtr, xTcpConnection::iListener * ListenerPtr)
     : _Socket(std::move(Handle.AsRef<xTcpSocket>()))
     {
-        _ConnectionState = eConnected;
         _ReadBuffer[MaxPacketSize] = '\0';
+        _ConnectionState = eConnected;
+        _ListenerContextPtr = TcpConnectionPtr;
+        _ListenerPtr = ListenerPtr;
+        ResumeReading();
     }
 
     xTcpSocketContext::~xTcpSocketContext()
@@ -99,7 +104,7 @@ ZEC_NS
                 if (Error == asio::error::eof) {
                     _ConnectionState = eConnectionClosed;
                     if (auto ListenerPtr = Steal(_ListenerPtr)) {
-                        ListenerPtr->OnPeerClose(_ListenerContextPtr);
+                        ListenerPtr->OnPeerClose(Steal(_ListenerContextPtr));
                         DoClose();
                     }
                     return;
@@ -217,7 +222,7 @@ ZEC_NS
         }
         _ConnectionState = eConnectionError;
         if (auto ListenerPtr = Steal(_ListenerPtr)) {
-            ListenerPtr->OnError(_ListenerContextPtr);
+            ListenerPtr->OnError(Steal(_ListenerContextPtr));
         }
         return;
     }
@@ -234,13 +239,12 @@ ZEC_NS
 
     bool xTcpConnection::Init(xIoHandle NativeHandle, iListener * ListenerPtr)
     {
-        assert(!_ListenerPtr);
         assert(!_SocketPtr);
-
-        _ListenerPtr = ListenerPtr;
-        _SocketPtr = new xTcpSocketContext(NativeHandle);
-        _SocketPtr->BindListener(_ListenerPtr, this);
-        _SocketPtr->ResumeReading();
+        try {
+            _SocketPtr = new xTcpSocketContext(NativeHandle, this, ListenerPtr);
+        } catch (...) {
+            return false;
+        }
         return true;
     }
 
@@ -252,12 +256,12 @@ ZEC_NS
 
     bool xTcpConnection::Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr)
     {
-        assert(!_ListenerPtr);
         assert(!_SocketPtr);
-
-        _ListenerPtr = ListenerPtr;
-        _SocketPtr = new xTcpSocketContext(IoContextPtr, Address);
-        _SocketPtr->BindListener(_ListenerPtr, this);
+        try {
+            _SocketPtr = new xTcpSocketContext(IoContextPtr, Address, this, ListenerPtr);
+        } catch (...) {
+            return false;
+        }
         return true;
     }
 
@@ -269,7 +273,6 @@ ZEC_NS
 
     void xTcpConnection::Clean()
     {
-        _ListenerPtr = nullptr;
         auto SocketPtr = xRetainer{ NoRetain, Steal(_SocketPtr) };
         SocketPtr->Close();
     }

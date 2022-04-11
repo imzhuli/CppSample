@@ -27,8 +27,8 @@ ZEC_NS
     , xNonCopyable
     {
     public:
-        ZEC_API_MEMBER xTcpSocketContext(xIoContext * IoContextPtr, const xNetAddress & Address);
-        ZEC_API_MEMBER xTcpSocketContext(xIoHandle Handle);
+        ZEC_API_MEMBER xTcpSocketContext(xIoContext * IoContextPtr, const xNetAddress & Address, xTcpConnection * TcpConnectionPtr, xTcpConnection::iListener * ListenerPtr);
+        ZEC_API_MEMBER xTcpSocketContext(xIoHandle Handle, xTcpConnection * TcpConnectionPtr, xTcpConnection::iListener * ListenerPtr);
         ZEC_API_MEMBER ~xTcpSocketContext();
 
         ZEC_INLINE tcp::endpoint GetLocalAddress() const { return _Socket.local_endpoint(X2Ref(xAsioError{})); }
@@ -37,7 +37,6 @@ ZEC_NS
         ZEC_API_MEMBER void ResizeSendBuffer(size_t Size) { asio::socket_base::send_buffer_size Option((int)Size); _Socket.set_option(Option); }
         ZEC_API_MEMBER void ResizeReceiveBuffer(size_t Size) { asio::socket_base::receive_buffer_size Option((int)Size); _Socket.set_option(Option); }
 
-        ZEC_INLINE void BindListener(xTcpConnection::iListener * ListenerPtr, xTcpConnection * ListenerContextPtr) { _ListenerPtr = ListenerPtr; _ListenerContextPtr = ListenerContextPtr; }
         ZEC_INLINE bool IsReadingSusppended() { return eReading != _ReadState; }
 
         ZEC_API_MEMBER size_t PostData(const void * DataPtr, size_t DataSize);

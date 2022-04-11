@@ -72,7 +72,6 @@ ZEC_NS
         ZEC_PRIVATE_MEMBER void DoRead();
 
     private:
-        iListener *                   _ListenerPtr = nullptr;
         xTcpSocketContext *           _SocketPtr = nullptr;
     };
 
