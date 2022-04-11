@@ -1,6 +1,9 @@
 #include "./UdpChannel.hpp"
 #include "./NetBase.hpp"
 
+#include <iostream>
+using namespace std;
+
 ZEC_NS
 {
     class xUdpSocketContext
@@ -8,43 +11,81 @@ ZEC_NS
     , xNonCopyable
     {
     public:
-        xUdpSocketContext(xIoContext * IoContextPtr)
+        xUdpSocketContext(xIoContext * IoContextPtr, xUdpChannel::iListener * ListenerPtr, xUdpChannel * ListenerContextPtr)
         : _Socket(xIoCaster()(*IoContextPtr)) {
             ReceiveBuffer[MaxPacketSize] = 0;
+            _Socket.open(udp::v4());
+            _ListenerPtr = ListenerPtr;
+            _ListenerContextPtr = ListenerContextPtr;
+            DoRead();
         }
-        xUdpSocketContext(xIoContext * IoContextPtr, const xNetAddress & BindAddress)
+        xUdpSocketContext(xIoContext * IoContextPtr, const xNetAddress & BindAddress, xUdpChannel::iListener * ListenerPtr, xUdpChannel * ListenerContextPtr)
         : _Socket(xIoCaster()(*IoContextPtr), MakeUdpEndpoint(BindAddress)) {
             ReceiveBuffer[MaxPacketSize] = 0;
+            _ListenerPtr = ListenerPtr;
+            _ListenerContextPtr = ListenerContextPtr;
+            DoRead();
         }
         ~xUdpSocketContext() = default;
 
         xUdpSocket & Native() { return _Socket; }
         const xUdpSocket & Native() const { return _Socket; }
         void Close() { assert(!CallbackFlag); _Socket.close(X2Ref(xAsioError{})); }
+
+        void PostData(const void * DataPtr, size_t DataSize, const xNetAddress & DestiationAddress) {
+            _Socket.send_to(xAsioConstBuffer{DataPtr, DataSize}, MakeUdpEndpoint(DestiationAddress), 0, X2Ref(xAsioError()));
+        }
+
+    protected:
+        void DoRead();
+
     public:
         xUdpEndpoint SenderEndpoint;
         ubyte        ReceiveBuffer[MaxPacketSize + 1];
         bool         CallbackFlag = false;
 
     private:
-        xUdpSocket _Socket;
+        xUdpSocket               _Socket;
+        xUdpChannel::iListener * _ListenerPtr = nullptr;
+        xUdpChannel *            _ListenerContextPtr = nullptr;
     };
+
+    void xUdpSocketContext::DoRead()
+    {
+        _Socket.async_receive_from(xAsioMutableBuffer{ReceiveBuffer, MaxPacketSize }, SenderEndpoint,
+        [this, R=xRetainer{this}](const xAsioError & Error, size_t TransferedSize) {
+            if (Error) {
+                cout << "UdpCallback: " << (void*)this << ", Error: " << Error.message() << endl;
+                auto ListenerPtr = Steal(_ListenerPtr);
+                if (Error != asio::error::operation_aborted && ListenerPtr) {
+                    ListenerPtr->OnError(Steal(_ListenerContextPtr), Error.message().c_str());
+                }
+                return;
+            }
+
+#ifndef NDEBUG
+            CallbackFlag = true;
+            _ListenerPtr->OnData(_ListenerContextPtr, ReceiveBuffer, TransferedSize, MakeNetAddress(SenderEndpoint));
+            CallbackFlag = false;
+#else
+            _ListenerPtr->OnData(_ListenerContextPtr, ReceiveBuffer, TransferedSize, MakeNetAddress(SenderEndpoint));
+#endif
+            DoRead();
+        });
+    }
+
+    /* user delegate */
 
     bool xUdpChannel::Init(xIoContext * IoContextPtr, iListener * ListenerPtr)
     {
         assert(IoContextPtr);
         assert(ListenerPtr);
 
-        xAsioError Error;
-        _SocketPtr = new xUdpSocketContext(IoContextPtr);
-        _SocketPtr->Native().open(udp::v4(), Error);
-        if (Error) {
-            delete _SocketPtr;
+        try {
+            _SocketPtr = new xUdpSocketContext(IoContextPtr, ListenerPtr, this);
+        } catch (...) {
             return false;
         }
-
-        _ListenerPtr = ListenerPtr;
-        DoRead();
         return true;
     }
 
@@ -53,15 +94,16 @@ ZEC_NS
         assert(IoContextPtr);
         assert(ListenerPtr);
 
-        _SocketPtr = new xUdpSocketContext(IoContextPtr, BindAddress);
-        _ListenerPtr = ListenerPtr;
-        DoRead();
+        try {
+            _SocketPtr = new xUdpSocketContext(IoContextPtr, BindAddress, ListenerPtr, this);
+        } catch (...) {
+            return false;
+        }
         return true;
     }
 
     void xUdpChannel::Clean()
     {
-        _ListenerPtr = nullptr;
         auto SocketPtr = xRetainer{ NoRetain, Steal(_SocketPtr) };
         SocketPtr->Close();
     }
@@ -78,31 +120,9 @@ ZEC_NS
         _SocketPtr->Native().set_option(Option);
     }
 
-    void xUdpChannel::DoRead()
-    {
-        _SocketPtr->Native().async_receive_from(xAsioMutableBuffer{_SocketPtr->ReceiveBuffer, MaxPacketSize }, _SocketPtr->SenderEndpoint,
-        [this, R=xRetainer{_SocketPtr}](const xAsioError & Error, size_t TransferedSize) {
-            if (Error) {
-                auto ListenerPtr = Steal(_ListenerPtr);
-                if (ListenerPtr) {
-                    ListenerPtr->OnError(this, Error.message().c_str());
-                }
-                return;
-            }
-#ifndef NDEBUG
-            _SocketPtr->CallbackFlag = true;
-            _ListenerPtr->OnData(this, _SocketPtr->ReceiveBuffer, TransferedSize, MakeNetAddress(_SocketPtr->SenderEndpoint));
-            _SocketPtr->CallbackFlag = false;
-#else
-            _ListenerPtr->OnData(this, _SocketPtr->ReceiveBuffer, TransferedSize, MakeNetAddress(_SocketPtr->SenderEndpoint));
-#endif
-            DoRead();
-        });
-    }
-
     void xUdpChannel::PostData(const void * DataPtr, size_t DataSize, const xNetAddress & DestiationAddress)
     {
-        _SocketPtr->Native().send_to(xAsioConstBuffer{DataPtr, DataSize}, MakeUdpEndpoint(DestiationAddress), 0, X2Ref(xAsioError()));
+        _SocketPtr->PostData(DataPtr, DataSize, DestiationAddress);
     }
 
 }

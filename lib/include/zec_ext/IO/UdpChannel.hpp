@@ -31,11 +31,7 @@ ZEC_NS
         ZEC_API_MEMBER void PostData(const void * DataPtr, size_t DataSize, const xNetAddress & DestiationAddress);
 
     private:
-        ZEC_API_MEMBER void DoRead();
-
-    private:
         xUdpSocketContext *  _SocketPtr = nullptr;
-        iListener *          _ListenerPtr = nullptr;
     };
 
 }
