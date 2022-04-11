@@ -48,6 +48,7 @@ ZEC_NS
         ZEC_API_MEMBER void ResizeSendBuffer(size_t Size);
         ZEC_API_MEMBER void ResizeReceiveBuffer(size_t Size);
 
+        ZEC_API_MEMBER size_t GetPendingWriteBlockCount() const;
         ZEC_INLINE bool IsActive() const { return _SocketPtr; }
 
         struct xAudit {

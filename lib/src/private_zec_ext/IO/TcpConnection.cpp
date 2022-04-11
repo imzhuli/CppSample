@@ -302,6 +302,11 @@ ZEC_NS
         return _SocketPtr->PostData(DataPtr, DataSize);
     }
 
+    size_t xTcpConnection::GetPendingWriteBlockCount() const
+    {
+        return _SocketPtr ? _SocketPtr->GetPendingWriteBlocks() : 0;
+    }
+
     void xTcpConnection::SuspendReading()
     {
         assert(_SocketPtr);
