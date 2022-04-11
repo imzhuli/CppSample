@@ -1,9 +1,6 @@
 #include "./UdpChannel.hpp"
 #include "./NetBase.hpp"
 
-#include <iostream>
-using namespace std;
-
 ZEC_NS
 {
     class xUdpSocketContext
@@ -55,7 +52,6 @@ ZEC_NS
         _Socket.async_receive_from(xAsioMutableBuffer{ReceiveBuffer, MaxPacketSize }, SenderEndpoint,
         [this, R=xRetainer{this}](const xAsioError & Error, size_t TransferedSize) {
             if (Error) {
-                cout << "UdpCallback: " << (void*)this << ", Error: " << Error.message() << endl;
                 auto ListenerPtr = Steal(_ListenerPtr);
                 if (Error != asio::error::operation_aborted && ListenerPtr) {
                     ListenerPtr->OnError(Steal(_ListenerContextPtr), Error.message().c_str());
