@@ -87,7 +87,7 @@ ZEC_NS
         enum eReadState {
             eReading,
             eReadSuspended,
-        } _ReadState;
+        } _ReadState = eReading;
     };
     using xSharedTcpSocketContextPtr = std::shared_ptr<xTcpSocketContext>;
 
