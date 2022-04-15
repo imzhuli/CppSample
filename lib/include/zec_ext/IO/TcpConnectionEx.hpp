@@ -3,7 +3,7 @@
 #include <zec/Common.hpp>
 #include <zec/Util/MemoryPool.hpp>
 #include <zec/Util/IndexedStorage.hpp>
-#include "TcpConnection.hpp"
+#include "./TcpConnection.hpp"
 
 ZEC_NS
 {
@@ -34,20 +34,20 @@ ZEC_NS
             virtual size_t OnData(xAutoClientTcpConnection * ConnectionPtr, void * DataPtr, size_t DataSize) = 0;
         };
 
-        bool Init(xIoContext * ContextPtr, const xNetAddress ServerAddress, iListener * ListenerPtr);
-        void Clean();
+        ZEC_API_MEMBER bool Init(xIoContext * ContextPtr, const xNetAddress ServerAddress, iListener * ListenerPtr);
+        ZEC_API_MEMBER void Clean();
 
-        void        Check(uint64_t NowMS);
-        void        ResetConnection() { _Dying = true; }
-        size_t      PostData(const void * DataPtr, size_t DataSize);
-        bool        IsConnected() const { return _Connected; }
-        uint64_t    GetVersion() const { return _Version; }
+        ZEC_API_MEMBER void        Check(uint64_t NowMS);
+        ZEC_API_MEMBER void        ResetConnection() { _Dying = true; }
+        ZEC_API_MEMBER size_t      PostData(const void * DataPtr, size_t DataSize);
+        ZEC_API_MEMBER bool        IsConnected() const { return _Connected; }
+        ZEC_API_MEMBER uint64_t    GetVersion() const { return _Version; }
 
     protected:
-        void   OnConnected(xTcpConnection * TcpConnectionPtr);
-        size_t OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize);
-        void   OnPeerClose(xTcpConnection * TcpConnectionPtr);
-        void   OnError(xTcpConnection * TcpConnectionPtr);
+        ZEC_API_MEMBER void   OnConnected(xTcpConnection * TcpConnectionPtr);
+        ZEC_API_MEMBER size_t OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize);
+        ZEC_API_MEMBER void   OnPeerClose(xTcpConnection * TcpConnectionPtr);
+        ZEC_API_MEMBER void   OnError(xTcpConnection * TcpConnectionPtr);
 
     private:
         xNetAddress                  _ServerAddress;

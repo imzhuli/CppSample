@@ -16,8 +16,6 @@ int main(int, char **)
     auto W = xStreamWriter(Buffer);
     auto R = xStreamReader(Buffer);
 
-
-
     (void)W;
     (void)R;
     return 0;
