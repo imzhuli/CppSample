@@ -17,6 +17,7 @@ ZEC_NS
 		};
 
 	public:
+		ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const std::vector<xNetAddress>& Addresses, iListener * ListenerPtr);
 		ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, std::vector<xNetAddress>&& Addresses, iListener * ListenerPtr);
 		ZEC_API_MEMBER void Clean();
 		ZEC_API_MEMBER void Check(uint64_t NowMS);

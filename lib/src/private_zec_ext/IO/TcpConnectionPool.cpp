@@ -2,6 +2,11 @@
 
 ZEC_NS
 {
+	bool xTcpConnectionPool::Init(xIoContext * IoContextPtr, const std::vector<xNetAddress>& Addresses, iListener * ListenerPtr)
+	{
+		auto AddressesTemp = Addresses;
+		return Init(IoContextPtr, std::move(AddressesTemp), ListenerPtr);
+	}
 
 	bool xTcpConnectionPool::Init(xIoContext * IoContextPtr, std::vector<xNetAddress>&& Addresses, iListener * ListenerPtr)
 	{
