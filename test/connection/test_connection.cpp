@@ -19,7 +19,6 @@ struct xTestLisetner
 	}
 };
 
-
 int main(int argc, char * argv[])
 {
 	auto CmdLine = zec::xCommandLine{ argc, argv, {
@@ -40,6 +39,7 @@ int main(int argc, char * argv[])
 
 	xTcpConnectionPool Pool;
 	auto PoolGuard = xResourceGuard(Pool, &IoContext, std::vector{
+		xNetAddress::Parse(*OptIp),
 		xNetAddress::Parse(*OptIp)
 	}, &TestListener);
 	Pool.Check(GetMilliTimestamp());
@@ -47,6 +47,7 @@ int main(int argc, char * argv[])
 	std::string Request = "GET / HTTP/1.1\r\nUser-Agent: zec-test/1.0\r\n\r\n";
 	cout << "Request:" << endl;
 	cout << Request << endl;
+	Pool.PostData(Request.data(), Request.length());
 	Pool.PostData(Request.data(), Request.length());
 
 	xTimer Timer;
