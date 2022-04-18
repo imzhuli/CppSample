@@ -3,9 +3,7 @@ project(lib_${libname})
 ##FindPackages here
 set(Boost_USE_STATIC_LIBS ON)
 find_package(Boost             REQUIRED)
-find_package(FFmpeg            REQUIRED)
 find_package(Lua               REQUIRED)
-find_package(Glfw3             REQUIRED)
 
 # enable specific macors by system type:
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
@@ -87,6 +85,21 @@ endif()
 #install
 install(
 	DIRECTORY ${PROJECT_SOURCE_DIR}/./include/zec
+	DESTINATION include
+	FILES_MATCHING REGEX ".+\.(h|hpp)"
+	)
+install(
+	DIRECTORY ${PROJECT_SOURCE_DIR}/./include/zec_ext
+	DESTINATION include
+	FILES_MATCHING REGEX ".+\.(h|hpp)"
+	)
+install(
+	DIRECTORY ${PROJECT_SOURCE_DIR}/./include/glm
+	DESTINATION include
+	FILES_MATCHING REGEX ".+\.(h|hpp)"
+	)
+install(
+	DIRECTORY ${PROJECT_SOURCE_DIR}/./include/rapidjson
 	DESTINATION include
 	FILES_MATCHING REGEX ".+\.(h|hpp)"
 	)

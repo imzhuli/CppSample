@@ -18,6 +18,7 @@ link_directories(
 set(shared_lib_dependency_private
 	${shared_lib_dependency_private}
 	${FCGI_LIBRARIES}
+	${LUA_LIBRARIES}
 )
 
 function(add_sub_sample sub_dir_name)
@@ -36,7 +37,3 @@ add_sub_sample(app)
 add_sub_sample(glm)
 add_sub_sample(lua)
 add_sub_sample(udp_echo)
-
-if (CMAKE_SYSTEM_NAME MATCHES "Linux")
-add_sub_sample(get_mac)
-endif()

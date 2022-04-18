@@ -20,14 +20,14 @@ ZEC_NS
         };
 
     public:
-        ZEC_PRIVATE_MEMBER xWebSocketSession();
-        ZEC_PRIVATE_MEMBER ~xWebSocketSession();
+        ZEC_API_MEMBER xWebSocketSession();
+        ZEC_API_MEMBER ~xWebSocketSession();
 
-        ZEC_PRIVATE_MEMBER bool Init(xIoContext * IoContextPtr, const char * IpStr, uint64_t Port, const std::string & Origin, const std::string &Target, iListener * ListenerPtr);
-        ZEC_PRIVATE_MEMBER void Clean();
+        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * IpStr, uint64_t Port, const std::string & Origin, const std::string &Target, iListener * ListenerPtr);
+        ZEC_API_MEMBER void Clean();
 
-        ZEC_PRIVATE_MEMBER bool PostTextData(const std::string_view & Data);
-        ZEC_PRIVATE_MEMBER bool PostBinaryData(const void * DataPtr, size_t DataSize);
+        ZEC_API_MEMBER bool PostTextData(const std::string_view & Data);
+        ZEC_API_MEMBER bool PostBinaryData(const void * DataPtr, size_t DataSize);
 
     protected:
         struct xMessageBuffer : xListNode {

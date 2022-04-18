@@ -4,6 +4,7 @@ set(libname zec)
 project(project_${libname})
 
 enable_language(CXX)
+#set(ZEC_OPTION_STATIC ON)
 
 message(STATUS "CMAKE_BUILD_TYPE=" ${CMAKE_BUILD_TYPE})
 message(STATUS "CMAKE_SYSTEM_NAME=" ${CMAKE_SYSTEM_NAME})
@@ -86,8 +87,6 @@ set(CMAKE_INSTALL_REMOVE_ENVIRONMENT_RPATH     TRUE)
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH          FALSE)
 
 enable_testing()
-
-set(ZEC_OPTION_STATIC ON)
 
 add_subdirectory(lib)
 add_subdirectory(test)
