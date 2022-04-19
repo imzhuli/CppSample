@@ -28,7 +28,6 @@ include_directories(
 	./include/
 	${Boost_INCLUDE_DIRS}
 	${LUA_INCLUDE_DIR}
-	${LightWebsockets_INCLUDE_DIRS}
 	)
 link_directories(
 	)
