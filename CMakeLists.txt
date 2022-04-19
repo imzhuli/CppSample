@@ -4,7 +4,7 @@ set(libname zec)
 project(project_${libname})
 
 enable_language(CXX)
-#set(ZEC_OPTION_STATIC ON)
+set(ZEC_OPTION_STATIC ON)
 
 message(STATUS "CMAKE_BUILD_TYPE=" ${CMAKE_BUILD_TYPE})
 message(STATUS "CMAKE_SYSTEM_NAME=" ${CMAKE_SYSTEM_NAME})
