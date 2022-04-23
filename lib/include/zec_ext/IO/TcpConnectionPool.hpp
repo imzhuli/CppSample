@@ -21,7 +21,7 @@ ZEC_NS
 		ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, std::vector<xNetAddress>&& Addresses, iListener * ListenerPtr);
 		ZEC_API_MEMBER void Clean();
 		ZEC_API_MEMBER void Check(uint64_t NowMS);
-		ZEC_API_MEMBER void PostData(const void * DataPtr, size_t DataSize);
+		ZEC_API_MEMBER bool PostData(const void * DataPtr, size_t DataSize);
 		ZEC_INLINE     void SetReconnectTimeoutMS(uint64_t TimeoutMS) { _ReconnectTimeoutMS = TimeoutMS; }
 
 	protected:

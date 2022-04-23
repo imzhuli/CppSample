@@ -81,17 +81,21 @@ ZEC_NS
 	void xTcpConnectionPool::OnConnected(xTcpConnection * TcpConnectionPtr)
 	{}
 
-	void xTcpConnectionPool::PostData(const void * DataPtr, size_t DataSize)
+	bool xTcpConnectionPool::PostData(const void * DataPtr, size_t DataSize)
 	{
 		auto FirstConnectionPtr = static_cast<xTcpConnectionEx*>(_EnabledConnectionList.Head());
 		if (!FirstConnectionPtr) {
-			return;
+			return false;
 		}
-		FirstConnectionPtr->PostData(DataPtr, DataSize);
+		if (DataSize != FirstConnectionPtr->PostData(DataPtr, DataSize)) {
+			Kill(FirstConnectionPtr);
+			return false;
+		}
 		_EnabledConnectionList.GrabTail(*FirstConnectionPtr);
+		return true;
 	}
 
-    size_t  xTcpConnectionPool::OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize)
+    size_t xTcpConnectionPool::OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize)
 	{
 		return _ListenerPtr->OnData(this, DataPtr, DataSize);
 	}
