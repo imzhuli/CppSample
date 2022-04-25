@@ -37,6 +37,7 @@ endif()
 endfunction()
 
 #test lib:
+add_sub_test(algorithm)
 add_sub_test(alignment)
 add_sub_test(cmd)
 add_sub_test(memlog)

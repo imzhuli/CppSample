@@ -71,6 +71,16 @@ ZEC_NS
 			struct { uint32_t x, y; }     VU32;
 		};
 
+
+		namespace __detail__ {
+			template< class T >
+			struct xRemoveCVR {
+				typedef std::remove_cv_t<std::remove_reference_t<T>> Type;
+			};
+		}
+		template< class T >
+		using xNonCVRType = typename __detail__::xRemoveCVR<T>::Type;
+
 		template<typename T>
 		constexpr std::in_place_type_t<T> xType {};
 
@@ -249,7 +259,6 @@ ZEC_NS
 
 		using xReentryFlag = __detail__::xReentryFlag<false>;
 		using xAtomicReentryFlag = __detail__::xReentryFlag<true>;
-
 
 		template<typename T>
 		class xResourceGuard final : xNonCopyable {

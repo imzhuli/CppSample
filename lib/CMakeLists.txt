@@ -44,6 +44,7 @@ set(shared_lib_dependency_public
 
 # source files:
 aux_source_directory(./src/private_zec                             ZEC_SRC)
+aux_source_directory(./src/private_zec/Algorithm                   ZEC_SRC)
 aux_source_directory(./src/private_zec/Util                        ZEC_SRC)
 aux_source_directory(./src/private_zec/Container                   ZEC_SRC)
 
