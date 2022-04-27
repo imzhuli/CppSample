@@ -79,7 +79,7 @@ ZEC_NS
 			};
 		}
 		template< class T >
-		using xNonCVRType = typename __detail__::xRemoveCVR<T>::Type;
+		using xNoCVR = typename __detail__::xRemoveCVR<T>::Type;
 
 		template<typename T>
 		constexpr std::in_place_type_t<T> xType {};
@@ -96,10 +96,10 @@ ZEC_NS
 		struct xNonCopyable { protected: xNonCopyable() = default; ~xNonCopyable() = default; xNonCopyable(xNonCopyable &&) = delete; };
 
 		template<typename T1, typename T2>
-		using xDiffType = decltype(std::declval<T1>() - std::declval<T2>());
+		using xDiff = decltype(std::declval<T1>() - std::declval<T2>());
 		template<typename T1, typename T2> ZEC_INLINE constexpr auto Diff(const T1& Value, const T2& ComparedToValue) { return Value - ComparedToValue; }
-		template<typename T1, typename T2> ZEC_INLINE constexpr auto SignedDiff(const T1& Value, const T2& ComparedToValue) { return static_cast<std::make_signed_t<xDiffType<T1, T2>>>(Value - ComparedToValue); }
-		template<typename T1, typename T2> ZEC_INLINE constexpr auto UnsignedDiff(const T1& Value, const T2& ComparedToValue) { return static_cast<std::make_unsigned_t<xDiffType<T1, T2>>>(Value - ComparedToValue); }
+		template<typename T1, typename T2> ZEC_INLINE constexpr auto SignedDiff(const T1& Value, const T2& ComparedToValue) { return static_cast<std::make_signed_t<xDiff<T1, T2>>>(Value - ComparedToValue); }
+		template<typename T1, typename T2> ZEC_INLINE constexpr auto UnsignedDiff(const T1& Value, const T2& ComparedToValue) { return static_cast<std::make_unsigned_t<xDiff<T1, T2>>>(Value - ComparedToValue); }
 
 		ZEC_STATIC_INLINE void Pass() {};
 		ZEC_STATIC_INLINE void Error() { throw nullptr; }

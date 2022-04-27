@@ -5,12 +5,12 @@ ZEC_NS
 {
 
     template<typename tOperator>
-    ZEC_INLINE typename xNonCVRType<tOperator>::xUnit BinaryExponentiation(tOperator && Operator, typename xNonCVRType<tOperator>::xUnit Base, size_t Times) 
+    ZEC_INLINE typename xNoCVR<tOperator>::xUnit BinaryExponentiation(tOperator && Operator, typename xNoCVR<tOperator>::xUnit Base, size_t Times)
     {
-        using xOperator = xNonCVRType<tOperator>;
-        using xUnit = xNonCVRType<typename xOperator::xUnit>;
+        using xOperator = xNoCVR<tOperator>;
+        using xUnit = xNoCVR<typename xOperator::xUnit>;
         static_assert(std::is_same_v<xUnit, typename xOperator::xUnit>);
-        static_assert(std::is_same_v<xUnit, xNonCVRType<decltype(xOperator::Unit)>>);
+        static_assert(std::is_same_v<xUnit, xNoCVR<decltype(xOperator::Unit)>>);
 
         auto Result = xOperator::Unit;
         while(Times) {
