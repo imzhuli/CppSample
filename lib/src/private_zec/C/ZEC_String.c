@@ -1,4 +1,4 @@
-#include <zec/C/String.h>
+#include <zec/C/ZEC_String.h>
 #include <stdio.h>
 #include <ctype.h>
 #include <inttypes.h>

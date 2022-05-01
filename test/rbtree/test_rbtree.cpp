@@ -3,7 +3,7 @@
 #include <cmath>
 #include <ctime>
 #include <iostream>
-#include <zec/C/RBTree.h>
+#include <zec/C/ZEC_RBTree.h>
 
 using namespace std;
 using namespace zec;

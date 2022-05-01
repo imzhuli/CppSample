@@ -1,5 +1,5 @@
 #pragma once
-#include "./Common.h"
+#include "./ZEC_Common.h"
 
 #ifdef __cplusplus
 extern "C" {

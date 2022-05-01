@@ -1,6 +1,6 @@
 #pragma once
-#include <zec/C/Common.h>
-#include <zec/C/Byte.h>
+#include <zec/C/ZEC_Common.h>
+#include <zec/C/ZEC_Byte.h>
 #include <stdbool.h>
 #include <stdio.h>
 #include <errno.h>
