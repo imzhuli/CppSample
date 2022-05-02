@@ -85,13 +85,16 @@
 	#error "Unsupported compiler"
 #endif
 
+#define ZEC_EXTERN             extern
+#define ZEC_MEMBER 
+#define ZEC_STATIC_MEMBER      static
 #if defined(ZEC_OPTION_STATIC)
 	#if defined(ZEC_OPTION_EXPORT_API)
 		#error ZEC_OPTION_STATIC is used with ZEC_OPTION_EXPORT_API
 	#endif
-	#define ZEC_API                      extern
-	#define ZEC_API_MEMBER
-	#define ZEC_API_STATIC_MEMBER        static
+	#define ZEC_API                      ZEC_EXTERN
+	#define ZEC_API_MEMBER               ZEC_MEMBER
+	#define ZEC_API_STATIC_MEMBER        ZEC_STATIC_MEMBER
 #else
 	#if defined(ZEC_OPTION_EXPORT_API)
 		#define ZEC_API                  ZEC_EXPORT
