@@ -1,14 +1,11 @@
 project(sample_${libname})
 
 # dependencies:
-find_package(MbedTls)
 
 # local dependencies
 include_directories(
 	../lib/src/
 	../lib/include/
-	${Awdb_INCLUDE_DIRS}
-	${MBED_INCLUDE_DIRS}
 	)
 link_directories(
 	)
@@ -16,9 +13,6 @@ link_directories(
 set(shared_lib_dependency_private
 	ssl
 	crypto
-	${Awdb_LIBRARIES}
-	${MBED_LIBRARIES}
-	${LightWebsockets_LIBRARIES}
 	)
 
 aux_source_directory(./base/    COMMON_SOURCE_CODE)

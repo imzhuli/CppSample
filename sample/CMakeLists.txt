@@ -17,7 +17,6 @@ link_directories(
 
 set(shared_lib_dependency_private
 	${shared_lib_dependency_private}
-	${FCGI_LIBRARIES}
 	${LUA_LIBRARIES}
 )
 
