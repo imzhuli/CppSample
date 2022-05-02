@@ -50,67 +50,58 @@
 	#define NOMINMAX
 	#define ZEC_INLINE                       __forceinline
 	#define ZEC_STATIC_INLINE                static __forceinline
-	#if defined(ZEC_OPTION_STATIC)
-		#if defined(ZEC_OPTION_EXPORT_API)
-			#error ZEC_OPTION_STATIC is used with ZEC_OPTION_EXPORT_API
-		#endif
-		#define ZEC_API                      extern
-		#define ZEC_API_MEMBER
-		#define ZEC_API_STATIC_MEMBER        static
-	#else
-		#if defined(ZEC_OPTION_EXPORT_API)
-			#define ZEC_API                  __declspec(dllexport) extern
-			#define ZEC_API_MEMBER           __declspec(dllexport)
-			#define ZEC_API_STATIC_MEMBER    __declspec(dllexport) static
-			#define ZEC_API_FRIEND           friend __declspec(dllexport)
-		#else
-			#define ZEC_API                  __declspec(dllimport) extern
-			#define ZEC_API_MEMBER           __declspec(dllimport)
-			#define ZEC_API_STATIC_MEMBER    __declspec(dllimport) static
-			#define ZEC_API_FRIEND           friend __declspec(dllimport)
-		#endif
-	#endif
+
 	#define ZEC_PRIVATE                      extern
 	#define ZEC_PRIVATE_MEMBER
 	#define ZEC_PRIVATE_STATIC_MEMBER        static
 	#define ZEC_PRIVATE_CONSTEXPR            constexpr
 	#define ZEC_PRIVATE_STATIC_CONSTEXPR     static constexpr
 	#define ZEC_PRIVATE_INLINE               __forceinline
+
 	#define ZEC_EXPORT                       __declspec(dllexport) extern
+	#define ZEC_EXPORT_MEMBER                __declspec(dllexport)
+	#define ZEC_EXPORT_STATIC_MEMBER         __declspec(dllexport) static
 	#define ZEC_IMPORT                       __declspec(dllimport) extern
+	#define ZEC_IMPORT_MEMBER                __declspec(dllimport)
+	#define ZEC_IMPORT_STATIC_MEMBER         __declspec(dllimport) static
 #elif defined(__clang__) || defined(__GNUC__)
 	#define ZEC_INLINE                       __attribute__((always_inline)) inline
 	#define ZEC_STATIC_INLINE                __attribute__((always_inline)) static inline
-	#if defined(ZEC_OPTION_STATIC)
-		#if defined(ZEC_OPTION_EXPORT_API)
-			#error ZEC_OPTION_STATIC is used with ZEC_OPTION_EXPORT_API
-		#endif
-		#define ZEC_API                      extern
-		#define ZEC_API_MEMBER
-		#define ZEC_API_STATIC_MEMBER        static
-	#else
-		#if defined(ZEC_OPTION_EXPORT_API)
-			#define ZEC_API                  __attribute__((__visibility__("default"))) extern
-			#define ZEC_API_MEMBER           __attribute__((__visibility__("default")))
-			#define ZEC_API_STATIC_MEMBER    __attribute__((__visibility__("default"))) static
-			#define ZEC_API_FRIEND           friend __attribute__((__visibility__("default")))
-		#else
-			#define ZEC_API                  extern
-			#define ZEC_API_MEMBER
-			#define ZEC_API_STATIC_MEMBER    static
-			#define ZEC_API_FRIEND           friend
-		#endif
-	#endif
+
 	#define ZEC_PRIVATE                      __attribute__((__visibility__("hidden"))) extern
 	#define ZEC_PRIVATE_MEMBER               __attribute__((__visibility__("hidden")))
 	#define ZEC_PRIVATE_STATIC_MEMBER        __attribute__((__visibility__("hidden"))) static
 	#define ZEC_PRIVATE_CONSTEXPR            __attribute__((__visibility__("hidden"))) constexpr
 	#define ZEC_PRIVATE_STATIC_CONSTEXPR     __attribute__((__visibility__("hidden"))) static constexpr
 	#define ZEC_PRIVATE_INLINE               __attribute__((always_inline)) __attribute__((__visibility__("hidden"))) inline
+
 	#define ZEC_EXPORT                       __attribute__((__visibility__("default"))) extern
+	#define ZEC_EXPORT_MEMBER                __attribute__((__visibility__("default")))
+	#define ZEC_EXPORT_STATIC_MEMBER         __attribute__((__visibility__("default"))) static
 	#define ZEC_IMPORT                       extern
+	#define ZEC_IMPORT_MEMBER
+	#define ZEC_IMPORT_STATIC_MEMBER         static
 #else
 	#error "Unsupported compiler"
+#endif
+
+#if defined(ZEC_OPTION_STATIC)
+	#if defined(ZEC_OPTION_EXPORT_API)
+		#error ZEC_OPTION_STATIC is used with ZEC_OPTION_EXPORT_API
+	#endif
+	#define ZEC_API                      extern
+	#define ZEC_API_MEMBER
+	#define ZEC_API_STATIC_MEMBER        static
+#else
+	#if defined(ZEC_OPTION_EXPORT_API)
+		#define ZEC_API                  ZEC_EXPORT
+		#define ZEC_API_MEMBER           ZEC_EXPORT_MEMBER
+		#define ZEC_API_STATIC_MEMBER    ZEC_EXPORT_STATIC_MEMBER
+	#else
+		#define ZEC_API                  ZEC_IMPORT
+		#define ZEC_API_MEMBER           ZEC_IMPORT_MEMBER
+		#define ZEC_API_STATIC_MEMBER    ZEC_IMPORT_STATIC_MEMBER
+	#endif
 #endif
 
 #define ZEC_MAKE_STRING(s) #s

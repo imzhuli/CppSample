@@ -2,21 +2,16 @@ project(sample_${libname})
 
 find_package(Lua REQUIRED)
 
-# dependencies:
-set(shared_lib_dependency_private)
-
 # local dependencies
 include_directories(
 	../lib/src/
 	../lib/include/
-	${FCGI_INCLUDE_DIRS}
 	${LUA_INCLUDE_DIR}
 	)
 link_directories(
 	)
 
 set(shared_lib_dependency_private
-	${shared_lib_dependency_private}
 	${LUA_LIBRARIES}
 )
 
