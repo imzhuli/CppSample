@@ -5,7 +5,6 @@
 #include <sstream>
 #include <stdexcept>
 #include <cmath>
-#include <smmintrin.h>
 
 using namespace std;
 using namespace zec;

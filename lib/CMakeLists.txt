@@ -2,23 +2,24 @@ project(lib_${libname})
 
 ##FindPackages here
 set(Boost_USE_STATIC_LIBS ON)
-find_package(Boost             REQUIRED)
 find_package(Lua               REQUIRED)
+find_package(Boost             REQUIRED)
+find_package(OpenSSL           REQUIRED)
 
 # enable specific macors by system type:
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
 	#Platform
-	set(PLATFORM_LIBRARIES crypto)
+	#set(PLATFORM_LIBRARIES crypto)
 	#end of Platform
 elseif (CMAKE_SYSTEM_NAME MATCHES "Linux")
 	#Platform
-	set(PLATFORM_LIBRARIES crypto)
+	#set(PLATFORM_LIBRARIES crypto)
 	#end of Platform
 elseif (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 	#Platform
 	find_library(COCOA_LIBRARY Cocoa REQUIRED)
 	find_library(IOKIT_LIBRARY IOKit REQUIRED)
-	set(PLATFORM_LIBRARIES crypto ${IOKIT_LIBRARY} ${COCOA_LIBRARY})
+	set(PLATFORM_LIBRARIES ${IOKIT_LIBRARY} ${COCOA_LIBRARY})
 	#end of Platform
 endif()
 
@@ -26,8 +27,9 @@ endif()
 # paths
 include_directories(
 	./include/
-	${Boost_INCLUDE_DIRS}
 	${LUA_INCLUDE_DIR}
+	${Boost_INCLUDE_DIRS}
+	${OPENSSL_INCLUDE_DIR}
 	)
 link_directories(
 	)
@@ -36,8 +38,9 @@ link_directories(
 set(shared_lib_dependency_private
 	)
 set(shared_lib_dependency_public
-	${Boost_LIBRARIES}
 	${LUA_LIBRARIES}
+	${Boost_LIBRARIES}
+	${OPENSSL_LIBRARIES}
 	${PLATFORM_LIBRARIES}
 	${cpp})
 
