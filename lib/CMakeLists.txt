@@ -8,19 +8,13 @@ find_package(OpenSSL           REQUIRED)
 
 # enable specific macors by system type:
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
-	#Platform
-	#set(PLATFORM_LIBRARIES crypto)
-	#end of Platform
+	set(PLATFORM_LIBRARIES)
 elseif (CMAKE_SYSTEM_NAME MATCHES "Linux")
-	#Platform
-	#set(PLATFORM_LIBRARIES crypto)
-	#end of Platform
+	set(PLATFORM_LIBRARIES)
 elseif (CMAKE_SYSTEM_NAME MATCHES "Darwin")
-	#Platform
 	find_library(COCOA_LIBRARY Cocoa REQUIRED)
 	find_library(IOKIT_LIBRARY IOKit REQUIRED)
 	set(PLATFORM_LIBRARIES ${IOKIT_LIBRARY} ${COCOA_LIBRARY})
-	#end of Platform
 endif()
 
 # local dependencies
