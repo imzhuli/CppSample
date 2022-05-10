@@ -41,23 +41,6 @@ static void test()
 		}
 	}
 
-	static uint32_t i = 0;
-	union U{
-		__m128i data;
-		struct {
-			uint32_t a0;
-			uint32_t a1;
-			uint32_t a2;
-			uint32_t a3;
-		} ii = { i, i + 1, i + 2, i + 3 };
-	};
-
-	U U1;
-	i += 10;
-	U U2;
-
-	U1.data = _mm_max_epi32(U1.data, U2.data);
-	cout <<  U1.ii.a0 << U1.ii.a1 << U1.ii.a2 << U1.ii.a3 << endl;
 }
 
 void testOrder()
