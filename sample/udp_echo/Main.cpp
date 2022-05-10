@@ -13,7 +13,7 @@ struct xServerListner
 : xUdpChannel::iListener
 {
 	bool Stop = false;
-	void OnError(xUdpChannel * ChannelPtr, const char * Message) {
+	void OnError(xUdpChannel * ChannelPtr, const char * Message) override {
 		cout << "Error:" << Message << endl;
 	}
     void OnData(xUdpChannel * ChannelPtr, void * DataPtr, size_t DataSize, const xNetAddress & RemoteAddress) override

@@ -11,8 +11,6 @@ link_directories(
 	)
 
 set(shared_lib_dependency_private
-	ssl
-	crypto
 	)
 
 aux_source_directory(./base/    COMMON_SOURCE_CODE)

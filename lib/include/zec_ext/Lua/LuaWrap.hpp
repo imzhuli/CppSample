@@ -44,14 +44,21 @@ ZEC_NS
         template<typename tArg>
         ZEC_INLINE std::enable_if_t<std::is_floating_point_v<tArg>> Push(tArg Number) const { lua_pushnumber(_LuaStatePtr, Number); }
         template<typename...Args>
-        ZEC_INLINE void PushF(const char * FmtStr, Args&&...args) const { lua_pushfstring(_LuaStatePtr, FmtStr, std::forward<Args>(args)...); }
+        ZEC_INLINE void PushFS(const char * FmtStr, Args&&...args) const { lua_pushfstring(_LuaStatePtr, FmtStr, std::forward<Args>(args)...); }
 
         template<typename tFirstArg, typename...tOtherArgs>
-        ZEC_INLINE std::enable_if_t<sizeof...(tOtherArgs), int> Push(tFirstArg&& FirstArg, tOtherArgs&&...args) const {
+        ZEC_INLINE std::enable_if_t<static_cast<bool>(sizeof...(tOtherArgs))> Push(tFirstArg&& FirstArg, tOtherArgs&&...args) const {
             Push(std::forward<tFirstArg>(FirstArg));
             Push(std::forward<tOtherArgs>(args)...);
-            return 1 + (int)sizeof...(args);
         }
+
+        template<typename...Args>
+        [[nodiscard]]
+        ZEC_INLINE int Return(Args&&...args) const {
+            Push(std::forward<Args>(args)...);
+            return (int)sizeof...(args);
+        }
+
 
         template<typename...Args>
         ZEC_INLINE void SetGlobal(const char * name, Args&&...args) const {

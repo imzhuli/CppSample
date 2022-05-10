@@ -9,7 +9,7 @@ int LuaCallbackSubSub(lua_State * LP)
 	auto W = xLuaStateWrapper(LP);
 	auto [p1, p2, p3] = W.Get<int, double, const char *>();
 	cout << "p1=" << p1 << ", p2=" << p2 << ", p3=" << p3 << endl;
-	return W.Push(1, 2.2, "Hello R3");
+	return W.Return(1, 2.2, "Hello R3");
 }
 
 int main(int, char *[])
