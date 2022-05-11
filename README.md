@@ -12,4 +12,4 @@ libwebsockets
 
 # included 3rd party library versions:
 glm:        20220420
-rapidjson:  20211124
+rapidjson:  20220406
