@@ -132,12 +132,12 @@ ZEC_NS
         WS->binary(MessagePtr->Binary);
         WS->async_write(xAsioConstBuffer(MessageData.data(), MessageData.size()), [this, Retainer=WS, MessagePtr](const xAsioError & Error, size_t TransferedSize) {
             do {
-                auto MessageCleaner = xScopeGuard{ [MessagePtr] { delete MessagePtr; } };
                 if (Error) {
                     // cerr << "WS Flush Error" << endl;
                     OnError(Retainer.get());
                     return;
                 }
+                delete MessagePtr;
             } while(false);
             DoFlush();
         });
