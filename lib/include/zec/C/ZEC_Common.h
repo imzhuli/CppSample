@@ -46,6 +46,10 @@
 	#define ZEC_SYSTEM_GENERIC
 #endif
 
+#if defined(ZEC_SYSTEM_IPHONE_SIMULATOR) || defined(ZEC_SYSTEM_IPHONE)
+	#define ZEC_SYSTEM_IOS
+#endif
+
 #if defined(_MSC_VER)
 	#define NOMINMAX
 	#define ZEC_INLINE                       __forceinline
