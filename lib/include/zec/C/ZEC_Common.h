@@ -107,6 +107,12 @@
 	#endif
 #endif
 
+#ifndef __cplusplus
+#define ZEC_CNAME 
+#else
+#define ZEC_CNAME extern "C"
+#endif 
+
 #define ZEC_MAKE_STRING(s) #s
 #define ZEC_EXPAND_STRING(s) ZEC_MAKE_STRING(s)
 #define ZEC_EXPECT(x) do { bool test=(bool)(x); if(!test) { throw #x; } } while(0)
