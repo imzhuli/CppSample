@@ -109,8 +109,12 @@
 
 #ifndef __cplusplus
 #define ZEC_CNAME 
+#define ZEC_CNAME_BEGIN
+#define ZEC_CNAME_END
 #else
 #define ZEC_CNAME extern "C"
+#define ZEC_CNAME_BEGIN extern "C" {
+#define ZEC_CNAME_END }
 #endif 
 
 #define ZEC_MAKE_STRING(s) #s
