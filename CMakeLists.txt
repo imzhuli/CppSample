@@ -82,10 +82,6 @@ set(LIBRARY_OUTPUT_PATH                        "${PROJECT_BINARY_DIR}/bin")
 set(EXECUTABLE_OUTPUT_PATH                     "${PROJECT_BINARY_DIR}/bin")
 set(CMAKE_MODULE_PATH                          ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
 
-set(CMAKE_BUILD_RPATH_USE_ORIGIN               TRUE)
-set(CMAKE_INSTALL_REMOVE_ENVIRONMENT_RPATH     TRUE)
-set(CMAKE_INSTALL_RPATH_USE_LINK_PATH          FALSE)
-
 enable_testing()
 
 add_subdirectory(lib)
