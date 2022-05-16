@@ -136,7 +136,7 @@ ZEC_NS
 
 		template<typename T, typename...tArgs>
 		ZEC_STATIC_INLINE void
-		RenewWith(T& ExpiringTarget,  tArgs && ... Args) { 
+		RenewValue(T& ExpiringTarget,  tArgs && ... Args) { 
 			ExpiringTarget.~T();
 			new ((void*)&ExpiringTarget) T {std::forward<tArgs>(Args)...};
 		}
