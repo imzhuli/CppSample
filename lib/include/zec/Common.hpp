@@ -126,6 +126,20 @@ ZEC_NS
 		template<typename T, typename TValue>
 		ZEC_STATIC_INLINE void
 		Reset(T& ExpiringTarget,  TValue && value) { ExpiringTarget = std::forward<TValue>(value); }
+		
+		template<typename T>
+		ZEC_STATIC_INLINE void
+		Renew(T& ExpiringTarget) { 
+			ExpiringTarget.~T();
+			new ((void*)&ExpiringTarget) T;
+		}
+
+		template<typename T, typename...tArgs>
+		ZEC_STATIC_INLINE void
+		RenewWith(T& ExpiringTarget,  tArgs && ... Args) { 
+			ExpiringTarget.~T();
+			new ((void*)&ExpiringTarget) T {std::forward<tArgs>(Args)...};
+		}
 
 		template<typename T>
 		[[nodiscard]] ZEC_STATIC_INLINE T
