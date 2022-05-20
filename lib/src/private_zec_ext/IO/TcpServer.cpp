@@ -1,4 +1,5 @@
 #include "./_Local.hpp"
+#include "./NetBase.hpp"
 #include "./TcpConnection.hpp"
 #include <zec_ext/IO/TcpServer.hpp>
 

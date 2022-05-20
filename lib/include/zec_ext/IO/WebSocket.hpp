@@ -4,6 +4,7 @@
 #include <string>
 #include <memory>
 #include "./IoContext.hpp"
+#include "./NetBase.hpp"
 
 ZEC_NS
 {
@@ -24,6 +25,7 @@ ZEC_NS
         ZEC_API_MEMBER ~xWebSocketSession();
 
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * IpStr, uint64_t Port, const std::string & Origin, const std::string &Target, iListener * ListenerPtr);
+        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, const std::string & Origin, const std::string &Target, iListener * ListenerPtr);
         ZEC_API_MEMBER void Clean();
 
         ZEC_API_MEMBER bool PostTextData(const std::string_view & Data);
@@ -44,6 +46,7 @@ ZEC_NS
         ZEC_PRIVATE_MEMBER void DoFlush();
 
     private:
+        bool         _Active = false;
         xDummy<16>   _Native; // active websocket object
         iListener*   _Listener;
         std::string  _Origin;

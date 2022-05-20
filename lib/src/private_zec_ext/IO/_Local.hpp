@@ -13,24 +13,27 @@
 #include <zec_ext/IO/Packet.hpp>
 #include <zec_ext/IO/PacketBuffer.hpp>
 
-namespace asio        = boost::asio;
-namespace beast       = boost::beast;
-namespace ip          = boost::asio::ip;
-namespace websocket   = boost::beast::websocket;
-
-using tcp   = boost::asio::ip::tcp;
-using udp   = boost::asio::ip::udp;
-
-using xAsioError = boost::system::error_code;
-using xAsioConstBuffer = boost::asio::const_buffer;
-using xAsioMutableBuffer = boost::asio::mutable_buffer;
-using xBeastDynamicBuffer = boost::beast::multi_buffer;
-
 ZEC_NS
 {
 
-    using xNativeIoContext = asio::io_context;
+    namespace asio        = boost::asio;
+    namespace beast       = boost::beast;
+    namespace ip          = boost::asio::ip;
+    namespace websocket   = boost::beast::websocket;
 
+    using tcp   = boost::asio::ip::tcp;
+    using udp   = boost::asio::ip::udp;
+
+    using xAsioError = boost::system::error_code;
+
+    using xNativeIoContext = asio::io_context;
+    using xTcpEndpoint = tcp::endpoint;
+    using xUdpEndpoint = udp::endpoint;
+
+    using xAsioConstBuffer = boost::asio::const_buffer;
+    using xAsioMutableBuffer = boost::asio::mutable_buffer;
+    using xBeastDynamicBuffer = boost::beast::multi_buffer;
+    
     class xIoCaster final
     : xNonCopyable
     {

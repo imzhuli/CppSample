@@ -1,4 +1,5 @@
 #include "./_Local.hpp"
+#include "./NetBase.hpp"
 #include <zec_ext/IO/WebSocket.hpp>
 #include <array>
 #include <memory>
@@ -24,6 +25,12 @@ ZEC_NS
 
     bool xWebSocketSession::Init(xIoContext * IoContextPtr, const char * IpStr, uint64_t Port, const std::string & Origin, const std::string &Target, iListener * ListenerPtr)
     {
+        auto Address = xNetAddress::Make(IpStr, Port);
+        return Init(IoContextPtr, Address, Origin, Target, ListenerPtr);
+    }
+
+    bool xWebSocketSession::Init(xIoContext * IoContextPtr, const xNetAddress & Address, const std::string & Origin, const std::string &Target, iListener * ListenerPtr)
+    {
         _Origin = Origin;
         _Path = Target;
         _Listener = ListenerPtr;
@@ -31,7 +38,7 @@ ZEC_NS
 
         auto & WS = _Native.As<xWsPtr>();
         WS = std::make_shared<xNativeWebSocket>(xIoCaster()(*IoContextPtr));
-        WS->next_layer().async_connect(ip::tcp::endpoint(ip::make_address(IpStr), Port), [this, Retainer=WS](xAsioError Error) mutable {
+        WS->next_layer().async_connect(MakeTcpEndpoint(Address), [this, Retainer=WS](xAsioError Error) mutable {
             if (Error) {
                 // cerr << "WS Connect Error" << endl;
                 OnError(Retainer.get());
@@ -39,7 +46,7 @@ ZEC_NS
             }
             OnConnected(Retainer.get());
         });
-        return true;
+        return (_Active = true);
     }
 
     void xWebSocketSession::Clean()
@@ -53,8 +60,12 @@ ZEC_NS
         for(auto & Message : _MessageBufferList) {
             delete &Message;
         }
-        _Connected = false;
-        _Error = false;
+        Reset(_Connected);
+        Reset(_Error);
+        Reset(_Origin);
+        Reset(_Path);
+        Reset(_Listener);
+        _Active = false;
     }
 
     bool xWebSocketSession::OnError(const void * CallbackObjectPtr)
