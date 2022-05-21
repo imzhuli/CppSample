@@ -23,8 +23,17 @@ ZEC_NS
 
     void xWebSocketSessionPool::Clean()
     {
-        // TODO
-
+        for (auto & Iter : _SessionTargets) {
+            auto & Target = static_cast<xSessionTarget&>(Iter);
+            if (Target.SessionPtr->IsActive()) {
+                Target.SessionPtr->Clean();
+            }
+        }
+        Reset(_SessionTargets);
+		Reset(_ListenerPtr);
+		Reset(_IoContextPtr);
+        Reset(_Origin);
+        Reset(_Target);
     }
 
 	void xWebSocketSessionPool::Check(uint64_t NowMS)
