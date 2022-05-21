@@ -10,6 +10,11 @@ ZEC_NS
         assert(AddressCount);
         assert(_SessionTargets.empty());
 
+        _IoContextPtr = IoContextPtr;
+        _Origin = Origin;
+        _Target = Target;
+        _ListenerPtr = ListenerPtr;
+
         _SessionTargets.resize(AddressCount);
         for (size_t i = 0 ; i < AddressCount; ++i) {
             auto & Target = _SessionTargets[i];
