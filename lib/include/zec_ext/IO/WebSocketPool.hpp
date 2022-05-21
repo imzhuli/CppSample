@@ -10,7 +10,7 @@ ZEC_NS
     {
 	public:
 		struct iListener {
-            virtual void OnWSMessage(xWebSocketSession * WebSocketClientPtr, bool Binary, void * DataPtr, size_t DataSize) {}
+            virtual void OnWSMessage(xWebSocketSessionPool * WebSocketPoolPtr, bool Binary, void * DataPtr, size_t DataSize) {}
 		};
 
     public:
@@ -21,7 +21,13 @@ ZEC_NS
         ZEC_API_MEMBER bool PostTextData(const std::string_view & Data);
         ZEC_API_MEMBER bool PostBinaryData(const void * DataPtr, size_t DataSize);
 
+
+        ZEC_API_MEMBER void OnWSMessage(xWebSocketSession * WebSocketClientPtr, bool Binary, void * DataPtr, size_t DataSize) override;
+        ZEC_API_MEMBER void OnWSClose(xWebSocketSession * WebSocketClientPtr) override;
+
     private:
+		ZEC_INLINE void Kill(xWebSocketSession * SessionPtr) { _KillSessionList.GrabTail(*static_cast<xWebSocketSessionEx*>(SessionPtr)); }
+
         struct xSessionTarget
         {
             xNetAddress            Address;

@@ -62,5 +62,42 @@ ZEC_NS
 		_DisabledSessionList.GrabListTail(TempList);
 	}
 
-}
+    void xWebSocketSessionPool::OnWSMessage(xWebSocketSession * WebSocketClientPtr, bool Binary, void * DataPtr, size_t DataSize)
+    {
+        _ListenerPtr->OnWSMessage(this, Binary, DataPtr, DataSize);
+    }
 
+    void xWebSocketSessionPool::OnWSClose(xWebSocketSession * WebSocketClientPtr)
+    {
+        Kill(static_cast<xWebSocketSessionEx*>(WebSocketClientPtr));
+    }
+
+    bool xWebSocketSessionPool::PostTextData(const std::string_view & Data)
+    {
+        auto SessionPtr = static_cast<xWebSocketSessionEx*>(_EnabledSessionList.Head());
+        if (!SessionPtr) {
+            return false;
+        }
+        if (!SessionPtr->PostTextData(Data)) {
+            Kill(SessionPtr);
+            return false;
+        }
+        _EnabledSessionList.GrabTail(*SessionPtr);
+        return true;
+    }
+
+    bool xWebSocketSessionPool::PostBinaryData(const void * DataPtr, size_t DataSize)
+    {
+        auto SessionPtr = static_cast<xWebSocketSessionEx*>(_EnabledSessionList.Head());
+        if (!SessionPtr) {
+            return false;
+        }
+        if (!SessionPtr->PostBinaryData(DataPtr, DataSize)) {
+            Kill(SessionPtr);
+            return false;
+        }
+        _EnabledSessionList.GrabTail(*SessionPtr);
+        return true;
+    }
+
+}
