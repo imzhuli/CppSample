@@ -3,7 +3,6 @@
 #include "./TcpConnection.hpp"
 #include <zec_ext/IO/TcpServer.hpp>
 
-
 #if defined(ZEC_SYSTEM_LINUX) || defined(ZEC_SYSTEM_ANDROID)
 #define ZEC_ENABLE_REUSEPORT SO_REUSEPORT
 #include <sys/socket.h>
@@ -18,23 +17,25 @@ ZEC_NS
     using xNativeTcpAcceptor = tcp::acceptor;
     using xSharedTcpAcceptorPtr = std::shared_ptr<xNativeTcpAcceptor>;
 
-	bool xTcpServer::Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr)
+	bool xTcpServer::Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr, bool ReusePort)
 	{
         xNetAddress Address = xNetAddress::Make(Ip, Port);
-		return Init(IoContextPtr, Address, ListenerPtr);
+		return Init(IoContextPtr, Address, ListenerPtr, ReusePort);
 	}
 
-	bool xTcpServer::Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr)
+	bool xTcpServer::Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr, bool ReusePort)
 	{
 		try {
 			auto & Acceptor = _Native.CreateValueAs<xSharedTcpAcceptorPtr>(new xNativeTcpAcceptor(xIoCaster()(*IoContextPtr)));
 			Acceptor->open(tcp::v4());
 			xTcpSocket::reuse_address Option(true);
 			Acceptor->set_option(Option);
-		#ifdef ZEC_ENABLE_REUSEPORT
-			int one = 1;
-    		setsockopt(Acceptor->native_handle(), SOL_SOCKET, ZEC_ENABLE_REUSEPORT, &one, sizeof(one));
-		#endif
+			if (ReusePort) {
+			#ifdef ZEC_ENABLE_REUSEPORT
+				int one = 1;
+				setsockopt(Acceptor->native_handle(), SOL_SOCKET, ZEC_ENABLE_REUSEPORT, &one, sizeof(one));
+			#endif
+			}
 			Acceptor->bind(MakeTcpEndpoint(Address));
 			Acceptor->listen();
 		}
