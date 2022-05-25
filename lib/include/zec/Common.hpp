@@ -256,7 +256,6 @@ ZEC_NS
 					xGuard(xGuard && Other) : _CounterRef(Other._CounterRef), _Entered(Steal(Other._Entered)) { ++_CounterRef; };
 					~xGuard() { --_CounterRef; }
 					operator bool () const { return _Entered; }
-
 				private:
 					xCounter &   _CounterRef;
 					bool         _Entered;
@@ -264,31 +263,48 @@ ZEC_NS
 				};
 			public:
 				xGuard Guard() { return xGuard(_Counter); }
-
 			private:
 				xCounter _Counter {};
-
 			};
 		}
 
 		using xReentryFlag = __detail__::xReentryFlag<false>;
 		using xAtomicReentryFlag = __detail__::xReentryFlag<true>;
 
-		template<typename T>
-		class xResourceGuard final : xNonCopyable {
-		public:
-			template<typename ... tArgs>
-			ZEC_INLINE constexpr xResourceGuard(T & Resource, tArgs&& ... Args) : _Resource(Resource), _Inited(Resource.Init(std::forward<tArgs>(Args)...)) {}
-			ZEC_INLINE constexpr xResourceGuard(T && Other) : _Resource(Other._Resource), _Inited(Steal(Other._Inited)) {}
-			ZEC_INLINE ~xResourceGuard() { if (_Inited) {_Resource.Clean();} }
-			ZEC_INLINE operator bool () const { return _Inited; }
-		private:
-			T & _Resource;
-			const bool _Inited;
-		};
+		namespace __detail__ {
+			template<typename T, bool DoThrow = false>
+			class xResourceGuardBase : xNonCopyable {
+			public:
+				template<typename ... tArgs>
+				ZEC_INLINE constexpr xResourceGuardBase(T & Resource, tArgs&& ... Args) : _Resource(Resource), _Inited(Resource.Init(std::forward<tArgs>(Args)...)) {
+					if constexpr (DoThrow) {
+						if (!_Inited) {
+							throw "xResourceGuardBase Error: Failed to init resource";
+						}
+					}
+				}
+				ZEC_INLINE constexpr xResourceGuardBase(T && Other) : _Resource(Other._Resource), _Inited(Steal(Other._Inited)) {}
+				ZEC_INLINE ~xResourceGuardBase() { if (_Inited) {_Resource.Clean();} }
+				ZEC_INLINE operator bool () const { return _Inited; }
+			private:
+				T & _Resource;
+				const bool _Inited;
+			};
+		}
 
+		template<typename T>
+		struct xResourceGuard final : __detail__::xResourceGuardBase<T, false> {
+			using __detail__::xResourceGuardBase<T, false>::xResourceGuardBase;
+		};
 		template<typename T, typename ... tArgs>
 		xResourceGuard(T & Resource, tArgs&& ... Args) -> xResourceGuard<T>;
+		
+		template<typename T>
+		struct xResourceGuardThrowable final : __detail__::xResourceGuardBase<T, true> {
+			using __detail__::xResourceGuardBase<T, true>::xResourceGuardBase;
+		};
+		template<typename T, typename ... tArgs>
+		xResourceGuardThrowable(T & Resource, tArgs&& ... Args) -> xResourceGuardThrowable<T>;
 
 		/* change variable value, and reset it to its original value after scope of the guard */
 		template<typename T>

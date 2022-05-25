@@ -3,6 +3,12 @@
 #include "./TcpConnection.hpp"
 #include <zec_ext/IO/TcpServer.hpp>
 
+
+#if defined(ZEC_SYSTEM_LINUX) || defined(ZEC_SYSTEM_ANDROID) || defined(ZEC_SYSTEM_MACOS) || defined(ZEC_SYSTEM_IOS)
+#define ZEC_ENABLE_REUSEPORT
+#include <sys/socket.h>
+#endif
+
 ZEC_NS
 {
     using xNativeTcpAcceptor = tcp::acceptor;
@@ -16,12 +22,25 @@ ZEC_NS
 
 	bool xTcpServer::Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr)
 	{
+		try {
+			auto & Acceptor = _Native.CreateValueAs<xSharedTcpAcceptorPtr>(new xNativeTcpAcceptor(xIoCaster()(*IoContextPtr)));
+			Acceptor->open(tcp::v4());
+			xTcpSocket::reuse_address Option(true);
+			Acceptor->set_option(Option);
+		#ifdef ZEC_ENABLE_REUSEPORT
+			int one = 1;
+    		setsockopt(Acceptor->native_handle(), SOL_SOCKET, SO_REUSEPORT, &one, sizeof(one));
+		#endif
+			Acceptor->bind(MakeTcpEndpoint(Address));
+			Acceptor->listen();
+		}
+		catch (...) {
+			_Native.DestroyAs<xSharedTcpAcceptorPtr>();
+			return false;
+		}
+
 		_IoContextPtr = IoContextPtr;
 		_ListenerPtr = ListenerPtr;
-
-		auto & Acceptor = _Native.CreateValueAs<xSharedTcpAcceptorPtr>(new xNativeTcpAcceptor(xIoCaster()(*IoContextPtr), MakeTcpEndpoint(Address)));
-		xTcpSocket::reuse_address Option(true);
-		Acceptor->set_option(Option);
 		DoAccept();
 		return true;
 	}
