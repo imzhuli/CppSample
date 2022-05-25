@@ -1,8 +1,8 @@
-#include <zec_ext/C/Net/Link.h>
-#ifdef ZEC_SYSTEM_WINDOWS
-    #define XelNoWriteSignal       0
-#else
+#include <zec_ext/C/Net/ZEC_Link.h>
+#ifdef MSG_NOSIGNAL
     #define XelNoWriteSignal       MSG_NOSIGNAL
+#else
+    #define XelNoWriteSignal       0
 #endif
 
 #ifndef SOCK_CLOEXEC
