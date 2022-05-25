@@ -14,6 +14,7 @@
 		#define ZEC_SYSTEM_WIN32
 	#endif
 #elif __APPLE__
+	#define ZEC_SYSTEM_APPLE
 	#include <TargetConditionals.h>
 	#if TARGET_IPHONE_SIMULATOR
 		// iOS Simulator
@@ -32,6 +33,9 @@
 #elif __linux__
 	// linux
 	#define ZEC_SYSTEM_LINUX
+	#ifdef __FreeBSD__
+		#define ZEC_SYSTEM_FREEBSD
+	#endif
 #elif __unix__ // all unices not caught above
 	// Unix
 	#error "unsupported unix"
