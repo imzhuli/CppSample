@@ -4,12 +4,13 @@
 #include <zec_ext/IO/TcpServer.hpp>
 
 
-#if defined(ZEC_SYSTEM_LINUX) || defined(ZEC_SYSTEM_ANDROID)
+#if defined(ZEC_SYSTEM_LINUX) || defined(ZEC_SYSTEM_ANDROID) || defined(ZEC_SYSTEM_MACOS) || defined(ZEC_SYSTEM_IOS)
 #define ZEC_ENABLE_REUSEPORT SO_REUSEPORT
 #include <sys/socket.h>
-#elif defined(ZEC_SYSTEM_MACOS) || defined(ZEC_SYSTEM_IOS)
+#if defined(SO_REUSEPORT_LB)
+#undef  ZEC_ENABLE_REUSEPORT
 #define ZEC_ENABLE_REUSEPORT SO_REUSEPORT_LB
-#include <sys/socket.h>
+#endif
 #endif
 
 ZEC_NS
