@@ -1,16 +1,37 @@
 #include <zec/Util/Command.hpp>
 #include <zec_ext/IO/TcpServer.hpp>
 #include <iostream>
+#include <vector>
 
 using namespace std;
 using namespace zec;
 
 static auto Tag = std::string{"TCP_ECHO"};
+static auto DeleteQueue = std::vector<xTcpConnection*>{};
+
+static struct : xTcpConnection::iListener
+{
+    size_t  OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize) override 
+    {
+        TcpConnectionPtr->PostData(DataPtr, DataSize);
+        return DataSize;
+    }
+    void OnPeerClose(xTcpConnection * TcpConnectionPtr) override
+    {
+        DeleteQueue.push_back(TcpConnectionPtr);
+    }
+    void OnError(xTcpConnection * TcpConnectionPtr) override
+    {
+        DeleteQueue.push_back(TcpConnectionPtr);
+    }
+} TcpReactor;
 
 static struct : xTcpServer::iListener
 {
     void OnNewConnection(xTcpServer * TcpServerPtr, xIoHandle NativeHandle) {
         cout << Tag << ": New Connection" << endl;
+        auto TcpPtr = new xTcpConnection();
+        TcpPtr->Init(NativeHandle, &TcpReactor);
     }
 } TcpServerListener;
 
@@ -23,7 +44,7 @@ int main(int argc, char *argv[])
     }
     cout << "UpdateTag: " << Tag.c_str() << endl;
 
-    xIoContext IoContext;
+    auto IoContext = xIoContext{};
     auto IoContextGuard = xResourceGuardThrowable { IoContext };
     
     xTcpServer TcpServer;
@@ -31,6 +52,11 @@ int main(int argc, char *argv[])
     
     while(true) {
         IoContext.LoopOnce(100);
+        for (auto & Iter : DeleteQueue) {
+            Iter->Clean();
+            delete(Steal(Iter));
+        }
+        Renew(DeleteQueue);
     }
 
     return 0;
