@@ -494,3 +494,7 @@ ZEC_NS
 	}
 
 }
+
+#ifndef ZEC_CATCH_NONE 
+#define ZEC_CATCH_NONE catch(const ::zec::xNoCatch &)
+#endif
