@@ -94,7 +94,7 @@ ZEC_NS
 		struct xPass final { ZEC_INLINE void operator()() const {} };
 		struct xAbstract { protected: xAbstract() = default; virtual ~xAbstract() = default; xAbstract(xAbstract &&) = delete; };
 		struct xNonCopyable { protected: xNonCopyable() = default; ~xNonCopyable() = default; xNonCopyable(xNonCopyable &&) = delete; };
-    	struct xNoCatch final { private: xNoCatch() = default; ~xNoCatch() = default; };
+    	struct xNonCatchable final { private: xNonCatchable() = default; ~xNonCatchable() = default; };
 
 		template<typename T1, typename T2>
 		using xDiff = decltype(std::declval<T1>() - std::declval<T2>());
@@ -496,5 +496,5 @@ ZEC_NS
 }
 
 #ifndef ZEC_CATCH_NONE 
-#define ZEC_CATCH_NONE catch(const ::zec::xNoCatch &)
+#define ZEC_CATCH_NONE catch(const ::zec::xNonCatchable &)
 #endif
