@@ -84,16 +84,17 @@ ZEC_NS
 		template<typename T>
 		constexpr std::in_place_type_t<T> xType {};
 
-		constexpr struct xNoInit {} NoInit {};
-		constexpr struct xZeroInit {} ZeroInit {};
-		constexpr struct xDefaultInit {} DefaultInit {};
-		constexpr struct xGeneratorInit {} GeneratorInit {};
-
-		struct xSizeInit final { size_t value; };
-		struct xCapacityInit final { size_t value; };
+		constexpr struct xNoInit final {} NoInit {};
+		constexpr struct xZeroInit final {} ZeroInit {};
+		constexpr struct xDefaultInit final {} DefaultInit {};
+		constexpr struct xGeneratorInit final {} GeneratorInit {};
+		constexpr struct xSizeInit final { size_t value; } ZeroSizeInit {};
+		constexpr struct xCapacityInit final { size_t value; } ZeroCapacityInit{};
+		
 		struct xPass final { ZEC_INLINE void operator()() const {} };
 		struct xAbstract { protected: xAbstract() = default; virtual ~xAbstract() = default; xAbstract(xAbstract &&) = delete; };
 		struct xNonCopyable { protected: xNonCopyable() = default; ~xNonCopyable() = default; xNonCopyable(xNonCopyable &&) = delete; };
+    	struct xNoCatch final { private: xNoCatch() = default; ~xNoCatch() = default; };
 
 		template<typename T1, typename T2>
 		using xDiff = decltype(std::declval<T1>() - std::declval<T2>());
