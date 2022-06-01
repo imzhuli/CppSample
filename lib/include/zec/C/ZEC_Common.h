@@ -47,7 +47,7 @@
 #endif
 
 #if defined(ZEC_SYSTEM_WINDOWS) || defined(ZEC_SYSTEM_LINUX) || defined(ZEC_SYSTEM_MACOS)
-	#define ZEC_SYSTEM_GENERIC
+	#define ZEC_SYSTEM_DESKTOP
 #endif
 
 #if defined(ZEC_SYSTEM_IPHONE_SIMULATOR) || defined(ZEC_SYSTEM_IPHONE)
