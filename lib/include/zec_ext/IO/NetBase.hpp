@@ -30,6 +30,18 @@ ZEC_NS
             memcpy(Ret.data(), this, sizeof(*this));
             return Ret;
         }
+        ZEC_INLINE bool operator == (const xNetAddress & Other) const {
+            if (Type == eUnknown || Type != Other.Type || Port != Other.Port) {
+                return false;
+            }
+            if (Type == eIpv4) {
+                return !memcmp(Ipv4, Other.Ipv4, sizeof(Ipv4));
+            }
+            if (Type == eIpv6) {
+                return !memcmp(Ipv6, Other.Ipv6, sizeof(Ipv6));
+            }
+            return false;
+        }
 
         ZEC_API_MEMBER std::string IpToString() const;
         ZEC_API_MEMBER std::string ToString() const;
