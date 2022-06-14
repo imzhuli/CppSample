@@ -45,7 +45,10 @@ aux_source_directory(./src/private_zec/Algorithm                   ZEC_SRC)
 aux_source_directory(./src/private_zec/Util                        ZEC_SRC)
 aux_source_directory(./src/private_zec/Container                   ZEC_SRC)
 
+if (ZEC_OPTION_WITH_LUA)
 aux_source_directory(./src/private_zec_ext/Lua                     ZEC_SRC)
+endif()
+
 aux_source_directory(./src/private_zec_ext/IO                      ZEC_SRC)
 aux_source_directory(./src/private_zec_ext/Utility                 ZEC_SRC)
 
