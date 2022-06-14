@@ -12,6 +12,9 @@ ZEC_NS
     class xWebSocketSessionEx
     : public xWebSocketSession
     , public xWebSocketSessionExNode
-    {};
+    {
+    public:
+        ZEC_INLINE void Detach() { xWebSocketSessionExNode::Detach(); }
+    };
 
 }

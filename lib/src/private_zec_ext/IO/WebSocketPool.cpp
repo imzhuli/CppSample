@@ -33,6 +33,7 @@ ZEC_NS
             if (Target.SessionPtr->IsActive()) {
                 Target.SessionPtr->Clean();
             }
+            Target.SessionPtr->Detach();
         }
         Reset(_SessionTargets);
 		Reset(_ListenerPtr);
