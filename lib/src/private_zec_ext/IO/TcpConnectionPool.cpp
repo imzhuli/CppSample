@@ -47,7 +47,7 @@ ZEC_NS
 			}
 		}
 		delete [] Steal(_Connections);
-		_Addresses.clear();
+		Renew(_Addresses);
 		_IoContextPtr = nullptr;
 		_ListenerPtr = nullptr;
 	}

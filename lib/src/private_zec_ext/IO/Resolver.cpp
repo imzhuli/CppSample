@@ -42,7 +42,7 @@ ZEC_NS
                 }
             });
         _CacheTimeoutList.Finish([](xTimeoutNode&, xVariable){});
-        _ResolveMap.clear();
+        Renew(_ResolveMap);
 
         DEF_RESOLVER_HANDLE();
         Handle->ListenerPtr = nullptr;
@@ -103,7 +103,7 @@ ZEC_NS
                     ListenerPtr->OnResolve(Node.Hostname, Node.Address, Context, false);
                 }
                 _CacheTimeoutList.PushBack(Node);
-                Node.RequestContexts.clear();
+                Renew(Node.RequestContexts);
             });
             return true;
         }
