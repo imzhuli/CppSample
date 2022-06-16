@@ -234,10 +234,12 @@ ZEC_NS
 			 *     use xRef(some_non_const_object) above as a const-wrapper-object
 			 * */
 			tExit _ExitCallback;
+			bool  _DismissExit = false;
 		public:
 			[[nodiscard]] ZEC_INLINE xScopeGuard(const tEntry& Entry, const tExit& Exit) : _ExitCallback(Exit) { Entry(); }
 			[[nodiscard]] ZEC_INLINE xScopeGuard(const tExit& Exit) : _ExitCallback(Exit) {}
-			ZEC_INLINE ~xScopeGuard() { xRefCaster<tExit>::Get(_ExitCallback)(); }
+			ZEC_INLINE void Dismiss() { _DismissExit = true; }
+			ZEC_INLINE ~xScopeGuard() { if (_DismissExit) { return; } xRefCaster<tExit>::Get(_ExitCallback)(); }
 		};
 		template<typename tEntry, typename tExit>
 		xScopeGuard(const tEntry& Entry, const tExit& Exit) -> xScopeGuard<std::decay_t<tEntry>, std::decay_t<tExit>>;
