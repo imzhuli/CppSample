@@ -223,6 +223,7 @@ ZEC_NS
 
 		template<typename tEntry, typename tExit>
 		class xScopeGuard final : xNonCopyable {
+		private:
 			/** NOTE: It's important typeof(_ExitCallback) is not reference,
 			 *  so that it be compatible with:
 			 *     function,
