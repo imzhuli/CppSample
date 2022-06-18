@@ -206,14 +206,14 @@ ZEC_NS
 		struct xRefCaster {
 			static_assert(!std::is_reference_v<RefedT>);
 			using Type = RefedT;
-			static RefedT& Get(RefedT & R) { return R; }
-			static const RefedT& Get(const RefedT & R) { return R; }
+			ZEC_STATIC_INLINE RefedT& Get(RefedT & R) { return R; }
+			ZEC_STATIC_INLINE const RefedT& Get(const RefedT & R) { return R; }
 		};
 		template<typename RefedT>
 		struct xRefCaster<xRef<RefedT>> {
 			static_assert(!std::is_reference_v<RefedT>);
 			using Type = RefedT;
-			static RefedT& Get(const xRef<RefedT> & RR) { return RR.Get(); }
+			ZEC_STATIC_INLINE RefedT& Get(const xRef<RefedT> & RR) { return RR.Get(); }
 		};
 
 		template<typename tFuncObj, typename ... Args>
