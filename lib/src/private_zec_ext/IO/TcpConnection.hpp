@@ -37,8 +37,8 @@ ZEC_NS
         ZEC_INLINE  size_t   GetPendingWriteBlocks() const { return _WritePacketBufferQueue.GetSize(); }
 
     private:
-        xPacketBuffer * NewWriteBuffer() { return new xPacketBuffer(); }
-        void DeleteWriteBuffer(xPacketBuffer * BufferPtr) { delete BufferPtr; }
+        virtual xPacketBuffer * NewWriteBuffer() { return new xPacketBuffer(); }
+        virtual void DeleteWriteBuffer(xPacketBuffer * BufferPtr) { delete BufferPtr; }
 
         ZEC_API_MEMBER void OnExpired();
         ZEC_API_MEMBER void OnConnected();
