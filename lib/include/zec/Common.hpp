@@ -73,13 +73,29 @@ ZEC_NS
 
 
 		namespace __detail__ {
-			template< class T >
+			template<typename T>
 			struct xRemoveCVR {
 				typedef std::remove_cv_t<std::remove_reference_t<T>> Type;
 			};
 		}
-		template< class T >
+		template<typename T >
 		using xNoCVR = typename __detail__::xRemoveCVR<T>::Type;
+
+		template<typename T>
+		class xCountRetainer {
+		public:
+			xCountRetainer(T & _TargetRef) : _TargetPtr(&_TargetRef) { ++*_TargetPtr; }
+			xCountRetainer(const xCountRetainer& Other) : _TargetPtr(Other._TargetPtr) { ++*_TargetPtr; }
+			~xCountRetainer() { --*_TargetPtr; }
+			xCountRetainer & operator = (const xCountRetainer & Other) {
+				if (_TargetPtr != Other._TargetPtr) {
+					--*_TargetPtr; ++*(_TargetPtr = Other._TargetPtr);
+				}
+				return *this;
+			}
+		private:
+			T * const _TargetPtr = nullptr;
+		};
 
 		template<typename T>
 		constexpr std::in_place_type_t<T> xType {};
