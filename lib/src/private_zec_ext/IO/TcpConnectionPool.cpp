@@ -31,6 +31,7 @@ ZEC_NS
 		for (size_t i = 0 ; i < TotalConnections; ++i) {
 			auto & Connection = _Connections[i];
 			Connection.ConnectionId = (uint64_t)i;
+			Connection.ConnectionType = DisabledConnection;
 			_DisabledConnectionList.AddTail(Connection);
 		}
 		_ListenerPtr = ListenerPtr;
@@ -58,6 +59,7 @@ ZEC_NS
 			auto & Connection = static_cast<xTcpConnectionEx &>(Iter);
 			Connection.Clean();
 			Connection.ConnectionTimestampMS = NowMS;
+			Connection.ConnectionType = DisabledConnection;
 			_DisabledConnectionList.GrabTail(Connection);
 		}
 
@@ -72,14 +74,26 @@ ZEC_NS
 				Connection.ConnectionTimestampMS = NowMS;
 				TempList.GrabTail(Connection);
 			} else {
+				Connection.ConnectionType = EnabledConnection;
 				_EnabledConnectionList.GrabTail(Connection);
 			}
 		}
 		_DisabledConnectionList.GrabListTail(TempList);
 	}
 
-	void xTcpConnectionPool::OnConnected(xTcpConnection * TcpConnectionPtr)
-	{}
+	bool xTcpConnectionPool::PostData(size_t Index, const void * DataPtr, size_t DataSize)
+	{
+		assert(Index < _Addresses.size());
+		auto ConnectionPtr = &_Connections[Index];
+		if (ConnectionPtr->ConnectionType == DisabledConnection) {
+			return false;
+		}
+		if (DataSize != ConnectionPtr->PostData(DataPtr, DataSize)) {
+			Kill(ConnectionPtr);
+			return false;
+		}
+		return true;
+	}
 
 	bool xTcpConnectionPool::PostData(const void * DataPtr, size_t DataSize)
 	{
@@ -95,9 +109,20 @@ ZEC_NS
 		return true;
 	}
 
+	void xTcpConnectionPool::OnConnected(xTcpConnection * TcpConnectionPtr)
+	{
+		auto ConnectionPtr = static_cast<xTcpConnectionEx*>(TcpConnectionPtr);
+		size_t Index =  (size_t)ConnectionPtr->ConnectionId;
+		assert(Index == (size_t)(ConnectionPtr - _Connections));
+		_ListenerPtr->OnConnected(this, Index);
+	}
+
     size_t xTcpConnectionPool::OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize)
 	{
-		return _ListenerPtr->OnData(this, DataPtr, DataSize);
+		auto ConnectionPtr = static_cast<xTcpConnectionEx*>(TcpConnectionPtr);
+		size_t Index =  (size_t)ConnectionPtr->ConnectionId;
+		assert(Index == (size_t)(ConnectionPtr - _Connections));
+		return _ListenerPtr->OnData(this, Index, DataPtr, DataSize);
 	}
 
 }

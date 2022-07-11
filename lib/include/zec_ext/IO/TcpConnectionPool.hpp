@@ -13,7 +13,8 @@ ZEC_NS
 	{
 	public:
 		struct iListener {
-            virtual size_t  OnData(xTcpConnectionPool * ConnectionPoolPtr, void * DataPtr, size_t DataSize) = 0;
+            virtual void    OnConnected(xTcpConnectionPool * ConnectionPoolPtr, size_t Index) {};
+            virtual size_t  OnData(xTcpConnectionPool * ConnectionPoolPtr, size_t Index, void * DataPtr, size_t DataSize) = 0;
 		};
 
 	public:
@@ -22,6 +23,7 @@ ZEC_NS
 		ZEC_API_MEMBER void Clean();
 		ZEC_API_MEMBER void Check(uint64_t NowMS);
 		ZEC_API_MEMBER bool PostData(const void * DataPtr, size_t DataSize);
+		ZEC_API_MEMBER bool PostData(size_t Index, const void * DataPtr, size_t DataSize);
 		ZEC_INLINE     void SetReconnectTimeoutMS(uint64_t TimeoutMS) { _ReconnectTimeoutMS = TimeoutMS; }
 
 	protected:
@@ -30,6 +32,10 @@ ZEC_NS
         ZEC_API_MEMBER void    OnPeerClose(xTcpConnection * TcpConnectionPtr) override { Kill(TcpConnectionPtr); }
         ZEC_API_MEMBER void    OnError(xTcpConnection * TcpConnectionPtr) override { Kill(TcpConnectionPtr); }
 		ZEC_INLINE     void    Kill(xTcpConnection * TcpConnectionPtr) { _KillConnectionList.GrabTail(static_cast<xTcpConnectionEx&>(*TcpConnectionPtr)); }
+
+	private:
+		static constexpr xTcpConnectionEx::eType DisabledConnection = 0;
+		static constexpr xTcpConnectionEx::eType EnabledConnection  = 1;
 
 	private:
 		iListener *                     _ListenerPtr  = nullptr;

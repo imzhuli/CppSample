@@ -12,7 +12,7 @@ struct xTestLisetner
 : xTcpConnectionPool::iListener
 {
 	std::string Text;
-    size_t  OnData(xTcpConnectionPool * ConnectionPoolPtr, void * DataPtr, size_t DataSize) override
+    size_t  OnData(xTcpConnectionPool * ConnectionPoolPtr, size_t Index, void * DataPtr, size_t DataSize) override
 	{
 		Text.append((const char *)DataPtr, DataSize);
 		return DataSize;
