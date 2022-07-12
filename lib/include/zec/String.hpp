@@ -47,32 +47,4 @@ ZEC_NS
 		return FileToStr(filename.c_str());
 	}
 
-	template<size_t _Capacity = 127>
-	class xTinyString
-	{
-	public:
-		ZEC_INLINE xTinyString() {
-			_Buffer[0] = '\0';
-		}
-		ZEC_INLINE xTinyString(const char * StrPtr, size_t Length) {
-			assert(Length <= Capacity);
-			memcpy(_Buffer, StrPtr, Length);
-			_Buffer[_Length = Length] = '\0';
-		}
-		ZEC_INLINE xTinyString(const char * StrPtr) 
-		: xTinyString(StrPtr, strlen(StrPtr))
-		{}
-		ZEC_INLINE xTinyString(const xTinyString &Other) = default;
-		ZEC_INLINE xTinyString & operator = (const xTinyString &Other) = default;
-
-		ZEC_INLINE const char * Data() const { return _Buffer; };
-		ZEC_INLINE size_t Length() const { return Length; }
-		ZEC_INLINE size_t Size() const { return Length; }
-		ZEC_INLINE size_t Capacity() const { return _Capacity; }
-
-	private:
-		char   _Buffer[Capacity + 1];
-		size_t _Length = 0;
-	};
-
 }
