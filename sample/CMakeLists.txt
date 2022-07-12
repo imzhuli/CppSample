@@ -34,3 +34,10 @@ if (ZEC_OPTION_WITH_LUA)
 endif()
 add_sub_sample(tcp_echo)
 add_sub_sample(udp_echo)
+
+install(TARGETS
+	sample_tcp_echo
+	RUNTIME DESTINATION bin
+	ARCHIVE DESTINATION lib
+	LIBRARY DESTINATION lib
+	)

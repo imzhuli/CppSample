@@ -6,6 +6,7 @@
 using namespace std;
 using namespace zec;
 
+static bool Silent = false;
 static auto Tag = std::string{"TCP_ECHO"};
 static auto DeleteQueue = std::vector<xTcpConnection*>{};
 
@@ -13,7 +14,9 @@ static struct : xTcpConnection::iListener
 {
     size_t  OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize) override 
     {
-        TcpConnectionPtr->PostData(DataPtr, DataSize);
+        if (!Silent) {
+            TcpConnectionPtr->PostData(DataPtr, DataSize);
+        }
         return DataSize;
     }
     void OnPeerClose(xTcpConnection * TcpConnectionPtr) override
@@ -37,7 +40,12 @@ static struct : xTcpServer::iListener
 
 int main(int argc, char *argv[])
 {
-    auto Cmd = xCommandLine{ argc, argv, {} };
+    auto Cmd = xCommandLine{ argc, argv, {
+        { 's', nullptr, "silent", false }
+    }};
+
+    auto OptSlient = Cmd["silent"];
+    Silent = OptSlient();
 
     if (Cmd.GetArgCount() > 1) {
         Tag = Cmd[1];
