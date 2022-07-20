@@ -85,7 +85,7 @@ ZEC_NS
         ZEC_INLINE std::string PopString() const {
             auto Top = lua_gettop(_LuaStatePtr);
             assert (Top);
-            auto Ret = lua_tostring(_LuaStatePtr, Top);
+            std::string Ret = lua_tostring(_LuaStatePtr, Top);
             lua_pop(_LuaStatePtr, 1);
             return Ret;
         }
