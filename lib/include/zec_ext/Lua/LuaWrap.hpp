@@ -34,7 +34,7 @@ ZEC_NS
 
         ZEC_INLINE auto GetTop() const { return lua_gettop(_LuaStatePtr); }
         ZEC_INLINE void SetTop(int Index) const { lua_settop(_LuaStatePtr, Index); }
-        ZEC_INLINE void PopN(int Number) const { lua_pop(_LuaStatePtr, Number);
+        ZEC_INLINE void PopN(int Number) const { lua_pop(_LuaStatePtr, Number); }
 
         ZEC_INLINE void Push() const {}
         ZEC_INLINE void Push(lua_Integer IntValue) const { lua_pushinteger(_LuaStatePtr, IntValue); }
