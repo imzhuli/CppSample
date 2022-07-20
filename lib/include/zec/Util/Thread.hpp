@@ -102,7 +102,7 @@ ZEC_NS
 			}
 
 			template<typename tFuncObj>
-			ZEC_INLINE auto SyncCall(tFuncObj & func) {
+			auto SyncCall(const tFuncObj & func) {
 				auto Lock = std::unique_lock(_Mutex);
 				return func();
 			}
