@@ -49,10 +49,10 @@ int main(int, char *[])
 
 		cout << "Top: " << LuaState.GetTop() << endl;
 
-		auto RR3 = LuaState.Pop<std::string>();
-		auto RR2 = LuaState.Pop<float>();
-		auto RR1 = LuaState.Pop<int>();
-		auto RR0 = LuaState.Pop<int>();
+		auto [RR3] = LuaState.Pop<std::string>();
+		auto [RR2] = LuaState.Pop<float>();
+		auto [RR1] = LuaState.Pop<int>();
+		auto [RR0] = LuaState.Pop<int>();
 		cout << "Results: " << RR1 << ", " << RR2 << ", " << RR3 << ", " << RR0 << endl;
 	} while(false);
 
