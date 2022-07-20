@@ -16,10 +16,10 @@ ZEC_NS
 
         ZEC_INLINE operator lua_State * () const { return _LuaStatePtr; }
 
-        ZEC_INLINE bool LoadStr(const char * CodeStr) {
+        ZEC_INLINE bool LoadString(const char * CodeStr) {
             return LUA_OK == luaL_loadstring(_LuaStatePtr, CodeStr);
         }
-        ZEC_INLINE bool LoadStr(const std::string & CodeStr) {
+        ZEC_INLINE bool LoadString(const std::string & CodeStr) {
             return LUA_OK == luaL_loadstring(_LuaStatePtr, CodeStr.c_str());
         }
 
@@ -33,8 +33,8 @@ ZEC_NS
         ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, std::string>, tArg> GetAt(int Index) const { return lua_tostring(_LuaStatePtr, Index); }
 
         ZEC_INLINE auto GetTop() const { return lua_gettop(_LuaStatePtr); }
-        ZEC_INLINE auto SetTop(int Index) const { lua_settop(_LuaStatePtr, Index); }
-        ZEC_INLINE auto PopN(int Number) const { lua_pop(_LuaStatePtr, Number); }
+        ZEC_INLINE void SetTop(int Index) const { lua_settop(_LuaStatePtr, Index); }
+        ZEC_INLINE void PopN(int Number) const { lua_pop(_LuaStatePtr, Number);
 
         ZEC_INLINE void Push() const {}
         ZEC_INLINE void Push(lua_Integer IntValue) const { lua_pushinteger(_LuaStatePtr, IntValue); }
@@ -82,7 +82,7 @@ ZEC_NS
             return Ret;
         }
 
-        ZEC_INLINE std::string PopStr() const {
+        ZEC_INLINE std::string PopString() const {
             auto Top = lua_gettop(_LuaStatePtr);
             assert (Top);
             auto Ret = lua_tostring(_LuaStatePtr, Top);
@@ -95,7 +95,7 @@ ZEC_NS
         template<typename tArg>
         ZEC_INLINE std::enable_if_t<std::is_floating_point_v<tArg>, tArg> Pop() const { return (tArg)PopNumber(); }
         template<typename tArg>
-        ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, std::string>, tArg> Pop() const { return PopStr(); }
+        ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, std::string>, tArg> Pop() const { return PopString(); }
 
         template<typename...tArgs>
         ZEC_INLINE std::enable_if_t<(sizeof...(tArgs) > 1),std::tuple<tArgs...>> Get() const {
