@@ -1,6 +1,6 @@
 #pragma once
 #include "../Common.hpp"
-#include "./Chrono.hpp"
+#include <chrono>
 #include <thread>
 #include <atomic>
 #include <mutex>
