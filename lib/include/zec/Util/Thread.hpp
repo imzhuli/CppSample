@@ -120,7 +120,7 @@ ZEC_NS
 				funcPost();
 			}
 			template<typename tFuncPost>
-			void Wait(const tFuncPost & funcPost) {
+			void Wait(const tFuncPost & funcPost = xPass{}) {
 				auto Lock = std::unique_lock(_Mutex);
 				_ConditionVariable.wait(Lock, [this](){return _Ready;});
 				if constexpr (AutoReset) {
@@ -148,7 +148,7 @@ ZEC_NS
 				return true;
 			}
 			template<typename Rep, typename Period, typename tFuncPost>
-			ZEC_INLINE bool WaitFor(const std::chrono::duration<Rep, Period>& RelTime, const tFuncPost & funcPost) {
+			ZEC_INLINE bool WaitFor(const std::chrono::duration<Rep, Period>& RelTime, const tFuncPost & funcPost = xPass{}) {
 				auto Lock = std::unique_lock(_Mutex);
 				if (!_ConditionVariable.wait_for(Lock, RelTime, [this](){return _Ready;})) {
 					return false;
