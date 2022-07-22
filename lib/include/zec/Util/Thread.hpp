@@ -119,8 +119,8 @@ ZEC_NS
 				// just incase it throws exception;
 				funcPost();
 			}
-			template<typename tFuncPost>
-			void Wait(const tFuncPost & funcPost = xPass{}) {
+			template<typename tFuncPost = xPass>
+			void Wait(const tFuncPost & funcPost = {}) {
 				auto Lock = std::unique_lock(_Mutex);
 				_ConditionVariable.wait(Lock, [this](){return _Ready;});
 				if constexpr (AutoReset) {
@@ -147,8 +147,8 @@ ZEC_NS
 				funcPost();
 				return true;
 			}
-			template<typename Rep, typename Period, typename tFuncPost>
-			ZEC_INLINE bool WaitFor(const std::chrono::duration<Rep, Period>& RelTime, const tFuncPost & funcPost = xPass{}) {
+			template<typename Rep, typename Period, typename tFuncPost = xPass>
+			ZEC_INLINE bool WaitFor(const std::chrono::duration<Rep, Period>& RelTime, const tFuncPost & funcPost = {}) {
 				auto Lock = std::unique_lock(_Mutex);
 				if (!_ConditionVariable.wait_for(Lock, RelTime, [this](){return _Ready;})) {
 					return false;
