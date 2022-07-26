@@ -104,9 +104,8 @@ ZEC_NS
 		struct xAbstract { protected: constexpr xAbstract() = default; virtual ~xAbstract() = default; xAbstract(xAbstract &&) = delete; };
 		struct xNonCopyable { protected: constexpr xNonCopyable() = default; ~xNonCopyable() = default; xNonCopyable(xNonCopyable &&) = delete; };
     	struct xNonCatchable final { private: constexpr xNonCatchable() = default; ~xNonCatchable() = default; };
-		struct xNone final : private xNonCopyable {};
 
-		constexpr struct xNone None;
+		constexpr struct xNone final {} None;
 		constexpr struct xNoInit final {} NoInit {};
 		constexpr struct xZeroInit final {} ZeroInit {};
 		constexpr struct xDefaultInit final {} DefaultInit {};
