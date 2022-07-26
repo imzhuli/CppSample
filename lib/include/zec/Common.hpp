@@ -100,6 +100,13 @@ ZEC_NS
 		template<typename T>
 		constexpr std::in_place_type_t<T> xType {};
 
+		struct xPass final { ZEC_INLINE void operator()() const {} };
+		struct xAbstract { protected: constexpr xAbstract() = default; virtual ~xAbstract() = default; xAbstract(xAbstract &&) = delete; };
+		struct xNonCopyable { protected: constexpr xNonCopyable() = default; ~xNonCopyable() = default; xNonCopyable(xNonCopyable &&) = delete; };
+    	struct xNonCatchable final { private: constexpr xNonCatchable() = default; ~xNonCatchable() = default; };
+		struct xNone final : xNonCopyable {};
+
+		constexpr struct xNone None;
 		constexpr struct xNoInit final {} NoInit {};
 		constexpr struct xZeroInit final {} ZeroInit {};
 		constexpr struct xDefaultInit final {} DefaultInit {};
@@ -107,10 +114,6 @@ ZEC_NS
 		constexpr struct xSizeInit final { size_t value; } ZeroSizeInit {};
 		constexpr struct xCapacityInit final { size_t value; } ZeroCapacityInit{};
 		
-		struct xPass final { ZEC_INLINE void operator()() const {} };
-		struct xAbstract { protected: xAbstract() = default; virtual ~xAbstract() = default; xAbstract(xAbstract &&) = delete; };
-		struct xNonCopyable { protected: xNonCopyable() = default; ~xNonCopyable() = default; xNonCopyable(xNonCopyable &&) = delete; };
-    	struct xNonCatchable final { private: xNonCatchable() = default; ~xNonCatchable() = default; };
 
 		template<typename T1, typename T2>
 		using xDiff = decltype(std::declval<T1>() - std::declval<T2>());
