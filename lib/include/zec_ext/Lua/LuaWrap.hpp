@@ -34,6 +34,8 @@ ZEC_NS
         template<typename tArg>
         ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, const void *>, tArg> GetAt(int Index) const { return lua_touserdata(_LuaStatePtr, Index); }
         template<typename tArg>
+        ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, char *>, tArg> GetAt(int Index) const { static_assert("Lua.GetAt<char*>() is forbidden"); return nullptr; }
+        template<typename tArg>
         ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, const char *>, tArg> GetAt(int Index) const { return lua_tostring(_LuaStatePtr, Index); }
         template<typename tArg>
         ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, std::string>, tArg> GetAt(int Index) const { return lua_tostring(_LuaStatePtr, Index); }
@@ -43,6 +45,7 @@ ZEC_NS
         ZEC_INLINE void PopN(int Number) const { lua_pop(_LuaStatePtr, Number); }
 
         ZEC_INLINE void Push() const {}
+        ZEC_INLINE void Push(char * StrValue) const { lua_pushstring(_LuaStatePtr, StrValue); }
         ZEC_INLINE void Push(const char * StrValue) const { lua_pushstring(_LuaStatePtr, StrValue); }
         ZEC_INLINE void Push(const std::string& StrValue) const { lua_pushstring(_LuaStatePtr, StrValue.c_str()); }
         ZEC_INLINE void Push(int (*Func)(lua_State*)) const { lua_pushcfunction(_LuaStatePtr, Func); }
