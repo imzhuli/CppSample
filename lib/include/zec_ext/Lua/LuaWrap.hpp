@@ -32,6 +32,8 @@ ZEC_NS
         template<typename tArg>
         ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, void *>, tArg> GetAt(int Index) const { return lua_touserdata(_LuaStatePtr, Index); }
         template<typename tArg>
+        ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, const void *>, tArg> GetAt(int Index) const { return lua_touserdata(_LuaStatePtr, Index); }
+        template<typename tArg>
         ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, const char *>, tArg> GetAt(int Index) const { return lua_tostring(_LuaStatePtr, Index); }
         template<typename tArg>
         ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, std::string>, tArg> GetAt(int Index) const { return lua_tostring(_LuaStatePtr, Index); }
@@ -118,12 +120,6 @@ ZEC_NS
         template<typename...tArgs>
         ZEC_INLINE std::enable_if_t<(sizeof...(tArgs) == 0)> Pop() const {}
 
-        // template<typename tArg>
-        // ZEC_INLINE std::enable_if_t<std::is_integral_v<tArg>, tArg> Pop() const { return (tArg)PopInt(); }
-        // template<typename tArg>
-        // ZEC_INLINE std::enable_if_t<std::is_floating_point_v<tArg>, tArg> Pop() const { return (tArg)PopNumber(); }
-        // template<typename tArg>
-        // ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, std::string>, tArg> Pop() const { return PopString(); }
         template<typename...tArgs>
         ZEC_INLINE std::enable_if_t<(sizeof...(tArgs) >= 1),std::tuple<tArgs...>> Pop() const {
             auto Top = lua_gettop(_LuaStatePtr); assert (Top);
