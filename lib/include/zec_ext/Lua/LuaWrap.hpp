@@ -30,6 +30,8 @@ ZEC_NS
         template<typename tArg>
         ZEC_INLINE std::enable_if_t<std::is_floating_point_v<tArg>, tArg> GetAt(int Index) const { return (tArg)lua_tonumber(_LuaStatePtr, Index); }
         template<typename tArg>
+        ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, void *>, tArg> GetAt(int Index) const { return lua_touserdata(_LuaStatePtr, Index); }
+        template<typename tArg>
         ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, const char *>, tArg> GetAt(int Index) const { return lua_tostring(_LuaStatePtr, Index); }
         template<typename tArg>
         ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, std::string>, tArg> GetAt(int Index) const { return lua_tostring(_LuaStatePtr, Index); }
@@ -43,13 +45,16 @@ ZEC_NS
         ZEC_INLINE void Push(const std::string& StrValue) const { lua_pushstring(_LuaStatePtr, StrValue.c_str()); }
         ZEC_INLINE void Push(int (*Func)(lua_State*)) const { lua_pushcfunction(_LuaStatePtr, Func); }
         template<typename tArg>
-        ZEC_INLINE std::enable_if_t<std::is_same_v<tArg>, bool> Push(tArg Value) const { lua_pushboolean(_LuaStatePtr, Value); }
+        ZEC_INLINE std::enable_if_t<std::is_pointer_v<tArg>> Push(tArg Value) const { lua_pushlightuserdata(_LuaStatePtr, (void*)Value); }
         template<typename tArg>
-        ZEC_INLINE std::enable_if_t<std::is_integral_v<tArg> && !std::is_same_v<tArg, bool>> Push(tArg Value) const { lua_pushinteger(_LuaStatePtr, (lua_Integer)Value); }
+        ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, bool>> Push(tArg Value) const { lua_pushboolean(_LuaStatePtr, Value); }
         template<typename tArg>
-        ZEC_INLINE std::enable_if_t<std::is_floating_point_v<tArg>> Push(tArg Value) const { lua_pushnumber(_LuaStatePtr, Value); }
+        ZEC_INLINE std::enable_if_t<std::is_integral_v<tArg> && !std::is_pointer_v<tArg> && !std::is_same_v<tArg, bool>> Push(tArg Value) const { lua_pushinteger(_LuaStatePtr, (lua_Integer)Value); }
+        template<typename tArg>
+        ZEC_INLINE std::enable_if_t<std::is_floating_point_v<tArg>> Push(tArg Number) const { lua_pushnumber(_LuaStatePtr, Number); }
         template<typename...Args>
         ZEC_INLINE void PushFS(const char * FmtStr, Args&&...args) const { lua_pushfstring(_LuaStatePtr, FmtStr, std::forward<Args>(args)...); }
+
 
         template<typename tFirstArg, typename...tOtherArgs>
         ZEC_INLINE std::enable_if_t<static_cast<bool>(sizeof...(tOtherArgs))> Push(tFirstArg&& FirstArg, tOtherArgs&&...args) const {
@@ -77,7 +82,7 @@ ZEC_NS
             lua_pop(_LuaStatePtr, 1);
             return Ret;
         }
-        
+
         ZEC_INLINE lua_Integer PopInt() const {
             auto Top = lua_gettop(_LuaStatePtr);
             assert (Top);
