@@ -38,7 +38,7 @@ ZEC_NS
         template<typename tArg>
         ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, const char *>, tArg> GetAt(int Index) const { return lua_tostring(_LuaStatePtr, Index); }
         template<typename tArg>
-        ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, std::string>, tArg> GetAt(int Index) const { return lua_tostring(_LuaStatePtr, Index); }
+        ZEC_INLINE std::enable_if_t<std::is_same_v<tArg, std::string>, tArg> GetAt(int Index) const { auto CStringPtr = lua_tostring(_LuaStatePtr, Index); return CStringPtr ? CStringPtr : ""; }
 
         ZEC_INLINE auto GetTop() const { return lua_gettop(_LuaStatePtr); }
         ZEC_INLINE void SetTop(int Index) const { lua_settop(_LuaStatePtr, Index); }
