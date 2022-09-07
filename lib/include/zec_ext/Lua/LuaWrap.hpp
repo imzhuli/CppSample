@@ -133,8 +133,18 @@ ZEC_NS
         }
 
         ZEC_INLINE void Error(const char * Reason) const { lua_pushstring(_LuaStatePtr, Reason); lua_error(_LuaStatePtr); }
-        ZEC_INLINE bool Execute(const char * CodeStr) const { return LUA_OK == luaL_dostring(_LuaStatePtr, CodeStr); }
-        ZEC_INLINE bool ExecuteFile(const char * Filename) const { return LUA_OK == luaL_dofile(_LuaStatePtr, Filename); }
+        ZEC_INLINE std::tuple<bool, std::string> Execute(const char * CodeStr) const {
+            if (LUA_OK == luaL_dostring(_LuaStatePtr, CodeStr)) {
+                return std::make_tuple(true, std::string{});
+            }
+            return std::make_tuple(false, PopString());
+        }
+        ZEC_INLINE std::tuple<bool, std::string> ExecuteFile(const char * Filename) const {
+            if (LUA_OK == luaL_dofile(_LuaStatePtr, Filename)) {
+                return std::make_tuple(true, std::string{});
+            }
+            return std::make_tuple(false, PopString());
+        }
 
         template<size_t ResultNumber = 0, typename...tArgs>
         ZEC_INLINE void CallN(const char * name, tArgs&&...args) const {
