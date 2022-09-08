@@ -21,7 +21,7 @@ typedef struct XelRBInsertSlot
 } XelRBInsertSlot;
 
 static inline void XRBN_Init(XelRBNode * NodePtr) {
-    XelRBNode InitValue = {};
+    XelRBNode InitValue = { NULL, NULL, NULL, false };
     *NodePtr = InitValue;
 }
 
@@ -106,7 +106,7 @@ struct XelRBTree {
 typedef int XRBT_KeyCompare(XelRBTree * TreePtr, const void * KeyPtr, XelRBNode * NodePtr);
 
 static inline void XRBT_Init(XelRBTree* TreePtr) {
-    XelRBTree InitValue = {};
+    XelRBTree InitValue = { NULL };
     *TreePtr = InitValue;
 }
 
@@ -150,7 +150,7 @@ static inline XelRBNode *XRBT_Find(XelRBTree * TreePtr, XRBT_KeyCompare * CompFu
 }
 
 static inline XelRBInsertSlot XRBT_FindInsertSlot(XelRBTree * TreePtr, XRBT_KeyCompare * CompFunc, const void *KeyPtr) {
-    XelRBInsertSlot InsertNode = {};
+    XelRBInsertSlot InsertNode = { NULL, NULL };
     XelRBNode ** CurrNodeRefPtr = &TreePtr->RootPtr;
     while (*CurrNodeRefPtr) {
         InsertNode.ParentPtr = *CurrNodeRefPtr;

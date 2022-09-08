@@ -248,7 +248,7 @@ ZEC_NS
         return true;
     }
 
-    bool xTcpConnection::Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr)
+    bool xTcpConnection::Init(xIoContext * IoContextPtr, const char * Ip, uint16_t Port, iListener * ListenerPtr)
     {
         xNetAddress Address = xNetAddress::Make(Ip, Port);
         return Init(IoContextPtr, Address, ListenerPtr);

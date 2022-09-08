@@ -24,7 +24,7 @@ ZEC_NS
 		};
 
     public:
-        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr, bool ReusePort = false);
+        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint16_t Port, iListener * ListenerPtr, bool ReusePort = false);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr, bool ReusePort = false);
 		ZEC_API_MEMBER void Clean();
 

@@ -30,7 +30,7 @@ ZEC_NS
         ZEC_API_MEMBER void LoopOnce(int TimeoutMS);
 
     private:
-        xDummy<16>             _Native;
+        xDummy<24>             _Native;
         xDummy<24>             _WorkGuard;
         friend class xIoCaster;
     };

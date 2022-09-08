@@ -24,7 +24,7 @@ ZEC_NS
         ZEC_API_MEMBER xWebSocketSession();
         ZEC_API_MEMBER ~xWebSocketSession();
 
-        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * IpStr, uint64_t Port, const std::string & Origin, const std::string &Target, iListener * ListenerPtr);
+        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * IpStr, uint16_t Port, const std::string & Origin, const std::string &Target, iListener * ListenerPtr);
         ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, const std::string & Origin, const std::string &Target, iListener * ListenerPtr);
         ZEC_API_MEMBER void Clean();
         ZEC_INLINE     bool IsActive() const { return _Active; }

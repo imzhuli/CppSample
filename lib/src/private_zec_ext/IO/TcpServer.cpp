@@ -17,7 +17,7 @@ ZEC_NS
     using xNativeTcpAcceptor = tcp::acceptor;
     using xSharedTcpAcceptorPtr = std::shared_ptr<xNativeTcpAcceptor>;
 
-	bool xTcpServer::Init(xIoContext * IoContextPtr, const char * Ip, uint64_t Port, iListener * ListenerPtr, bool ReusePort)
+	bool xTcpServer::Init(xIoContext * IoContextPtr, const char * Ip, uint16_t Port, iListener * ListenerPtr, bool ReusePort)
 	{
         xNetAddress Address = xNetAddress::Make(Ip, Port);
 		return Init(IoContextPtr, Address, ListenerPtr, ReusePort);

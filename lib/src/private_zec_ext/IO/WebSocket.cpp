@@ -23,7 +23,7 @@ ZEC_NS
         _ReadBuffer.DestroyAs<xWSReadBufferPtr>();
     }
 
-    bool xWebSocketSession::Init(xIoContext * IoContextPtr, const char * IpStr, uint64_t Port, const std::string & Origin, const std::string &Target, iListener * ListenerPtr)
+    bool xWebSocketSession::Init(xIoContext * IoContextPtr, const char * IpStr, uint16_t Port, const std::string & Origin, const std::string &Target, iListener * ListenerPtr)
     {
         auto Address = xNetAddress::Make(IpStr, Port);
         return Init(IoContextPtr, Address, Origin, Target, ListenerPtr);

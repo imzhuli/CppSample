@@ -55,7 +55,9 @@
 #endif
 
 #if defined(_MSC_VER)
-	#define NOMINMAX
+	#ifndef NOMINMAX
+		#define NOMINMAX
+	#endif
 	#define ZEC_INLINE                       __forceinline
 	#define ZEC_STATIC_INLINE                static __forceinline
 

@@ -72,14 +72,14 @@ ZEC_NS
 		};
 
 
-		namespace __detail__ {
+		namespace __common_detail__ {
 			template<typename T>
 			struct xRemoveCVR {
 				typedef std::remove_cv_t<std::remove_reference_t<T>> Type;
 			};
 		}
 		template<typename T >
-		using xNoCVR = typename __detail__::xRemoveCVR<T>::Type;
+		using xNoCVR = typename __common_detail__::xRemoveCVR<T>::Type;
 
 		template<typename T>
 		class xCountRetainer {
@@ -265,7 +265,7 @@ ZEC_NS
 		template<typename tExit>
 		xScopeGuard(const tExit& Exit) -> xScopeGuard<xPass, std::decay_t<tExit>>;
 
-		namespace __detail__ {
+		namespace __common_detail__ {
 			template<bool IsAtomic = false>
 			class xReentryFlag final : xNonCopyable
 			{
@@ -290,10 +290,10 @@ ZEC_NS
 			};
 		}
 
-		using xReentryFlag = __detail__::xReentryFlag<false>;
-		using xAtomicReentryFlag = __detail__::xReentryFlag<true>;
+		using xReentryFlag = __common_detail__::xReentryFlag<false>;
+		using xAtomicReentryFlag = __common_detail__::xReentryFlag<true>;
 
-		namespace __detail__ {
+		namespace __common_detail__ {
 			template<typename T, bool DoThrow = false>
 			class xResourceGuardBase : xNonCopyable {
 			public:
@@ -315,15 +315,15 @@ ZEC_NS
 		}
 
 		template<typename T>
-		struct xResourceGuard final : __detail__::xResourceGuardBase<T, false> {
-			using __detail__::xResourceGuardBase<T, false>::xResourceGuardBase;
+		struct xResourceGuard final : __common_detail__::xResourceGuardBase<T, false> {
+			using __common_detail__::xResourceGuardBase<T, false>::xResourceGuardBase;
 		};
 		template<typename T, typename ... tArgs>
 		xResourceGuard(T & Resource, tArgs&& ... Args) -> xResourceGuard<T>;
 		
 		template<typename T>
-		struct xResourceGuardThrowable final : __detail__::xResourceGuardBase<T, true> {
-			using __detail__::xResourceGuardBase<T, true>::xResourceGuardBase;
+		struct xResourceGuardThrowable final : __common_detail__::xResourceGuardBase<T, true> {
+			using __common_detail__::xResourceGuardBase<T, true>::xResourceGuardBase;
 		};
 		template<typename T, typename ... tArgs>
 		xResourceGuardThrowable(T & Resource, tArgs&& ... Args) -> xResourceGuardThrowable<T>;
