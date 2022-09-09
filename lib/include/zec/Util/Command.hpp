@@ -19,13 +19,13 @@ ZEC_NS
 	 *     If an option is marked as requiring a value and is the last argv in command line:
 	 *        it can have an empty string value if its value field is omitted;
 	 *     ShortName options begins with a single minus sign, and can be combined together.
-	 *     If more than one ShortName options need values, they should all get a copy of a same value;
+	 *     If any of a combination of ShortNames options need values, the following segment will be considered value;
 	 *     Parsing priority:
 	 *        Obtaining value for option previously checked,
+	 *        non-option arguments.
 	 *        Checking subcommmand mark ("--"),
 	 *        LongName options,
 	 *        Combination of ShortName options,
-	 *        non-option arguments.
 	 *     As mentioned above, though ShortName of '-' and LongName beginning with '-' are not forbidden,
 	 *        one should be very carefull, if he insists on using such options.
 	 *     If more than one options with same KeyName have values,
@@ -71,6 +71,7 @@ ZEC_NS
 
 		ZEC_API_MEMBER void CleanOptions();
 		ZEC_API_MEMBER void CleanValues();
+		ZEC_API_MEMBER std::string DescribeOptions();
 
 	private:
 		struct xCoreOption {

@@ -1,4 +1,5 @@
 #include <zec/Util/Command.hpp>
+#include <sstream>
 #include <cstring>
 
 ZEC_NS
@@ -113,6 +114,18 @@ ZEC_NS
 	{
 		_ParsedValues.clear();
 		_NonOptionArguments.clear();
+	}
+
+	std::string xCommandLine::DescribeOptions()
+	{
+		std::stringstream ss;
+		for (auto & [c, opt] : _ShortOptions) {
+			ss << '-' << c << ' ' << (opt.NeedValue ? "<value>" : "")  << " : " << opt.KeyName <<  std::endl;
+		}
+		for (auto & [s, opt] : _LongOptions) {
+			ss << "--" << s << ' ' << (opt.NeedValue ? "<value>" : "") << " : " << opt.KeyName  << std::endl;
+		}
+		return ss.str();
 	}
 
 }
