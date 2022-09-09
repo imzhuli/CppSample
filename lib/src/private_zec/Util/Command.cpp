@@ -22,20 +22,27 @@ ZEC_NS
 		return Iter->second;
 	}
 
+
 	void xCommandLine::AddOption(const xOption &Option)
 	{
 		assert(Option.KeyName);
-		assert(Option.ShortName || Option.LongName);
+		assert(Option.ShortName || (Option.LongName && strlen(Option.LongName)));
 		xCoreOption CoreOption = { Option.KeyName, Option.NeedValue	};
 		if (_KeySet.find(Option.KeyName) != _KeySet.end()) {
 			Error("Duplicate OptionKey");
 		}
 		_KeySet.insert(Option.KeyName);
 		if (Option.ShortName) {
-			_ShortOptions.insert_or_assign(Option.ShortName, CoreOption);
+			auto [Iter, Inserted] = _ShortOptions.emplace(Option.ShortName, CoreOption);
+			if (!Inserted) {
+				Error("Duplicate ShortKey");
+			}
 		}
-		if (Option.LongName) {
-			_LongOptions.insert_or_assign(Option.LongName, CoreOption);
+		if (Option.LongName && strlen(Option.LongName)) {
+			auto [Iter, Inserted] = _LongOptions.emplace(Option.LongName, CoreOption);
+			if (!Inserted) {
+				Error("Duplicate LongKey");
+			}
 		}
 	}
 
