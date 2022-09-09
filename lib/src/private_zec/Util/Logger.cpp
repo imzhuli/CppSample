@@ -1,6 +1,6 @@
 #include <zec/Util/Logger.hpp>
+#include <zec/Container/Array.hpp>
 #include <zec/Byte.hpp>
-#include <zec/CArray.hpp>
 #include <cstdio>
 #include <ctime>
 #include <string>
@@ -13,7 +13,7 @@
 ZEC_NS
 {
 
-	static constexpr auto gcHint = xCArray {
+	static constexpr auto gcHint = xArray {
 		xType<const char>,
 		'V',
 		'D',
