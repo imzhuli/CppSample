@@ -9,20 +9,20 @@ ZEC_NS
 {
 
 	template<typename T>
-	class xArray final
+	class xVector final
 	{
 		template<typename U>
-		friend class xArray;
+		friend class xVector;
 
 	public:
-		ZEC_INLINE xArray(xAllocator * alloc = &DefaultAllocator)
+		ZEC_INLINE xVector(xAllocator * alloc = &DefaultAllocator)
 		: _Alloc(alloc)
 		, _Data(nullptr)
 		, _Capacity(0)
 		, _Size(0)
 		{}
 
-		ZEC_INLINE xArray(xCapacityInit capacity, xAllocator * alloc = &DefaultAllocator)
+		ZEC_INLINE xVector(xCapacityInit capacity, xAllocator * alloc = &DefaultAllocator)
 		: _Alloc(alloc)
 		, _Capacity(capacity.value)
 		, _Size(0)
@@ -31,7 +31,7 @@ ZEC_NS
 			_Data = (T*)_Alloc->Alloc(sizeof(T) * _Capacity, AllocAlignSize<T>);
 		}
 
-		ZEC_INLINE xArray(size_t initSize, xAllocator * alloc = &DefaultAllocator)
+		ZEC_INLINE xVector(size_t initSize, xAllocator * alloc = &DefaultAllocator)
 		: _Alloc(alloc), _Size(initSize)
 		{
 			_Capacity = (_Size + 15) & ~0x0F;
@@ -44,7 +44,7 @@ ZEC_NS
 			}
 		}
 
-		ZEC_INLINE xArray(size_t initSize, const xZeroInit &, xAllocator * alloc = &DefaultAllocator)
+		ZEC_INLINE xVector(size_t initSize, const xZeroInit &, xAllocator * alloc = &DefaultAllocator)
 		: _Alloc(alloc), _Size(initSize)
 		{
 			_Capacity = (_Size + 15) & ~0x0F;
@@ -60,7 +60,7 @@ ZEC_NS
 			}
 		}
 
-		ZEC_INLINE xArray(size_t initSize, const T & vInitValue, xAllocator * alloc = &DefaultAllocator)
+		ZEC_INLINE xVector(size_t initSize, const T & vInitValue, xAllocator * alloc = &DefaultAllocator)
 		: _Alloc(alloc), _Size(initSize)
 		{
 			_Capacity = (_Size + 15) & ~0x0F;
@@ -71,7 +71,7 @@ ZEC_NS
 		}
 
 		template<typename U>
-		ZEC_INLINE xArray(xRangeView<U> range, xAllocator * alloc = &DefaultAllocator)
+		ZEC_INLINE xVector(xRangeView<U> range, xAllocator * alloc = &DefaultAllocator)
 		: _Alloc(alloc), _Size(range.size())
 		{
 			_Capacity = (_Size + 15) & ~0x0F;
@@ -89,7 +89,7 @@ ZEC_NS
 		}
 
 		template<typename U>
-		ZEC_INLINE xArray(const xArray<U> & other)
+		ZEC_INLINE xVector(const xVector<U> & other)
 		: _Alloc(other._Alloc), _Capacity(other._Capacity), _Size(other._Size)
 		{
 			_Data = (T*)_Alloc->Alloc(sizeof(T) * _Capacity, AllocAlignSize<T>);
@@ -105,14 +105,14 @@ ZEC_NS
 			}
 		}
 
-		ZEC_INLINE xArray(xArray && other)
+		ZEC_INLINE xVector(xVector && other)
 		: _Alloc(other._Alloc), _Data(other._Data), _Capacity(other._Capacity), _Size(other._Size)
 		{
 			other._Data = nullptr;
 			other._Capacity = other._Size = 0;
 		}
 
-		ZEC_INLINE ~xArray()
+		ZEC_INLINE ~xVector()
 		{
 			if (_Data) {
 				Clear();
