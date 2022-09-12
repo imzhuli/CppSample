@@ -5,6 +5,15 @@
     #define XelNoWriteSignal       0
 #endif
 
+#ifdef ZEC_SYSTEM_WINDOWS
+    typedef SSIZE_T  ssize_t;
+    typedef int      send_len_t;
+    typedef int      recv_len_t;
+#else
+    typedef size_t  send_len_t;
+    typedef size_t  recv_len_t;
+#endif
+
 #ifndef SOCK_CLOEXEC
     #define SOCK_CLOEXEC 0
 #endif
@@ -60,7 +69,7 @@ bool XL_FlushData(XelLink * LinkPtr)
         if (!BufferPtr) {
             return true;
         }
-        ssize_t WB = send(LinkPtr->SocketFd, BufferPtr->Buffer, BufferPtr->BufferDataSize, XelNoWriteSignal);
+        ssize_t WB = send(LinkPtr->SocketFd, BufferPtr->Buffer, (send_len_t)BufferPtr->BufferDataSize, XelNoWriteSignal);
         if (WB == BufferPtr->BufferDataSize) {
             XWBC_FreeFront(ChainPtr);
             continue;
@@ -149,7 +158,8 @@ void XLH_Write(const XelLinkHeader * HeaderPtr, void * DestPtr)
     if (LinkPtr->SocketFd == XelInvalidSocket) {
         return false;
     }
-    struct sockaddr_in TargetAddr = {};
+    struct sockaddr_in TargetAddr;
+    memset(&TargetAddr, 0, sizeof(TargetAddr));
     TargetAddr.sin_family = AF_INET;
     TargetAddr.sin_addr.s_addr = Addr;
     TargetAddr.sin_port = htons(Port);
@@ -171,7 +181,7 @@ bool XL_ReadRawData(XelLink * LinkPtr, void * DestBufferPtr, size_t * DestBuffer
     assert(XL_IsWorking(LinkPtr));
     assert(DestBufferPtr && DestBufferSize && *DestBufferSize);
 
-    ssize_t Rb = read(LinkPtr->SocketFd, DestBufferPtr, *DestBufferSize);
+    ssize_t Rb = recv(LinkPtr->SocketFd, DestBufferPtr, (recv_len_t)*DestBufferSize, 0);
     if (Rb == 0) {
         XEL_LINK_CALLBACK(LinkPtr, OnSetClose);
         return false;
@@ -193,7 +203,7 @@ bool XL_ReadPacketLoop(XelLink * LinkPtr, XelPacketCallback * CallbackPtr, void 
     assert(XL_IsWorking(LinkPtr));
     assert(CallbackPtr);
 
-    ssize_t Rb = read(LinkPtr->SocketFd, LinkPtr->ReadBuffer + LinkPtr->ReadBufferDataSize, XelMaxLinkPacketSize - LinkPtr->ReadBufferDataSize);
+    ssize_t Rb = recv(LinkPtr->SocketFd, LinkPtr->ReadBuffer + LinkPtr->ReadBufferDataSize, (recv_len_t)(XelMaxLinkPacketSize - LinkPtr->ReadBufferDataSize), 0);
     if (Rb == 0) { XEL_LINK_CALLBACK(LinkPtr, OnSetClose); return false; }
     if (Rb < 0) { return errno == EAGAIN; }
     LinkPtr->ReadBufferDataSize += Rb;
@@ -204,7 +214,8 @@ bool XL_ReadPacketLoop(XelLink * LinkPtr, XelPacketCallback * CallbackPtr, void 
         if (RemainSize < XelLinkHeaderSize) {
             break;
         }
-        XelLinkHeader Header = {};
+        XelLinkHeader Header;
+        memset(&Header, 0, sizeof(Header));
         if (!XLH_Read(&Header, StartPtr)) {
             XL_SetError(LinkPtr);
             return false;
@@ -238,7 +249,7 @@ bool XL_WriteRawData(XelLink * LinkPtr, const void * _DataPtr, size_t Length)
     if (LinkPtr->Status == XLS_Connecting || XWBC_Peek(ChainPtr)) {
         return XL_AppendData(LinkPtr, DataPtr, Length);
     }
-    ssize_t WB = send(LinkPtr->SocketFd, DataPtr, Length, MSG_NOSIGNAL);
+    ssize_t WB = send(LinkPtr->SocketFd, DataPtr, (send_len_t)Length, XelNoWriteSignal);
     if (WB < 0) {
         if (errno != EAGAIN) {
             XL_SetError(LinkPtr);

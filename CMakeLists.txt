@@ -11,6 +11,7 @@ message(STATUS "CMAKE_CXX_COMPILER_ID=" ${CMAKE_CXX_COMPILER_ID})
 
 find_package(Threads REQUIRED)
 if (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+	add_compile_options("-D_WIN32_WINNT=0x0601")
 	add_compile_options("-D_CRT_SECURE_NO_WARNINGS")
 	add_compile_options("-std:c11")
 	add_compile_options("-std:c++latest")

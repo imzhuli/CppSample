@@ -6,6 +6,9 @@
 #include <errno.h>
 
 #ifdef ZEC_SYSTEM_WINDOWS
+#define WIN32_LEAN_AND_MEAN 
+#include <windows.h>
+#include <windef.h>
 #include <ws2def.h>
 #include <winsock2.h>
     typedef SOCKET XelSocket;
@@ -116,7 +119,7 @@ struct XelLinkCallbacks;
 typedef struct {
     XelLinkStatus               Status;
     uint32_t                    Flags;
-    int                         SocketFd;
+    XelSocket                   SocketFd;
     xel_byte                    ReadBuffer[XelMaxLinkPacketSize];
     size_t                      ReadBufferDataSize;
     XelWriteBufferChain         BufferChain;
