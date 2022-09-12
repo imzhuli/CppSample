@@ -95,7 +95,7 @@ install(
 install(
 	DIRECTORY ${PROJECT_SOURCE_DIR}/./include/glm
 	DESTINATION include
-	FILES_MATCHING REGEX ".+\.(h|hpp)"
+	FILES_MATCHING REGEX ".+\.(h|hpp|inc)"
 	)
 install(
 	DIRECTORY ${PROJECT_SOURCE_DIR}/./include/rapidjson

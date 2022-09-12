@@ -21,7 +21,7 @@ static XelRBTree Tree;
 
 size_t GenerateNodePool()
 {
-    srand(time(nullptr));
+    srand((unsigned int)time(nullptr));
     size_t Counter = 0;
     for (size_t i = 0 ; i < Total; ++i) {
         size_t Index = rand() % Total;
@@ -108,7 +108,7 @@ bool CheckOrder(XelRBTree * TreePtr)
 void test0()
 {
     XRBT_Init(&Tree);
-    srand(time(nullptr));
+    srand((unsigned int)time(nullptr));
 
     size_t Counter = 0;
     std::vector<size_t> PushOrder;
@@ -166,7 +166,7 @@ void test2()
 {
     XRBT_Init(&Tree);
 
-    srand(time(nullptr));
+    srand((unsigned int)time(nullptr));
 
     TreeInsert(5);
     TreeInsert(3);
@@ -194,7 +194,7 @@ void test3()
 {
     XRBT_Init(&Tree);
 
-    srand(time(nullptr));
+    srand((unsigned int)time(nullptr));
     size_t Counter = 0;
     std::vector<size_t> PushOrder;
     for (size_t i = 0 ; i < Total; ++i) {
@@ -280,7 +280,7 @@ void test5()
 {
     XRBT_Init(&Tree);
 
-    srand(time(nullptr));
+    srand((unsigned int)time(nullptr));
     size_t Counter = 0;
     std::vector<size_t> PushOrder;
     for (size_t i = 0 ; i < Total; ++i) {
