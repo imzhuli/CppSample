@@ -2,7 +2,7 @@
 #include <sstream>
 
 static constexpr const size_t    MaxSafeStringLength = 4096;
-static constexpr const uint64_t  CheckHttpRequestTimeoutMS = 1'000;
+static constexpr const uint64_t  CheckHttpRequestTimeoutMS = 5'000;
 static const size_t              MaxHeadSize = 4096;
 static const size_t              MaxPostBodySize = 3 * MaxSafeStringLength;
 static const char                ContentLengthHint[] = "Content-Length: ";
@@ -43,7 +43,7 @@ void xCheckHttpServer::SetLogRequestPath(const std::string & Path)
 
 void xCheckHttpServer::OnNewConnection(xTcpServer * TcpServerPtr, xIoHandle NativeHandle)
 {
-	uint64_t NowMS = GetMicroTimestamp();
+	uint64_t NowMS = GetMilliTimestamp();
     xCheckHttpConnection * ConnectionPtr = new (std::nothrow) xCheckHttpConnection();
     if (!ConnectionPtr) {
         return;
@@ -95,7 +95,6 @@ size_t xCheckHttpServer::OnData(xTcpConnection * TcpConnectionPtr, void * DataPt
 	}
 
 	if (RequestLine.length() != ConnectionPtr->HeaderSize + ConnectionPtr->BodySize) {
-		cout << "body size: " << ConnectionPtr->BodySize << endl;
 		return DataSize;
 	}
 
@@ -128,7 +127,7 @@ bool xCheckHttpServer::OnConnectionRequest(xCheckHttpConnection * TcpConnectionP
 	}
 	if (RequestLine.find(PostLogRequestPath) == 0 && RequestLine[PostLogRequestPath.length()] == ' ' && TcpConnectionPtr->BodySize) {
 		xLogRecord * RecordPtr = new xLogRecord;
-		RecordPtr->ServerTimeMS = GetMicroTimestamp();
+		RecordPtr->ServerTimeMS = GetMilliTimestamp();
 		RecordPtr->LogContents = MakeSafeString(std::string{ TcpConnectionPtr->RequestLine.data() + TcpConnectionPtr->HeaderSize, TcpConnectionPtr->BodySize});
 		AddLogRecord(RecordPtr);
     	TcpConnectionPtr->PostData("HTTP/1.1 200 OK\r\nConnection: close\r\n\r\n", 38);
@@ -140,7 +139,7 @@ bool xCheckHttpServer::OnConnectionRequest(xCheckHttpConnection * TcpConnectionP
 
 void xCheckHttpServer::Shrink()
 {
-	uint64_t NowMS = GetMicroTimestamp();
+	uint64_t NowMS = GetMilliTimestamp();
     auto KillTimepoint = NowMS - CheckHttpRequestTimeoutMS;
     for (auto & Iter : TimeoutList) {
         auto & Connection = (xCheckHttpConnection&)Iter;
