@@ -118,7 +118,7 @@ bool xCheckHttpServer::OnConnectionRequest(xCheckHttpConnection * TcpConnectionP
 			ss << R.ServerTimeMS << ": " << R.LogContents << endl;
 		}
 		auto s = ss.str();
-		auto h = std::string("HTTP/1.1 200 OK\r\n") + "Content-Type: text/plain\r\n" + "Content-Length: " + std::to_string(s.length()) + "\r\n\r\n";
+		auto h = std::string("HTTP/1.1 200 OK\r\n") + "Content-Type: text/plain\r\nConnection: close\r\n" + "Content-Length: " + std::to_string(s.length()) + "\r\n\r\n";
 
     	TcpConnectionPtr->PostData(h.data(), h.length());
 		if (s.length()) {
@@ -131,10 +131,10 @@ bool xCheckHttpServer::OnConnectionRequest(xCheckHttpConnection * TcpConnectionP
 		RecordPtr->ServerTimeMS = GetMicroTimestamp();
 		RecordPtr->LogContents = MakeSafeString(std::string{ TcpConnectionPtr->RequestLine.data() + TcpConnectionPtr->HeaderSize, TcpConnectionPtr->BodySize});
 		AddLogRecord(RecordPtr);
-    	TcpConnectionPtr->PostData("HTTP/1.1 200 OK\r\n\r\n", 19);
+    	TcpConnectionPtr->PostData("HTTP/1.1 200 OK\r\nConnection: close\r\n\r\n", 38);
 		return true;
 	}
-	TcpConnectionPtr->PostData("HTTP/1.1 404 InvalidRequest(NB)\r\n\r\n", 35);
+	TcpConnectionPtr->PostData("HTTP/1.1 404 InvalidRequest(NB)\r\nConnection: close\r\n\r\n", 54);
 	return false;
 }
 
