@@ -47,6 +47,8 @@ ZEC_NS
 		xTcpConnectionExList            _DisabledConnectionList;
 		xTcpConnectionExList            _KillConnectionList;
 		uint64_t                        _ReconnectTimeoutMS = 30'000;
+
+		ubyte KeepAliveRequestBuffer[xPacketHeader::Size];
 	};
 
 }

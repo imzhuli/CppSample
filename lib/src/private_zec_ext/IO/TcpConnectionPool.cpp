@@ -37,6 +37,7 @@ ZEC_NS
 			_DisabledConnectionList.AddTail(Connection);
 		}
 		_ListenerPtr = ListenerPtr;
+		xPacketHeader::MakeKeepAlive(KeepAliveRequestBuffer);
 		return true;
 	}
 
@@ -73,9 +74,7 @@ ZEC_NS
 			if (Connection.ConnectionTimestampMS > KeepAliveTimepoint) {
 				break;
 			}
-			ubyte RequestBuffer[xPacketHeader::Size];
-			xPacketHeader::MakeKeepAlive(RequestBuffer);
-			Connection.PostData(RequestBuffer, sizeof(RequestBuffer));
+			Connection.PostData(KeepAliveRequestBuffer, sizeof(KeepAliveRequestBuffer));
 			Connection.ConnectionTimestampMS = NowMS;
 			_EnabledConnectionList.GrabTail(Connection);
 		}
