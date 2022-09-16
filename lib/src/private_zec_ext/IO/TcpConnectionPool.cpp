@@ -2,6 +2,8 @@
 
 ZEC_NS
 {
+	static constexpr const uint64_t KeepAliveTimeoutMS = 55'000;
+
 	bool xTcpConnectionPool::Init(xIoContext * IoContextPtr, const std::vector<xNetAddress>& Addresses, iListener * ListenerPtr)
 	{
 		auto AddressesTemp = Addresses;
@@ -55,6 +57,7 @@ ZEC_NS
 
 	void xTcpConnectionPool::Check(uint64_t NowMS)
 	{
+		// Kill connections:
 		for (auto & Iter : _KillConnectionList) {
 			auto & Connection = static_cast<xTcpConnectionEx &>(Iter);
 			Connection.Clean();
@@ -63,20 +66,36 @@ ZEC_NS
 			_DisabledConnectionList.GrabTail(Connection);
 		}
 
-		uint64_t KillTimepoint = NowMS - _ReconnectTimeoutMS;
+		// KeepAlive:
+		uint64_t KeepAliveTimepoint = NowMS - KeepAliveTimeoutMS;
+		for (auto & Iter : _EnabledConnectionList) {
+			auto & Connection = static_cast<xTcpConnectionEx &>(Iter);
+			if (Connection.ConnectionTimestampMS > KeepAliveTimepoint) {
+				break;
+			}
+			ubyte RequestBuffer[xPacketHeader::Size];
+			xPacketHeader::MakeKeepAlive(RequestBuffer);
+			Connection.PostData(RequestBuffer, sizeof(RequestBuffer));
+			Connection.ConnectionTimestampMS = NowMS;
+			_EnabledConnectionList.GrabTail(Connection);
+		}
+
+		// Reconnect;
+		uint64_t ReconnectTimepoint = NowMS - _ReconnectTimeoutMS;
 		xTcpConnectionExList TempList; // using templist to prevent infinate
 		for (auto & Iter : _DisabledConnectionList) {
 			auto & Connection = static_cast<xTcpConnectionEx &>(Iter);
-			if (Connection.ConnectionTimestampMS > KillTimepoint) {
+			if (Connection.ConnectionTimestampMS > ReconnectTimepoint) {
 				break;
 			}
+
 			if (!Connection.Init(_IoContextPtr, _Addresses[Connection.ConnectionId], this)) {
-				Connection.ConnectionTimestampMS = NowMS;
 				TempList.GrabTail(Connection);
 			} else {
 				Connection.ConnectionType = EnabledConnection;
 				_EnabledConnectionList.GrabTail(Connection);
 			}
+			Connection.ConnectionTimestampMS = NowMS;
 		}
 		_DisabledConnectionList.GrabListTail(TempList);
 	}

@@ -26,6 +26,7 @@ ZEC_NS
     struct xPacketHeader final
     {
         static constexpr const size32_t Size = 2 * sizeof(uint64_t) + 16;
+        static constexpr const xPacketCommandId CmdId_KeepAlive   = 0x00'00;
 
         xPacketLength            PacketLength = 0; // header size included, lower 24 bits as length, higher 8 bits as a magic check
         xPacketSequence          PackageSequenceId = 0; // the index of the packet in a full package, (this is no typo)
@@ -71,6 +72,27 @@ ZEC_NS
                 + 2); // CommandId
             S.W8L(RequestId);
         };
+
+        ZEC_STATIC_INLINE size_t MakeKeepAlive(void * PackageHeaderBuffer) {
+            xPacketHeader Header;
+            Header.CommandId = CmdId_KeepAlive;
+            Header.PacketLength = PacketHeaderSize;
+            Header.Serialize(PackageHeaderBuffer);
+            return PacketHeaderSize;
+        }
+
+        ZEC_STATIC_INLINE size_t MakeCheckKeepAlive(void * PackageHeaderBuffer) {
+            xPacketHeader Header;
+            Header.CommandId = CmdId_KeepAlive;
+            Header.RequestId = 0xFFFF'FFFF'FFFF'FFFFul;
+            Header.PacketLength = PacketHeaderSize;
+            Header.Serialize(PackageHeaderBuffer);
+            return PacketHeaderSize;
+        }
+
+        ZEC_STATIC_INLINE bool IsServerCheckKeepAlive(const xPacketHeader & Header) {
+            return Header.CommandId == CmdId_KeepAlive && Header.RequestId == 0xFFFF'FFFF'FFFF'FFFFul;
+        }
 
     private:
         ZEC_STATIC_INLINE uint32_t MakeHeaderLength(uint32_t PacketLength) {
