@@ -103,7 +103,7 @@ size_t xCheckHttpServer::OnData(xTcpConnection * TcpConnectionPtr, void * DataPt
 		return DataSize;
 	}
 
-    ConnectionPtr->PostData("HTTP/1.1 404 Not Found\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", 64);
+	TcpConnectionPtr->PostData("HTTP/1.1 404 InvalidRequest(NF)\r\nContent-Type: application/oct-stream\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", 111);
     ConnectionPtr->GracefulClose();
     return DataSize;
 }
@@ -130,10 +130,10 @@ bool xCheckHttpServer::OnConnectionRequest(xCheckHttpConnection * TcpConnectionP
 		RecordPtr->ServerTimeMS = GetMilliTimestamp();
 		RecordPtr->LogContents = MakeSafeString(std::string{ TcpConnectionPtr->RequestLine.data() + TcpConnectionPtr->HeaderSize, TcpConnectionPtr->BodySize});
 		AddLogRecord(RecordPtr);
-    	TcpConnectionPtr->PostData("HTTP/1.1 200 OK\r\nConnection: close\r\n\r\n", 38);
+    	TcpConnectionPtr->PostData("HTTP/1.1 200 OK\r\nContent-Type: application/oct-stream\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", 95);
 		return true;
 	}
-	TcpConnectionPtr->PostData("HTTP/1.1 404 InvalidRequest(NB)\r\nConnection: close\r\n\r\n", 54);
+	TcpConnectionPtr->PostData("HTTP/1.1 404 InvalidRequest(NB)\r\nContent-Type: application/oct-stream\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", 111);
 	return false;
 }
 
