@@ -65,11 +65,8 @@ ZEC_NS
 
 		std::tm brokenTime;
 		std::time_t now = std::time(nullptr);
-#ifdef _MSC_VER
-		localtime_s(&brokenTime, &now);
-#else
-		localtime_r(&now, &brokenTime);
-#endif
+		ZecLocalTime(&now, &brokenTime);
+
 		std::hash<std::thread::id> hasher;
 
 		va_list vaList;

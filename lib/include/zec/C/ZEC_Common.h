@@ -97,7 +97,7 @@
 #endif
 
 #define ZEC_EXTERN             extern
-#define ZEC_MEMBER 
+#define ZEC_MEMBER
 #define ZEC_STATIC_MEMBER      static
 #if defined(ZEC_OPTION_STATIC)
 	#if defined(ZEC_OPTION_EXPORT_API)
@@ -119,14 +119,14 @@
 #endif
 
 #ifndef __cplusplus
-#define ZEC_CNAME 
+#define ZEC_CNAME
 #define ZEC_CNAME_BEGIN
 #define ZEC_CNAME_END
 #else
 #define ZEC_CNAME extern "C"
 #define ZEC_CNAME_BEGIN extern "C" {
 #define ZEC_CNAME_END }
-#endif 
+#endif
 
 #define ZEC_MAKE_STRING(s) #s
 #define ZEC_EXPAND_STRING(s) ZEC_MAKE_STRING(s)
@@ -135,9 +135,11 @@
 #if defined(_MSC_VER)
 #	define ZecAlignedAlloc                      _aligned_malloc
 #	define ZecAlignedFree                       _aligned_free
+#   define ZecLocalTime(Timestamp, ST)          localtime_s((ST), (Timestamp));
 #else
 #	define ZecAlignedAlloc(size, alignment)     aligned_alloc(alignment, size)
 #	define ZecAlignedFree                       free
+#   define ZecLocalTime(Timestamp, ST)          localtime_r((Timestamp), (ST));
 #endif
 
 #if defined(ZEC_SYSTEM_ANDROID)

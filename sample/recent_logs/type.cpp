@@ -1,4 +1,5 @@
 #include "./type.hpp"
+#include <ctime>
 #include <sstream>
 
 static constexpr const size_t    MaxSafeStringLength = 4096;
@@ -114,10 +115,17 @@ bool xCheckHttpServer::OnConnectionRequest(xCheckHttpConnection * TcpConnectionP
 	if (RequestLine.find(GetLogRequestPath) == 0 && RequestLine[GetLogRequestPath.length()] == ' ') {
 		std::stringstream ss;
 		for (auto & R : RecordList) {
-			ss << R.ServerTimeMS << ": " << R.LogContents << endl;
+			std::tm brokenTime;
+			ZecLocalTime(X2Ptr((time_t)(R.ServerTimeMS/1000)), &brokenTime);
+			char TimeFormatBuffer[64];
+			sprintf(TimeFormatBuffer, "%02d%02d%02d:%02d%02d%02d ",
+				brokenTime.tm_year + 1900 - 2000, brokenTime.tm_mon + 1, brokenTime.tm_mday,
+				brokenTime.tm_hour, brokenTime.tm_min, brokenTime.tm_sec
+			);
+			ss << TimeFormatBuffer << ": " << R.LogContents << endl;
 		}
 		auto s = ss.str();
-		auto h = std::string("HTTP/1.1 200 OK\r\n") + "Content-Type: text/plain\r\nConnection: close\r\n" + "Content-Length: " + std::to_string(s.length()) + "\r\n\r\n";
+		auto h = std::string("HTTP/1.1 200 OK\r\n") + "Content-Type: text/plain; charset=UTF-8\r\nConnection: close\r\n" + "Content-Length: " + std::to_string(s.length()) + "\r\n\r\n";
 
     	TcpConnectionPtr->PostData(h.data(), h.length());
 		if (s.length()) {
