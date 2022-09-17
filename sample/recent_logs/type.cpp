@@ -2,7 +2,7 @@
 #include <ctime>
 #include <sstream>
 
-static constexpr const size_t    MaxSafeStringLength = 4096;
+static constexpr const size_t    MaxSafeStringLength = 1*1024*1024;
 static constexpr const uint64_t  CheckHttpRequestTimeoutMS = 5'000;
 static const size_t              MaxHeadSize = 4096;
 static const size_t              MaxPostBodySize = 3 * MaxSafeStringLength;
@@ -145,7 +145,7 @@ bool xCheckHttpServer::OnConnectionRequest(xCheckHttpConnection * TcpConnectionP
 
 	if (RequestLine.find(ClearLogRequestPath) == 0 && RequestLine[ClearLogRequestPath.length()] == ' ') {
 		ClearLogRecordList();
-    	TcpConnectionPtr->PostData("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", 97);
+    	TcpConnectionPtr->PostData("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: 0\r\nConnection: close\r\nCache-Control: no-cache\r\n\r\n", 122);
 		return true;
 	}
 	TcpConnectionPtr->PostData("HTTP/1.1 404 InvalidRequest(NB)\r\nContent-Type: application/octet-stream\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", 113);
