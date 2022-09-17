@@ -76,4 +76,5 @@ private:
     xLogRecordList       RecordList;
 	std::string          GetLogRequestPath;
 	std::string          PostLogRequestPath;
+	std::string          ClearLogRequestPath;
 };

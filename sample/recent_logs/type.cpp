@@ -40,6 +40,7 @@ void xCheckHttpServer::SetLogRequestPath(const std::string & Path)
 {
 	GetLogRequestPath = "GET " + Path;
 	PostLogRequestPath = "POST " + Path;
+	ClearLogRequestPath = GetLogRequestPath + "/clear";
 }
 
 void xCheckHttpServer::OnNewConnection(xTcpServer * TcpServerPtr, xIoHandle NativeHandle)
@@ -138,6 +139,12 @@ bool xCheckHttpServer::OnConnectionRequest(xCheckHttpConnection * TcpConnectionP
 		RecordPtr->ServerTimeMS = GetMilliTimestamp();
 		RecordPtr->LogContents = MakeSafeString(std::string{ TcpConnectionPtr->RequestLine.data() + TcpConnectionPtr->HeaderSize, TcpConnectionPtr->BodySize});
 		AddLogRecord(RecordPtr);
+    	TcpConnectionPtr->PostData("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", 97);
+		return true;
+	}
+
+	if (RequestLine.find(ClearLogRequestPath) == 0 && RequestLine[ClearLogRequestPath.length()] == ' ') {
+		ClearLogRecordList();
     	TcpConnectionPtr->PostData("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", 97);
 		return true;
 	}
