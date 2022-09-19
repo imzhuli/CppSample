@@ -59,8 +59,6 @@ ZEC_NS
         ZEC_INLINE std::enable_if_t<std::is_integral_v<tArg> && !std::is_pointer_v<tArg> && !std::is_same_v<tArg, bool>> Push(tArg Value) const { lua_pushinteger(_LuaStatePtr, (lua_Integer)Value); }
         template<typename tArg>
         ZEC_INLINE std::enable_if_t<std::is_floating_point_v<tArg>> Push(tArg Number) const { lua_pushnumber(_LuaStatePtr, Number); }
-        template<typename...Args>
-        ZEC_INLINE void PushFS(const char * FmtStr, Args&&...args) const { lua_pushfstring(_LuaStatePtr, FmtStr, std::forward<Args>(args)...); }
         template<typename tK, typename tV>
         ZEC_INLINE void Push(const std::pair<tK, tV> & KVPair) const {
             Push(KVPair.first);
@@ -85,12 +83,14 @@ ZEC_NS
                 lua_settable(_LuaStatePtr, -3);
             }
         }
-
         template<typename tFirstArg, typename...tOtherArgs>
         ZEC_INLINE std::enable_if_t<static_cast<bool>(sizeof...(tOtherArgs))> Push(tFirstArg&& FirstArg, tOtherArgs&&...args) const {
             Push(std::forward<tFirstArg>(FirstArg));
             Push(std::forward<tOtherArgs>(args)...);
         }
+
+        template<typename...Args>
+        ZEC_INLINE void PushFS(const char * FmtStr, Args&&...args) const { lua_pushfstring(_LuaStatePtr, FmtStr, std::forward<Args>(args)...); }
 
         template<typename...Args>
         [[nodiscard]]
