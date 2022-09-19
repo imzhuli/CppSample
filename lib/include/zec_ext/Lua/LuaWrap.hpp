@@ -61,12 +61,18 @@ ZEC_NS
         ZEC_INLINE std::enable_if_t<std::is_floating_point_v<tArg>> Push(tArg Number) const { lua_pushnumber(_LuaStatePtr, Number); }
         template<typename...Args>
         ZEC_INLINE void PushFS(const char * FmtStr, Args&&...args) const { lua_pushfstring(_LuaStatePtr, FmtStr, std::forward<Args>(args)...); }
+        template<typename tK, typename tV>
+        ZEC_INLINE void Push(const std::pair<tK, tV> & KVPair) const {
+            Push(KVPair.first);
+            Push(KVPair.second);
+        }
         template<typename T>
-        ZEC_INLINE void Push(const std::vector<T>& Record) const {
+        ZEC_INLINE void Push(const xIteratorRange<T> & Range) const {
             lua_newtable(_LuaStatePtr);
-            for (size_t i = 0 ; i < Record.size(); ++i) {
-                Push(i+1);
-                Push(Record[i]);
+            size_t Index = 0;
+            for (auto & Item : Range) {
+                Push(++Index);
+                Push(Item);
                 lua_settable(_LuaStatePtr, -3);
             }
         }

@@ -210,14 +210,23 @@ ZEC_NS
 
 		// Util classes:
 		template<typename IteratorType>
-		class xRange
+		class xIteratorRange
 		{
 			static_assert(!std::is_reference_v<IteratorType>);
 		public:
-			ZEC_INLINE xRange() = delete;
-			ZEC_INLINE constexpr xRange(const IteratorType & Begin, const IteratorType & End): _Begin(Begin), _End(End) {}
-			ZEC_INLINE constexpr xRange(const xRange &) = default;
-			ZEC_INLINE constexpr xRange & operator = (const xRange &) = default;
+			using iterator = IteratorType;
+
+			ZEC_INLINE xIteratorRange() = delete;
+			ZEC_INLINE constexpr xIteratorRange(const IteratorType & Begin, const IteratorType & End): _Begin(Begin), _End(End) {}
+			template<typename tContainer>
+			ZEC_INLINE constexpr xIteratorRange(tContainer & Container) : xIteratorRange(Container.begin(), Container.end()) {}
+			template<typename tContainer>
+			ZEC_INLINE constexpr xIteratorRange(tContainer && Container) : xIteratorRange(Container.begin(), Container.end()) {}
+
+			ZEC_INLINE constexpr xIteratorRange(const xIteratorRange &) = default;
+			ZEC_INLINE constexpr xIteratorRange(xIteratorRange &&) = default;
+			ZEC_INLINE constexpr xIteratorRange & operator = (const xIteratorRange &) = default;
+			ZEC_INLINE constexpr xIteratorRange & operator = (xIteratorRange &&) = default;
 
 			ZEC_INLINE constexpr IteratorType begin() const { return _Begin; }
 			ZEC_INLINE constexpr IteratorType end()   const { return _End; }
@@ -227,6 +236,10 @@ ZEC_NS
 			IteratorType _Begin;
 			IteratorType _End;
 		};
+		template<typename tWrapper>
+		xIteratorRange(const tWrapper&) -> xIteratorRange<typename tWrapper::iterator>;
+		template<typename tWrapper>
+		xIteratorRange(tWrapper&&) -> xIteratorRange<typename tWrapper::iterator>;
 
 		template<typename T>
 		class xRef final {

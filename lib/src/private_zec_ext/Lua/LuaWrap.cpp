@@ -4,9 +4,6 @@
 ZEC_NS
 {
 
-
-
-
     xLuaState::xLuaState()
     {
     #if LUA_VERSION_NUM >= 503

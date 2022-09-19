@@ -58,7 +58,7 @@ int main(int, char *[])
 
 	do {
 		LuaState.Call("print", 1, 2.5, "hello world!");
-		LuaState.SetGlobal("GT", std::vector<int>{11,12,13});
+		LuaState.SetGlobal("GT", xIteratorRange(std::vector<int>{11,12,13}));
 		LuaState.Execute("print(table.unpack(GT))");
 	} while(false);
 
