@@ -296,6 +296,7 @@ ZEC_NS
 		public:
 			[[nodiscard]] ZEC_INLINE xScopeGuard(const tEntry& Entry, const tExit& Exit) : _ExitCallback(Exit) { Entry(); }
 			[[nodiscard]] ZEC_INLINE xScopeGuard(const tExit& Exit) : _ExitCallback(Exit) {}
+    		[[nodiscard]] ZEC_INLINE xScopeGuard(xScopeGuard && Other) : _ExitCallback(Other._ExitCallback) { Other._DismissExit = true; }
 			ZEC_INLINE void Dismiss() { _DismissExit = true; }
 			ZEC_INLINE ~xScopeGuard() { if (_DismissExit) { return; } xRefCaster<tExit>::Get(_ExitCallback)(); }
 		};
@@ -303,6 +304,8 @@ ZEC_NS
 		xScopeGuard(const tEntry& Entry, const tExit& Exit) -> xScopeGuard<std::decay_t<tEntry>, std::decay_t<tExit>>;
 		template<typename tExit>
 		xScopeGuard(const tExit& Exit) -> xScopeGuard<xPass, std::decay_t<tExit>>;
+		template<typename tEntry, typename tExit>
+		xScopeGuard(xScopeGuard<tEntry, tExit> && Other) -> xScopeGuard<tEntry, tExit>;
 
 		namespace __common_detail__ {
 			template<bool IsAtomic = false>
