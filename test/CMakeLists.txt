@@ -45,6 +45,7 @@ endif()
 endfunction()
 
 #test lib:
+add_sub_test(_)
 add_sub_test(algorithm)
 add_sub_test(alignment)
 add_sub_test(cmd)
@@ -57,7 +58,6 @@ add_sub_test(rbtree)
 add_sub_test(uuid)
 #add_sub_test(thread)
 
-add_sub_buildonly(_)
 add_sub_buildonly(connection)
 
 add_test(

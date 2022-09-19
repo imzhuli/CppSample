@@ -296,7 +296,7 @@ ZEC_NS
 		public:
 			[[nodiscard]] ZEC_INLINE xScopeGuard(const tEntry& Entry, const tExit& Exit) : _ExitCallback(Exit) { Entry(); }
 			[[nodiscard]] ZEC_INLINE xScopeGuard(const tExit& Exit) : _ExitCallback(Exit) {}
-    		[[nodiscard]] ZEC_INLINE xScopeGuard(xScopeGuard && Other) : _ExitCallback(Other._ExitCallback) { Other._DismissExit = true; }
+    		[[nodiscard]] ZEC_INLINE xScopeGuard(xScopeGuard && Other) : _ExitCallback(Other._ExitCallback), _DismissExit(Steal(Other._DismissExit, true)) {}
 			ZEC_INLINE void Dismiss() { _DismissExit = true; }
 			ZEC_INLINE ~xScopeGuard() { if (_DismissExit) { return; } xRefCaster<tExit>::Get(_ExitCallback)(); }
 		};
