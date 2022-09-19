@@ -1,5 +1,6 @@
 #include <zec_ext/Lua/LuaWrap.hpp>
 #include <iostream>
+#include <map>
 
 using namespace zec;
 using namespace std;
@@ -58,8 +59,20 @@ int main(int, char *[])
 
 	do {
 		LuaState.Call("print", 1, 2.5, "hello world!");
+	} while(false);
+
+	do {
 		LuaState.SetGlobal("GT", xIteratorRange(std::vector<int>{11,12,13}));
 		LuaState.Execute("print(table.unpack(GT))");
+	} while(false);
+
+	do {
+		auto Map = std::map<std::string, std::string> {
+			{ "hello", "world" },
+			{ "k1", "v1"},
+		};
+		LuaState.SetGlobal("GD", xIteratorRange(Map));
+		LuaState.Execute("for k,v in pairs(GD) do print(k, v) end");
 	} while(false);
 
 	return 0;

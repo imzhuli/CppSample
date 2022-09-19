@@ -1,15 +1,23 @@
 project(test_${libname})
 
 # dependencies:
-set(shared_lib_dependency_private ${LightWebsockets_LIBRARIES})
+if (ZEC_OPTION_WITH_LUA)
+	find_package(Lua REQUIRED)
+endif()
 
 # local dependencies
 include_directories(
 	../lib/include/
 	../lib/src/
+	${LUA_INCLUDE_DIR}
 	)
 link_directories(
 	)
+set(shared_lib_dependency_private
+	${LightWebsockets_LIBRARIES}
+	${LUA_LIBRARIES}
+)
+
 
 function(add_sub_test sub_dir_name)
 	aux_source_directory(${sub_dir_name} LOCAL_SOURCE_CODE)
@@ -40,6 +48,9 @@ endfunction()
 add_sub_test(algorithm)
 add_sub_test(alignment)
 add_sub_test(cmd)
+if (ZEC_OPTION_WITH_LUA)
+	add_sub_test(lua)
+endif()
 add_sub_test(memlog)
 add_sub_test(optional)
 add_sub_test(rbtree)

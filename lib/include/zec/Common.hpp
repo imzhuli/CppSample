@@ -213,8 +213,16 @@ ZEC_NS
 		class xIteratorRange
 		{
 			static_assert(!std::is_reference_v<IteratorType>);
+			template<typename tIterator>
+			struct xIsPairReference : std::false_type {};
+			template<typename tK, typename tV>
+			struct xIsPairReference<std::pair<tK, tV> &> : std::true_type {};
+			template<typename tK, typename tV>
+			struct xIsPairReference<const std::pair<tK, tV> &> : std::true_type {};
+
 		public:
 			using iterator = IteratorType;
+			static constexpr const bool IsPairIterator = xIsPairReference<decltype(*std::declval<IteratorType>())>::value;
 
 			ZEC_INLINE xIteratorRange() = delete;
 			ZEC_INLINE constexpr xIteratorRange(const IteratorType & Begin, const IteratorType & End): _Begin(Begin), _End(End) {}

@@ -28,9 +28,6 @@ endfunction()
 #test lib:
 
 add_sub_sample(glm)
-if (ZEC_OPTION_WITH_LUA)
-	add_sub_sample(lua)
-endif()
 add_sub_sample(recent_logs)
 add_sub_sample(tcp_echo)
 add_sub_sample(udp_echo)

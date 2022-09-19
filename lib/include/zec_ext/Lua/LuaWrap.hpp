@@ -66,13 +66,22 @@ ZEC_NS
             Push(KVPair.first);
             Push(KVPair.second);
         }
-        template<typename T>
-        ZEC_INLINE void Push(const xIteratorRange<T> & Range) const {
+        template<typename tIter>
+        ZEC_INLINE std::enable_if_t<!xIteratorRange<tIter>::IsPairIterator> Push(const xIteratorRange<tIter> & Range) const {
             lua_newtable(_LuaStatePtr);
             size_t Index = 0;
             for (auto & Item : Range) {
                 Push(++Index);
                 Push(Item);
+                lua_settable(_LuaStatePtr, -3);
+            }
+        }
+        template<typename tIter>
+        ZEC_INLINE std::enable_if_t<xIteratorRange<tIter>::IsPairIterator> Push(const xIteratorRange<tIter> & Range) const {
+            lua_newtable(_LuaStatePtr);
+            for (auto & Item : Range) {
+                Push(Item.first);
+                Push(Item.second);
                 lua_settable(_LuaStatePtr, -3);
             }
         }
