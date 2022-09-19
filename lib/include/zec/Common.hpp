@@ -112,9 +112,9 @@ ZEC_NS
 		constexpr struct xGeneratorInit final {} GeneratorInit {};
 		constexpr struct xSizeInit final { size_t value; } ZeroSizeInit {};
 		constexpr struct xCapacityInit final { size_t value; } ZeroCapacityInit{};
-		
 
-		template<typename T1, typename T2>
+
+		template<typename T1, typename T2 = T1>
 		using xDiff = decltype(std::declval<T1>() - std::declval<T2>());
 		template<typename T1, typename T2> ZEC_INLINE constexpr auto Diff(const T1& Value, const T2& ComparedToValue) { return Value - ComparedToValue; }
 		template<typename T1, typename T2> ZEC_INLINE constexpr auto SignedDiff(const T1& Value, const T2& ComparedToValue) { return static_cast<std::make_signed_t<xDiff<T1, T2>>>(Value - ComparedToValue); }
@@ -145,17 +145,17 @@ ZEC_NS
 		template<typename T, typename TValue>
 		ZEC_STATIC_INLINE void
 		Reset(T& ExpiringTarget,  TValue && value) { ExpiringTarget = std::forward<TValue>(value); }
-		
+
 		template<typename T>
 		ZEC_STATIC_INLINE void
-		Renew(T& ExpiringTarget) { 
+		Renew(T& ExpiringTarget) {
 			ExpiringTarget.~T();
 			new ((void*)&ExpiringTarget) T;
 		}
 
 		template<typename T, typename...tArgs>
 		ZEC_STATIC_INLINE void
-		RenewValue(T& ExpiringTarget,  tArgs && ... Args) { 
+		RenewValue(T& ExpiringTarget,  tArgs && ... Args) {
 			ExpiringTarget.~T();
 			new ((void*)&ExpiringTarget) T {std::forward<tArgs>(Args)...};
 		}
@@ -209,6 +209,24 @@ ZEC_NS
 		X2Ptr(T && ref) { return &ref; }
 
 		// Util classes:
+		template<typename IteratorType>
+		class xRange
+		{
+			static_assert(!std::is_reference_v<IteratorType>);
+		public:
+			ZEC_INLINE xRange() = delete;
+			ZEC_INLINE constexpr xRange(const IteratorType & Begin, const IteratorType & End): _Begin(Begin), _End(End) {}
+			ZEC_INLINE constexpr xRange(const xRange &) = default;
+			ZEC_INLINE constexpr xRange & operator = (const xRange &) = default;
+
+			ZEC_INLINE constexpr IteratorType begin() const { return _Begin; }
+			ZEC_INLINE constexpr IteratorType end()   const { return _End; }
+			ZEC_INLINE constexpr auto size() const { return _End - _Begin; }
+
+		private:
+			IteratorType _Begin;
+			IteratorType _End;
+		};
 
 		template<typename T>
 		class xRef final {
@@ -320,7 +338,7 @@ ZEC_NS
 		};
 		template<typename T, typename ... tArgs>
 		xResourceGuard(T & Resource, tArgs&& ... Args) -> xResourceGuard<T>;
-		
+
 		template<typename T>
 		struct xResourceGuardThrowable final : __common_detail__::xResourceGuardBase<T, true> {
 			using __common_detail__::xResourceGuardBase<T, true>::xResourceGuardBase;
@@ -532,6 +550,6 @@ ZEC_NS
 
 }
 
-#ifndef ZEC_CATCH_NONE 
+#ifndef ZEC_CATCH_NONE
 #define ZEC_CATCH_NONE catch(const ::zec::xNonCatchable &)
 #endif
