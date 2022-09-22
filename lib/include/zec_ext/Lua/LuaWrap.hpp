@@ -16,7 +16,7 @@ ZEC_NS
         ZEC_INLINE ~xLuaStateWrapper() = default;
 
         ZEC_INLINE operator lua_State * () const { return _LuaStatePtr; }
-        ZEC_INLINE void GC() const { lua_gc(_LuaStatePtr, LUA_GCCOLLECT); }
+        ZEC_INLINE void GC() const { lua_gc(_LuaStatePtr, LUA_GCCOLLECT, 0); }
 
         ZEC_INLINE bool LoadString(const char * CodeStr) {
             return LUA_OK == luaL_loadstring(_LuaStatePtr, CodeStr);
