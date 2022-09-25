@@ -150,7 +150,7 @@
 
 #if defined(ANDROID_PACKAGE_CNAME)
 #	define _ZEC_ANDROID_API(ClassFuncName, ReturnType) \
-		extern "C" JNIEXPORT ReturnType JNICALL ZEC_ANDROID_API__FUNC_NAME(ANDROID_PACKAGE_CNAME, ClassFuncName)
+		ZEC_CNAME JNIEXPORT ReturnType JNICALL ZEC_ANDROID_API__FUNC_NAME(ANDROID_PACKAGE_CNAME, ClassFuncName)
 #	define ZEC_ANDROID_API(ClassName, FuncName, ReturnType) _ZEC_ANDROID_API(ClassName ## _ ## FuncName, ReturnType)
 #	endif
 #endif
