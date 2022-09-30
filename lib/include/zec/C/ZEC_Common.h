@@ -29,6 +29,7 @@
 	#	error "Unknown Apple platform"
 	#endif
 #elif defined(__ANDROID_API__)
+	#define ZEC_SYSTEM_LINUX
 	#define ZEC_SYSTEM_ANDROID
 #elif __linux__
 	// linux
