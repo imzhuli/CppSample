@@ -59,9 +59,6 @@ aux_source_directory(./src/private_zec_game/Window                 ZEC_SRC)
 
 # C version utils:
 aux_source_directory(./src/private_zec/C                           ZEC_SRC)
-aux_source_directory(./src/private_zec_ext/C                       ZEC_SRC)
-aux_source_directory(./src/private_zec_ext/C/Net                   ZEC_SRC)
-aux_source_directory(./src/private_zec_ext/C/CppCompat             ZEC_SRC)
 
 
 if (ZEC_OPTION_STATIC)

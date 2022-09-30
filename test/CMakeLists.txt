@@ -54,7 +54,6 @@ if (ZEC_OPTION_WITH_LUA)
 endif()
 add_sub_test(memlog)
 add_sub_test(optional)
-add_sub_test(rbtree)
 add_sub_test(uuid)
 #add_sub_test(thread)
 
