@@ -42,7 +42,7 @@ int main(int argc, char * argv[])
 		xNetAddress::Parse(*OptIp),
 		xNetAddress::Parse(*OptIp)
 	}, &TestListener);
-	Pool.Check(GetMilliTimestamp());
+	Pool.Check(GetTimestampMS());
 
 	std::string Request = "GET / HTTP/1.1\r\nUser-Agent: zec-test/1.0\r\n\r\n";
 	cout << "Request:" << endl;
@@ -53,7 +53,7 @@ int main(int argc, char * argv[])
 	xTimer Timer;
 	while(!Timer.TestAndTag(3s)) {
 		IoContext.LoopOnce(100);
-		Pool.Check(GetMilliTimestamp());
+		Pool.Check(GetTimestampMS());
 	}
 	cout << TestListener.Text << endl;
 

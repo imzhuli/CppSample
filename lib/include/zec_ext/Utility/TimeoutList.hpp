@@ -29,7 +29,7 @@ ZEC_NS
     public:
         template<typename tCallback>
         ZEC_INLINE void PopTimeoutNodes(uint64_t TimeoutMS, tCallback && Callback) {
-            uint64_t Now = GetMilliTimestamp();
+            uint64_t Now = GetTimestampMS();
             for(auto & Node : _TimeoutList) {
                 if ((Now - Node._TimestampMS) <= TimeoutMS) {
                     break;
@@ -49,7 +49,7 @@ ZEC_NS
 
         ZEC_INLINE void PushBack(xTimeoutNode & Node, xVariable UserContext = {})
         {
-            Node._TimestampMS = GetMilliTimestamp();
+            Node._TimestampMS = GetTimestampMS();
             Node._UserContext = UserContext;
             _TimeoutList.GrabTail(Node);
         };

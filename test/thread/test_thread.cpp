@@ -11,21 +11,21 @@ int main(int, char **)
     xEvent ev;
 
     auto t0 = thread{[&]{
-        ev.Wait([]{ cout << "Wait_0(" << GetMilliTimestamp() << ")" << endl; });
+        ev.Wait([]{ cout << "Wait_0(" << GetTimestampMS() << ")" << endl; });
     }};
 
     auto t1 = thread{[&]{
         ev.Wait(
-            []{ cout << "Wait_1_Pre(" << GetMilliTimestamp() << ")" << endl; },
-            []{ cout << "Wait_1_Post(" << GetMilliTimestamp() << ")" << endl;}
+            []{ cout << "Wait_1_Pre(" << GetTimestampMS() << ")" << endl; },
+            []{ cout << "Wait_1_Post(" << GetTimestampMS() << ")" << endl;}
         );
     }};
 
     auto t2 = thread{[&]{
         if (!ev.WaitFor(
             1s,
-            []{ cout << "WaitFor_2_Pre(" << GetMilliTimestamp() << ")" << endl; },
-            []{ cout << "WaittFor_2_Post(" << GetMilliTimestamp() << ")" << endl;}
+            []{ cout << "WaitFor_2_Pre(" << GetTimestampMS() << ")" << endl; },
+            []{ cout << "WaittFor_2_Post(" << GetTimestampMS() << ")" << endl;}
         )) {
             cout << "WaitFor_2_Timeout" << endl;
         }

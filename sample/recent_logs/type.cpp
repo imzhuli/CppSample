@@ -45,7 +45,7 @@ void xCheckHttpServer::SetLogRequestPath(const std::string & Path)
 
 void xCheckHttpServer::OnNewConnection(xTcpServer * TcpServerPtr, xIoHandle NativeHandle)
 {
-	uint64_t NowMS = GetMilliTimestamp();
+	uint64_t NowMS = GetTimestampMS();
     xCheckHttpConnection * ConnectionPtr = new (std::nothrow) xCheckHttpConnection();
     if (!ConnectionPtr) {
         return;
@@ -136,7 +136,7 @@ bool xCheckHttpServer::OnConnectionRequest(xCheckHttpConnection * TcpConnectionP
 	}
 	if (RequestLine.find(PostLogRequestPath) == 0 && RequestLine[PostLogRequestPath.length()] == ' ' && TcpConnectionPtr->BodySize) {
 		xLogRecord * RecordPtr = new xLogRecord;
-		RecordPtr->ServerTimeMS = GetMilliTimestamp();
+		RecordPtr->ServerTimeMS = GetTimestampMS();
 		RecordPtr->LogContents = MakeSafeString(std::string{ TcpConnectionPtr->RequestLine.data() + TcpConnectionPtr->HeaderSize, TcpConnectionPtr->BodySize});
 		AddLogRecord(RecordPtr);
     	TcpConnectionPtr->PostData("HTTP/1.1 200 OK\r\nContent-Type: application/octet-stream\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", 97);
@@ -154,7 +154,7 @@ bool xCheckHttpServer::OnConnectionRequest(xCheckHttpConnection * TcpConnectionP
 
 void xCheckHttpServer::Shrink()
 {
-	uint64_t NowMS = GetMilliTimestamp();
+	uint64_t NowMS = GetTimestampMS();
     auto KillTimepoint = NowMS - CheckHttpRequestTimeoutMS;
     for (auto & Iter : TimeoutList) {
         auto & Connection = (xCheckHttpConnection&)Iter;

@@ -7,7 +7,7 @@ ZEC_NS
 
 	uint32_t xIndexId::TimeSeed()
 	{
-		return static_cast<uint32_t>(GetMicroTimestamp());
+		return static_cast<uint32_t>(GetTimestampUS());
 	}
 
 }

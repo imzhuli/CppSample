@@ -39,7 +39,7 @@ namespace {
 #if __cplusplus < 202002L
 ZEC_NS
 {
-	uint64_t GetMicroTimestamp() {
+	uint64_t GetTimestampUS() {
 		return Internal_MicroTimestamp();
 	}
 }

@@ -21,16 +21,16 @@ ZEC_NS
 	using xNanoSeconds    = std::chrono::nanoseconds;
 
 #if __cplusplus < 202002L
-	ZEC_API uint64_t GetMicroTimestamp();
+	ZEC_API uint64_t GetTimestampUS();
 #else
-	ZEC_INLINE uint64_t GetMicroTimestamp() {
+	ZEC_INLINE uint64_t GetTimestampUS() {
 		return std::chrono::duration_cast<std::chrono::microseconds>(
 			std::chrono::system_clock::now().time_since_epoch()
 		).count();
 	}
 #endif
-	ZEC_INLINE uint64_t GetMilliTimestamp() { return GetMicroTimestamp() / 1000; }
-	ZEC_INLINE uint64_t GetTimestamp()      { return GetMicroTimestamp() / 1000000; }
+	ZEC_INLINE uint64_t GetTimestampMS() { return GetTimestampUS() / 1000; }
+	ZEC_INLINE uint64_t GetTimestamp()   { return GetTimestampUS() / 1000000; }
 
 	class xTimer
 	{
