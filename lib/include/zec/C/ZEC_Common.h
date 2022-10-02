@@ -56,9 +56,14 @@
 #endif
 
 #if defined(_MSC_VER)
+
 	#ifndef NOMINMAX
 		#define NOMINMAX
 	#endif
+
+	#define ZEC_LIKELY(x)                    (x))
+	#define ZEC_UNLIKELY(x)                  (x))
+	#define ZEC_PRINTF_LIKE(a, b)
 
 	#define ZEC_INLINE                       __forceinline
 	#define ZEC_STATIC_INLINE                static __forceinline
@@ -76,7 +81,13 @@
 	#define ZEC_IMPORT                       __declspec(dllimport) extern
 	#define ZEC_IMPORT_MEMBER                __declspec(dllimport)
 	#define ZEC_IMPORT_STATIC_MEMBER         __declspec(dllimport) static
+
 #elif defined(__clang__) || defined(__GNUC__)
+
+	#define ZEC_LIKELY(x)                    __builtin_expect(!!(x), 1)
+	#define ZEC_UNLIKELY(x)                  __builtin_expect(!!(x), 0)
+	#define ZEC_PRINTF_LIKE(f, a)            __attribute__((format(printf, f, a)))
+
 	#define ZEC_INLINE                       __attribute__((always_inline)) inline
 	#define ZEC_STATIC_INLINE                __attribute__((always_inline)) static inline
 
@@ -93,6 +104,7 @@
 	#define ZEC_IMPORT                       extern
 	#define ZEC_IMPORT_MEMBER
 	#define ZEC_IMPORT_STATIC_MEMBER         static
+
 #else
 	#error "Unsupported compiler"
 #endif
