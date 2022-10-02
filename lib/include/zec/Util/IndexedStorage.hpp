@@ -177,6 +177,14 @@ ZEC_NS
 		ZEC_INLINE void Clean()
 		{
 			assert(_IdPoolPtr);
+			for (size_t i = 0 ; i < _InitedId; ++i) {
+				auto & Key = _IdPoolPtr[i];
+				if (!(Key & xIndexId::KeyInUseBitmask)) {
+					continue;
+				}
+				auto & Value = _StoragePtr[i];
+				_StoragePtr[Index].~tValue();
+			}
 			delete [] reinterpret_cast<ubyte*>(Steal(_StoragePtr));
 			delete [] Steal(_IdPoolPtr);
 			_InitedId = 0;
@@ -187,7 +195,7 @@ ZEC_NS
 		ZEC_INLINE xIndexId Acquire(const tValue & Value) {
 			uint32_t Index;
 			if (_NextFreeIdIndex == InvalidIndex) {
-				if (_InitedId >= _IdPoolSize) {
+				if (ZEC_UNLIKELY(_InitedId >= _IdPoolSize)) {
 					return xIndexId::InvalidValue;
 				}
 				Index = _InitedId++;
