@@ -17,12 +17,13 @@ ZEC_NS
 	 *        and the higher 32 bit with random value as a check key
 	 * @note
 	 *    for pooled use,
-	 *      the highest bit in Index part and is always zero,
-	 *      the highest bit in Key part is always one (aka: KeyInUseBitmask == 0x8000'0000u),
+	 *      the highest 2 bits in Index part and is always zero,
+	 *      the second highest bit in Key part is always one (aka: KeyInUseBitmask == 0x4000'0000u),
 	 *      so the id pool could use one 32bit integer to store an index to next free node in chain
 	 *      while the index itself is free, or a key value with KeyInUseBitmask set while the index is in use;
 	 *    Especially, since all allocated index has KeyInUseBitmask set to 1, a valid index id is never zero;
-	 *    KeyMask is used to remove the second highest bit of the key, so that key never matches InvalidIndex, which might be used for attacking
+	 *    The highest bit of Key is always zero, so that a valid key is never (uint32_t)-1, which matches NoFreeIndex indicator in id pool,
+	 *    KeyMask is used to remove the second highest bit of the key, so that key never matches NoFreeIndex, which might be used for attacking
 	 * */
 	class xIndexId final
 	{
@@ -45,9 +46,10 @@ ZEC_NS
 		friend class xIndexedStorage;
 
 		ZEC_API_STATIC_MEMBER uint32_t TimeSeed();
-		static constexpr const uint32_t MaxIndexValue   = ((uint32_t)0x3FFF'FFFFu);
-		static constexpr const uint32_t KeyMask         = ((uint32_t)0xCFFF'FFFFu);
-		static constexpr const uint32_t KeyInUseBitmask = ((uint32_t)0x8000'0000u);
+		static constexpr const uint32_t MaxIndexValue    = ((uint32_t)0x3FFF'FFFFu);
+		static constexpr const uint32_t KeyInUseBitmask  = ((uint32_t)0x4000'0000u);
+		static constexpr const uint32_t KeyMask          = MaxIndexValue | KeyInUseBitmask;
+		ZEC_STATIC_INLINE bool IsSafeKey(uint32_t Key) { return ZEC_LIKELY(Key != (uint32_t)-1); }
 	};
 
 	template<bool RandomKey>
@@ -59,13 +61,13 @@ ZEC_NS
 		{
 			assert(Size <= xIndexId::MaxIndexValue);
 			assert(_IdPoolPtr == nullptr);
-			assert(_NextFreeIdIndex == InvalidIndex);
+			assert(_NextFreeIdIndex == NoFreeIndex);
 			assert(_InitedId == 0);
 
 			_IdPoolPtr = new uint32_t[Size];
 			_IdPoolSize = (size32_t)Size;
 			_InitedId = 0;
-			_NextFreeIdIndex = InvalidIndex;
+			_NextFreeIdIndex = NoFreeIndex;
 
 		    _Counter = xIndexId::TimeSeed();
 			_Random32.seed(_Counter);
@@ -86,12 +88,12 @@ ZEC_NS
 			delete [] Steal(_IdPoolPtr);
 			_InitedId = 0;
 			_IdPoolSize = 0;
-			_NextFreeIdIndex = InvalidIndex;
+			_NextFreeIdIndex = NoFreeIndex;
 		}
 
 		ZEC_INLINE xIndexId Acquire() {
 			uint32_t Index;
-			if (_NextFreeIdIndex == InvalidIndex) {
+			if (_NextFreeIdIndex == NoFreeIndex) {
 				if (_InitedId >= _IdPoolSize) {
 					return xIndexId::InvalidValue;
 				}
@@ -117,7 +119,7 @@ ZEC_NS
 				return false;
 			}
 			auto Key = Id.GetKey();
-			return ZEC_LIKELY(Key & xIndexId::KeyInUseBitmask) && ZEC_LIKELY(Key == _IdPoolPtr[Index]);
+			return ZEC_LIKELY(xIndexId::IsSafeKey(Key)) && ZEC_LIKELY(Key == _IdPoolPtr[Index]);
 		}
 
 		ZEC_INLINE bool CheckAndRelease(const xIndexId& Id) {
@@ -126,7 +128,7 @@ ZEC_NS
 				return false;
 			}
 			auto Key = Id.GetKey();
-			if(!ZEC_LIKELY(Key & xIndexId::KeyInUseBitmask) || !ZEC_LIKELY(Key == _IdPoolPtr[Index])) {
+			if(!ZEC_LIKELY(xIndexId::IsSafeKey(Key)) || !ZEC_LIKELY(Key == _IdPoolPtr[Index])) {
 				return false;
 			}
 			_IdPoolPtr[Index] = Steal(_NextFreeIdIndex, Index);
@@ -137,11 +139,11 @@ ZEC_NS
 		size32_t      _InitedId   = 0;
 		size32_t      _IdPoolSize = 0;
 		uint32_t*     _IdPoolPtr  = nullptr;
-		uint32_t      _NextFreeIdIndex = InvalidIndex;
+		uint32_t      _NextFreeIdIndex = NoFreeIndex;
 		uint32_t      _Counter = 0;
 		std::mt19937  _Random32;
 		static constexpr const uint32_t CounterStep = 1;
-		static constexpr const uint32_t InvalidIndex = static_cast<uint32_t>(-1);
+		static constexpr const uint32_t NoFreeIndex = static_cast<uint32_t>(-1);
 	};
 
 	template<typename tValue, bool RandomKey>
@@ -161,13 +163,13 @@ ZEC_NS
 		{
 			assert(Size <= xIndexId::MaxIndexValue);
 			assert(_IdPoolPtr == nullptr);
-			assert(_NextFreeIdIndex == InvalidIndex);
+			assert(_NextFreeIdIndex == NoFreeIndex);
 			assert(_InitedId == 0);
 
 			_IdPoolPtr = new xNode[Size];
 			_IdPoolSize = (size32_t)Size;
 			_InitedId = 0;
-			_NextFreeIdIndex = InvalidIndex;
+			_NextFreeIdIndex = NoFreeIndex;
 
 		    _Counter = xIndexId::TimeSeed();
 			_Random32.seed(_Counter);
@@ -195,13 +197,13 @@ ZEC_NS
 			delete [] Steal(_IdPoolPtr);
 			_InitedId = 0;
 			_IdPoolSize = 0;
-			_NextFreeIdIndex = InvalidIndex;
+			_NextFreeIdIndex = NoFreeIndex;
 		}
 
 		ZEC_INLINE xIndexId Acquire(const tValue & Value) {
 			uint32_t Index;
 			xNode * NodePtr;
-			if (_NextFreeIdIndex == InvalidIndex) {
+			if (_NextFreeIdIndex == NoFreeIndex) {
 				if (ZEC_UNLIKELY(_InitedId >= _IdPoolSize)) {
 					return xIndexId::InvalidValue;
 				}
@@ -225,7 +227,7 @@ ZEC_NS
 		ZEC_INLINE xIndexId Acquire(tValue && Value = {}) {
 			uint32_t Index;
 			xNode * NodePtr;
-			if (_NextFreeIdIndex == InvalidIndex) {
+			if (_NextFreeIdIndex == NoFreeIndex) {
 				if (_InitedId >= _IdPoolSize) {
 					return xIndexId::InvalidValue;
 				}
@@ -260,7 +262,7 @@ ZEC_NS
 			}
 			auto Key = Id.GetKey();
 			auto & Node = _IdPoolPtr[Index];
-			return ZEC_LIKELY(Key & xIndexId::KeyInUseBitmask) && ZEC_LIKELY(Key == Node.Key);
+			return ZEC_LIKELY(xIndexId::IsSafeKey(Key)) && ZEC_LIKELY(Key == Node.Key);
 		}
 
 		ZEC_INLINE xOptional<xRef<tValue>> CheckAndGet(const xIndexId& Id) {
@@ -270,7 +272,7 @@ ZEC_NS
 			}
 			auto Key = Id.GetKey();
 			auto & Node = _IdPoolPtr[Index];
-			if (!ZEC_LIKELY(Key & xIndexId::KeyInUseBitmask) || !ZEC_LIKELY(Key == Node.Key)) {
+			if (!ZEC_LIKELY(xIndexId::IsSafeKey(Key)) || !ZEC_LIKELY(Key == Node.Key)) {
 				return {};
 			}
 			return *Node.ValueHolder;
@@ -323,10 +325,10 @@ ZEC_NS
 		xNode *       _IdPoolPtr  = nullptr;
 		size32_t      _IdPoolSize = 0;
 		size32_t      _InitedId   = 0;
-		uint32_t      _NextFreeIdIndex = InvalidIndex;
+		uint32_t      _NextFreeIdIndex = NoFreeIndex;
 		uint32_t      _Counter = 0;
 		std::mt19937  _Random32;
-		static constexpr const uint32_t InvalidIndex = static_cast<uint32_t>(-1);
+		static constexpr const uint32_t NoFreeIndex = static_cast<uint32_t>(-1);
 		static constexpr const uint32_t CounterStep = 1;
 	};
 
