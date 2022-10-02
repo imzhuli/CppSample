@@ -285,7 +285,7 @@ ZEC_NS
 			}
 			auto Key = Id.GetKey();
 			auto Node = _IdPoolPtr[Index];
-			if(!ZEC_LIKELY(Key == Node.Key)) {
+			if(!ZEC_LIKELY(xIndexId::IsSafeKey(Key)) || !ZEC_LIKELY(Key == Node.Key)) {
 				return {};
 			}
 			return *Node.ValueHolder;
@@ -298,7 +298,7 @@ ZEC_NS
 			}
 			auto Key = Id.GetKey();
 			auto Node = _IdPoolPtr[Index];
-			if(!ZEC_LIKELY(Key == Node.Key)) {
+			if(!ZEC_LIKELY(xIndexId::IsSafeKey(Key)) || !ZEC_LIKELY(Key == Node.Key)) {
 				return {};
 			}
 			auto DeferredRelese = xScopeGuard{[&](){
