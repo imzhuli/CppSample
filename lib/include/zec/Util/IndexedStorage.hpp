@@ -177,12 +177,12 @@ ZEC_NS
 		ZEC_INLINE void Clean()
 		{
 			assert(_IdPoolPtr);
-			for (size_t i = 0 ; i < _InitedId; ++i) {
-				auto & Key = _IdPoolPtr[i];
+			for (size_t Index = 0 ; Index < _InitedId; ++Index) {
+				auto & Key = _IdPoolPtr[Index];
 				if (!(Key & xIndexId::KeyInUseBitmask)) {
 					continue;
 				}
-				auto & Value = _StoragePtr[i];
+				auto & Value = _StoragePtr[Index];
 				_StoragePtr[Index].~tValue();
 			}
 			delete [] reinterpret_cast<ubyte*>(Steal(_StoragePtr));
@@ -272,7 +272,6 @@ ZEC_NS
 		ZEC_INLINE void Set(const xIndexId& Id, tAssignValue && Value) {
 			_StoragePtr[Id.GetIndex()] = std::forward<tAssignValue>(Value);
 		}
-
 
 	private:
 		size32_t      _InitedId   = 0;
