@@ -110,17 +110,20 @@ ZEC_NS
 
 		ZEC_INLINE bool Check(const xIndexId& Id) {
 			uint32_t Index = Id.GetIndex();
-			if (Index >= _IdPoolSize) {
+			if (!ZEC_LIKELY(Index < _IdPoolSize)) {
 				return false;
 			}
 			auto Key = Id.GetKey();
-			return (Key & xIndexId::KeyInUseBitmask) && (Key == _IdPoolPtr[Index]);
+			return ZEC_LIKELY(Key & xIndexId::KeyInUseBitmask) && ZEC_LIKELY(Key == _IdPoolPtr[Index]);
 		}
 
 		ZEC_INLINE bool CheckAndRelease(const xIndexId& Id) {
 			uint32_t Index = Id.GetIndex();
+			if (!ZEC_LIKELY(Index < _IdPoolSize)) {
+				return false;
+			}
 			auto Key = Id.GetKey();
-			if (Index >= _IdPoolSize || !(Key & xIndexId::KeyInUseBitmask) ||  Key != _IdPoolPtr[Index]) {
+			if(!ZEC_LIKELY(Key & xIndexId::KeyInUseBitmask) || !ZEC_LIKELY(Key == _IdPoolPtr[Index])) {
 				return false;
 			}
 			_IdPoolPtr[Index] = Steal(_NextFreeIdIndex, Index);
@@ -221,11 +224,11 @@ ZEC_NS
 
 		ZEC_INLINE bool Check(const xIndexId& Id) {
 			uint32_t Index = Id.GetIndex();
-			if (Index >= _IdPoolSize) {
+			if (!ZEC_LIKELY(Index < _IdPoolSize)) {
 				return false;
 			}
 			auto Key = Id.GetKey();
-			return (Key & xIndexId::KeyInUseBitmask) && (Key == _IdPoolPtr[Index]);
+			return ZEC_LIKELY(Key & xIndexId::KeyInUseBitmask) && ZEC_LIKELY(Key == _IdPoolPtr[Index]);
 		}
 
 		ZEC_INLINE xOptional<xRef<const tValue>> CheckAndGet(const xIndexId& Id) const {
@@ -239,8 +242,11 @@ ZEC_NS
 
 		ZEC_INLINE xOptional<tValue> CheckAndRelease(const xIndexId& Id) const {
 			uint32_t Index = Id.GetIndex();
+			if (!ZEC_LIKELY(Index < _IdPoolSize)) {
+				return {};
+			}
 			auto Key = Id.GetKey();
-			if (Index >= _IdPoolSize || !(Key & xIndexId::KeyInUseBitmask) || Key != _IdPoolPtr[Index]) {
+			if(!ZEC_LIKELY(Key & xIndexId::KeyInUseBitmask) || !ZEC_LIKELY(Key == _IdPoolPtr[Index])) {
 				return {};
 			}
 			auto DeferredRelese = xScopeGuard{[&](){
