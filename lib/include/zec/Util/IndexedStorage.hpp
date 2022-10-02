@@ -22,6 +22,7 @@ ZEC_NS
 	 *      so the id pool could use one 32bit integer to store an index to next free node in chain
 	 *      while the index itself is free, or a key value with KeyInUseBitmask set while the index is in use;
 	 *    Especially, since all allocated index has KeyInUseBitmask set to 1, a valid index id is never zero;
+	 *    KeyMask is used to remove the second highest bit of the key, so that key never matches InvalidIndex, which might be used for attacking
 	 * */
 	class xIndexId final
 	{
@@ -44,8 +45,9 @@ ZEC_NS
 		friend class xIndexedStorage;
 
 		ZEC_API_STATIC_MEMBER uint32_t TimeSeed();
-		static constexpr const uint32_t MaxIndexValue = static_cast<uint32_t>(0x7FFF'FFFFu);
-		static constexpr const uint32_t KeyInUseBitmask = 0x8000'0000u;
+		static constexpr const uint32_t MaxIndexValue   = ((uint32_t)0x3FFF'FFFFu);
+		static constexpr const uint32_t KeyMask         = ((uint32_t)0xCFFF'FFFFu);
+		static constexpr const uint32_t KeyInUseBitmask = ((uint32_t)0x8000'0000u);
 	};
 
 	template<bool RandomKey>
@@ -97,7 +99,9 @@ ZEC_NS
 			} else {
 				Index = Steal(_NextFreeIdIndex, _IdPoolPtr[_NextFreeIdIndex]);
 			}
-			uint32_t Rand = (RandomKey ? _Random32() : (_Counter += CounterStep)) | xIndexId::KeyInUseBitmask;
+			uint32_t Rand = RandomKey ? _Random32() : (_Counter += CounterStep);
+			Rand |= xIndexId::KeyInUseBitmask;
+			Rand &= xIndexId::KeyMask;
 			_IdPoolPtr[Index] = Rand;
 			return { (static_cast<uint64_t>(Rand) << 32) + Index };
 		}
@@ -205,7 +209,9 @@ ZEC_NS
 			} else {
 				NodePtr = &_IdPoolPtr[Index = Steal(_NextFreeIdIndex, _IdPoolPtr[_NextFreeIdIndex].NextFreeIdIndex)];
 			}
-			uint32_t Rand = (RandomKey ? _Random32() : (_Counter += CounterStep)) | xIndexId::KeyInUseBitmask;
+			uint32_t Rand = RandomKey ? _Random32() : (_Counter += CounterStep);
+			Rand |= xIndexId::KeyInUseBitmask;
+			Rand &= xIndexId::KeyMask;
 			NodePtr->Key = Rand;
 			try {
 				NodePtr->ValueHolder.CreateValue(Value);
@@ -227,7 +233,9 @@ ZEC_NS
 			} else {
 				NodePtr = &_IdPoolPtr[Index = Steal(_NextFreeIdIndex, _IdPoolPtr[_NextFreeIdIndex].NextFreeIdIndex)];
 			}
-			uint32_t Rand = (RandomKey ? _Random32() : (_Counter += CounterStep)) | xIndexId::KeyInUseBitmask;
+			uint32_t Rand = RandomKey ? _Random32() : (_Counter += CounterStep);
+			Rand |= xIndexId::KeyInUseBitmask;
+			Rand &= xIndexId::KeyMask;
 			NodePtr->Key = Rand ;
 			try {
 				NodePtr->ValueHolder.CreateValue(std::move(Value));
