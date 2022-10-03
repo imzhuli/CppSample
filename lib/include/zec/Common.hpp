@@ -176,6 +176,12 @@ ZEC_NS
 			return ret;
 		}
 
+		template<typename T>
+		void * AddressOf(T & target) {
+			using UnderlyingType = typename std::conditional<std::is_const<T>::value, const unsigned char, unsigned char>::type;
+			return &reinterpret_cast<UnderlyingType &>(target);
+		}
+
 		template<typename T, size_t L>
 		[[nodiscard]] ZEC_STATIC_INLINE constexpr size_t
 		Length(const T(&)[L]) { return L; }
