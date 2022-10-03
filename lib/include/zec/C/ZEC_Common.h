@@ -184,6 +184,6 @@ ZEC_STATIC_INLINE void * ZEC_Cast(void * MemberPtr, size_t MemberOffset)
 	}
     return (void*)((unsigned char*)MemberPtr - MemberOffset);
 }
-#define ZEC_Entry(_MemberPtr, Type, Member) ((Type*)(X_Cast((_MemberPtr), offsetof(Type, Member))))
+#define ZEC_Entry(_MemberPtr, Type, Member) ((Type*)(ZEC_Cast((_MemberPtr), offsetof(Type, Member))))
 
 ZEC_CNAME_END

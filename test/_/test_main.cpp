@@ -24,6 +24,12 @@ struct A
 		return nullptr;
 	}
 };
+struct B
+{
+	int a;
+	int b;
+	int c;
+};
 
 #define Assert(cond) if (!(cond)) { cerr << "assertion:( " #cond " ) failed" << endl; exit(-1); }
 
@@ -36,7 +42,14 @@ void TestAddressOf()
 	Assert(Address != &static_cast<const unsigned char &>(a));
 	Assert(Address == &reinterpret_cast<const unsigned char &>(a));
 	Assert((ZEC_AddressOf)(a) == Address);
+
+
+	B b;
+	auto Address_B = AddressOf(b);
+	Assert(Address_B == ZEC_Entry(ZEC_AddressOf(b.c), B, c));
 }
+
+
 
 int main(int, char **)
 {
