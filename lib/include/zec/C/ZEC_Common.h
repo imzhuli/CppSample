@@ -173,3 +173,17 @@
 #include <stdint.h>
 #include <stdbool.h>
 #include <assert.h>
+
+ZEC_CNAME_BEGIN
+
+#define ZEC_AddressOf(T) (&(T))
+ZEC_STATIC_INLINE void * ZEC_Cast(void * MemberPtr, size_t MemberOffset)
+{
+	if (!MemberPtr) {
+		return NULL;
+	}
+    return (void*)((unsigned char*)MemberPtr - MemberOffset);
+}
+#define ZEC_Entry(_MemberPtr, Type, Member) ((Type*)(X_Cast((_MemberPtr), offsetof(Type, Member))))
+
+ZEC_CNAME_END
