@@ -61,8 +61,8 @@
 		#define NOMINMAX
 	#endif
 
-	#define ZEC_LIKELY(x)                    (x))
-	#define ZEC_UNLIKELY(x)                  (x))
+	#define ZEC_LIKELY(x)                    (x)
+	#define ZEC_UNLIKELY(x)                  (x)
 	#define ZEC_PRINTF_LIKE(a, b)
 
 	#define ZEC_INLINE                       __forceinline

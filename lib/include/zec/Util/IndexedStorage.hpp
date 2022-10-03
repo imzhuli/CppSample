@@ -153,7 +153,7 @@ ZEC_NS
 		static_assert(!std::is_reference_v<tValue> && !std::is_const_v<tValue> && std::is_copy_constructible_v<tValue>);
 		struct xNode {
 			union {
-				uint32_t NextFreeIndex;
+				uint32_t NextFreeIdIndex;
 				uint32_t Key;
 			};
 			xHolder<tValue> ValueHolder;
@@ -218,7 +218,7 @@ ZEC_NS
 			try {
 				NodePtr->ValueHolder.CreateValue(Value);
 			} catch (...) {
-				NodePtr->Index = Steal(_NextFreeIdIndex, Index);
+				NodePtr->NextFreeIdIndex = Steal(_NextFreeIdIndex, Index);
 				throw;
 			}
 			return { (static_cast<uint64_t>(Rand) << 32) + Index };
@@ -242,7 +242,7 @@ ZEC_NS
 			try {
 				NodePtr->ValueHolder.CreateValue(std::move(Value));
 			} catch (...) {
-				NodePtr->Index = Steal(_NextFreeIdIndex, Index);
+				NodePtr->NextFreeIdIndex = Steal(_NextFreeIdIndex, Index);
 				throw;
 			}
 			return { (static_cast<uint64_t>(Rand) << 32) + Index };
@@ -251,7 +251,7 @@ ZEC_NS
 		ZEC_INLINE void Release(const xIndexId& Id) {
 			uint32_t Index = Id.GetIndex();
 			auto & Node = _IdPoolPtr[Index];
-			Node.NextFreeIndex = Steal(_NextFreeIdIndex, Index);
+			Node.NextFreeIdIndex = Steal(_NextFreeIdIndex, Index);
 			Node.ValueHolder.Destroy();
 		}
 
@@ -268,7 +268,7 @@ ZEC_NS
 		ZEC_INLINE xOptional<xRef<tValue>> CheckAndGet(const xIndexId& Id) {
 			uint32_t Index = Id.GetIndex();
 			if (!ZEC_LIKELY(Index < _IdPoolSize)) {
-				return false;
+				return {};
 			}
 			auto Key = Id.GetKey();
 			auto & Node = _IdPoolPtr[Index];
@@ -291,20 +291,20 @@ ZEC_NS
 			return *Node.ValueHolder;
 		}
 
-		ZEC_INLINE xOptional<tValue> CheckAndRelease(const xIndexId& Id) const {
+		ZEC_INLINE xOptional<tValue> CheckAndRelease(const xIndexId& Id) {
 			uint32_t Index = Id.GetIndex();
 			if (!ZEC_LIKELY(Index < _IdPoolSize)) {
 				return {};
 			}
 			auto Key = Id.GetKey();
-			auto Node = _IdPoolPtr[Index];
+			auto & Node = _IdPoolPtr[Index];
 			if(!ZEC_LIKELY(xIndexId::IsSafeKey(Key)) || !ZEC_LIKELY(Key == Node.Key)) {
 				return {};
 			}
 			auto DeferredRelese = xScopeGuard{[&](){
 				Node.ValueHolder.Destroy();
 			}};
-			Node.NextFreeIndex = Steal(_NextFreeIdIndex, Index);
+			Node.NextFreeIdIndex = Steal(_NextFreeIdIndex, Index);
 			return std::move(*Node.ValueHolder);
 		}
 
