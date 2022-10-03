@@ -47,7 +47,7 @@ static void TestIdPool()
             exit(-1);
         }
     }
-    
+
     for (size_t i = 0 ; i < TestSize; ++i) {
         if (Pool.CheckAndRelease(Keys[i])) {
             printf("TestIdPool Failed to ignore recycled index, IndexId=%zi\n", i);
@@ -66,7 +66,7 @@ static void TestIdPool()
 
     FailKey = Pool.Acquire();
     if (FailKey != xIndexId::InvalidValue) {
-        printf("TestIdPool Failed to fail on acquire over TestSize\n");
+        cerr << "TestIdPool Failed to fail on acquire over TestSize" << endl;
         exit(-1);
     }
 
@@ -75,7 +75,7 @@ static void TestIdPool()
 
 struct xCounter
 {
-    xCounter() { 
+    xCounter() {
         ++Total;
     }
     xCounter(size_t I) : Index{I} {
@@ -107,7 +107,7 @@ static void TestIdStorage()
             exit(-1);
         }
     };
-    
+
     uint64_t FailKey = xIndexId::InvalidValue;
     uint64_t Keys[TestSize];
     memset(Keys, 0, sizeof(Keys));
@@ -115,7 +115,7 @@ static void TestIdStorage()
         cerr << "TestIdPool fatal: Attack key allowd" << endl;
         exit(-1);
     }
-    
+
     for (size_t i = 0 ; i < TestSize; ++i) {
         Keys[i] = Pool.Acquire(xCounter(i));
         if (Keys[i] == xIndexId::InvalidValue) {
@@ -145,14 +145,14 @@ static void TestIdStorage()
             exit(-1);
         }
         auto OptRelease = Pool.CheckAndRelease(Keys[i]);
-        if (!OptRelease()) {   
+        if (!OptRelease()) {
             cerr << "TestIdStorage faild to check and release, index=%" << i << endl;
             exit(-1);
         }
     }
     if (xCounter::Total != 0) {
         cerr << "TestIdStorage redundant objects" << endl;
-        exit(-1); 
+        exit(-1);
     }
     for (size_t i = 0 ; i < TestSize; ++i) {
         Keys[i] = Pool.Acquire(xCounter(i));
