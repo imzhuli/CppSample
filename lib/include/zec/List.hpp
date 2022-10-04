@@ -45,6 +45,10 @@ ZEC_NS
 			pPrev = &prev_node;
 			pNext = &next_node;
 		}
+		
+		ZEC_INLINE void InsertBefore(xListNode& next_node) {
+			AppendTo(*next_node.pPrev);
+		}
 
 		ZEC_INLINE void DetachUnsafe() {
 			pPrev->pNext = pNext;
