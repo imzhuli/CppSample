@@ -5,6 +5,7 @@
 #include <new>
 #include <utility>
 #include <type_traits>
+#include <memory>
 #include <atomic>
 #include <cstdint>
 #include <cstddef>
@@ -195,11 +196,7 @@ ZEC_NS
 		template<typename T>
 		[[nodiscard]] ZEC_STATIC_INLINE constexpr bool
 		IsPow2(const T x) { static_assert(std::is_integral_v<T>); return x > 0 && !(x & (x-1)); }
-
-		template<typename tOffsetType, typename tAlignmentType>
-		[[nodiscard]] ZEC_STATIC_INLINE constexpr tOffsetType
-		Align(tOffsetType Origin, tAlignmentType Alignment) { assert(IsPow2(Alignment) && Alignment != 1); const auto Offset = Alignment - 1; return (Origin + Offset) & ~Offset; }
-
+		
 		template<typename T>
 		[[nodiscard]] ZEC_STATIC_INLINE std::remove_reference_t<T> &
 		X2Ref(T && ref) { return ref; }

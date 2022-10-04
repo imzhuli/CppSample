@@ -9,40 +9,6 @@
 using namespace std;
 using namespace zec;
 
-static void test()
-{
-	stringstream err;
-	for (int i = 1 ; i <= 16; ++i) {
-		auto Al = Align(i, 16);
-		if (Al != 16) {
-			err << "Invalid Alignment at " << i << ", Value=" << Al;
-			throw std::runtime_error(err.str());
-		}
-	}
-	for (int i = 17 ; i <= 32; ++i) {
-		auto Al = Align(i, 16);
-		if (Al != 32) {
-			err << "Invalid Alignment at " << i << ", Value=" << Al;
-			throw std::runtime_error(err.str());
-		}
-	}
-	for (int i = 33 ; i <= 48; ++i) {
-		auto Al = Align(i, 16);
-		if (Al != 48) {
-			err << "Invalid Alignment at " << i << ", Value=" << Al;
-			throw std::runtime_error(err.str());
-		}
-	}
-	for (int i = 49 ; i <= 64; ++i) {
-		auto Al = Align(i, 16);
-		if (Al != 64) {
-			err << "Invalid Alignment at " << i << ", Value=" << Al;
-			throw std::runtime_error(err.str());
-		}
-	}
-
-}
-
 void testOrder()
 {
 	ubyte B1[8] = {};
@@ -80,7 +46,6 @@ void testOrder()
 int main(int, char **)
 {
 	try {
-		test();
 		testOrder();
 	}
 	catch (const std::exception & e) {
