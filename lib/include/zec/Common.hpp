@@ -51,8 +51,7 @@ ZEC_NS
 			ubyte                         B[8];
 
 			void *                        Ptr;
-			const void *                  CstPtr;
-			const char *                  Str;
+			const void *                  ConstPtr;
 
 			ptrdiff_t                     Offset;
 			size_t                        Size;
@@ -68,8 +67,8 @@ ZEC_NS
 			uint32_t                      U32;
 			uint64_t                      U64;
 
-			struct { int32_t  x, y; }     VI32;
-			struct { uint32_t x, y; }     VU32;
+			struct { int32_t  x, y; }     IV2;
+			struct { uint32_t x, y; }     UV32;
 		};
 
 
