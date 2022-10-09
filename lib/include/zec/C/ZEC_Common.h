@@ -48,11 +48,17 @@
 #endif
 
 #if defined(ZEC_SYSTEM_WINDOWS) || defined(ZEC_SYSTEM_LINUX) || defined(ZEC_SYSTEM_MACOS)
+#ifndef ZEC_SYSTEM_ANDROID
 	#define ZEC_SYSTEM_DESKTOP
+#endif
 #endif
 
 #if defined(ZEC_SYSTEM_IPHONE_SIMULATOR) || defined(ZEC_SYSTEM_IPHONE)
 	#define ZEC_SYSTEM_IOS
+#endif
+
+#if defined(ZEC_SYSTEM_IOS) || defined(ZEC_SYSTEM_MACOS)
+	#define ZEC_SYSTEM_DARWIN
 #endif
 
 #if defined(_MSC_VER)
