@@ -14,9 +14,11 @@ ZEC_NS
 		std::unique_lock lock(_Mutex);
 		auto & context = _Coutnexts[_ActiveContext];
 		if (--_TotalSize == context.xWaitingCount && _TotalSize != 0) {
-			context.xWaitingCount = 0;
-			std::swap(_ActiveContext, _OtherContext);
-			lock.unlock();
+			do {
+				context.xWaitingCount = 0;
+				std::swap(_ActiveContext, _OtherContext);
+				lock.unlock();
+			} while(false);
 			context.xCondtion.notify_all();
 		}
 	}
@@ -26,9 +28,11 @@ ZEC_NS
 		std::unique_lock lock(_Mutex);
 		auto & context = _Coutnexts[_ActiveContext];
 		if (++context.xWaitingCount == _TotalSize) {
-			context.xWaitingCount = 0;
-			std::swap(_ActiveContext, _OtherContext);
-			lock.unlock();
+			do {
+				context.xWaitingCount = 0;
+				std::swap(_ActiveContext, _OtherContext);
+				lock.unlock();
+			} while(false);
 			context.xCondtion.notify_all();
 		}
 		else {

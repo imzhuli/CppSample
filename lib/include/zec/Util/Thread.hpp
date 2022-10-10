@@ -164,16 +164,22 @@ ZEC_NS
 
 			template<typename tFuncObj = xPass>
 			ZEC_INLINE std::enable_if_t<std::is_same_v<void, std::invoke_result_t<tFuncObj>>> Notify(const tFuncObj & PreNotifyFunc = {}) {
-				auto Lock = std::unique_lock(_Mutex);
-				PreNotifyFunc();
-				_Ready = true; _ConditionVariable.notify_one();
+				do {
+					auto Lock = std::unique_lock(_Mutex);
+					PreNotifyFunc();
+					_Ready = true;
+					} while(false);
+				_ConditionVariable.notify_one();
 			}
 
 			template<typename tFuncObj = xPass>
 			ZEC_INLINE std::enable_if_t<std::is_same_v<void, std::invoke_result_t<tFuncObj>>> NotifyAll(const tFuncObj & PreNotifyFunc = {}) {
-				auto Lock = std::unique_lock(_Mutex);
-				PreNotifyFunc();
-				_Ready = true; _ConditionVariable.notify_all();
+				do {
+					auto Lock = std::unique_lock(_Mutex);
+					PreNotifyFunc();
+					_Ready = true; 
+				} while(false);
+				_ConditionVariable.notify_all();
 			}
 		};
 	}
