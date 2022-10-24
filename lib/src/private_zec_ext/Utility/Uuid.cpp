@@ -30,16 +30,16 @@ namespace
 		uint64_t seed[2];
 	};
 
-	static uint64_t xorshift128plus(uint64_t *s)
-	{
-		/* http://xorshift.di.unimi.it/xorshift128plus.c */
-		uint64_t s1 = s[0];
-		const uint64_t s0 = s[1];
-		s[0] = s0;
-		s1 ^= s1 << 23;
-		s[1] = s1 ^ s0 ^ (s1 >> 18) ^ (s0 >> 5);
-		return s[1] + s0;
-	}
+	// static uint64_t xorshift128plus(uint64_t *s)
+	// {
+	// 	/* http://xorshift.di.unimi.it/xorshift128plus.c */
+	// 	uint64_t s1 = s[0];
+	// 	const uint64_t s0 = s[1];
+	// 	s[0] = s0;
+	// 	s1 ^= s1 << 23;
+	// 	s[1] = s1 ^ s0 ^ (s1 >> 18) ^ (s0 >> 5);
+	// 	return s[1] + s0;
+	// }
 
 	static int uuid4_init(xUuidSeed & Ret)
 	{
@@ -92,9 +92,11 @@ namespace
 		} s;
 		const char *p;
 		int i, n;
-		/* get random */
-		s.word[0] = xorshift128plus(seed);
-		s.word[1] = xorshift128plus(seed);
+
+		/* get random: disabled since each generation calls system random engine */
+		s.word[0] = seed[0];
+		s.word[1] = seed[1];
+
 		/* build string */
 		p = Template;
 		i = 0;
