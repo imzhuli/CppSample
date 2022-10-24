@@ -1,6 +1,6 @@
 #pragma once
 #include <zec/Common.hpp>
-#include <lua.hpp>
+#include <lua/lua.hpp>
 #include <tuple>
 #include <string>
 #include <vector>

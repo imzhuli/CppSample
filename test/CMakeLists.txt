@@ -1,9 +1,6 @@
 project(test_${libname})
 
 # dependencies:
-if (ZEC_OPTION_WITH_LUA)
-	find_package(Lua REQUIRED)
-endif()
 
 # local dependencies
 include_directories(
@@ -50,15 +47,10 @@ add_sub_test(algorithm)
 add_sub_test(alignment)
 add_sub_test(cmd)
 add_sub_test(indexed_storage)
-if (ZEC_OPTION_WITH_LUA)
-	add_sub_test(lua)
-endif()
 add_sub_test(memlog)
 add_sub_test(optional)
 add_sub_test(uuid)
 #add_sub_test(thread)
-
-add_sub_buildonly(connection)
 
 add_test(
 	NAME cmd_short_long_empty

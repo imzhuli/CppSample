@@ -1,10 +1,6 @@
 project(lib_${libname})
 
 ##FindPackages here
-set(Boost_USE_STATIC_LIBS ON)
-find_package(Lua               REQUIRED)
-find_package(Boost             REQUIRED)
-find_package(OpenSSL           REQUIRED)
 
 # enable specific macors by system type:
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
@@ -21,8 +17,6 @@ endif()
 # paths
 include_directories(
 	./include/
-	${LUA_INCLUDE_DIR}
-	${Boost_INCLUDE_DIRS}
 	${OPENSSL_INCLUDE_DIR}
 	)
 link_directories(
@@ -32,22 +26,19 @@ link_directories(
 set(shared_lib_dependency_private
 	)
 set(shared_lib_dependency_public
-	${LUA_LIBRARIES}
-	${Boost_LIBRARIES}
 	${OPENSSL_LIBRARIES}
 	${PLATFORM_LIBRARIES}
 	${cpp})
 
 
 # source files:
+aux_source_directory(./src/private_lua                             ZEC_SRC)
+
 aux_source_directory(./src/private_zec                             ZEC_SRC)
 aux_source_directory(./src/private_zec/Algorithm                   ZEC_SRC)
 aux_source_directory(./src/private_zec/Util                        ZEC_SRC)
 aux_source_directory(./src/private_zec/Container                   ZEC_SRC)
-
-if (ZEC_OPTION_WITH_LUA)
 aux_source_directory(./src/private_zec_ext/Lua                     ZEC_SRC)
-endif()
 
 aux_source_directory(./src/private_zec_ext/IO                      ZEC_SRC)
 aux_source_directory(./src/private_zec_ext/Utility                 ZEC_SRC)
