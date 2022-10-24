@@ -25,7 +25,7 @@ ZEC_NS
 		ZEC_INLINE bool operator <= (const xUuid & Other) const { return memcmp(_Data, Other._Data, 16) <= 0; }
 		ZEC_INLINE bool operator >= (const xUuid & Other) const { return memcmp(_Data, Other._Data, 16) >= 0; }
 
-		ZEC_API_MEMBER void Generate();
+		ZEC_API_MEMBER bool Generate();
 
 	private:
 		xRawType _Data;

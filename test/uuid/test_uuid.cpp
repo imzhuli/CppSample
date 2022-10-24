@@ -1,4 +1,5 @@
 #include <zec_ext/Utility/Uuid.hpp>
+#include <zec/String.hpp>
 #include <iostream>
 using namespace zec;
 using namespace std;
@@ -17,5 +18,6 @@ int main(int, char **)
         return -1;
     }
 
+    cout << StrToHex(u3.GetData(), u3.GetSize()) << endl;
     return 0;
 }
