@@ -33,13 +33,15 @@ ZEC_NS
 		}
 		_KeySet.insert(Option.KeyName);
 		if (Option.ShortName) {
-			auto [std::ignore, Inserted] = _ShortOptions.emplace(Option.ShortName, CoreOption);
+			auto [Ignored, Inserted] = _ShortOptions.emplace(Option.ShortName, CoreOption);
+			(void)Ignored;
 			if (!Inserted) {
 				Error("Duplicate ShortKey");
 			}
 		}
 		if (Option.LongName && strlen(Option.LongName)) {
-			auto [std::ignore, Inserted] = _LongOptions.emplace(Option.LongName, CoreOption);
+			auto [Ignored, Inserted] = _LongOptions.emplace(Option.LongName, CoreOption);
+			(void)Ignored;
 			if (!Inserted) {
 				Error("Duplicate LongKey");
 			}
