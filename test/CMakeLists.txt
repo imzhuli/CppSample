@@ -6,13 +6,11 @@ project(test_${libname})
 include_directories(
 	../lib/include/
 	../lib/src/
-	${LUA_INCLUDE_DIR}
 	)
 link_directories(
 	)
 set(shared_lib_dependency_private
 	${LightWebsockets_LIBRARIES}
-	${LUA_LIBRARIES}
 )
 
 
