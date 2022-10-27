@@ -41,6 +41,9 @@ aux_source_directory(./src/private_zec/Container                   ZEC_SRC)
 aux_source_directory(./src/private_zec_ext/Lua                     ZEC_SRC)
 
 aux_source_directory(./src/private_zec_ext/IO                      ZEC_SRC)
+aux_source_directory(./src/private_zec_ext/IO/Darwin               ZEC_SRC)
+aux_source_directory(./src/private_zec_ext/IO/Linux                ZEC_SRC)
+aux_source_directory(./src/private_zec_ext/IO/Windows              ZEC_SRC)
 aux_source_directory(./src/private_zec_ext/Utility                 ZEC_SRC)
 
 aux_source_directory(./src/private_zec_game/Base                   ZEC_SRC)
