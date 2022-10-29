@@ -79,23 +79,7 @@ ZEC_NS
 			};
 		}
 		template<typename T >
-		using xNoCVR = typename __common_detail__::xRemoveCVR<T>::Type;
-
-		template<typename T>
-		class xCountRetainer {
-		public:
-			xCountRetainer(T & _TargetRef) : _TargetPtr(&_TargetRef) { ++*_TargetPtr; }
-			xCountRetainer(const xCountRetainer& Other) : _TargetPtr(Other._TargetPtr) { ++*_TargetPtr; }
-			~xCountRetainer() { --*_TargetPtr; }
-			xCountRetainer & operator = (const xCountRetainer & Other) {
-				if (_TargetPtr != Other._TargetPtr) {
-					--*_TargetPtr; ++*(_TargetPtr = Other._TargetPtr);
-				}
-				return *this;
-			}
-		private:
-			T * const _TargetPtr = nullptr;
-		};
+		using xNonCVR = typename __common_detail__::xRemoveCVR<T>::Type;
 
 		template<typename T>
 		constexpr std::in_place_type_t<T> xType {};
