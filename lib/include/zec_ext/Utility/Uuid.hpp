@@ -2,7 +2,7 @@
 #include <zec/Common.hpp>
 #include <cstring>
 
-ZEC_NS
+X_NS
 {
 
 	class xUuid
@@ -10,22 +10,22 @@ ZEC_NS
 	public:
 		using xRawType = ubyte[16];
 
-		ZEC_INLINE const xRawType&  GetData() const { return _Data; }
-		ZEC_INLINE constexpr size_t GetSize() const { return sizeof(xRawType); }
+		X_INLINE const xRawType&  GetData() const { return _Data; }
+		X_INLINE constexpr size_t GetSize() const { return sizeof(xRawType); }
 
-		ZEC_INLINE xUuid() : _Data{} {}
-		ZEC_INLINE xUuid(const xNoInit &) {}
-		ZEC_INLINE xUuid(const xGeneratorInit &) { Generate(); }
-		ZEC_INLINE xUuid(const xRawType & RawData) { memcpy(&_Data, &RawData, sizeof(xRawType)); }
+		X_INLINE xUuid() : _Data{} {}
+		X_INLINE xUuid(const xNoInit &) {}
+		X_INLINE xUuid(const xGeneratorInit &) { Generate(); }
+		X_INLINE xUuid(const xRawType & RawData) { memcpy(&_Data, &RawData, sizeof(xRawType)); }
 
-		ZEC_INLINE bool operator != (const xUuid & Other) const { return memcmp(_Data, Other._Data, sizeof(xRawType)); }
-		ZEC_INLINE bool operator == (const xUuid & Other) const { return !memcmp(_Data, Other._Data, sizeof(xRawType)); }
-		ZEC_INLINE bool operator < (const xUuid & Other) const { return memcmp(_Data, Other._Data, 16) < 0; }
-		ZEC_INLINE bool operator > (const xUuid & Other) const { return memcmp(_Data, Other._Data, 16) > 0; }
-		ZEC_INLINE bool operator <= (const xUuid & Other) const { return memcmp(_Data, Other._Data, 16) <= 0; }
-		ZEC_INLINE bool operator >= (const xUuid & Other) const { return memcmp(_Data, Other._Data, 16) >= 0; }
+		X_INLINE bool operator != (const xUuid & Other) const { return memcmp(_Data, Other._Data, sizeof(xRawType)); }
+		X_INLINE bool operator == (const xUuid & Other) const { return !memcmp(_Data, Other._Data, sizeof(xRawType)); }
+		X_INLINE bool operator < (const xUuid & Other) const { return memcmp(_Data, Other._Data, 16) < 0; }
+		X_INLINE bool operator > (const xUuid & Other) const { return memcmp(_Data, Other._Data, 16) > 0; }
+		X_INLINE bool operator <= (const xUuid & Other) const { return memcmp(_Data, Other._Data, 16) <= 0; }
+		X_INLINE bool operator >= (const xUuid & Other) const { return memcmp(_Data, Other._Data, 16) >= 0; }
 
-		ZEC_API_MEMBER bool Generate();
+		X_API_MEMBER bool Generate();
 
 	private:
 		xRawType _Data;

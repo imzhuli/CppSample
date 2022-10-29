@@ -2,7 +2,7 @@
 #include "./Common.hpp"
 #include <type_traits>
 
-ZEC_NS
+X_NS
 {
 	// xList<tNode> type, with tNode extends xListNode
 	template<typename tNode>
@@ -18,27 +18,27 @@ ZEC_NS
 		friend class xList;
 
 	protected:
-		ZEC_INLINE xListNode() noexcept { Reset(); }
-		ZEC_INLINE xListNode(const xListNode & Other) noexcept { Reset(); }
-		ZEC_INLINE ~xListNode() noexcept { DetachUnsafe(); }
+		X_INLINE xListNode() noexcept { Reset(); }
+		X_INLINE xListNode(const xListNode & Other) noexcept { Reset(); }
+		X_INLINE ~xListNode() noexcept { DetachUnsafe(); }
 
-		ZEC_INLINE void Reset() {
+		X_INLINE void Reset() {
 			pPrev = pNext = this;
 		}
-		ZEC_INLINE void Detach() {
+		X_INLINE void Detach() {
 			DetachUnsafe();
 			Reset();
 		}
-		ZEC_INLINE void TakePlaceOf(xListNode& other) {
+		X_INLINE void TakePlaceOf(xListNode& other) {
 			TakePlaceOfUnsafe(other);
 			other.Reset();
 		}
-		ZEC_INLINE bool Linked() const {
+		X_INLINE bool Linked() const {
 			return pPrev != this;
 		}
 
 	private:
-		ZEC_INLINE void AppendTo(xListNode& prev_node) {
+		X_INLINE void AppendTo(xListNode& prev_node) {
 			xListNode& next_node = *prev_node.pNext;
 			prev_node.pNext = this;
 			next_node.pPrev = this;
@@ -46,16 +46,16 @@ ZEC_NS
 			pNext = &next_node;
 		}
 		
-		ZEC_INLINE void InsertBefore(xListNode& next_node) {
+		X_INLINE void InsertBefore(xListNode& next_node) {
 			AppendTo(*next_node.pPrev);
 		}
 
-		ZEC_INLINE void DetachUnsafe() {
+		X_INLINE void DetachUnsafe() {
 			pPrev->pNext = pNext;
 			pNext->pPrev = pPrev;
 		}
 
-		ZEC_INLINE void TakePlaceOfUnsafe(xListNode& other) {
+		X_INLINE void TakePlaceOfUnsafe(xListNode& other) {
 			pPrev = other.pPrev;
 			pNext = other.pNext;
 			pNext->pPrev = this;
@@ -75,10 +75,10 @@ ZEC_NS
 	public:
 		xList() = default;
 		xList(const xList&) = delete;
-		ZEC_INLINE xList(xList&& other) {
+		X_INLINE xList(xList&& other) {
 			GrabListTail(other);
 		}
-		ZEC_INLINE ~xList() {
+		X_INLINE ~xList() {
 			assert(IsEmpty());
 		}
 
@@ -93,34 +93,34 @@ ZEC_NS
 			xBaseNode* pNext;
 
 		private:
-			ZEC_INLINE xExtendNode* Ptr() const { return static_cast<xExtendNode*>(pTarget); }
-			ZEC_INLINE void Copy(xBaseNode* n) { pTarget = n; pNext = n->pNext; }
+			X_INLINE xExtendNode* Ptr() const { return static_cast<xExtendNode*>(pTarget); }
+			X_INLINE void Copy(xBaseNode* n) { pTarget = n; pNext = n->pNext; }
 
 		public:
 			// construct:
-			ZEC_INLINE xForwardIteratorTemplate() = delete;
-			ZEC_INLINE xForwardIteratorTemplate(xBaseNode* n) { Copy(n); }
+			X_INLINE xForwardIteratorTemplate() = delete;
+			X_INLINE xForwardIteratorTemplate(xBaseNode* n) { Copy(n); }
 			// for use of xList::end(),
-			ZEC_INLINE xForwardIteratorTemplate(xBaseNode* n, const std::nullptr_t &) { pTarget = n, pNext = nullptr; }
+			X_INLINE xForwardIteratorTemplate(xBaseNode* n, const std::nullptr_t &) { pTarget = n, pNext = nullptr; }
 
 			// Copy:
-			ZEC_INLINE xForwardIteratorTemplate(const xForwardIteratorTemplate& it) = default;
-			ZEC_INLINE xForwardIteratorTemplate& operator=(const xForwardIteratorTemplate& it) = default;
+			X_INLINE xForwardIteratorTemplate(const xForwardIteratorTemplate& it) = default;
+			X_INLINE xForwardIteratorTemplate& operator=(const xForwardIteratorTemplate& it) = default;
 
 			// cast:
-			ZEC_INLINE xExtendNode* operator->() const { return Ptr(); }
-			ZEC_INLINE xExtendNode& operator*() const { return *Ptr(); }
+			X_INLINE xExtendNode* operator->() const { return Ptr(); }
+			X_INLINE xExtendNode& operator*() const { return *Ptr(); }
 
 			// compare:
-			ZEC_INLINE bool operator==(const xForwardIteratorTemplate& it) const { return pTarget == it.pTarget; }
-			ZEC_INLINE bool operator!=(const xForwardIteratorTemplate& it) const { return pTarget != it.pTarget; }
+			X_INLINE bool operator==(const xForwardIteratorTemplate& it) const { return pTarget == it.pTarget; }
+			X_INLINE bool operator!=(const xForwardIteratorTemplate& it) const { return pTarget != it.pTarget; }
 
 			// traversing:
-			ZEC_INLINE xForwardIteratorTemplate operator++() {
+			X_INLINE xForwardIteratorTemplate operator++() {
 				Copy(pNext);
 				return *this;
 			}
-			ZEC_INLINE xForwardIteratorTemplate operator++(int) {
+			X_INLINE xForwardIteratorTemplate operator++(int) {
 				xForwardIteratorTemplate ret(*this);
 				Copy(pNext);
 				return ret;
@@ -132,22 +132,22 @@ ZEC_NS
 		using xForwardConstIterator = xForwardIteratorTemplate<true>;
 
 	public:
-		ZEC_INLINE bool IsEmpty() const { return _Head.pNext == &_Head;  }
-		ZEC_INLINE void AddHead(tNode& rTarget) {
+		X_INLINE bool IsEmpty() const { return _Head.pNext == &_Head;  }
+		X_INLINE void AddHead(tNode& rTarget) {
 			static_cast<xListNode&>(rTarget).AppendTo(_Head);
 		}
-		ZEC_INLINE void AddTail(tNode& rTarget) {
+		X_INLINE void AddTail(tNode& rTarget) {
 			static_cast<xListNode&>(rTarget).AppendTo(*_Head.pPrev);
 		}
-		ZEC_INLINE void GrabHead(tNode& rTarget) {
+		X_INLINE void GrabHead(tNode& rTarget) {
 			static_cast<xListNode&>(rTarget).DetachUnsafe();
 			AddHead(rTarget);
 		}
-		ZEC_INLINE void GrabTail(tNode& rTarget) {
+		X_INLINE void GrabTail(tNode& rTarget) {
 			static_cast<xListNode&>(rTarget).DetachUnsafe();
 			AddTail(rTarget);
 		}
-		ZEC_INLINE void GrabListHead(xList& other) {
+		X_INLINE void GrabListHead(xList& other) {
 			if (other.IsEmpty()) {
 				return;
 			};
@@ -161,7 +161,7 @@ ZEC_NS
 			localHead->pPrev = remoteTail;
 			remoteTail->pNext = localHead;
 		}
-		ZEC_INLINE void GrabListTail(xList& other) {
+		X_INLINE void GrabListTail(xList& other) {
 			if (other.IsEmpty()) {
 				return;
 			};
@@ -175,19 +175,19 @@ ZEC_NS
 			localTail->pNext = remoteHead;
 			remoteHead->pPrev = localTail;
 		}
-		ZEC_INLINE tNode * Head() {
+		X_INLINE tNode * Head() {
 			if (IsEmpty()) {
 				return nullptr;
 			}
 			return static_cast<tNode*>(_Head.pNext);
 		}
-		ZEC_INLINE tNode * Tail() {
+		X_INLINE tNode * Tail() {
 			if (IsEmpty()) {
 				return nullptr;
 			}
 			return static_cast<tNode*>(_Head.pPrev);
 		}
-		ZEC_INLINE tNode * PopHead() {
+		X_INLINE tNode * PopHead() {
 			if (IsEmpty()) {
 				return nullptr;
 			}
@@ -195,7 +195,7 @@ ZEC_NS
 			ret->Detach();
 			return static_cast<tNode*>(ret);
 		}
-		ZEC_INLINE tNode * PopTail() {
+		X_INLINE tNode * PopTail() {
 			if (IsEmpty()) {
 				return nullptr;
 			}
@@ -203,17 +203,17 @@ ZEC_NS
 			ret->Detach();
 			return static_cast<tNode*>(ret);
 		}
-		ZEC_STATIC_INLINE void Remove(tNode& Node) {
+		X_STATIC_INLINE void Remove(tNode& Node) {
 			Node.Detach();
 		}
 
-		ZEC_INLINE xForwardIterator begin() { return xForwardIterator(_Head.pNext); }
-		ZEC_INLINE xForwardIterator end() { return xForwardIterator(&_Head, nullptr); }
+		X_INLINE xForwardIterator begin() { return xForwardIterator(_Head.pNext); }
+		X_INLINE xForwardIterator end() { return xForwardIterator(&_Head, nullptr); }
 
-		ZEC_INLINE xForwardConstIterator begin() const { return xForwardConstIterator(_Head.pNext); }
-		ZEC_INLINE xForwardConstIterator end() const { return xForwardConstIterator(&_Head, nullptr); }
+		X_INLINE xForwardConstIterator begin() const { return xForwardConstIterator(_Head.pNext); }
+		X_INLINE xForwardConstIterator end() const { return xForwardConstIterator(&_Head, nullptr); }
 
-		ZEC_INLINE void ReleaseUnsafe() { _Head.Reset(); }
+		X_INLINE void ReleaseUnsafe() { _Head.Reset(); }
 	};
 
 }

@@ -7,7 +7,7 @@
 #include "./Packet.hpp"
 #include "./PacketBuffer.hpp"
 
-ZEC_NS
+X_NS
 {
 
     class xTcpSocketContext;
@@ -33,43 +33,43 @@ ZEC_NS
         };
 
     public:
-        ZEC_API_MEMBER xTcpConnection();
-        ZEC_API_MEMBER ~xTcpConnection();
+        X_API_MEMBER xTcpConnection();
+        X_API_MEMBER ~xTcpConnection();
 
-        ZEC_API_MEMBER bool Init(xIoHandle NativeHandle, iListener * ListenerPtr);
-        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint16_t Port, iListener * ListenerPtr);
-        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr);
-        ZEC_API_MEMBER bool GracefulClose();  // return value: true: immediately closed, false pending writes
-        ZEC_API_MEMBER void Clean();
+        X_API_MEMBER bool Init(xIoHandle NativeHandle, iListener * ListenerPtr);
+        X_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint16_t Port, iListener * ListenerPtr);
+        X_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr);
+        X_API_MEMBER bool GracefulClose();  // return value: true: immediately closed, false pending writes
+        X_API_MEMBER void Clean();
 
-        ZEC_API_MEMBER xNetAddress GetRemoteAddress() const;
-        ZEC_API_MEMBER xNetAddress GetLocalAddress() const;
+        X_API_MEMBER xNetAddress GetRemoteAddress() const;
+        X_API_MEMBER xNetAddress GetLocalAddress() const;
 
-        ZEC_API_MEMBER void ResizeSendBuffer(size_t Size);
-        ZEC_API_MEMBER void ResizeReceiveBuffer(size_t Size);
+        X_API_MEMBER void ResizeSendBuffer(size_t Size);
+        X_API_MEMBER void ResizeReceiveBuffer(size_t Size);
 
-        ZEC_API_MEMBER size_t GetPendingWriteBlockCount() const;
-        ZEC_INLINE bool IsActive() const { return _SocketPtr; }
+        X_API_MEMBER size_t GetPendingWriteBlockCount() const;
+        X_INLINE bool IsActive() const { return _SocketPtr; }
 
         struct xAudit {
             size64_t ReadSize  = 0;
             size64_t WriteSize = 0;
         };
-        ZEC_API_MEMBER xAudit GetAudit();
-        ZEC_API_MEMBER xAudit StealAudit();
+        X_API_MEMBER xAudit GetAudit();
+        X_API_MEMBER xAudit StealAudit();
 
         /***
          * @brief aync post data, try to buffer(copy) data into internal buffer
          * @return Unbuffered Data Size
          * */
-        ZEC_API_MEMBER size_t PostData(const void * DataPtr, size_t DataSize);
-        ZEC_API_MEMBER void SuspendReading();
-        ZEC_API_MEMBER void ResumeReading();
+        X_API_MEMBER size_t PostData(const void * DataPtr, size_t DataSize);
+        X_API_MEMBER void SuspendReading();
+        X_API_MEMBER void ResumeReading();
 
     private:
-        ZEC_PRIVATE_MEMBER void OnConnected();
-        ZEC_PRIVATE_MEMBER void OnError();
-        ZEC_PRIVATE_MEMBER void DoRead();
+        X_PRIVATE_MEMBER void OnConnected();
+        X_PRIVATE_MEMBER void OnError();
+        X_PRIVATE_MEMBER void DoRead();
 
     private:
         xTcpSocketContext *           _SocketPtr = nullptr;

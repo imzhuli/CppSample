@@ -2,7 +2,7 @@
 #include "../Common.hpp"
 #include <atomic>
 
-ZEC_NS
+X_NS
 {
 
 	class xVersion
@@ -10,17 +10,17 @@ ZEC_NS
 	public:
 		using xId = uint64_t;
 
-		ZEC_INLINE operator    xId() const { return _Version;  }
-		ZEC_INLINE void        Set(xId ver) { _Version = ver; }
-		ZEC_INLINE void        Upgrade() { ++_Version; }
+		X_INLINE operator    xId() const { return _Version;  }
+		X_INLINE void        Set(xId ver) { _Version = ver; }
+		X_INLINE void        Upgrade() { ++_Version; }
 
-		ZEC_INLINE bool        operator == (const xVersion & other) const { return _Version == other._Version; }
-		ZEC_INLINE bool        operator != (const xVersion & other) const { return _Version != other._Version; }
-		ZEC_INLINE bool        Synchronize(xId newVersion) { if (newVersion == _Version) { return false; } _Version = newVersion; return true; }
+		X_INLINE bool        operator == (const xVersion & other) const { return _Version == other._Version; }
+		X_INLINE bool        operator != (const xVersion & other) const { return _Version != other._Version; }
+		X_INLINE bool        Synchronize(xId newVersion) { if (newVersion == _Version) { return false; } _Version = newVersion; return true; }
 
-		ZEC_INLINE xVersion() = default;
-		ZEC_INLINE xVersion(const xVersion &) = default;
-		ZEC_INLINE ~xVersion() = default;
+		X_INLINE xVersion() = default;
+		X_INLINE xVersion(const xVersion &) = default;
+		X_INLINE ~xVersion() = default;
 
 	private:
 		xId _Version = 0;
@@ -31,17 +31,17 @@ ZEC_NS
 	public:
 		using xId = uint64_t;
 
-		ZEC_INLINE operator    xId() const { return _Version;  }
-		ZEC_INLINE void        Set(xId ver) { _Version = ver; }
-		ZEC_INLINE void        Upgrade() { ++_Version; }
+		X_INLINE operator    xId() const { return _Version;  }
+		X_INLINE void        Set(xId ver) { _Version = ver; }
+		X_INLINE void        Upgrade() { ++_Version; }
 
-		ZEC_INLINE bool        operator == (const xVersionAtomic & other) const { return _Version == other._Version; }
-		ZEC_INLINE bool        operator != (const xVersionAtomic & other) const { return _Version != other._Version; }
-		ZEC_INLINE bool        Synchronize(xId newVersion) { return newVersion != _Version.exchange(newVersion); }
+		X_INLINE bool        operator == (const xVersionAtomic & other) const { return _Version == other._Version; }
+		X_INLINE bool        operator != (const xVersionAtomic & other) const { return _Version != other._Version; }
+		X_INLINE bool        Synchronize(xId newVersion) { return newVersion != _Version.exchange(newVersion); }
 
-		ZEC_INLINE xVersionAtomic() = default;
-		ZEC_INLINE xVersionAtomic(const xVersionAtomic & other) : _Version{ other._Version.load() } {}
-		ZEC_INLINE ~xVersionAtomic() = default;
+		X_INLINE xVersionAtomic() = default;
+		X_INLINE xVersionAtomic(const xVersionAtomic & other) : _Version{ other._Version.load() } {}
+		X_INLINE ~xVersionAtomic() = default;
 
 	private:
 		std::atomic<xId> _Version = { 0 };

@@ -4,7 +4,7 @@
 #include <memory>
 #include <functional>
 
-ZEC_NS
+X_NS
 {
 
 	template<bool cAtomic = false, typename T = int64_t>
@@ -19,16 +19,16 @@ ZEC_NS
 		using RealType = std::conditional_t<cAtomic, std::atomic<T>, T>;
 
 	protected:
-		ZEC_INLINE xRetainableBase() = default;
-		ZEC_INLINE xRetainableBase(T initCount) : _Count(initCount) {}
-		ZEC_INLINE xRetainableBase(const xRetainableBase &) {};
-		ZEC_INLINE xRetainableBase & operator = (const xRetainableBase &) { return *this; }
+		X_INLINE xRetainableBase() = default;
+		X_INLINE xRetainableBase(T initCount) : _Count(initCount) {}
+		X_INLINE xRetainableBase(const xRetainableBase &) {};
+		X_INLINE xRetainableBase & operator = (const xRetainableBase &) { return *this; }
 
 	public:
-		ZEC_INLINE void Retain(T increment = 1) const { _Count += increment; }
-		ZEC_INLINE T Release(T decrement = 1) const { return _Count -= decrement; }
-		ZEC_INLINE T GetRetainCount() const { return static_cast<T>(_Count); }
-		ZEC_INLINE void SetRetainCount(T resetCount) const { _Count = resetCount; }
+		X_INLINE void Retain(T increment = 1) const { _Count += increment; }
+		X_INLINE T Release(T decrement = 1) const { return _Count -= decrement; }
+		X_INLINE T GetRetainCount() const { return static_cast<T>(_Count); }
+		X_INLINE void SetRetainCount(T resetCount) const { _Count = resetCount; }
 
 	private:
 		mutable RealType _Count{ 1 };
@@ -40,27 +40,27 @@ ZEC_NS
 	class xRetainer : xNonCopyable
 	{
 	public:
-		ZEC_INLINE xRetainer(const xNoRetain &, tRetainable * && TargetPtr, const tDeleter & Deleter = {})
+		X_INLINE xRetainer(const xNoRetain &, tRetainable * && TargetPtr, const tDeleter & Deleter = {})
 		: _TargetPtr(TargetPtr), _Deleter(Deleter)
 		{}
-		ZEC_INLINE xRetainer(tRetainable * TargetPtr, const tDeleter & Deleter = {})
+		X_INLINE xRetainer(tRetainable * TargetPtr, const tDeleter & Deleter = {})
 		: _TargetPtr(TargetPtr), _Deleter(Deleter) {
 			_TargetPtr->Retain();
 		}
-		ZEC_INLINE xRetainer(const xRetainer & Other)
+		X_INLINE xRetainer(const xRetainer & Other)
 		: _TargetPtr(Other._TargetPtr), _Deleter(Other._Deleter)
 		{
 			_TargetPtr->Retain();
 		}
-		ZEC_INLINE ~xRetainer() {
+		X_INLINE ~xRetainer() {
 			if (_TargetPtr->Release()) {
 				return;
 			}
 			_Deleter(_TargetPtr);
 		}
 
-		ZEC_INLINE tRetainable & operator  *() const { return *_TargetPtr; }
-		ZEC_INLINE tRetainable * operator ->() const { return _TargetPtr; }
+		X_INLINE tRetainable & operator  *() const { return *_TargetPtr; }
+		X_INLINE tRetainable * operator ->() const { return _TargetPtr; }
 
 	private:
 		tRetainable *     _TargetPtr;
@@ -113,14 +113,14 @@ ZEC_NS
 		 * @return address of Allocaed memroy
 		 * @exception bad_Alloc
 		 */
-		ZEC_API_MEMBER virtual void * Alloc(size_t vxSize, size_t vxAlignment);
+		X_API_MEMBER virtual void * Alloc(size_t vxSize, size_t vxAlignment);
 		/**
 		 * @brief Free Allocated memory, null pointer should be accepted
 		 */
-		ZEC_API_MEMBER virtual void   Free(const void * vpObject);
+		X_API_MEMBER virtual void   Free(const void * vpObject);
 
 		template<typename T>
-		ZEC_INLINE T * Create() {
+		X_INLINE T * Create() {
 			void * p = this->Alloc(sizeof(T), AllocAlignSize<T>);
 			try { new (p) T; }
 			catch (...) { this->Free(p); throw; }
@@ -128,7 +128,7 @@ ZEC_NS
 		}
 
 		template<typename T, typename ... Args>
-		ZEC_INLINE T * CreateValue(Args&& ... args) {
+		X_INLINE T * CreateValue(Args&& ... args) {
 			void * p = this->Alloc(sizeof(T), AllocAlignSize<T>);
 			try { new (p) T{ std::forward<Args>(args)... }; }
 			catch (...) { this->Free(p); throw; }
@@ -136,7 +136,7 @@ ZEC_NS
 		}
 
 		template<typename T>
-		ZEC_INLINE T * AlignedCreate(size_t vxAlignment) {
+		X_INLINE T * AlignedCreate(size_t vxAlignment) {
 			void * p = this->Alloc(sizeof(T), vxAlignment);
 			try { new (p) T; }
 			catch (...) { this->Free(p); throw; }
@@ -144,7 +144,7 @@ ZEC_NS
 		}
 
 		template<typename T, typename ... Args>
-		ZEC_INLINE T * AlignedCreateValue(size_t vxAlignment, Args&& ... args) {
+		X_INLINE T * AlignedCreateValue(size_t vxAlignment, Args&& ... args) {
 			void * p = this->Alloc(sizeof(T), vxAlignment);
 			try { new (p) T{ std::forward<Args>(args)... }; }
 			catch (...) { this->Free(p); throw; }
@@ -152,7 +152,7 @@ ZEC_NS
 		}
 
 		template<typename T>
-		ZEC_INLINE T * CreateArray(size_t n) {
+		X_INLINE T * CreateArray(size_t n) {
 			void * p = this->Alloc(sizeof(T) * n, AllocAlignSize<T>);
 			if constexpr(!std::is_trivially_constructible_v<T>) {
 				try { new (p) T[n]; }
@@ -162,7 +162,7 @@ ZEC_NS
 		}
 
 		template<typename T, typename ... Args>
-		ZEC_INLINE T * CreateValueArray(size_t n, Args&& ... args) {
+		X_INLINE T * CreateValueArray(size_t n, Args&& ... args) {
 			void * p = this->Alloc(sizeof(T) * n, AllocAlignSize<T>);
 			try { new (p) T[n] { std::forward<Args>(args)... }; }
 			catch (...) { this->Free(p); throw; }
@@ -170,13 +170,13 @@ ZEC_NS
 		}
 
 		template<typename T>
-		ZEC_INLINE void Destroy(T * pObject) {
+		X_INLINE void Destroy(T * pObject) {
 			pObject->~T();
 			this->Free(pObject);
 		}
 
 		template<typename T>
-		ZEC_INLINE void DestroyArray(T * pStart, size_t n) {
+		X_INLINE void DestroyArray(T * pStart, size_t n) {
 			if constexpr(!std::is_trivially_destructible_v<T>) {
 				T * pObject = pStart;
 				for (size_t i = 0 ; i < n ; ++i) {
@@ -193,6 +193,6 @@ ZEC_NS
 		virtual ~xAllocator();
 	};
 
-	ZEC_API xAllocator DefaultAllocator;
+	X_API xAllocator DefaultAllocator;
 
 }

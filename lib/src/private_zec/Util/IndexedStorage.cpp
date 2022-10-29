@@ -1,7 +1,7 @@
 #include <zec/Util/IndexedStorage.hpp>
 #include <zec/Util/Chrono.hpp>
 
-ZEC_NS
+X_NS
 {
 	static_assert(sizeof(xIndexId) == sizeof(uint64_t));
 

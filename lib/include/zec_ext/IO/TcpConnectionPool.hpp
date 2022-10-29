@@ -4,7 +4,7 @@
 #include "./TcpConnectionEx.hpp"
 #include <vector>
 
-ZEC_NS
+X_NS
 {
 
 	class xTcpConnectionPool
@@ -18,20 +18,20 @@ ZEC_NS
 		};
 
 	public:
-		ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const std::vector<xNetAddress>& Addresses, iListener * ListenerPtr);
-		ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, std::vector<xNetAddress>&& Addresses, iListener * ListenerPtr);
-		ZEC_API_MEMBER void Clean();
-		ZEC_API_MEMBER void Check(uint64_t NowMS);
-		ZEC_API_MEMBER bool PostData(const void * DataPtr, size_t DataSize);
-		ZEC_API_MEMBER bool PostData(size_t Index, const void * DataPtr, size_t DataSize);
-		ZEC_INLINE     void SetReconnectTimeoutMS(uint64_t TimeoutMS) { _ReconnectTimeoutMS = TimeoutMS; }
+		X_API_MEMBER bool Init(xIoContext * IoContextPtr, const std::vector<xNetAddress>& Addresses, iListener * ListenerPtr);
+		X_API_MEMBER bool Init(xIoContext * IoContextPtr, std::vector<xNetAddress>&& Addresses, iListener * ListenerPtr);
+		X_API_MEMBER void Clean();
+		X_API_MEMBER void Check(uint64_t NowMS);
+		X_API_MEMBER bool PostData(const void * DataPtr, size_t DataSize);
+		X_API_MEMBER bool PostData(size_t Index, const void * DataPtr, size_t DataSize);
+		X_INLINE     void SetReconnectTimeoutMS(uint64_t TimeoutMS) { _ReconnectTimeoutMS = TimeoutMS; }
 
 	protected:
-        ZEC_API_MEMBER size_t  OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize) override;
-        ZEC_API_MEMBER void    OnConnected(xTcpConnection * TcpConnectionPtr) override;
-        ZEC_API_MEMBER void    OnPeerClose(xTcpConnection * TcpConnectionPtr) override { Kill(TcpConnectionPtr); }
-        ZEC_API_MEMBER void    OnError(xTcpConnection * TcpConnectionPtr) override { Kill(TcpConnectionPtr); }
-		ZEC_INLINE     void    Kill(xTcpConnection * TcpConnectionPtr) { _KillConnectionList.GrabTail(static_cast<xTcpConnectionEx&>(*TcpConnectionPtr)); }
+        X_API_MEMBER size_t  OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize) override;
+        X_API_MEMBER void    OnConnected(xTcpConnection * TcpConnectionPtr) override;
+        X_API_MEMBER void    OnPeerClose(xTcpConnection * TcpConnectionPtr) override { Kill(TcpConnectionPtr); }
+        X_API_MEMBER void    OnError(xTcpConnection * TcpConnectionPtr) override { Kill(TcpConnectionPtr); }
+		X_INLINE     void    Kill(xTcpConnection * TcpConnectionPtr) { _KillConnectionList.GrabTail(static_cast<xTcpConnectionEx&>(*TcpConnectionPtr)); }
 
 	private:
 		static constexpr xTcpConnectionEx::eType DisabledConnection = 0;

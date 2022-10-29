@@ -10,7 +10,7 @@
 #include <string>
 #include <algorithm>
 
-ZEC_NS
+X_NS
 {
 
 	static constexpr auto gcHint = xArray {
@@ -65,7 +65,7 @@ ZEC_NS
 
 		std::tm brokenTime;
 		std::time_t now = std::time(nullptr);
-		ZecLocalTime(&now, &brokenTime);
+		XLocalTime(&now, &brokenTime);
 
 		std::hash<std::thread::id> hasher;
 

@@ -1,7 +1,7 @@
 #include <zec_ext/Lua/LuaWrap.hpp>
 #include <new>
 
-ZEC_NS
+X_NS
 {
 
     xLuaState::xLuaState()

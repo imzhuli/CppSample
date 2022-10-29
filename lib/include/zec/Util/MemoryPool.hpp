@@ -10,7 +10,7 @@
 #include <cstdlib>
 #include <cstring>
 
-ZEC_NS
+X_NS
 {
 	struct xMemoryPoolOptions {
 		xAllocator *  Allocator = &DefaultAllocator;
@@ -33,11 +33,11 @@ ZEC_NS
 			alignas(T) ubyte xObjectHolder[sizeof(T)];
 			xTypeWrapper * pNext;
 
-			ZEC_INLINE T* Construct() { auto pTarget = ((void*)&xObjectHolder); new (pTarget) T; return static_cast<T*>(pTarget); }
+			X_INLINE T* Construct() { auto pTarget = ((void*)&xObjectHolder); new (pTarget) T; return static_cast<T*>(pTarget); }
 			template<typename ... CArgs>
-			ZEC_INLINE T* ConstructWith(CArgs && ... cargs) { auto pTarget = ((void*)&xObjectHolder); new (pTarget) T{std::forward<CArgs>(cargs)...}; return static_cast<T*>(pTarget); }
+			X_INLINE T* ConstructWith(CArgs && ... cargs) { auto pTarget = ((void*)&xObjectHolder); new (pTarget) T{std::forward<CArgs>(cargs)...}; return static_cast<T*>(pTarget); }
 
-			ZEC_INLINE void Destruct() noexcept { reinterpret_cast<T*>(&xObjectHolder)->~T(); }
+			X_INLINE void Destruct() noexcept { reinterpret_cast<T*>(&xObjectHolder)->~T(); }
 		};
 
 		struct xBlock : public xListNode {
@@ -45,7 +45,7 @@ ZEC_NS
 			size_t InitCount = 0;
 			xTypeWrapper ResourcePool[1];
 
-			ZEC_INLINE xBlock(size_t count) noexcept : Count(count) {}
+			X_INLINE xBlock(size_t count) noexcept : Count(count) {}
 			xBlock(xBlock&&) = delete;
 		};
 
@@ -63,7 +63,7 @@ ZEC_NS
 
 	public:
 
-		ZEC_INLINE bool Init(const size_t MaxPoolSize, const size_t Addend = 128) {
+		X_INLINE bool Init(const size_t MaxPoolSize, const size_t Addend = 128) {
 			assert(MaxPoolSize > 0);
 			xMemoryPoolOptions Options = {};
 			Options.MaxPoolSize = (Options.InitSize >= MaxPoolSize) ? Options.InitSize : MaxPoolSize;
@@ -71,7 +71,7 @@ ZEC_NS
 			return Init(Options);
 		}
 
-		ZEC_INLINE bool Init(const xMemoryPoolOptions & Options) {
+		X_INLINE bool Init(const xMemoryPoolOptions & Options) {
 			assert(Options.Allocator);
 			assert(Options.MultiplierBy100th || Options.Addend);
 			assert(Options.InitSize >= 1 && Options.MaxSizeIncrement > 0);
@@ -86,7 +86,7 @@ ZEC_NS
 			return AllocBlock(cInitSize) != nullptr;
 		}
 
-		ZEC_INLINE void Clean() {
+		X_INLINE void Clean() {
 			for(auto & block : _BlockList) {
 				/**
 				 * call to block.~xBlock() is omitted,
@@ -100,7 +100,7 @@ ZEC_NS
 			_TotalSize = 0;
 		}
 
-		ZEC_INLINE T * Create() {
+		X_INLINE T * Create() {
 			if (_NextFreeNode) {
 				T * pTarget = _NextFreeNode->Construct();
 				_NextFreeNode = _NextFreeNode->pNext;
@@ -117,7 +117,7 @@ ZEC_NS
 		}
 
 		template<typename... CArgs>
-		ZEC_INLINE T * CreateValue(CArgs && ... cargs) {
+		X_INLINE T * CreateValue(CArgs && ... cargs) {
 			if (_NextFreeNode) {
 				T * pTarget = _NextFreeNode->ConstructWith(std::forward<CArgs>(cargs)...);
 				_NextFreeNode = _NextFreeNode->pNext;
@@ -133,7 +133,7 @@ ZEC_NS
 			return pTarget;
 		}
 
-		ZEC_INLINE void Destroy(T * pTarget) {
+		X_INLINE void Destroy(T * pTarget) {
 			assert(pTarget);
 			xTypeWrapper * pWrapper = reinterpret_cast<xTypeWrapper*>(
 				reinterpret_cast<ubyte*>(pTarget) - offsetof(xTypeWrapper, xObjectHolder)
@@ -144,7 +144,7 @@ ZEC_NS
 		}
 
 	private:
-		ZEC_INLINE xBlock * ExtendPool() {
+		X_INLINE xBlock * ExtendPool() {
 			size_t maxAddSize = std::min(cMaxSizeIncrement, cMaxPoolSize - _TotalSize);
 			if (!maxAddSize) {
 				return nullptr;

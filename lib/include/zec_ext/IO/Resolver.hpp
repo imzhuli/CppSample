@@ -10,7 +10,7 @@
 #include "./IoContext.hpp"
 #include "./NetBase.hpp"
 
-ZEC_NS
+X_NS
 {
 
     class xTcpResolver
@@ -31,11 +31,11 @@ ZEC_NS
         };
 
     public:
-        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, iListener * ObserverPtr);
-        ZEC_API_MEMBER void Clean();
-        ZEC_API_MEMBER bool Request(const std::string & Hostname, const xVariable RequestContext = {});
-        ZEC_API_MEMBER void ClearTimeoutRequest();
-        ZEC_API_MEMBER void ClearTimeoutCacheNode();
+        X_API_MEMBER bool Init(xIoContext * IoContextPtr, iListener * ObserverPtr);
+        X_API_MEMBER void Clean();
+        X_API_MEMBER bool Request(const std::string & Hostname, const xVariable RequestContext = {});
+        X_API_MEMBER void ClearTimeoutRequest();
+        X_API_MEMBER void ClearTimeoutCacheNode();
 
     private:
         iListener *                                 _ListenerPtr = nullptr;

@@ -4,7 +4,7 @@
 #include <locale>
 #include <cinttypes>
 
-ZEC_NS
+X_NS
 {
 
 	static constexpr const char CTBL[256] =
@@ -69,9 +69,9 @@ ZEC_NS
 
 	using Hex2 = char[2];
 
-	// ZEC_STATIC_INLINE constexpr const Hex2 & StrToHexLower(char c) { return HTBL[static_cast<unsigned char>(c)]; }
-	// ZEC_STATIC_INLINE constexpr const Hex2 & StrToHex(char c) { return HTBL_UPPER[static_cast<unsigned char>(c)]; }
-	// ZEC_STATIC_INLINE constexpr char x2c(const Hex2 &pc2) {
+	// X_STATIC_INLINE constexpr const Hex2 & StrToHexLower(char c) { return HTBL[static_cast<unsigned char>(c)]; }
+	// X_STATIC_INLINE constexpr const Hex2 & StrToHex(char c) { return HTBL_UPPER[static_cast<unsigned char>(c)]; }
+	// X_STATIC_INLINE constexpr char x2c(const Hex2 &pc2) {
 	// 	auto uc0 = static_cast<unsigned char>(pc2[0]);
 	// 	auto uc1 = static_cast<unsigned char>(pc2[1]);
 	// 	return static_cast<char>((CTBL[uc0] << 4) + CTBL[uc1]);

@@ -5,18 +5,18 @@
 #include <zec/Util/Chrono.hpp>
 #include <string>
 
-ZEC_NS
+X_NS
 {
     class xIoCaster;
 
     class xIoHandle
     {
     public:
-        ZEC_INLINE xIoHandle(void * NativeObjectPtr) : ObjectPtr(NativeObjectPtr) {}
+        X_INLINE xIoHandle(void * NativeObjectPtr) : ObjectPtr(NativeObjectPtr) {}
         template<typename T>
-        ZEC_INLINE T* AsPtr() const { return static_cast<T*>(ObjectPtr); };
+        X_INLINE T* AsPtr() const { return static_cast<T*>(ObjectPtr); };
         template<typename T>
-        ZEC_INLINE T& AsRef() const { return *static_cast<T*>(ObjectPtr); };
+        X_INLINE T& AsRef() const { return *static_cast<T*>(ObjectPtr); };
     private:
         void * ObjectPtr;
     };
@@ -25,9 +25,9 @@ ZEC_NS
     : xNonCopyable
     {
     public:
-        ZEC_API_MEMBER bool Init();
-        ZEC_API_MEMBER void Clean();
-        ZEC_API_MEMBER void LoopOnce(int TimeoutMS);
+        X_API_MEMBER bool Init();
+        X_API_MEMBER void Clean();
+        X_API_MEMBER void LoopOnce(int TimeoutMS);
 
     private:
         xDummy<24>             _Native;

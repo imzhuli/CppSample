@@ -41,7 +41,7 @@
 /*
 ** Cost of calling one finalizer.
 */
-#define GCFINALIZECOST	50
+#define GCFINALIXOST	50
 
 
 /*
@@ -1620,7 +1620,7 @@ static lu_mem singlestep (lua_State *L) {
     case GCScallfin: {  /* call remaining finalizers */
       if (g->tobefnz && !g->gcemergency) {
         g->gcstopem = 0;  /* ok collections during finalizers */
-        work = runafewfinalizers(L, GCFINMAX) * GCFINALIZECOST;
+        work = runafewfinalizers(L, GCFINMAX) * GCFINALIXOST;
       }
       else {  /* emergency mode or no more finalizers */
         g->gcstate = GCSpause;  /* finish collection */

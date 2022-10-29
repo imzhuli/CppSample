@@ -2,7 +2,7 @@
 #include <sstream>
 #include <cstring>
 
-ZEC_NS
+X_NS
 {
 
 	xCommandLine::xCommandLine(int Argc, const char ** Argv, const std::vector<xOption> & OptionList)

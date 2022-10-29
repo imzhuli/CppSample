@@ -3,7 +3,7 @@
 #include <chrono>
 #include <ctime>
 
-ZEC_NS
+X_NS
 {
 
 	using xHiResxClock = std::chrono::high_resolution_clock;
@@ -21,16 +21,16 @@ ZEC_NS
 	using xNanoSeconds    = std::chrono::nanoseconds;
 
 #if __cplusplus < 202002L
-	ZEC_API uint64_t GetTimestampUS();
+	X_API uint64_t GetTimestampUS();
 #else
-	ZEC_INLINE uint64_t GetTimestampUS() {
+	X_INLINE uint64_t GetTimestampUS() {
 		return std::chrono::duration_cast<std::chrono::microseconds>(
 			std::chrono::system_clock::now().time_since_epoch()
 		).count();
 	}
 #endif
-	ZEC_INLINE uint64_t GetTimestampMS() { return GetTimestampUS() / 1000; }
-	ZEC_INLINE uint64_t GetTimestamp()   { return GetTimestampUS() / 1000000; }
+	X_INLINE uint64_t GetTimestampMS() { return GetTimestampUS() / 1000; }
+	X_INLINE uint64_t GetTimestamp()   { return GetTimestampUS() / 1000000; }
 
 	class xTimer
 	{
@@ -40,7 +40,7 @@ ZEC_NS
 		using xDuration = xSteadyDuration;
 		static_assert(std::is_signed_v<xDuration::rep>);
 
-		ZEC_STATIC_INLINE xTimePoint Now() {
+		X_STATIC_INLINE xTimePoint Now() {
 			return xClock::now();
 		}
 
@@ -48,42 +48,42 @@ ZEC_NS
 		xTimePoint _LastTagTime;
 
 	public:
-		ZEC_INLINE xTimer() {
+		X_INLINE xTimer() {
 			_LastTagTime = Now();
 		}
 
-		ZEC_INLINE xDuration Elapsed() {
+		X_INLINE xDuration Elapsed() {
 			return Now() - _LastTagTime;
 		}
 
-		ZEC_INLINE xDuration Skip(const xDuration & duration)
+		X_INLINE xDuration Skip(const xDuration & duration)
 		{
 			_LastTagTime += duration;
 			return duration;
 		}
 
-		ZEC_INLINE void Tag() {
+		X_INLINE void Tag() {
 			Tag(Now());
 		}
 
-		ZEC_INLINE void Tag(xTimePoint tp) {
+		X_INLINE void Tag(xTimePoint tp) {
 			_LastTagTime = tp;
 		}
 
-		ZEC_INLINE xTimePoint TagAndGet() {
+		X_INLINE xTimePoint TagAndGet() {
 			auto N = Now();
 			Tag(N);
 			return N;
 		}
 
-		ZEC_INLINE xDuration TagAndGetElapsed() {
+		X_INLINE xDuration TagAndGetElapsed() {
 			auto L = _LastTagTime;
 			auto N = Now();
 			Tag(N);
 			return N - L;
 		}
 
-		ZEC_INLINE bool TestAndTag(xDuration testDuration) {
+		X_INLINE bool TestAndTag(xDuration testDuration) {
 			xTimePoint n = Now();
 			if (Diff(n - _LastTagTime, testDuration).count() >= 0) {
 				_LastTagTime = n;
@@ -92,7 +92,7 @@ ZEC_NS
 			return false;
 		}
 
-		ZEC_INLINE xTimePoint GetAndTag() {
+		X_INLINE xTimePoint GetAndTag() {
 			return Steal(_LastTagTime, Now());
 		}
 
@@ -110,7 +110,7 @@ ZEC_NS
 		 *  }
 		 *  so even if the test happens 10s later, it acts as if test happeds every 1s, and 10 times in all.
 		 */
-		ZEC_INLINE bool Consume(xDuration duration) {
+		X_INLINE bool Consume(xDuration duration) {
 			xTimePoint target = _LastTagTime + duration;
 			if (Diff(Now(), target).count() >= 0) {
 				_LastTagTime = target;

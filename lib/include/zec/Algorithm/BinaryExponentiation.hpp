@@ -1,11 +1,11 @@
 #pragma once
 #include "../Common.hpp"
 
-ZEC_NS
+X_NS
 {
 
     template<typename tOperator>
-    ZEC_INLINE typename xNonCVR<tOperator>::xUnit BinaryExponentiation(tOperator && Operator, typename xNonCVR<tOperator>::xUnit Base, size_t Times)
+    X_INLINE typename xNonCVR<tOperator>::xUnit BinaryExponentiation(tOperator && Operator, typename xNonCVR<tOperator>::xUnit Base, size_t Times)
     {
         using xOperator = xNonCVR<tOperator>;
         using xUnit = xNonCVR<typename xOperator::xUnit>;

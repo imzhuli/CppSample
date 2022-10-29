@@ -1,6 +1,6 @@
 #include <zec/Util/Transactional.hpp>
 
-ZEC_NS
+X_NS
 {
 
 	bool xTransactional::Execute()

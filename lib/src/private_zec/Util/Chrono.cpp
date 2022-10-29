@@ -1,13 +1,13 @@
 #include <zec/Util/Chrono.hpp>
 
-#ifdef ZEC_SYSTEM_WINDOWS
+#ifdef X_SYSTEM_WINDOWS
 #define WIN32_LEAN_AND_MEAN
 #include <Windows.h>
 namespace {
 	[[maybe_unused]]
 	static constexpr const uint64_t EPOCH = ((uint64_t) 116444736000000000ULL);
 	[[maybe_unused]]
-	ZEC_STATIC_INLINE uint64_t Internal_MicroTimestamp()
+	X_STATIC_INLINE uint64_t Internal_MicroTimestamp()
 	{
 		// Note: some broken versions only have 8 trailing zero's, the correct epoch has 9 trailing zero's
 		// This magic number is the number of 100 nanosecond intervals since January 1, 1601 (UTC)
@@ -28,7 +28,7 @@ namespace {
 #include <sys/time.h>
 namespace {
 	[[maybe_unused]]
-	ZEC_STATIC_INLINE uint64_t Internal_MicroTimestamp() {
+	X_STATIC_INLINE uint64_t Internal_MicroTimestamp() {
 		timeval tv;
 		gettimeofday(&tv, nullptr);
 		return tv.tv_sec * 1000000 + tv.tv_usec;
@@ -37,7 +37,7 @@ namespace {
 #endif
 
 #if __cplusplus < 202002L
-ZEC_NS
+X_NS
 {
 	uint64_t GetTimestampUS() {
 		return Internal_MicroTimestamp();

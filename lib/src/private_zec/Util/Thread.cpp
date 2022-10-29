@@ -1,6 +1,6 @@
 #include <zec/Util/Thread.hpp>
 
-ZEC_NS
+X_NS
 {
 
 	void xThreadSynchronizer::Aquire()

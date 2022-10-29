@@ -6,7 +6,7 @@
 #include <mutex>
 #include <condition_variable>
 
-ZEC_NS
+X_NS
 {	
 	
 	template<typename tMutex, typename tFuncObj, typename ... tArgs>
@@ -19,7 +19,7 @@ ZEC_NS
 	class xSpinlock final
 	{
 	public:
-		ZEC_INLINE void Lock() const noexcept {
+		X_INLINE void Lock() const noexcept {
 			for (;;) {
 				// Optimistically assume the lock is free on the first try
 				if (!_LockVariable.exchange(true, std::memory_order_acquire)) {
@@ -35,14 +35,14 @@ ZEC_NS
 			}
 		}
 
-		ZEC_INLINE bool TryLock() const noexcept {
+		X_INLINE bool TryLock() const noexcept {
 			// First do a relaxed load to check if lock is free in order to prevent
 			// unnecessary cache misses if someone does while(!try_lock())
 			return !_LockVariable.load(std::memory_order_relaxed) &&
 				!_LockVariable.exchange(true, std::memory_order_acquire);
 		}
 
-		ZEC_INLINE void Unlock() const noexcept {
+		X_INLINE void Unlock() const noexcept {
 			_LockVariable.store(false, std::memory_order_release);
 		}
 	private:
@@ -53,11 +53,11 @@ ZEC_NS
 	: xNonCopyable
 	{
 	public:
-		[[nodiscard]] ZEC_INLINE xSpinlockGuard(const xSpinlock & Spinlock)
+		[[nodiscard]] X_INLINE xSpinlockGuard(const xSpinlock & Spinlock)
 		: _Spinlock(&Spinlock) {
 			_Spinlock->Lock();
 		}
-		ZEC_INLINE ~xSpinlockGuard() {
+		X_INLINE ~xSpinlockGuard() {
 			_Spinlock->Unlock();
 		}
 	private:
@@ -79,9 +79,9 @@ ZEC_NS
 		Context                    _Coutnexts[2];
 
 	public:
-		ZEC_API_MEMBER void Aquire();
-		ZEC_API_MEMBER void Release();
-		ZEC_API_MEMBER void Sync();
+		X_API_MEMBER void Aquire();
+		X_API_MEMBER void Release();
+		X_API_MEMBER void Sync();
 	};
 
 	namespace __detail__
@@ -96,7 +96,7 @@ ZEC_NS
 			bool _Ready = false;
 
 		public:
-			ZEC_INLINE void Reset() {
+			X_INLINE void Reset() {
 				auto Lock = std::unique_lock(_Mutex);
 				_Ready = false;
 			}
@@ -108,7 +108,7 @@ ZEC_NS
 			}
 
 			template<typename tFuncPre, typename tFuncPost>
-			ZEC_INLINE void Wait(const tFuncPre & funcPre, const tFuncPost & funcPost) {
+			X_INLINE void Wait(const tFuncPre & funcPre, const tFuncPost & funcPost) {
 				auto Lock = std::unique_lock(_Mutex);
 				funcPre();
 				_ConditionVariable.wait(Lock, [this](){return _Ready;});
@@ -132,7 +132,7 @@ ZEC_NS
 			}
 
 			template<typename Rep, typename Period, typename tFuncPre, typename tFuncPost>
-			ZEC_INLINE bool WaitFor(const std::chrono::duration<Rep, Period>& RelTime
+			X_INLINE bool WaitFor(const std::chrono::duration<Rep, Period>& RelTime
 					, const tFuncPre & funcPre,  const tFuncPost & funcPost) {
 				auto Lock = std::unique_lock(_Mutex);
 				funcPre();
@@ -148,7 +148,7 @@ ZEC_NS
 				return true;
 			}
 			template<typename Rep, typename Period, typename tFuncPost = xPass>
-			ZEC_INLINE bool WaitFor(const std::chrono::duration<Rep, Period>& RelTime, const tFuncPost & funcPost = {}) {
+			X_INLINE bool WaitFor(const std::chrono::duration<Rep, Period>& RelTime, const tFuncPost & funcPost = {}) {
 				auto Lock = std::unique_lock(_Mutex);
 				if (!_ConditionVariable.wait_for(Lock, RelTime, [this](){return _Ready;})) {
 					return false;
@@ -163,7 +163,7 @@ ZEC_NS
 			}
 
 			template<typename tFuncObj = xPass>
-			ZEC_INLINE std::enable_if_t<std::is_same_v<void, std::invoke_result_t<tFuncObj>>> Notify(const tFuncObj & PreNotifyFunc = {}) {
+			X_INLINE std::enable_if_t<std::is_same_v<void, std::invoke_result_t<tFuncObj>>> Notify(const tFuncObj & PreNotifyFunc = {}) {
 				do {
 					auto Lock = std::unique_lock(_Mutex);
 					PreNotifyFunc();
@@ -173,7 +173,7 @@ ZEC_NS
 			}
 
 			template<typename tFuncObj = xPass>
-			ZEC_INLINE std::enable_if_t<std::is_same_v<void, std::invoke_result_t<tFuncObj>>> NotifyAll(const tFuncObj & PreNotifyFunc = {}) {
+			X_INLINE std::enable_if_t<std::is_same_v<void, std::invoke_result_t<tFuncObj>>> NotifyAll(const tFuncObj & PreNotifyFunc = {}) {
 				do {
 					auto Lock = std::unique_lock(_Mutex);
 					PreNotifyFunc();
@@ -189,9 +189,9 @@ ZEC_NS
 	class xThreadChecker final
 	{
 	public:
-		ZEC_INLINE void Init()  { _ThreadId = std::this_thread::get_id(); }
-		ZEC_INLINE void Clean() { _ThreadId = {}; }
-		ZEC_INLINE void Check() { if (std::this_thread::get_id() != _ThreadId) { Error(); }};
+		X_INLINE void Init()  { _ThreadId = std::this_thread::get_id(); }
+		X_INLINE void Clean() { _ThreadId = {}; }
+		X_INLINE void Check() { if (std::this_thread::get_id() != _ThreadId) { Error(); }};
 	private:
 		std::thread::id _ThreadId;
 	};
@@ -202,9 +202,9 @@ ZEC_NS
 	class xDebugThreadChecker
 	{
 	public:
-		ZEC_INLINE void Init()  {}
-		ZEC_INLINE void Clean() {}
-		ZEC_INLINE void Check() {}
+		X_INLINE void Init()  {}
+		X_INLINE void Clean() {}
+		X_INLINE void Check() {}
 	};
 #endif
 

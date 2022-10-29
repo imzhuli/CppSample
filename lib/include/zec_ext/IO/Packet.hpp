@@ -4,7 +4,7 @@
 #include <algorithm>
 #include <cstring>
 
-ZEC_NS
+X_NS
 {
 
     static constexpr const size_t PacketHeaderSize           = 32;
@@ -35,7 +35,7 @@ ZEC_NS
         xPacketRequestId         RequestId = 0;
         ubyte                    TraceId[16] = {}; // allow uuid
 
-        ZEC_API_MEMBER void      Serialize(void * DestPtr) const {
+        X_API_MEMBER void      Serialize(void * DestPtr) const {
             xStreamWriter S(DestPtr);
             S.W4L(MakeHeaderLength(PacketLength));
             S.W1L(PackageSequenceId);
@@ -45,7 +45,7 @@ ZEC_NS
             S.W(TraceId, 16);
         }
 
-        ZEC_INLINE size32_t  Deserialize(const void * SourcePtr) {
+        X_INLINE size32_t  Deserialize(const void * SourcePtr) {
             xStreamReader S(SourcePtr);
             PacketLength = S.R4L();
             if (!CheckPackageLength(PacketLength)) {
@@ -60,11 +60,11 @@ ZEC_NS
             return PacketLength;
         }
 
-        ZEC_INLINE size_t GetPayloadSize() const {
+        X_INLINE size_t GetPayloadSize() const {
             return PacketLength - PacketHeaderSize;
         }
 
-        ZEC_STATIC_INLINE void PatchRequestId(void * PacketPtr, xPacketRequestId RequestId) {
+        X_STATIC_INLINE void PatchRequestId(void * PacketPtr, xPacketRequestId RequestId) {
             xStreamWriter S(PacketPtr);
             S.Skip(
                 + 4 // PacketLength
@@ -73,7 +73,7 @@ ZEC_NS
             S.W8L(RequestId);
         };
 
-        ZEC_STATIC_INLINE size_t MakeKeepAlive(void * PackageHeaderBuffer) {
+        X_STATIC_INLINE size_t MakeKeepAlive(void * PackageHeaderBuffer) {
             xPacketHeader Header;
             Header.CommandId = CmdId_KeepAlive;
             Header.PacketLength = PacketHeaderSize;
@@ -81,7 +81,7 @@ ZEC_NS
             return PacketHeaderSize;
         }
 
-        ZEC_STATIC_INLINE size_t MakeCheckKeepAlive(void * PackageHeaderBuffer) {
+        X_STATIC_INLINE size_t MakeCheckKeepAlive(void * PackageHeaderBuffer) {
             xPacketHeader Header;
             Header.CommandId = CmdId_KeepAlive;
             Header.RequestId = 0xFFFF'FFFF'FFFF'FFFFul;
@@ -90,16 +90,16 @@ ZEC_NS
             return PacketHeaderSize;
         }
 
-        ZEC_STATIC_INLINE bool IsServerCheckKeepAlive(const xPacketHeader & Header) {
+        X_STATIC_INLINE bool IsServerCheckKeepAlive(const xPacketHeader & Header) {
             return Header.CommandId == CmdId_KeepAlive && Header.RequestId == 0xFFFF'FFFF'FFFF'FFFFul;
         }
 
     private:
-        ZEC_STATIC_INLINE uint32_t MakeHeaderLength(uint32_t PacketLength) {
+        X_STATIC_INLINE uint32_t MakeHeaderLength(uint32_t PacketLength) {
             assert(PacketLength <= MaxPacketSize);
             return PacketLength | PacketMagicValue;
         }
-        ZEC_STATIC_INLINE bool CheckPackageLength(uint32_t PacketLength) {
+        X_STATIC_INLINE bool CheckPackageLength(uint32_t PacketLength) {
             return (PacketLength & PacketMagicMask) == PacketMagicValue
                 && (PacketLength & PacketLengthMask) <= MaxPacketSize;
         }
@@ -110,8 +110,8 @@ ZEC_NS
         xPacketHeader Header;
         ubyte Payload[MaxPacketSize - xPacketHeader::Size];
 
-        ZEC_STATIC_INLINE ubyte * GetPayload(void * PacketPtr) { return (ubyte *)PacketPtr + xPacketHeader::Size; }
-        ZEC_STATIC_INLINE const ubyte * GetPayload(const void * PacketPtr) { return (const ubyte *)PacketPtr + xPacketHeader::Size; }
+        X_STATIC_INLINE ubyte * GetPayload(void * PacketPtr) { return (ubyte *)PacketPtr + xPacketHeader::Size; }
+        X_STATIC_INLINE const ubyte * GetPayload(const void * PacketPtr) { return (const ubyte *)PacketPtr + xPacketHeader::Size; }
     };
 
 }

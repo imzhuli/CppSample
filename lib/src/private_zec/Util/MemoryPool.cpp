@@ -1,4 +1,4 @@
 #include <zec/Util/MemoryPool.hpp>
 
-ZEC_NS
+X_NS
 {}

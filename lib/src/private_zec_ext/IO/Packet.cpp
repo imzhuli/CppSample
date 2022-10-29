@@ -1,7 +1,7 @@
 #include <zec_ext/IO/Packet.hpp>
 #include <zec/Byte.hpp>
 
-ZEC_NS
+X_NS
 {
 
     static_assert(std::is_standard_layout_v<xPacketHeader>);

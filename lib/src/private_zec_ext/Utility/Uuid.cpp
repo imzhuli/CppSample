@@ -124,7 +124,7 @@ namespace
 	}
 }
 
-ZEC_NS
+X_NS
 {
 	static_assert(sizeof(xUuid) == sizeof(xUuid::xRawType));
 

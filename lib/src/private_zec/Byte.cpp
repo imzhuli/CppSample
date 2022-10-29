@@ -1,6 +1,6 @@
 #include <zec/Byte.hpp>
 
-ZEC_NS
+X_NS
 {
 
     namespace __detail__::__raw__

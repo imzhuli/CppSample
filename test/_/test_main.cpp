@@ -41,12 +41,12 @@ void TestAddressOf()
     Assert(Address != (const void*)a);
 	Assert(Address != &static_cast<const unsigned char &>(a));
 	Assert(Address == &reinterpret_cast<const unsigned char &>(a));
-	Assert((ZEC_AddressOf)(a) == Address);
+	Assert((X_AddressOf)(a) == Address);
 
 
 	B b;
 	auto Address_B = AddressOf(b);
-	Assert(Address_B == ZEC_Entry(ZEC_AddressOf(b.c), B, c));
+	Assert(Address_B == X_Entry(X_AddressOf(b.c), B, c));
 }
 
 

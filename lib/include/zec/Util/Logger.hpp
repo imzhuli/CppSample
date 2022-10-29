@@ -8,7 +8,7 @@
 #include <atomic>
 #include <cinttypes>
 
-ZEC_NS
+X_NS
 {
 
 	enum struct eLogLevel : int_fast32_t
@@ -24,41 +24,41 @@ ZEC_NS
 	class xLogger : xAbstract
 	{
 	public:
-		ZEC_API_MEMBER xLogger();
-		ZEC_API_MEMBER ~xLogger();
+		X_API_MEMBER xLogger();
+		X_API_MEMBER ~xLogger();
 
-		ZEC_API_MEMBER
+		X_API_MEMBER
 		virtual void UpdateConfig(const char * aConfigData, size_t cConfigDataSize);
 		virtual void SetLogLevel(eLogLevel ll) = 0;
 		virtual void Log(eLogLevel ll, const char * fmt, ...) = 0;
 
 		// helper functions
-		ZEC_INLINE void UpdateConfig(const char * aConfigData) { UpdateConfig(aConfigData, strlen(aConfigData)); }
+		X_INLINE void UpdateConfig(const char * aConfigData) { UpdateConfig(aConfigData, strlen(aConfigData)); }
 
 		template<typename ... Args>
-		ZEC_INLINE void V(const char * fmt, Args&& ... args) {
+		X_INLINE void V(const char * fmt, Args&& ... args) {
 			Log(eLogLevel::Verbose, fmt, std::forward<Args>(args)...);
 		}
 
 	#ifndef NDEBUG
 		template<typename ... Args>
-		ZEC_INLINE void D(const char * fmt, Args&& ... args) {
+		X_INLINE void D(const char * fmt, Args&& ... args) {
 			Log(eLogLevel::Debug, fmt, std::forward<Args>(args)...);
 		}
 	#else
 		template<typename ... Args>
-		ZEC_INLINE void D(const char * fmt, Args&& ... args) {
+		X_INLINE void D(const char * fmt, Args&& ... args) {
 			Pass();
 		}
 	#endif
 
 		template<typename ... Args>
-		ZEC_INLINE void I(const char * fmt, Args&& ... args) {
+		X_INLINE void I(const char * fmt, Args&& ... args) {
 			Log(eLogLevel::Info, fmt, std::forward<Args>(args)...);
 		}
 
 		template<typename ... Args>
-		ZEC_INLINE void E(const char * fmt, Args&& ... args) {
+		X_INLINE void E(const char * fmt, Args&& ... args) {
 			Log(eLogLevel::Error, fmt, std::forward<Args>(args)...);
 		}
 	};
@@ -74,24 +74,24 @@ ZEC_NS
 	: public xLogger
 	{
 	public:
-		ZEC_API_MEMBER xSimpleLogger();
-		ZEC_API_MEMBER ~xSimpleLogger();
+		X_API_MEMBER xSimpleLogger();
+		X_API_MEMBER ~xSimpleLogger();
 
-		ZEC_API_MEMBER bool Init(const char * PathPtr = nullptr, bool AutoStdout = true);
-		ZEC_API_MEMBER void Clean();
-		ZEC_INLINE     bool IsStdout() const { return _LogFile == stdout; }
+		X_API_MEMBER bool Init(const char * PathPtr = nullptr, bool AutoStdout = true);
+		X_API_MEMBER void Clean();
+		X_INLINE     bool IsStdout() const { return _LogFile == stdout; }
 
-		ZEC_API_MEMBER void SetLogLevel(eLogLevel ll) override { _LogLevel = ll; }
-		ZEC_API_MEMBER void Log(eLogLevel ll, const char * fmt, ...) override;
+		X_API_MEMBER void SetLogLevel(eLogLevel ll) override { _LogLevel = ll; }
+		X_API_MEMBER void Log(eLogLevel ll, const char * fmt, ...) override;
 
-		ZEC_API_MEMBER FILE * Lock() {
+		X_API_MEMBER FILE * Lock() {
 			_SyncMutex.lock();
 			if (!_LogFile) {
 				_SyncMutex.unlock();
 			}
 			return _LogFile;
 		}
-		ZEC_API_MEMBER void Unlock(FILE * && ExpiringFilePtr) {
+		X_API_MEMBER void Unlock(FILE * && ExpiringFilePtr) {
 			assert(ExpiringFilePtr == _LogFile);
 			_SyncMutex.unlock();
 		}
@@ -107,15 +107,15 @@ ZEC_NS
 	: public xLogger
 	{
 	public:
-		ZEC_API_MEMBER xMemoryLogger();
-		ZEC_API_MEMBER ~xMemoryLogger();
+		X_API_MEMBER xMemoryLogger();
+		X_API_MEMBER ~xMemoryLogger();
 
-		ZEC_API_MEMBER bool Init(size32_t MaxLineNumber = 10000, size32_t MaxLineSize = 1024);
-		ZEC_API_MEMBER void Clean();
+		X_API_MEMBER bool Init(size32_t MaxLineNumber = 10000, size32_t MaxLineSize = 1024);
+		X_API_MEMBER void Clean();
 
-		ZEC_API_MEMBER void SetLogLevel(eLogLevel ll) override { _LogLevel = ll; }
-		ZEC_API_MEMBER void Log(eLogLevel ll, const char * fmt, ...) override;
-		ZEC_API_MEMBER void Output(FILE * fp =  stdout);
+		X_API_MEMBER void SetLogLevel(eLogLevel ll) override { _LogLevel = ll; }
+		X_API_MEMBER void Log(eLogLevel ll, const char * fmt, ...) override;
+		X_API_MEMBER void Output(FILE * fp =  stdout);
 
 	private:
 		xSpinlock               _Spinlock;
@@ -134,6 +134,6 @@ ZEC_NS
 		static constexpr const size_t LineLeadBufferSize = 48;
 	};
 
-	ZEC_API xNonLogger * const NonLoggerPtr;
+	X_API xNonLogger * const NonLoggerPtr;
 
 }

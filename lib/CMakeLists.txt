@@ -32,40 +32,40 @@ set(shared_lib_dependency_public
 
 
 # source files:
-aux_source_directory(./src/private_lua                             ZEC_SRC)
+aux_source_directory(./src/private_lua                             X_SRC)
 
-aux_source_directory(./src/private_zec                             ZEC_SRC)
-aux_source_directory(./src/private_zec/Algorithm                   ZEC_SRC)
-aux_source_directory(./src/private_zec/Util                        ZEC_SRC)
-aux_source_directory(./src/private_zec/Container                   ZEC_SRC)
-aux_source_directory(./src/private_zec_ext/Lua                     ZEC_SRC)
+aux_source_directory(./src/private_zec                             X_SRC)
+aux_source_directory(./src/private_zec/Algorithm                   X_SRC)
+aux_source_directory(./src/private_zec/Util                        X_SRC)
+aux_source_directory(./src/private_zec/Container                   X_SRC)
+aux_source_directory(./src/private_zec_ext/Lua                     X_SRC)
 
-aux_source_directory(./src/private_zec_ext/IO                      ZEC_SRC)
-# aux_source_directory(./src/private_zec_ext/IO/Darwin               ZEC_SRC)
-# aux_source_directory(./src/private_zec_ext/IO/Linux                ZEC_SRC)
-# aux_source_directory(./src/private_zec_ext/IO/Windows              ZEC_SRC)
-aux_source_directory(./src/private_zec_ext/Utility                 ZEC_SRC)
+aux_source_directory(./src/private_zec_ext/IO                      X_SRC)
+# aux_source_directory(./src/private_zec_ext/IO/Darwin               X_SRC)
+# aux_source_directory(./src/private_zec_ext/IO/Linux                X_SRC)
+# aux_source_directory(./src/private_zec_ext/IO/Windows              X_SRC)
+aux_source_directory(./src/private_zec_ext/Utility                 X_SRC)
 
-aux_source_directory(./src/private_zec_game/Base                   ZEC_SRC)
-aux_source_directory(./src/private_zec_game/Window                 ZEC_SRC)
+aux_source_directory(./src/private_zec_game/Base                   X_SRC)
+aux_source_directory(./src/private_zec_game/Window                 X_SRC)
 
 # 3rd party
 
-if (ZEC_OPTION_STATIC)
+if (X_OPTION_STATIC)
 #static lib:
-	add_library(${libname} ${ZEC_SRC})
+	add_library(${libname} ${X_SRC})
 	set_target_properties(${libname} PROPERTIES VERSION 1.0)
 	target_link_libraries(${libname} PRIVATE ${shared_lib_dependency_private})
 	target_link_libraries(${libname} PUBLIC ${shared_lib_dependency_public})
-	target_compile_definitions(${libname} PRIVATE ZEC_OPTION_STATIC)
+	target_compile_definitions(${libname} PRIVATE X_OPTION_STATIC)
 
 else()
 #dynamic lib:
-	add_library(${libname} SHARED  ${ZEC_SRC})
+	add_library(${libname} SHARED  ${X_SRC})
 	set_target_properties(${libname} PROPERTIES VERSION 1.0)
 	target_link_libraries(${libname} PRIVATE ${shared_lib_dependency_private})
 	target_link_libraries(${libname} PUBLIC ${shared_lib_dependency_public})
-	target_compile_definitions(${libname} PRIVATE ZEC_OPTION_EXPORT_API)
+	target_compile_definitions(${libname} PRIVATE X_OPTION_EXPORT_API)
 endif()
 
 #install

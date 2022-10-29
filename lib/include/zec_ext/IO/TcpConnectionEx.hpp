@@ -5,7 +5,7 @@
 #include <zec/Util/IndexedStorage.hpp>
 #include "./TcpConnection.hpp"
 
-ZEC_NS
+X_NS
 {
 
     struct xTcpConnectionExNode : xListNode
@@ -34,20 +34,20 @@ ZEC_NS
             virtual size_t OnData(xAutoClientTcpConnection * ConnectionPtr, void * DataPtr, size_t DataSize) = 0;
         };
 
-        ZEC_API_MEMBER bool Init(xIoContext * ContextPtr, const xNetAddress ServerAddress, iListener * ListenerPtr);
-        ZEC_API_MEMBER void Clean();
+        X_API_MEMBER bool Init(xIoContext * ContextPtr, const xNetAddress ServerAddress, iListener * ListenerPtr);
+        X_API_MEMBER void Clean();
 
-        ZEC_API_MEMBER void        Check(uint64_t NowMS);
-        ZEC_API_MEMBER void        ResetConnection() { _Dying = true; }
-        ZEC_API_MEMBER size_t      PostData(const void * DataPtr, size_t DataSize);
-        ZEC_API_MEMBER bool        IsConnected() const { return _Connected; }
-        ZEC_API_MEMBER uint64_t    GetVersion() const { return _Version; }
+        X_API_MEMBER void        Check(uint64_t NowMS);
+        X_API_MEMBER void        ResetConnection() { _Dying = true; }
+        X_API_MEMBER size_t      PostData(const void * DataPtr, size_t DataSize);
+        X_API_MEMBER bool        IsConnected() const { return _Connected; }
+        X_API_MEMBER uint64_t    GetVersion() const { return _Version; }
 
     protected:
-        ZEC_API_MEMBER void   OnConnected(xTcpConnection * TcpConnectionPtr);
-        ZEC_API_MEMBER size_t OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize);
-        ZEC_API_MEMBER void   OnPeerClose(xTcpConnection * TcpConnectionPtr);
-        ZEC_API_MEMBER void   OnError(xTcpConnection * TcpConnectionPtr);
+        X_API_MEMBER void   OnConnected(xTcpConnection * TcpConnectionPtr);
+        X_API_MEMBER size_t OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize);
+        X_API_MEMBER void   OnPeerClose(xTcpConnection * TcpConnectionPtr);
+        X_API_MEMBER void   OnError(xTcpConnection * TcpConnectionPtr);
 
     private:
         xNetAddress                  _ServerAddress;
@@ -88,12 +88,12 @@ ZEC_NS
             Pool.Clean();
         }
 
-        ZEC_INLINE T* GetConnectionById(xIndexId Key) {
+        X_INLINE T* GetConnectionById(xIndexId Key) {
             auto Opt = KeyManager.CheckAndGet(Key);
             return Opt() ? *Opt : nullptr;
         }
 
-        ZEC_INLINE T* CreateConnection() {
+        X_INLINE T* CreateConnection() {
             auto ConnectionPtr = Pool.Create();
             if (!ConnectionPtr) {
                 return nullptr;
@@ -102,7 +102,7 @@ ZEC_NS
             return ConnectionPtr;
         }
 
-        ZEC_INLINE void DestroyConnection(T* ConnectionPtr) {
+        X_INLINE void DestroyConnection(T* ConnectionPtr) {
             KeyManager.Release(Steal(ConnectionPtr->ConnectionId));
             Pool.Destroy(ConnectionPtr);
         }

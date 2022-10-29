@@ -1,4 +1,4 @@
 #include <zec/View.hpp>
 
-ZEC_NS
+X_NS
 {}

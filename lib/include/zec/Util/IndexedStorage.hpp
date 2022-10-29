@@ -2,7 +2,7 @@
 #include "../Common.hpp"
 #include <random>
 
-ZEC_NS
+X_NS
 {
 
 	class xIndexId;
@@ -28,12 +28,12 @@ ZEC_NS
 	class xIndexId final
 	{
 	public:
-		ZEC_INLINE xIndexId() = default;
-		ZEC_INLINE constexpr xIndexId(uint64_t Value) : _Value(Value) {};
-		ZEC_INLINE constexpr operator uint64_t () const { return _Value; }
+		X_INLINE xIndexId() = default;
+		X_INLINE constexpr xIndexId(uint64_t Value) : _Value(Value) {};
+		X_INLINE constexpr operator uint64_t () const { return _Value; }
 
-		ZEC_INLINE uint32_t GetIndex() const { return (uint32_t)_Value; }
-		ZEC_INLINE uint32_t GetKey() const { return static_cast<uint32_t>(_Value >> 32);}
+		X_INLINE uint32_t GetIndex() const { return (uint32_t)_Value; }
+		X_INLINE uint32_t GetKey() const { return static_cast<uint32_t>(_Value >> 32);}
 
 		static constexpr uint64_t InvalidValue  = static_cast<uint64_t>(0);
 
@@ -45,11 +45,11 @@ ZEC_NS
 		template<typename tValue, bool RandomKey>
 		friend class xIndexedStorage;
 
-		ZEC_API_STATIC_MEMBER uint32_t TimeSeed();
+		X_API_STATIC_MEMBER uint32_t TimeSeed();
 		static constexpr const uint32_t MaxIndexValue    = ((uint32_t)0x3FFF'FFFFu);
 		static constexpr const uint32_t KeyInUseBitmask  = ((uint32_t)0x4000'0000u);
 		static constexpr const uint32_t KeyMask          = MaxIndexValue | KeyInUseBitmask;
-		ZEC_STATIC_INLINE bool IsSafeKey(uint32_t Key) { return ZEC_LIKELY(Key != (uint32_t)-1); }
+		X_STATIC_INLINE bool IsSafeKey(uint32_t Key) { return X_LIKELY(Key != (uint32_t)-1); }
 	};
 
 	template<bool RandomKey>
@@ -74,7 +74,7 @@ ZEC_NS
 			return true;
 		}
 
-		ZEC_INLINE std::enable_if_t<!RandomKey, bool> DebugInit(size_t Size, uint32_t InitCounter = 0) {
+		X_INLINE std::enable_if_t<!RandomKey, bool> DebugInit(size_t Size, uint32_t InitCounter = 0) {
 			if(!Init(Size)) {
 				return false;
 			}
@@ -91,7 +91,7 @@ ZEC_NS
 			_NextFreeIdIndex = NoFreeIndex;
 		}
 
-		ZEC_INLINE xIndexId Acquire() {
+		X_INLINE xIndexId Acquire() {
 			uint32_t Index;
 			if (_NextFreeIdIndex == NoFreeIndex) {
 				if (_InitedId >= _IdPoolSize) {
@@ -108,27 +108,27 @@ ZEC_NS
 			return { (static_cast<uint64_t>(Rand) << 32) + Index };
 		}
 
-		ZEC_INLINE void Release(const xIndexId& Id) {
+		X_INLINE void Release(const xIndexId& Id) {
 			uint32_t Index = Id.GetIndex();
 			_IdPoolPtr[Index] = Steal(_NextFreeIdIndex, Index);
 		}
 
-		ZEC_INLINE bool Check(const xIndexId& Id) {
+		X_INLINE bool Check(const xIndexId& Id) {
 			uint32_t Index = Id.GetIndex();
-			if (!ZEC_LIKELY(Index < _IdPoolSize)) {
+			if (!X_LIKELY(Index < _IdPoolSize)) {
 				return false;
 			}
 			auto Key = Id.GetKey();
-			return ZEC_LIKELY(xIndexId::IsSafeKey(Key)) && ZEC_LIKELY(Key == _IdPoolPtr[Index]);
+			return X_LIKELY(xIndexId::IsSafeKey(Key)) && X_LIKELY(Key == _IdPoolPtr[Index]);
 		}
 
-		ZEC_INLINE bool CheckAndRelease(const xIndexId& Id) {
+		X_INLINE bool CheckAndRelease(const xIndexId& Id) {
 			uint32_t Index = Id.GetIndex();
-			if (!ZEC_LIKELY(Index < _IdPoolSize)) {
+			if (!X_LIKELY(Index < _IdPoolSize)) {
 				return false;
 			}
 			auto Key = Id.GetKey();
-			if(!ZEC_LIKELY(xIndexId::IsSafeKey(Key)) || !ZEC_LIKELY(Key == _IdPoolPtr[Index])) {
+			if(!X_LIKELY(xIndexId::IsSafeKey(Key)) || !X_LIKELY(Key == _IdPoolPtr[Index])) {
 				return false;
 			}
 			_IdPoolPtr[Index] = Steal(_NextFreeIdIndex, Index);
@@ -159,7 +159,7 @@ ZEC_NS
 			xHolder<tValue> ValueHolder;
 		};
 	public:
-		ZEC_INLINE bool Init(size_t Size)
+		X_INLINE bool Init(size_t Size)
 		{
 			assert(Size <= xIndexId::MaxIndexValue);
 			assert(_IdPoolPtr == nullptr);
@@ -176,7 +176,7 @@ ZEC_NS
 			return true;
 		}
 
-		ZEC_INLINE std::enable_if_t<!RandomKey, bool> DebugInit(size_t Size, uint32_t InitCounter) {
+		X_INLINE std::enable_if_t<!RandomKey, bool> DebugInit(size_t Size, uint32_t InitCounter) {
 			if(!Init(Size)) {
 				return false;
 			}
@@ -184,7 +184,7 @@ ZEC_NS
 			return true;
 		}
 
-		ZEC_INLINE void Clean()
+		X_INLINE void Clean()
 		{
 			assert(_IdPoolPtr);
 			for (size_t Index = 0 ; Index < _InitedId; ++Index) {
@@ -200,11 +200,11 @@ ZEC_NS
 			_NextFreeIdIndex = NoFreeIndex;
 		}
 
-		ZEC_INLINE xIndexId Acquire(const tValue & Value) {
+		X_INLINE xIndexId Acquire(const tValue & Value) {
 			uint32_t Index;
 			xNode * NodePtr;
 			if (_NextFreeIdIndex == NoFreeIndex) {
-				if (ZEC_UNLIKELY(_InitedId >= _IdPoolSize)) {
+				if (X_UNLIKELY(_InitedId >= _IdPoolSize)) {
 					return xIndexId::InvalidValue;
 				}
 				NodePtr = &_IdPoolPtr[Index = _InitedId++];
@@ -224,7 +224,7 @@ ZEC_NS
 			return { (static_cast<uint64_t>(Rand) << 32) + Index };
 		}
 
-		ZEC_INLINE xIndexId Acquire(tValue && Value = {}) {
+		X_INLINE xIndexId Acquire(tValue && Value = {}) {
 			uint32_t Index;
 			xNode * NodePtr;
 			if (_NextFreeIdIndex == NoFreeIndex) {
@@ -248,57 +248,57 @@ ZEC_NS
 			return { (static_cast<uint64_t>(Rand) << 32) + Index };
 		}
 
-		ZEC_INLINE void Release(const xIndexId& Id) {
+		X_INLINE void Release(const xIndexId& Id) {
 			uint32_t Index = Id.GetIndex();
 			auto & Node = _IdPoolPtr[Index];
 			Node.NextFreeIdIndex = Steal(_NextFreeIdIndex, Index);
 			Node.ValueHolder.Destroy();
 		}
 
-		ZEC_INLINE bool Check(const xIndexId& Id) {
+		X_INLINE bool Check(const xIndexId& Id) {
 			uint32_t Index = Id.GetIndex();
-			if (!ZEC_LIKELY(Index < _IdPoolSize)) {
+			if (!X_LIKELY(Index < _IdPoolSize)) {
 				return false;
 			}
 			auto Key = Id.GetKey();
 			auto & Node = _IdPoolPtr[Index];
-			return ZEC_LIKELY(xIndexId::IsSafeKey(Key)) && ZEC_LIKELY(Key == Node.Key);
+			return X_LIKELY(xIndexId::IsSafeKey(Key)) && X_LIKELY(Key == Node.Key);
 		}
 
-		ZEC_INLINE xOptional<xRef<tValue>> CheckAndGet(const xIndexId& Id) {
+		X_INLINE xOptional<xRef<tValue>> CheckAndGet(const xIndexId& Id) {
 			uint32_t Index = Id.GetIndex();
-			if (!ZEC_LIKELY(Index < _IdPoolSize)) {
+			if (!X_LIKELY(Index < _IdPoolSize)) {
 				return {};
 			}
 			auto Key = Id.GetKey();
 			auto & Node = _IdPoolPtr[Index];
-			if (!ZEC_LIKELY(xIndexId::IsSafeKey(Key)) || !ZEC_LIKELY(Key == Node.Key)) {
+			if (!X_LIKELY(xIndexId::IsSafeKey(Key)) || !X_LIKELY(Key == Node.Key)) {
 				return {};
 			}
 			return *Node.ValueHolder;
 		}
 
-		ZEC_INLINE xOptional<xRef<const tValue>> CheckAndGet(const xIndexId& Id) const {
+		X_INLINE xOptional<xRef<const tValue>> CheckAndGet(const xIndexId& Id) const {
 			uint32_t Index = Id.GetIndex();
-			if (!ZEC_LIKELY(Index < _IdPoolSize)) {
+			if (!X_LIKELY(Index < _IdPoolSize)) {
 				return {};
 			}
 			auto Key = Id.GetKey();
 			auto Node = _IdPoolPtr[Index];
-			if(!ZEC_LIKELY(xIndexId::IsSafeKey(Key)) || !ZEC_LIKELY(Key == Node.Key)) {
+			if(!X_LIKELY(xIndexId::IsSafeKey(Key)) || !X_LIKELY(Key == Node.Key)) {
 				return {};
 			}
 			return *Node.ValueHolder;
 		}
 
-		ZEC_INLINE xOptional<tValue> CheckAndRelease(const xIndexId& Id) {
+		X_INLINE xOptional<tValue> CheckAndRelease(const xIndexId& Id) {
 			uint32_t Index = Id.GetIndex();
-			if (!ZEC_LIKELY(Index < _IdPoolSize)) {
+			if (!X_LIKELY(Index < _IdPoolSize)) {
 				return {};
 			}
 			auto Key = Id.GetKey();
 			auto & Node = _IdPoolPtr[Index];
-			if(!ZEC_LIKELY(xIndexId::IsSafeKey(Key)) || !ZEC_LIKELY(Key == Node.Key)) {
+			if(!X_LIKELY(xIndexId::IsSafeKey(Key)) || !X_LIKELY(Key == Node.Key)) {
 				return {};
 			}
 			auto DeferredRelese = xScopeGuard{[&](){
@@ -308,16 +308,16 @@ ZEC_NS
 			return std::move(*Node.ValueHolder);
 		}
 
-		ZEC_INLINE tValue & Get(const xIndexId& Id) {
+		X_INLINE tValue & Get(const xIndexId& Id) {
 			return *_IdPoolPtr[Id.GetIndex()].ValueHolder;
 		}
 
-		ZEC_INLINE const tValue & Get(const xIndexId& Id) const {
+		X_INLINE const tValue & Get(const xIndexId& Id) const {
 			return *_IdPoolPtr[Id.GetIndex()].ValueHolder;
 		}
 
 		template<typename tAssignValue>
-		ZEC_INLINE void Set(const xIndexId& Id, tAssignValue && Value) {
+		X_INLINE void Set(const xIndexId& Id, tAssignValue && Value) {
 			*_IdPoolPtr[Id.GetIndex()].ValueHolder = std::forward<tAssignValue>(Value);
 		}
 

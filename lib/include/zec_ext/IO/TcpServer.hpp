@@ -6,7 +6,7 @@
 #include "./TcpConnection.hpp"
 #include "./Packet.hpp"
 
-ZEC_NS
+X_NS
 {
 
     namespace __detail__ {
@@ -24,15 +24,15 @@ ZEC_NS
 		};
 
     public:
-        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint16_t Port, iListener * ListenerPtr, bool ReusePort = false);
-        ZEC_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr, bool ReusePort = false);
-		ZEC_API_MEMBER void Clean();
+        X_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint16_t Port, iListener * ListenerPtr, bool ReusePort = false);
+        X_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr, bool ReusePort = false);
+		X_API_MEMBER void Clean();
 
-		ZEC_INLINE xIoContext * GetIoContextPtr() const { return _IoContextPtr; }
+		X_INLINE xIoContext * GetIoContextPtr() const { return _IoContextPtr; }
 
 	private:
-		ZEC_API_MEMBER void DoAccept();
-		ZEC_API_MEMBER void OnAccept(xIoHandle NativeHandle);
+		X_API_MEMBER void DoAccept();
+		X_API_MEMBER void OnAccept(xIoHandle NativeHandle);
 
 	private:
 		xIoContext *  _IoContextPtr;

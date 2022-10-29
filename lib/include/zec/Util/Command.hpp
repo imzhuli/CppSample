@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-ZEC_NS
+X_NS
 {
 	/***
 	 * @brief Parse Command Line to Options and Params
@@ -49,29 +49,29 @@ ZEC_NS
 		};
 		using xOptionValue = xOptional<std::string>;
 
-		ZEC_INLINE xCommandLine() = default;
-		ZEC_INLINE ~xCommandLine() = default;
-		ZEC_API_MEMBER xCommandLine(int argc, const char ** argv, const std::vector<xOption> & OptionList = {});
-		ZEC_INLINE xCommandLine(int argc, char ** argv, const std::vector<xOption> & OptionList = {})
+		X_INLINE xCommandLine() = default;
+		X_INLINE ~xCommandLine() = default;
+		X_API_MEMBER xCommandLine(int argc, const char ** argv, const std::vector<xOption> & OptionList = {});
+		X_INLINE xCommandLine(int argc, char ** argv, const std::vector<xOption> & OptionList = {})
 		: xCommandLine(argc, const_cast<const char **>(argv), OptionList)
 		{}
 
-		ZEC_API_MEMBER void AddOption(const xOption &Option);
-		ZEC_API_MEMBER void Parse(int Argc, const char * Argv[]);
+		X_API_MEMBER void AddOption(const xOption &Option);
+		X_API_MEMBER void Parse(int Argc, const char * Argv[]);
 
-		ZEC_API_MEMBER xOptionValue GetOptionValue(const std::string & Key) const;
-		ZEC_INLINE     xOptionValue operator[](const std::string & Key) const { return GetOptionValue(Key); }
+		X_API_MEMBER xOptionValue GetOptionValue(const std::string & Key) const;
+		X_INLINE     xOptionValue operator[](const std::string & Key) const { return GetOptionValue(Key); }
 
-		ZEC_INLINE const std::vector<std::string> &
+		X_INLINE const std::vector<std::string> &
 			GetArgs() const { return _NonOptionArguments; }
-		ZEC_INLINE size_t
+		X_INLINE size_t
 			GetArgCount() const { return _NonOptionArguments.size(); }
-		ZEC_INLINE const std::string &
+		X_INLINE const std::string &
 			operator[](const size_t Index) const { return _NonOptionArguments[Index]; }
 
-		ZEC_API_MEMBER void CleanOptions();
-		ZEC_API_MEMBER void CleanValues();
-		ZEC_API_MEMBER std::string DescribeOptions();
+		X_API_MEMBER void CleanOptions();
+		X_API_MEMBER void CleanValues();
+		X_API_MEMBER std::string DescribeOptions();
 
 	private:
 		struct xCoreOption {

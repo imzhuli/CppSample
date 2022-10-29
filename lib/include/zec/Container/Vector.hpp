@@ -5,7 +5,7 @@
 #include <cstring>
 #include <new>
 
-ZEC_NS
+X_NS
 {
 
 	template<typename T>
@@ -15,14 +15,14 @@ ZEC_NS
 		friend class xVector;
 
 	public:
-		ZEC_INLINE xVector(xAllocator * alloc = &DefaultAllocator)
+		X_INLINE xVector(xAllocator * alloc = &DefaultAllocator)
 		: _Alloc(alloc)
 		, _Data(nullptr)
 		, _Capacity(0)
 		, _Size(0)
 		{}
 
-		ZEC_INLINE xVector(xCapacityInit capacity, xAllocator * alloc = &DefaultAllocator)
+		X_INLINE xVector(xCapacityInit capacity, xAllocator * alloc = &DefaultAllocator)
 		: _Alloc(alloc)
 		, _Capacity(capacity.value)
 		, _Size(0)
@@ -31,7 +31,7 @@ ZEC_NS
 			_Data = (T*)_Alloc->Alloc(sizeof(T) * _Capacity, AllocAlignSize<T>);
 		}
 
-		ZEC_INLINE xVector(size_t initSize, xAllocator * alloc = &DefaultAllocator)
+		X_INLINE xVector(size_t initSize, xAllocator * alloc = &DefaultAllocator)
 		: _Alloc(alloc), _Size(initSize)
 		{
 			_Capacity = (_Size + 15) & ~0x0F;
@@ -44,7 +44,7 @@ ZEC_NS
 			}
 		}
 
-		ZEC_INLINE xVector(size_t initSize, const xZeroInit &, xAllocator * alloc = &DefaultAllocator)
+		X_INLINE xVector(size_t initSize, const xZeroInit &, xAllocator * alloc = &DefaultAllocator)
 		: _Alloc(alloc), _Size(initSize)
 		{
 			_Capacity = (_Size + 15) & ~0x0F;
@@ -60,7 +60,7 @@ ZEC_NS
 			}
 		}
 
-		ZEC_INLINE xVector(size_t initSize, const T & vInitValue, xAllocator * alloc = &DefaultAllocator)
+		X_INLINE xVector(size_t initSize, const T & vInitValue, xAllocator * alloc = &DefaultAllocator)
 		: _Alloc(alloc), _Size(initSize)
 		{
 			_Capacity = (_Size + 15) & ~0x0F;
@@ -71,7 +71,7 @@ ZEC_NS
 		}
 
 		template<typename U>
-		ZEC_INLINE xVector(xRangeView<U> range, xAllocator * alloc = &DefaultAllocator)
+		X_INLINE xVector(xRangeView<U> range, xAllocator * alloc = &DefaultAllocator)
 		: _Alloc(alloc), _Size(range.size())
 		{
 			_Capacity = (_Size + 15) & ~0x0F;
@@ -89,7 +89,7 @@ ZEC_NS
 		}
 
 		template<typename U>
-		ZEC_INLINE xVector(const xVector<U> & other)
+		X_INLINE xVector(const xVector<U> & other)
 		: _Alloc(other._Alloc), _Capacity(other._Capacity), _Size(other._Size)
 		{
 			_Data = (T*)_Alloc->Alloc(sizeof(T) * _Capacity, AllocAlignSize<T>);
@@ -105,14 +105,14 @@ ZEC_NS
 			}
 		}
 
-		ZEC_INLINE xVector(xVector && other)
+		X_INLINE xVector(xVector && other)
 		: _Alloc(other._Alloc), _Data(other._Data), _Capacity(other._Capacity), _Size(other._Size)
 		{
 			other._Data = nullptr;
 			other._Capacity = other._Size = 0;
 		}
 
-		ZEC_INLINE ~xVector()
+		X_INLINE ~xVector()
 		{
 			if (_Data) {
 				Clear();
@@ -120,12 +120,12 @@ ZEC_NS
 			}
 		}
 
-		ZEC_INLINE T *                    Data()                { return _Data; }
-		ZEC_INLINE T *                    Data() const          { return _Data; }
-		ZEC_INLINE size_t                 Capacity() const      { return _Capacity; }
-		ZEC_INLINE size_t                 Size() const          { return _Size; }
-		ZEC_INLINE bool                   Empty() const         { return !_Size; }
-		ZEC_INLINE void                   Clear()               {
+		X_INLINE T *                    Data()                { return _Data; }
+		X_INLINE T *                    Data() const          { return _Data; }
+		X_INLINE size_t                 Capacity() const      { return _Capacity; }
+		X_INLINE size_t                 Size() const          { return _Size; }
+		X_INLINE bool                   Empty() const         { return !_Size; }
+		X_INLINE void                   Clear()               {
 			if constexpr(!std::is_trivial_v<T>) {
 				for(auto & elm : View()) {
 					elm.~T();
@@ -134,20 +134,20 @@ ZEC_NS
 			_Size = 0;
 		}
 
-		ZEC_INLINE T *                    Begin()               { return _Data; }
-		ZEC_INLINE T *                    End()                 { return _Data + _Size; }
-		ZEC_INLINE xRangeView<T>          View()                { return xRangeView(_Data, _Size); }
+		X_INLINE T *                    Begin()               { return _Data; }
+		X_INLINE T *                    End()                 { return _Data + _Size; }
+		X_INLINE xRangeView<T>          View()                { return xRangeView(_Data, _Size); }
 
-		ZEC_INLINE const T *              Begin() const         { return _Data; }
-		ZEC_INLINE const T *              End()   const         { return _Data + _Size; }
-		ZEC_INLINE xRangeView<const T>    View()  const         { return xRangeView((const T*)_Data, _Size); }
+		X_INLINE const T *              Begin() const         { return _Data; }
+		X_INLINE const T *              End()   const         { return _Data + _Size; }
+		X_INLINE xRangeView<const T>    View()  const         { return xRangeView((const T*)_Data, _Size); }
 
-		ZEC_INLINE T &                    operator[] (ptrdiff_t offset) { return *(Begin() + offset); }
-		ZEC_INLINE const T &              operator[] (ptrdiff_t offset) const { return *(Begin() + offset); }
+		X_INLINE T &                    operator[] (ptrdiff_t offset) { return *(Begin() + offset); }
+		X_INLINE const T &              operator[] (ptrdiff_t offset) const { return *(Begin() + offset); }
 
-		ZEC_INLINE void Reserve(size_t vNewCap) { if (vNewCap <= _Capacity) { return; } ExpandCapacity(vNewCap); }
+		X_INLINE void Reserve(size_t vNewCap) { if (vNewCap <= _Capacity) { return; } ExpandCapacity(vNewCap); }
 
-		ZEC_INLINE void Resize(size_t vNewSize)
+		X_INLINE void Resize(size_t vNewSize)
 		{
 			if (vNewSize <= _Size) {
 				for(auto & it : xRangeView(Begin() + vNewSize, End())) {
@@ -169,7 +169,7 @@ ZEC_NS
 			_Size = vNewSize;
 		}
 
-		ZEC_INLINE void Resize(size_t vNewSize, const xZeroInit &)
+		X_INLINE void Resize(size_t vNewSize, const xZeroInit &)
 		{
 			if (vNewSize <= _Size) {
 				for(auto & it : xRangeView(Begin() + vNewSize, End())) {
@@ -194,7 +194,7 @@ ZEC_NS
 			_Size = vNewSize;
 		}
 
-		ZEC_INLINE void Resize(size_t vNewSize, const T & vInitValue)
+		X_INLINE void Resize(size_t vNewSize, const T & vInitValue)
 		{
 			if (vNewSize <= _Size) {
 				for(auto & it : xRangeView(Begin() + vNewSize, End())) {
@@ -214,19 +214,19 @@ ZEC_NS
 			_Size = vNewSize;
 		}
 
-		ZEC_INLINE void CopyAppend(const T & obj)
+		X_INLINE void CopyAppend(const T & obj)
 		{
 			CopyAppend(xRangeView(&obj, 1));
 		}
 
 		template<typename U>
-		ZEC_INLINE void CopyAppend(const U & u)
+		X_INLINE void CopyAppend(const U & u)
 		{
 			CopyAppend(xRangeView(&u, 1));
 		}
 
 		template<typename U>
-		ZEC_INLINE void CopyAppend(xRangeView<U> range)
+		X_INLINE void CopyAppend(xRangeView<U> range)
 		{
 			size_t vNewSize = range.size() + _Size;
 			if (vNewSize > _Capacity) {
@@ -245,18 +245,18 @@ ZEC_NS
 		}
 
 		template<typename U, size_t N>
-		ZEC_INLINE void CopyAppend(U (&arr)[N])
+		X_INLINE void CopyAppend(U (&arr)[N])
 		{
 			CopyAppend(xRangeView{arr});
 		}
 
 		template<typename U>
-		ZEC_INLINE void MoveAppend(U && u)
+		X_INLINE void MoveAppend(U && u)
 		{
 			MoveAppend(xRangeView(&u, 1));
 		}
 
-		ZEC_INLINE void MoveAppend(xRangeView<T> range)
+		X_INLINE void MoveAppend(xRangeView<T> range)
 		{
 			size_t vNewSize = range.size() + _Size;
 			if (vNewSize > _Capacity) {
@@ -274,12 +274,12 @@ ZEC_NS
 			_Size = vNewSize;
 		}
 
-		ZEC_INLINE void Erase(T * iter)
+		X_INLINE void Erase(T * iter)
 		{
 			Erase(xRangeView(iter, 1));
 		}
 
-		ZEC_INLINE void Erase(xRangeView<T> range)
+		X_INLINE void Erase(xRangeView<T> range)
 		{
 			assert(Begin() <= range.begin());
 			assert(range.end() <= End());
@@ -300,7 +300,7 @@ ZEC_NS
 			_Size -= range.size();
 		}
 
-		ZEC_INLINE void EraseByValue(const T & value)
+		X_INLINE void EraseByValue(const T & value)
 		{
 			auto it = Begin();
 			auto end = End();
@@ -314,7 +314,7 @@ ZEC_NS
 		}
 
 		template<typename U>
-		ZEC_INLINE void Assign(xRangeView<U> range)
+		X_INLINE void Assign(xRangeView<U> range)
 		{
 			Clear();
 			CopyAppend(range);
@@ -323,7 +323,7 @@ ZEC_NS
 	protected:
 		// resize the underlying space for new size.
 		// size element is not updated, and no initialization is performed!!!
-		ZEC_INLINE void ExpandCapacity(size_t cap)
+		X_INLINE void ExpandCapacity(size_t cap)
 		{
 			assert(_Capacity < cap);
 			auto data = (T*)_Alloc->Alloc(sizeof(T) * cap, AllocAlignSize<T>);

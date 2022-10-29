@@ -1,6 +1,6 @@
 #include <zec/Common.hpp>
 
-ZEC_NS {
+X_NS {
 
 	static_assert(sizeof(ubyte) == sizeof(byte) && sizeof(uint8_t) == sizeof(byte));
 	static_assert(sizeof(intptr_t) == sizeof(void*));

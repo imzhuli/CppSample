@@ -1,7 +1,7 @@
 #pragma once
 #include "./Packet.hpp"
 
-ZEC_NS
+X_NS
 {
 
     class xPacketBuffer final
@@ -12,7 +12,7 @@ ZEC_NS
         size_t          DataSize = 0;
 
     public:
-        ZEC_INLINE size_t Pop(void * DstDataPtr, size_t DstDataBufferSize) {
+        X_INLINE size_t Pop(void * DstDataPtr, size_t DstDataBufferSize) {
             auto CopySize = std::min(DataSize, DstDataBufferSize);
             memcpy(DstDataPtr, Buffer, CopySize);
             if(auto Remains = DataSize - CopySize) {
@@ -22,7 +22,7 @@ ZEC_NS
             }
             return CopySize;
         }
-        ZEC_INLINE size_t Push(const void * SrcDataPtr, size_t SrcDataSize) {
+        X_INLINE size_t Push(const void * SrcDataPtr, size_t SrcDataSize) {
             auto CopySize = std::min(sizeof(Buffer) - DataSize, SrcDataSize);
             memcpy(Buffer + DataSize, SrcDataPtr, CopySize);
             DataSize += CopySize;
@@ -37,10 +37,10 @@ ZEC_NS
     class xPacketBufferQueue final
     {
     public:
-        ZEC_INLINE xPacketBuffer * Peek() {
+        X_INLINE xPacketBuffer * Peek() {
             return _FirstPtr;
         }
-        ZEC_INLINE xPacketBuffer * RemoveFront() {
+        X_INLINE xPacketBuffer * RemoveFront() {
             assert(_FirstPtr);
             if (!(_FirstPtr = Steal(_FirstPtr->NextBufferPtr))) {
                 _LastPtr = nullptr;
@@ -48,14 +48,14 @@ ZEC_NS
             --TotalBufferCount;
             return _FirstPtr;
         }
-        ZEC_INLINE xPacketBuffer * Pop() {
+        X_INLINE xPacketBuffer * Pop() {
             if (auto TargetPtr = Peek()) {
                 RemoveFront();
                 return TargetPtr;
             }
             return nullptr;
         }
-        ZEC_INLINE void Push(xPacketBuffer * BufferPtr) {
+        X_INLINE void Push(xPacketBuffer * BufferPtr) {
             assert(BufferPtr);
             assert(!BufferPtr->NextBufferPtr);
             if (!_LastPtr) {
@@ -66,16 +66,16 @@ ZEC_NS
             }
             ++TotalBufferCount;
         }
-        ZEC_INLINE size_t Push(const void * DataPtr, size_t DataSize) {
+        X_INLINE size_t Push(const void * DataPtr, size_t DataSize) {
             if (!_LastPtr) {
                 return 0;
             }
             return _LastPtr->Push(DataPtr, DataSize);
         }
 
-        ZEC_INLINE size_t GetSize () const { return TotalBufferCount; }
-        ZEC_INLINE size_t IsEmpty () const { return !GetSize(); }
-        ZEC_INLINE xPacketBuffer * GetLast() const { return _LastPtr; }
+        X_INLINE size_t GetSize () const { return TotalBufferCount; }
+        X_INLINE size_t IsEmpty () const { return !GetSize(); }
+        X_INLINE xPacketBuffer * GetLast() const { return _LastPtr; }
 
     private:
         xPacketBuffer * _FirstPtr = nullptr;

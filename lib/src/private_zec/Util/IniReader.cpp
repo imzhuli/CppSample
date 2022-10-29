@@ -3,13 +3,13 @@
 #include <cctype>
 #include <cstring>
 
-#if defined(ZEC_SYSTEM_WINDOWS)
+#if defined(X_SYSTEM_WINDOWS)
 #define strcasecmp _stricmp
-#elif defined(ZEC_SYSTEM_MACOS)
+#elif defined(X_SYSTEM_MACOS)
 #include <strings.h> // mac: strcasecmp
 #endif
 
-ZEC_NS
+X_NS
 {
 	struct __IniFileLine__
 	{
@@ -217,13 +217,13 @@ ZEC_NS
 		return nullptr;
 	}
 
-	ZEC_STATIC_INLINE int zecIniSearchCompare(const void* vhkey, const void* vhBlock)
+	X_STATIC_INLINE int zecIniSearchCompare(const void* vhkey, const void* vhBlock)
 	{
 		__IniFileLine__ * vhLine = (__IniFileLine__ *)vhBlock;
 		return strcmp((const char *)vhkey, vhLine->hKeyStart);
 	}
 
-	ZEC_STATIC_INLINE const char * zecIniGet(const __IniContent__ * vhIni, const char * vhKey)
+	X_STATIC_INLINE const char * zecIniGet(const __IniContent__ * vhIni, const char * vhKey)
 	{
 		__IniFileLine__ * vhLine = (__IniFileLine__ *)bsearch(vhKey, vhIni->pLines, vhIni->xLineCount, sizeof(__IniFileLine__), &zecIniSearchCompare);
 		if (!vhLine) {
@@ -232,7 +232,7 @@ ZEC_NS
 		return vhLine->hValueStart;
 	}
 
-	ZEC_STATIC_INLINE void zecIniFree(__IniContent__ * vhIni)
+	X_STATIC_INLINE void zecIniFree(__IniContent__ * vhIni)
 	{
 		if (vhIni->pLines) {
 			free(vhIni->pLines);

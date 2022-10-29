@@ -3,7 +3,7 @@
 #include <filesystem>
 #include <string>
 #include <mutex>
-ZEC_NS
+X_NS
 {
     static xSpinlock RootPathLock;
     static std::filesystem::path RootPath;

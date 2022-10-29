@@ -1,6 +1,6 @@
 #pragma once
 
-#include "./C/ZEC_Common.h"
+#include "./C/X_Common.h"
 
 #include <new>
 #include <utility>
@@ -12,9 +12,9 @@
 #include <cstdlib>
 #include <cassert>
 
-#define ZEC_NS namespace zec
+#define X_NS namespace zec
 
-ZEC_NS
+X_NS
 {
 
 	inline namespace common
@@ -84,7 +84,7 @@ ZEC_NS
 		template<typename T>
 		constexpr std::in_place_type_t<T> xType {};
 
-		struct xPass final { ZEC_INLINE void operator()() const {} };
+		struct xPass final { X_INLINE void operator()() const {} };
 		struct xAbstract { protected: constexpr xAbstract() = default; virtual ~xAbstract() = default; xAbstract(xAbstract &&) = delete; };
 		struct xNonCopyable { protected: constexpr xNonCopyable() = default; ~xNonCopyable() = default; xNonCopyable(xNonCopyable &&) = delete; };
     	struct xNonCatchable final { private: constexpr xNonCatchable() = default; ~xNonCatchable() = default; };
@@ -100,52 +100,52 @@ ZEC_NS
 
 		template<typename T1, typename T2 = T1>
 		using xDiff = decltype(std::declval<T1>() - std::declval<T2>());
-		template<typename T1, typename T2> ZEC_INLINE constexpr auto Diff(const T1& Value, const T2& ComparedToValue) { return Value - ComparedToValue; }
-		template<typename T1, typename T2> ZEC_INLINE constexpr auto SignedDiff(const T1& Value, const T2& ComparedToValue) { return static_cast<std::make_signed_t<xDiff<T1, T2>>>(Value - ComparedToValue); }
-		template<typename T1, typename T2> ZEC_INLINE constexpr auto UnsignedDiff(const T1& Value, const T2& ComparedToValue) { return static_cast<std::make_unsigned_t<xDiff<T1, T2>>>(Value - ComparedToValue); }
+		template<typename T1, typename T2> X_INLINE constexpr auto Diff(const T1& Value, const T2& ComparedToValue) { return Value - ComparedToValue; }
+		template<typename T1, typename T2> X_INLINE constexpr auto SignedDiff(const T1& Value, const T2& ComparedToValue) { return static_cast<std::make_signed_t<xDiff<T1, T2>>>(Value - ComparedToValue); }
+		template<typename T1, typename T2> X_INLINE constexpr auto UnsignedDiff(const T1& Value, const T2& ComparedToValue) { return static_cast<std::make_unsigned_t<xDiff<T1, T2>>>(Value - ComparedToValue); }
 
-		ZEC_STATIC_INLINE void Pass() {};
-		ZEC_STATIC_INLINE void Error() { throw nullptr; }
-		ZEC_STATIC_INLINE void Error(const char * message) { throw message; }
-		ZEC_STATIC_INLINE void Fatal() { std::abort(); }
-		ZEC_STATIC_INLINE void Fatal(const char *) { std::abort(); }
-		ZEC_STATIC_INLINE void Todo() { Fatal(); }
-		ZEC_STATIC_INLINE void Todo(const char * info) { Fatal(); }
-		ZEC_STATIC_INLINE void Pure() { Fatal("placeholder of pure function called, which is not expected"); }
-		ZEC_STATIC_INLINE constexpr const char * YN(bool y) { return y ? "yes" : "no"; }
-		ZEC_STATIC_INLINE constexpr const char * TF(bool t) { return t ? "true" : "false"; }
+		X_STATIC_INLINE void Pass() {};
+		X_STATIC_INLINE void Error() { throw nullptr; }
+		X_STATIC_INLINE void Error(const char * message) { throw message; }
+		X_STATIC_INLINE void Fatal() { std::abort(); }
+		X_STATIC_INLINE void Fatal(const char *) { std::abort(); }
+		X_STATIC_INLINE void Todo() { Fatal(); }
+		X_STATIC_INLINE void Todo(const char * info) { Fatal(); }
+		X_STATIC_INLINE void Pure() { Fatal("placeholder of pure function called, which is not expected"); }
+		X_STATIC_INLINE constexpr const char * YN(bool y) { return y ? "yes" : "no"; }
+		X_STATIC_INLINE constexpr const char * TF(bool t) { return t ? "true" : "false"; }
 
 		template<typename T>
-		ZEC_STATIC_INLINE bool IsDefaultValue(const T& Target) { return Target == T{}; }
+		X_STATIC_INLINE bool IsDefaultValue(const T& Target) { return Target == T{}; }
 
 		template<typename T, typename TValue>
-		ZEC_STATIC_INLINE void
+		X_STATIC_INLINE void
 		Assign(T& ExpiringTarget,  TValue && value) { ExpiringTarget = std::forward<TValue>(value); }
 
 		template<typename T>
-		ZEC_STATIC_INLINE void
+		X_STATIC_INLINE void
 		Reset(T& ExpiringTarget) { ExpiringTarget = T{}; }
 
 		template<typename T, typename TValue>
-		ZEC_STATIC_INLINE void
+		X_STATIC_INLINE void
 		Reset(T& ExpiringTarget,  TValue && value) { ExpiringTarget = std::forward<TValue>(value); }
 
 		template<typename T>
-		ZEC_STATIC_INLINE void
+		X_STATIC_INLINE void
 		Renew(T& ExpiringTarget) {
 			ExpiringTarget.~T();
 			new ((void*)&ExpiringTarget) T;
 		}
 
 		template<typename T, typename...tArgs>
-		ZEC_STATIC_INLINE void
+		X_STATIC_INLINE void
 		RenewValue(T& ExpiringTarget,  tArgs && ... Args) {
 			ExpiringTarget.~T();
 			new ((void*)&ExpiringTarget) T {std::forward<tArgs>(Args)...};
 		}
 
 		template<typename T>
-		[[nodiscard]] ZEC_STATIC_INLINE T
+		[[nodiscard]] X_STATIC_INLINE T
 		Steal(T& ExpiringTarget) {
 			T ret = std::move(ExpiringTarget);
 			ExpiringTarget = T{};
@@ -153,7 +153,7 @@ ZEC_NS
 		}
 
 		template<typename T, typename TValue>
-		[[nodiscard]] ZEC_STATIC_INLINE T
+		[[nodiscard]] X_STATIC_INLINE T
 		Steal(T& ExpiringTarget,  TValue && value) {
 			T ret = std::move(ExpiringTarget);
 			ExpiringTarget = std::forward<TValue>(value);
@@ -161,31 +161,31 @@ ZEC_NS
 		}
 
 		template<typename T, size_t L>
-		[[nodiscard]] ZEC_STATIC_INLINE constexpr size_t
+		[[nodiscard]] X_STATIC_INLINE constexpr size_t
 		Length(const T(&)[L]) { return L; }
 
 		template<typename T, size_t L>
-		[[nodiscard]] ZEC_STATIC_INLINE constexpr size_t
+		[[nodiscard]] X_STATIC_INLINE constexpr size_t
 		SafeLength(const T(&)[L]) { return L ? L - 1 : L; }
 
 		template<typename... Args>
-		[[nodiscard]] ZEC_STATIC_INLINE constexpr size_t
+		[[nodiscard]] X_STATIC_INLINE constexpr size_t
 		Count(const Args& ... args) { return sizeof...(args); }
 
 		template<typename T>
-		[[nodiscard]] ZEC_STATIC_INLINE constexpr std::conditional_t<std::is_const_v<T>, const void *, void *>
+		[[nodiscard]] X_STATIC_INLINE constexpr std::conditional_t<std::is_const_v<T>, const void *, void *>
 		AddressOf(T & obj) { return &reinterpret_cast<std::conditional_t<std::is_const_v<T>, const unsigned char, unsigned char>&>(obj); }
 
 		template<typename T>
-		[[nodiscard]] ZEC_STATIC_INLINE constexpr bool
+		[[nodiscard]] X_STATIC_INLINE constexpr bool
 		IsPow2(const T x) { static_assert(std::is_integral_v<T>); return x > 0 && !(x & (x-1)); }
 		
 		template<typename T>
-		[[nodiscard]] ZEC_STATIC_INLINE std::remove_reference_t<T> &
+		[[nodiscard]] X_STATIC_INLINE std::remove_reference_t<T> &
 		X2Ref(T && ref) { return ref; }
 
 		template<typename T>
-		[[nodiscard]] ZEC_STATIC_INLINE std::remove_reference_t<T> *
+		[[nodiscard]] X_STATIC_INLINE std::remove_reference_t<T> *
 		X2Ptr(T && ref) { return &ref; }
 
 		// Util classes:
@@ -204,21 +204,21 @@ ZEC_NS
 			using iterator = IteratorType;
 			static constexpr const bool IsPairIterator = xIsPairReference<decltype(*std::declval<IteratorType>())>::value;
 
-			ZEC_INLINE xIteratorRange() = delete;
-			ZEC_INLINE constexpr xIteratorRange(const IteratorType & Begin, const IteratorType & End): _Begin(Begin), _End(End) {}
+			X_INLINE xIteratorRange() = delete;
+			X_INLINE constexpr xIteratorRange(const IteratorType & Begin, const IteratorType & End): _Begin(Begin), _End(End) {}
 			template<typename tContainer>
-			ZEC_INLINE constexpr xIteratorRange(tContainer & Container) : xIteratorRange(Container.begin(), Container.end()) {}
+			X_INLINE constexpr xIteratorRange(tContainer & Container) : xIteratorRange(Container.begin(), Container.end()) {}
 			template<typename tContainer>
-			ZEC_INLINE constexpr xIteratorRange(tContainer && Container) : xIteratorRange(Container.begin(), Container.end()) {}
+			X_INLINE constexpr xIteratorRange(tContainer && Container) : xIteratorRange(Container.begin(), Container.end()) {}
 
-			ZEC_INLINE constexpr xIteratorRange(const xIteratorRange &) = default;
-			ZEC_INLINE constexpr xIteratorRange(xIteratorRange &&) = default;
-			ZEC_INLINE constexpr xIteratorRange & operator = (const xIteratorRange &) = default;
-			ZEC_INLINE constexpr xIteratorRange & operator = (xIteratorRange &&) = default;
+			X_INLINE constexpr xIteratorRange(const xIteratorRange &) = default;
+			X_INLINE constexpr xIteratorRange(xIteratorRange &&) = default;
+			X_INLINE constexpr xIteratorRange & operator = (const xIteratorRange &) = default;
+			X_INLINE constexpr xIteratorRange & operator = (xIteratorRange &&) = default;
 
-			ZEC_INLINE constexpr IteratorType begin() const { return _Begin; }
-			ZEC_INLINE constexpr IteratorType end()   const { return _End; }
-			ZEC_INLINE constexpr auto size() const { return _End - _Begin; }
+			X_INLINE constexpr IteratorType begin() const { return _Begin; }
+			X_INLINE constexpr IteratorType end()   const { return _End; }
+			X_INLINE constexpr auto size() const { return _End - _Begin; }
 
 		private:
 			IteratorType _Begin;
@@ -234,7 +234,7 @@ ZEC_NS
 		public:
 			[[nodiscard]] constexpr explicit xRef(T & Ref) noexcept : _Ref(&Ref) {}
 			[[nodiscard]] constexpr xRef(const xRef & RRef) noexcept = default;
-			ZEC_INLINE constexpr T& Get() const noexcept { return *_Ref; }
+			X_INLINE constexpr T& Get() const noexcept { return *_Ref; }
 		private:
 			T * _Ref;
 		};
@@ -243,19 +243,19 @@ ZEC_NS
 		struct xRefCaster {
 			static_assert(!std::is_reference_v<RefedT>);
 			using Type = RefedT;
-			ZEC_STATIC_INLINE RefedT& Get(RefedT & R) { return R; }
-			ZEC_STATIC_INLINE const RefedT& Get(const RefedT & R) { return R; }
+			X_STATIC_INLINE RefedT& Get(RefedT & R) { return R; }
+			X_STATIC_INLINE const RefedT& Get(const RefedT & R) { return R; }
 		};
 		template<typename RefedT>
 		struct xRefCaster<xRef<RefedT>> {
 			static_assert(!std::is_reference_v<RefedT>);
 			using Type = RefedT;
-			ZEC_STATIC_INLINE RefedT& Get(const xRef<RefedT> & RR) { return RR.Get(); }
+			X_STATIC_INLINE RefedT& Get(const xRef<RefedT> & RR) { return RR.Get(); }
 		};
 
 		template<typename tFuncObj, typename ... Args>
 		struct xInstantRun final : xNonCopyable	{
-			ZEC_INLINE xInstantRun(tFuncObj && Func, Args&& ... args) { std::forward<tFuncObj>(Func)(std::forward<Args>(args)...); }
+			X_INLINE xInstantRun(tFuncObj && Func, Args&& ... args) { std::forward<tFuncObj>(Func)(std::forward<Args>(args)...); }
 		};
 
 		template<typename tEntry, typename tExit>
@@ -274,11 +274,11 @@ ZEC_NS
 			tExit _ExitCallback;
 			bool  _DismissExit = false;
 		public:
-			[[nodiscard]] ZEC_INLINE xScopeGuard(const tEntry& Entry, const tExit& Exit) : _ExitCallback(Exit) { Entry(); }
-			[[nodiscard]] ZEC_INLINE xScopeGuard(const tExit& Exit) : _ExitCallback(Exit) {}
-			[[nodiscard]] ZEC_INLINE xScopeGuard(xScopeGuard && Other) : _ExitCallback(Other._ExitCallback), _DismissExit(Steal(Other._DismissExit, true)) {}
-			ZEC_INLINE void Dismiss() { _DismissExit = true; }
-			ZEC_INLINE ~xScopeGuard() { if (_DismissExit) { return; } xRefCaster<tExit>::Get(_ExitCallback)(); }
+			[[nodiscard]] X_INLINE xScopeGuard(const tEntry& Entry, const tExit& Exit) : _ExitCallback(Exit) { Entry(); }
+			[[nodiscard]] X_INLINE xScopeGuard(const tExit& Exit) : _ExitCallback(Exit) {}
+			[[nodiscard]] X_INLINE xScopeGuard(xScopeGuard && Other) : _ExitCallback(Other._ExitCallback), _DismissExit(Steal(Other._DismissExit, true)) {}
+			X_INLINE void Dismiss() { _DismissExit = true; }
+			X_INLINE ~xScopeGuard() { if (_DismissExit) { return; } xRefCaster<tExit>::Get(_ExitCallback)(); }
 		};
 		template<typename tEntry, typename tExit>
 		xScopeGuard(const tEntry& Entry, const tExit& Exit) -> xScopeGuard<std::decay_t<tEntry>, std::decay_t<tExit>>;
@@ -320,16 +320,16 @@ ZEC_NS
 			class xResourceGuardBase : xNonCopyable {
 			public:
 				template<typename ... tArgs>
-				ZEC_INLINE constexpr xResourceGuardBase(T & Resource, tArgs&& ... Args) : _Resource(Resource), _Inited(Resource.Init(std::forward<tArgs>(Args)...)) {
+				X_INLINE constexpr xResourceGuardBase(T & Resource, tArgs&& ... Args) : _Resource(Resource), _Inited(Resource.Init(std::forward<tArgs>(Args)...)) {
 					if constexpr (DoThrow) {
 						if (!_Inited) {
 							throw "xResourceGuardBase Error: Failed to init resource";
 						}
 					}
 				}
-				ZEC_INLINE constexpr xResourceGuardBase(T && Other) : _Resource(Other._Resource), _Inited(Steal(Other._Inited)) {}
-				ZEC_INLINE ~xResourceGuardBase() { if (_Inited) {_Resource.Clean();} }
-				ZEC_INLINE operator bool () const { return _Inited; }
+				X_INLINE constexpr xResourceGuardBase(T && Other) : _Resource(Other._Resource), _Inited(Steal(Other._Inited)) {}
+				X_INLINE ~xResourceGuardBase() { if (_Inited) {_Resource.Clean();} }
+				X_INLINE operator bool () const { return _Inited; }
 			private:
 				T & _Resource;
 				const bool _Inited;
@@ -373,35 +373,35 @@ ZEC_NS
 		{
 		public:
 			template<typename T>
-			ZEC_INLINE void CreateAs() {
+			X_INLINE void CreateAs() {
                 static_assert(Alignment >= alignof(T));
 				static_assert(sizeof(_PlaceHolder) >= sizeof(T));
 				new ((void*)_PlaceHolder) T;
 			}
 
 			template<typename T, typename ... tArgs>
-			ZEC_INLINE T& CreateValueAs(tArgs && ... Args) {
+			X_INLINE T& CreateValueAs(tArgs && ... Args) {
                 static_assert(Alignment >= alignof(T));
 				static_assert(sizeof(_PlaceHolder) >= sizeof(T));
 				return *(new ((void*)_PlaceHolder) T(std::forward<tArgs>(Args)...));
 			}
 
 			template<typename T>
-			ZEC_INLINE void DestroyAs() {
+			X_INLINE void DestroyAs() {
                 static_assert(Alignment >= alignof(T));
 				static_assert(sizeof(_PlaceHolder) >= sizeof(T));
 				reinterpret_cast<T*>(_PlaceHolder)->~T();
 			}
 
 			template<typename T>
-			ZEC_INLINE T & As() {
+			X_INLINE T & As() {
                 static_assert(Alignment >= alignof(T));
 				static_assert(sizeof(_PlaceHolder) >= sizeof(T));
 				return reinterpret_cast<T&>(_PlaceHolder);
 			}
 
 			template<typename T>
-			ZEC_INLINE const T & As() const {
+			X_INLINE const T & As() const {
                 static_assert(Alignment >= alignof(T));
 				static_assert(sizeof(_PlaceHolder) >= sizeof(T));
 				return reinterpret_cast<const T&>(_PlaceHolder);
@@ -419,31 +419,31 @@ ZEC_NS
 		: xNonCopyable
 		{
 		public:
-			ZEC_INLINE xHolder() = default;
-			ZEC_INLINE ~xHolder() = default;
+			X_INLINE xHolder() = default;
+			X_INLINE ~xHolder() = default;
 
-			ZEC_INLINE void Create() {
+			X_INLINE void Create() {
 				new ((void*)_PlaceHolder) T;
 			}
 
 			template<typename ... tArgs>
-			ZEC_INLINE T* CreateValue(tArgs && ... Args) {
+			X_INLINE T* CreateValue(tArgs && ... Args) {
 				auto ObjectPtr = new ((void*)_PlaceHolder) T(std::forward<tArgs>(Args)...);
 				return ObjectPtr;
 			}
 
-			ZEC_INLINE void Destroy() {
+			X_INLINE void Destroy() {
 				Get()->~T();
 			}
 
-			ZEC_INLINE T * operator->() { return Get(); }
-			ZEC_INLINE const T * operator->() const { return Get(); }
+			X_INLINE T * operator->() { return Get(); }
+			X_INLINE const T * operator->() const { return Get(); }
 
-			ZEC_INLINE T & operator*() { return *Get(); }
-			ZEC_INLINE const T & operator*() const { return *Get(); }
+			X_INLINE T & operator*() { return *Get(); }
+			X_INLINE const T & operator*() const { return *Get(); }
 
-			ZEC_INLINE T * Get() { return reinterpret_cast<T*>(_PlaceHolder); }
-			ZEC_INLINE const T * Get() const { return reinterpret_cast<const T*>(_PlaceHolder); }
+			X_INLINE T * Get() { return reinterpret_cast<T*>(_PlaceHolder); }
+			X_INLINE const T * Get() const { return reinterpret_cast<const T*>(_PlaceHolder); }
 
 		private:
 			alignas(T) ubyte _PlaceHolder [sizeof(T)];
@@ -457,27 +457,27 @@ ZEC_NS
 			using xValueType = typename xCaster::Type;
 
 		public:
-			ZEC_INLINE xOptional() = default;
-			ZEC_INLINE ~xOptional() { if(_Valid) { Destroy(); } }
-			ZEC_INLINE xOptional(const xOptional & Other) {
+			X_INLINE xOptional() = default;
+			X_INLINE ~xOptional() { if(_Valid) { Destroy(); } }
+			X_INLINE xOptional(const xOptional & Other) {
 				if (Other._Valid) {
 					new ((void*)_Holder) Type(Other.GetReference());
 					_Valid = true;
 				}
 			}
-			ZEC_INLINE xOptional(xOptional && Other) {
+			X_INLINE xOptional(xOptional && Other) {
 				if (Other._Valid) {
 					new ((void*)_Holder) Type(std::move(Other.GetReference()));
 					_Valid = true;
 				}
 			}
 			template<typename U>
-			ZEC_INLINE xOptional(U&& Value) {
+			X_INLINE xOptional(U&& Value) {
 				new ((void*)_Holder) Type(std::forward<U>(Value));
 				_Valid = true;
 			}
 
-			ZEC_INLINE xOptional & operator = (const xOptional &Other) {
+			X_INLINE xOptional & operator = (const xOptional &Other) {
 				if (_Valid) {
 					if (Other._Valid) {
 						GetReference() = Other.GetReference();
@@ -493,7 +493,7 @@ ZEC_NS
 				}
 				return *this;
 			}
-			ZEC_INLINE xOptional & operator = (xOptional && Other) {
+			X_INLINE xOptional & operator = (xOptional && Other) {
 				if (_Valid) {
 					if (Other._Valid) {
 						GetReference() = std::move(Other.GetReference());
@@ -510,7 +510,7 @@ ZEC_NS
 				return *this;
 			}
 			template<typename U>
-			ZEC_INLINE xOptional & operator = (U&& Value) {
+			X_INLINE xOptional & operator = (U&& Value) {
 				if (!_Valid) {
 					new ((void*)_Holder) Type(std::forward<U>(Value));
 					_Valid = true;
@@ -520,24 +520,24 @@ ZEC_NS
 				return *this;
 			}
 
-			ZEC_INLINE void Reset() { Steal(_Valid) ? Destroy() : Pass(); }
+			X_INLINE void Reset() { Steal(_Valid) ? Destroy() : Pass(); }
 
-			ZEC_INLINE bool operator()() const { return _Valid; }
+			X_INLINE bool operator()() const { return _Valid; }
 
-			ZEC_INLINE auto & operator *() { assert(_Valid); return GetValueReference(); }
-			ZEC_INLINE auto & operator *() const { assert(_Valid); return GetValueReference(); }
+			X_INLINE auto & operator *() { assert(_Valid); return GetValueReference(); }
+			X_INLINE auto & operator *() const { assert(_Valid); return GetValueReference(); }
 
-			ZEC_INLINE auto * operator->() { return _Valid ? &GetValueReference() : nullptr; }
-			ZEC_INLINE auto * operator->() const { return _Valid ? &GetValueReference() : nullptr; }
+			X_INLINE auto * operator->() { return _Valid ? &GetValueReference() : nullptr; }
+			X_INLINE auto * operator->() const { return _Valid ? &GetValueReference() : nullptr; }
 
-			ZEC_INLINE const xValueType & Or(const xValueType & DefaultValue) const { return _Valid ? GetValueReference() : DefaultValue; }
+			X_INLINE const xValueType & Or(const xValueType & DefaultValue) const { return _Valid ? GetValueReference() : DefaultValue; }
 
 		private:
-			ZEC_INLINE Type & GetReference() { return reinterpret_cast<Type&>(_Holder); }
-			ZEC_INLINE const Type & GetReference() const { return reinterpret_cast<const Type&>(_Holder); }
-			ZEC_INLINE auto & GetValueReference() { return xCaster::Get(GetReference()); }
-			ZEC_INLINE auto & GetValueReference() const { return xCaster::Get(GetReference()); }
-			ZEC_INLINE void Destroy() { GetReference().~Type(); }
+			X_INLINE Type & GetReference() { return reinterpret_cast<Type&>(_Holder); }
+			X_INLINE const Type & GetReference() const { return reinterpret_cast<const Type&>(_Holder); }
+			X_INLINE auto & GetValueReference() { return xCaster::Get(GetReference()); }
+			X_INLINE auto & GetValueReference() const { return xCaster::Get(GetReference()); }
+			X_INLINE void Destroy() { GetReference().~Type(); }
 
 		private:
 			bool _Valid {};
@@ -554,11 +554,11 @@ ZEC_NS
 
 }
 
-#ifndef ZEC_CATCH_NONE
-#define ZEC_CATCH_NONE catch(const ::zec::xNonCatchable &)
+#ifndef X_CATCH_NONE
+#define X_CATCH_NONE catch(const ::zec::xNonCatchable &)
 #endif
 
-#ifdef  ZEC_AddressOf
-#undef  ZEC_AddressOf
-#define ZEC_AddressOf ::zec::AddressOf
+#ifdef  X_AddressOf
+#undef  X_AddressOf
+#define X_AddressOf ::zec::AddressOf
 #endif
