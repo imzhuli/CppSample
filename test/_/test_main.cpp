@@ -1,10 +1,10 @@
 #include <iostream>
-#include <zec/Common.hpp>
-#include <zec/Byte.hpp>
-#include <zec/String.hpp>
+#include <xel/Common.hpp>
+#include <xel/Byte.hpp>
+#include <xel/String.hpp>
 
 using namespace std;
-using namespace zec;
+using namespace xel;
 
 static bool Exit = false;
 static const unsigned char SC = '\0';

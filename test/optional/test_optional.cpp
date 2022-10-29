@@ -1,7 +1,7 @@
-#include <zec/Common.hpp>
+#include <xel/Common.hpp>
 #include <iostream>
 
-using namespace zec;
+using namespace xel;
 using namespace std;
 
 static struct xRefed

@@ -1,7 +1,7 @@
-#include <zec_ext/Utility/Uuid.hpp>
-#include <zec/String.hpp>
+#include <xel_ext/Utility/Uuid.hpp>
+#include <xel/String.hpp>
 #include <iostream>
-using namespace zec;
+using namespace xel;
 using namespace std;
 
 int main(int, char **)

@@ -1,7 +1,7 @@
-#include <zec/Util/Logger.hpp>
+#include <xel/Util/Logger.hpp>
 #include <iostream>
 
-using namespace zec;
+using namespace xel;
 using namespace std;
 
 int main(int argc, char * argv[])

@@ -1,8 +1,8 @@
-#include <zec_ext/Lua/LuaWrap.hpp>
+#include <xel_ext/Lua/LuaWrap.hpp>
 #include <iostream>
 #include <map>
 
-using namespace zec;
+using namespace xel;
 using namespace std;
 
 int LuaCallbackSubSub(lua_State * LP)

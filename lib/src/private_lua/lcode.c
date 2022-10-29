@@ -380,7 +380,7 @@ static void removelastinstruction (FuncState *fs) {
 int luaK_code (FuncState *fs, Instruction i) {
   Proto *f = fs->f;
   /* put new instruction in code array */
-  luaM_growvector(fs->ls->L, f->code, fs->pc, f->sizecode, Instruction,
+  luaM_growvector(fs->ls->L, f->code, fs->pc, f->sixelode, Instruction,
                   MAX_INT, "opcodes");
   f->code[fs->pc++] = i;
   savelineinfo(fs, f, fs->ls->lastline);

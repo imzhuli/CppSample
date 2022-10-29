@@ -34,20 +34,20 @@ set(shared_lib_dependency_public
 # source files:
 aux_source_directory(./src/private_lua                             X_SRC)
 
-aux_source_directory(./src/private_zec                             X_SRC)
-aux_source_directory(./src/private_zec/Algorithm                   X_SRC)
-aux_source_directory(./src/private_zec/Util                        X_SRC)
-aux_source_directory(./src/private_zec/Container                   X_SRC)
-aux_source_directory(./src/private_zec_ext/Lua                     X_SRC)
+aux_source_directory(./src/private_xel                             X_SRC)
+aux_source_directory(./src/private_xel/Algorithm                   X_SRC)
+aux_source_directory(./src/private_xel/Util                        X_SRC)
+aux_source_directory(./src/private_xel/Container                   X_SRC)
+aux_source_directory(./src/private_xel_ext/Lua                     X_SRC)
 
-aux_source_directory(./src/private_zec_ext/IO                      X_SRC)
-# aux_source_directory(./src/private_zec_ext/IO/Darwin               X_SRC)
-# aux_source_directory(./src/private_zec_ext/IO/Linux                X_SRC)
-# aux_source_directory(./src/private_zec_ext/IO/Windows              X_SRC)
-aux_source_directory(./src/private_zec_ext/Utility                 X_SRC)
+aux_source_directory(./src/private_xel_ext/IO                      X_SRC)
+# aux_source_directory(./src/private_xel_ext/IO/Darwin               X_SRC)
+# aux_source_directory(./src/private_xel_ext/IO/Linux                X_SRC)
+# aux_source_directory(./src/private_xel_ext/IO/Windows              X_SRC)
+aux_source_directory(./src/private_xel_ext/Utility                 X_SRC)
 
-aux_source_directory(./src/private_zec_game/Base                   X_SRC)
-aux_source_directory(./src/private_zec_game/Window                 X_SRC)
+aux_source_directory(./src/private_xel_game/Base                   X_SRC)
+aux_source_directory(./src/private_xel_game/Window                 X_SRC)
 
 # 3rd party
 
@@ -70,12 +70,12 @@ endif()
 
 #install
 install(
-	DIRECTORY ${PROJECT_SOURCE_DIR}/./include/zec
+	DIRECTORY ${PROJECT_SOURCE_DIR}/./include/xel
 	DESTINATION include
 	FILES_MATCHING REGEX ".+\.(h|hpp)"
 	)
 install(
-	DIRECTORY ${PROJECT_SOURCE_DIR}/./include/zec_ext
+	DIRECTORY ${PROJECT_SOURCE_DIR}/./include/xel_ext
 	DESTINATION include
 	FILES_MATCHING REGEX ".+\.(h|hpp)"
 	)

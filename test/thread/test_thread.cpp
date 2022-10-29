@@ -1,9 +1,9 @@
-#include <zec/Common.hpp>
-#include <zec/Util/Thread.hpp>
-#include <zec/Util/Chrono.hpp>
+#include <xel/Common.hpp>
+#include <xel/Util/Thread.hpp>
+#include <xel/Util/Chrono.hpp>
 #include <iostream>
 
-using namespace zec;
+using namespace xel;
 using namespace std;
 
 int main(int, char **)

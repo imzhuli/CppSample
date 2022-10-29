@@ -1,8 +1,8 @@
-#include <zec/Common.hpp>
-#include <zec/Algorithm/BinaryExponentiation.hpp>
+#include <xel/Common.hpp>
+#include <xel/Algorithm/BinaryExponentiation.hpp>
 #include <iostream>
 
-using namespace zec;
+using namespace xel;
 using namespace std;
 
 struct xIngralMultiplication

@@ -1,5 +1,5 @@
 cmake_minimum_required(VERSION 3.10)
-set(libname zec)
+set(libname xel)
 
 project(project_${libname})
 

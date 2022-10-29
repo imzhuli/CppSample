@@ -143,7 +143,7 @@ static TString *loadString (LoadState *S, Proto *p) {
 static void loadCode (LoadState *S, Proto *f) {
   int n = loadInt(S);
   f->code = luaM_newvectorchecked(S->L, n, Instruction);
-  f->sizecode = n;
+  f->sixelode = n;
   loadVector(S, f->code, n);
 }
 

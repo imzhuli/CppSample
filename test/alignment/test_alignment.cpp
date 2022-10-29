@@ -1,13 +1,13 @@
 #include <iostream>
-#include <zec/Common.hpp>
-#include <zec/String.hpp>
-#include <zec/Byte.hpp>
+#include <xel/Common.hpp>
+#include <xel/String.hpp>
+#include <xel/Byte.hpp>
 #include <sstream>
 #include <stdexcept>
 #include <cmath>
 
 using namespace std;
-using namespace zec;
+using namespace xel;
 
 void testOrder()
 {

@@ -1,8 +1,8 @@
-#include <zec/Util/IndexedStorage.hpp>
+#include <xel/Util/IndexedStorage.hpp>
 #include <iostream>
 #include <cstring>
 
-using namespace zec;
+using namespace xel;
 using namespace std;
 
 #define TestSize 512

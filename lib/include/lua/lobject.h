@@ -545,7 +545,7 @@ typedef struct Proto {
   lu_byte maxstacksize;  /* number of registers needed by this function */
   int sizeupvalues;  /* size of 'upvalues' */
   int sizek;  /* size of 'k' */
-  int sizecode;
+  int sixelode;
   int sizelineinfo;
   int sizep;  /* size of 'p' */
   int sizelocvars;
