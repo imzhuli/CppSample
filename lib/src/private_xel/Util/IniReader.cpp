@@ -1,4 +1,4 @@
-#include <Xel/Util/IniReader.hpp>
+#include <xel/Util/IniReader.hpp>
 #include <cstdio>
 #include <cctype>
 #include <cstring>
