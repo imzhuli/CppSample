@@ -57,7 +57,7 @@
 	#define X_SYSTEM_IOS
 #endif
 
-#if defined(X_SYSTEM_IOS) || defined(X_SYSTEM_MACOS)
+#if defined(X_SYSTEM_MACOS) || defined(X_SYSTEM_IOS)
 	#define X_SYSTEM_DARWIN
 #endif
 

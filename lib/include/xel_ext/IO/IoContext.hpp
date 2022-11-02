@@ -1,4 +1,5 @@
 #pragma once
+#include "./IoBase.hpp"
 #include <xel/Common.hpp>
 #include <xel/List.hpp>
 #include <xel/Util/IndexedStorage.hpp>
@@ -7,8 +8,6 @@
 
 X_NS
 {
-    class xIoCaster;
-
     class xIoHandle
     {
     public:
@@ -30,9 +29,6 @@ X_NS
         X_API_MEMBER void LoopOnce(int TimeoutMS);
 
     private:
-        xDummy<24>             _Native;
-        xDummy<24>             _WorkGuard;
-        friend class xIoCaster;
     };
 
 }
