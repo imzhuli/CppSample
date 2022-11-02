@@ -1,1 +1,1 @@
-./make release
+./build release

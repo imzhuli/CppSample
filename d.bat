@@ -1,1 +1,1 @@
-./make debug
+./build debug
