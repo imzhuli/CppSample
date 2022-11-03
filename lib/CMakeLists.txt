@@ -4,7 +4,7 @@ project(lib_${libname})
 
 # enable specific macors by system type:
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
-	set(PLATFORM_LIBRARIES)
+	set(PLATFORM_LIBRARIES wsock32)
 elseif (CMAKE_SYSTEM_NAME MATCHES "Linux")
 	set(PLATFORM_LIBRARIES)
 elseif (CMAKE_SYSTEM_NAME MATCHES "Darwin")
@@ -17,7 +17,6 @@ endif()
 # paths
 include_directories(
 	./include/
-	${OPENSSL_INCLUDE_DIR}
 	)
 link_directories(
 	)
@@ -26,7 +25,6 @@ link_directories(
 set(shared_lib_dependency_private
 	)
 set(shared_lib_dependency_public
-	${OPENSSL_LIBRARIES}
 	${PLATFORM_LIBRARIES}
 	${cpp})
 

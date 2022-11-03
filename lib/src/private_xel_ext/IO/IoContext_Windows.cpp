@@ -1,11 +1,26 @@
 #include <xel_ext/IO/IoContext.hpp>
+#include <mutex>
 
 #ifdef X_SYSTEM_WINDOWS
 
 X_NS {
 
+    static void InitWinsock() {
+        WSADATA WsaData;
+        if (WSAStartup(MAKEWORD(2,2), &WsaData)) {
+            Fatal("WsaData Error");
+        }
+    }
+
+    static void CleanupWinsock() {
+        WSACleanup();
+    }
+
+    static xScopeGuard WSAEnv = { InitWinsock, CleanupWinsock };
+
     bool xIoContext::Init()
     {
+
         assert(_Poller == InvalidEventPoller);
         _Poller = CreateIoCompletionPort(INVALID_HANDLE_VALUE,0,0,0);
         if (_Poller == INVALID_HANDLE_VALUE) {
