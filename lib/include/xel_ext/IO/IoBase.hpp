@@ -35,9 +35,9 @@ X_NS {
     typedef int                        xEventPoller;        // epoll
     typedef enum EPOLL_EVENTS          xNativeEventType;    // EPOLLIN EPOLLOUT EPOLLERR ...
     typedef int                        xSocket;
-    constexpr xEventPoller InvalidEventPoller = ((xEventPoller)-1);
-    constexpr xSocket      InvalidSocket      = ((xSocket)-1);
-    #define XelCloseSocket(sockfd)        close((sockfd))
+    constexpr xEventPoller             InvalidEventPoller = ((xEventPoller)-1);
+    constexpr xSocket                  InvalidSocket = ((xSocket)-1);
+    #define XelCloseSocket(sockfd)     close((sockfd))
 }
 
 #elif defined(X_SYSTEM_DARWIN)
@@ -53,9 +53,9 @@ X_NS {
     typedef size_t                     recv_len_t;
     typedef int                        xEventPoller;        // kqueue
     typedef int                        xSocket;
-    constexpr xEventPoller InvalidEventPoller = ((xEventPoller)-1);
-    constexpr xSocket      InvalidSocket      = ((xSocket)-1);
-    #define XelCloseSocket(sockfd)        close((sockfd))
+    constexpr xEventPoller             InvalidEventPoller = ((xEventPoller)-1);
+    constexpr xSocket                  InvalidSocket = ((xSocket)-1);
+    #define XelCloseSocket(sockfd)     close((sockfd))
 }
 
 #else
@@ -63,10 +63,10 @@ X_NS {
 #endif
 
 #ifdef MSG_NOSIGNAL
-    #define NoWriteSignal       MSG_NOSIGNAL
+    #define XelNoWriteSignal       MSG_NOSIGNAL
 #else
-    #define NoWriteSignal       0
+    #define XelNoWriteSignal       0
 #endif
 #ifndef SOCK_CLOEXEC
-#define SOCK_CLOEXEC            0
+#define SOCK_CLOEXEC               0
 #endif

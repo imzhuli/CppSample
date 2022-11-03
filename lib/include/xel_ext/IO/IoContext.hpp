@@ -8,17 +8,10 @@
 
 X_NS
 {
-    class xIoHandle
-    {
-    public:
-        X_INLINE xIoHandle(void * NativeObjectPtr) : ObjectPtr(NativeObjectPtr) {}
-        template<typename T>
-        X_INLINE T* AsPtr() const { return static_cast<T*>(ObjectPtr); };
-        template<typename T>
-        X_INLINE T& AsRef() const { return *static_cast<T*>(ObjectPtr); };
-    private:
-        void * ObjectPtr;
-    };
+    class xIoContext;
+    class iIoReactor;
+    struct xIoReactorNode : xListNode {};
+    using  xIoReactorList = xList<xIoReactorNode>;
 
     class xIoContext
     : xNonCopyable
@@ -29,6 +22,18 @@ X_NS
         X_API_MEMBER void LoopOnce(int TimeoutMS);
 
     private:
+        xEventPoller     _Poller X_DEBUG_INIT(InvalidEventPoller);
+        xIoReactorList   _PendingErrorList;
+    };
+
+    class iIoReactor
+    {
+    public:
+        virtual void OnIoEventInReady()  { Fatal("NotImplemented"); }
+        virtual void OnIoEventOutReady() { Fatal("NotImplemented"); }
+        virtual void OnIoEventError()    { Fatal("NotImplemented"); }
+        virtual void OnIoEventReadFinished(void * DataPtr, size_t DataSize)  { Fatal("NotImplemented"); }
+        virtual void OnIoEventWriteFinished(void * DataPtr, size_t DataSize) { Fatal("NotImplemented"); }
     };
 
 }
