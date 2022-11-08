@@ -1,5 +1,5 @@
 #pragma once
-#include <xel/Common.hpp>
+#include "./IoBase.hpp"
 #include <string>
 #include <array>
 #include <cstring>
@@ -46,11 +46,7 @@ X_NS
         X_API_MEMBER std::string IpToString() const;
         X_API_MEMBER std::string ToString() const;
 
-        X_API_STATIC_MEMBER xNetAddress Make(const char * IpStr,   uint16_t Port = 0);
-        X_API_STATIC_MEMBER xNetAddress MakeV4Raw(const void * AddrRaw, uint16_t Port = 0);
-        X_API_STATIC_MEMBER xNetAddress MakeV4(const char * IpStr, uint16_t Port = 0);
-        X_API_STATIC_MEMBER xNetAddress MakeV6Raw(const void * AddrRaw, uint16_t Port = 0);
-        X_API_STATIC_MEMBER xNetAddress MakeV6(const char * IpStr, uint16_t Port = 0);
+        X_API_STATIC_MEMBER xNetAddress Parse(const char * IpStr, uint16_t Port = 0);
         X_API_STATIC_MEMBER xNetAddress Parse(const std::string & AddressStr);
     };
 

@@ -31,10 +31,10 @@ X_NS
 
     private:
         xPacketBuffer *   NextBufferPtr = nullptr;
-        friend class xPacketBufferQueue;
+        friend class xPacketBufferChain;
     };
 
-    class xPacketBufferQueue final
+    class xPacketBufferChain final
     {
     public:
         X_INLINE xPacketBuffer * Peek() {

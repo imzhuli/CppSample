@@ -1,23 +1,32 @@
 #pragma once
 
 #include <xel/Common.hpp>
-#include <atomic>
 #include "./IoContext.hpp"
-#include "./NetBase.hpp"
+#include "./NetAddress.hpp"
 #include "./Packet.hpp"
 #include "./PacketBuffer.hpp"
+#include <atomic>
 
 X_NS
 {
 
-    class xTcpSocketContext;
     class xTcpConnection;
     class xTcpServer;
 
     class xTcpConnection
-    : xAbstract
+    : public iBufferedIoReactor
+    , xAbstract
     {
     public:
+        enum struct eStatus
+        {
+            Unspecified,
+            Connecting,
+            Connected,
+            Closing,
+            Closed,
+        };
+
         struct iListener
         {
             // callback on connected, normally this is not needed to be handled
@@ -33,10 +42,7 @@ X_NS
         };
 
     public:
-        X_API_MEMBER xTcpConnection();
-        X_API_MEMBER ~xTcpConnection();
-
-        X_API_MEMBER bool Init(xIoHandle NativeHandle, iListener * ListenerPtr);
+        X_API_MEMBER bool Init(xIoContext * IoContextPtr, xSocket NativeHandle, iListener * ListenerPtr);
         X_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint16_t Port, iListener * ListenerPtr);
         X_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr);
         X_API_MEMBER bool GracefulClose();  // return value: true: immediately closed, false pending writes
@@ -47,16 +53,8 @@ X_NS
 
         X_API_MEMBER void ResizeSendBuffer(size_t Size);
         X_API_MEMBER void ResizeReceiveBuffer(size_t Size);
-
+        
         X_API_MEMBER size_t GetPendingWriteBlockCount() const;
-        X_INLINE bool IsActive() const { return _SocketPtr; }
-
-        struct xAudit {
-            size64_t ReadSize  = 0;
-            size64_t WriteSize = 0;
-        };
-        X_API_MEMBER xAudit GetAudit();
-        X_API_MEMBER xAudit StealAudit();
 
         /***
          * @brief aync post data, try to buffer(copy) data into internal buffer
@@ -66,13 +64,28 @@ X_NS
         X_API_MEMBER void SuspendReading();
         X_API_MEMBER void ResumeReading();
 
+    protected:
+    #if defined (X_SYSTEM_WINDOWS)
+        X_API_MEMBER eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) override {
+            return OverlappedPtr == &_ReadOverlappedObject ? eIoEventType::InReady : 
+                    (OverlappedPtr == &_WriteOverlappedObject ? eIoEventType::OutReady : eIoEventType::Error);
+        }
+        X_API_MEMBER void OnIoEventInReady() override;
+        X_API_MEMBER void OnIoEventOutReady() override;
+        X_API_MEMBER void TryRecvData(size_t SkipSize = 0);
+        X_API_MEMBER void TrySendData();
+    #endif
+
     private:
         X_PRIVATE_MEMBER void OnConnected();
         X_PRIVATE_MEMBER void OnError();
         X_PRIVATE_MEMBER void DoRead();
 
     private:
-        xTcpSocketContext *           _SocketPtr = nullptr;
+        xSocket        _Socket X_DEBUG_INIT(InvalidSocket);
+        eStatus        _Status X_DEBUG_INIT(eStatus::Unspecified);
+        xIoContext *   _IoContextPtr X_DEBUG_INIT(nullptr);
+        iListener *    _ListenerPtr X_DEBUG_INIT(nullptr);
     };
 
 }

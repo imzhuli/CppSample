@@ -563,19 +563,22 @@ X_NS
 #define X_AddressOf ::xel::AddressOf
 #endif
 
-#ifndef X_DEBUG_INIT
 #ifndef NDEBUG
 #define X_DEBUG_INIT(...) = {##__VA_ARGS__}
 #else
 #define X_DEBUG_INIT(...)
 #endif
-#endif
 
-#ifndef X_DEBUG_STEAL
 #ifndef NDEBUG
 #define X_DEBUG_STEAL(Param, ...) (::xel::Steal(Param, ##__VA_ARGS__))
+#define X_DEBUG_RESET(Param, ...) (::xel::Reset(Param, ##__VA_ARGS__))
 #else
 #define X_DEBUG_STEAL(Param, ...) Param
+#define X_DEBUG_RESET(Param, ...)
 #endif
 
+#ifndef NDEBUG
+#define X_DEBUG_PRINTF printf
+#else
+#define X_DEBUG_PRINTF(...)
 #endif

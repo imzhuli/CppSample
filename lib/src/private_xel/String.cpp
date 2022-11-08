@@ -154,7 +154,7 @@ X_NS
 	static std::string __show__(const void * buffer_, size_t len, const char (&hexfmt)[5], bool header)
 	{
 		if (!len) {
-			return "<empty>";
+			return "<-- Empty Data -->";
 		}
 		const char * buffer = static_cast<const char*>(buffer_);
 		std::string h;
@@ -170,7 +170,7 @@ X_NS
 		h.append("00000000  ");
 		for (size_t oi = 0 ; oi < len ; ++oi) {
 			char c = buffer[oi];
-			char cs = (isprint(c) && c != ' ') ? c : '.' ;
+			char cs = (c > 0 && isgraph(c)) ? c : '.' ;
 			sprintf(ch, hexfmt, (int)(unsigned char)c);
 			sprintf(bh, ((oi % 2) ? "%s ": "%s"), ch);
 			sprintf(bp, "%c", cs);

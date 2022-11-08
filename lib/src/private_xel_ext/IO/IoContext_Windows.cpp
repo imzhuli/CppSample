@@ -1,5 +1,6 @@
 #include <xel_ext/IO/IoContext.hpp>
 #include <mutex>
+#include <cinttypes>
 
 #ifdef X_SYSTEM_WINDOWS
 
@@ -11,47 +12,95 @@ X_NS {
             Fatal("WsaData Error");
         }
     }
-
     static void CleanupWinsock() {
         WSACleanup();
     }
-
     static xScopeGuard WSAEnv = { InitWinsock, CleanupWinsock };
 
     bool xIoContext::Init()
     {
-
         assert(_Poller == InvalidEventPoller);
         _Poller = CreateIoCompletionPort(INVALID_HANDLE_VALUE,0,0,0);
         if (_Poller == INVALID_HANDLE_VALUE) {
             return false;
         }
+        X_DEBUG_PRINTF("xIoContext::Init: Instance=%p Poller=%p\n", this, _Poller);
         return true;
     }
 
     void xIoContext::Clean()
-    {
-        assert(_PendingErrorList.IsEmpty());
+    {        
+        X_DEBUG_PRINTF("xIoContext::Clean: Instance=%p Poller=%p\n", this, _Poller);
+
+        assert(_DeferredOperationList.IsEmpty());
+        assert(_PendingOperationList.IsEmpty());
         CloseHandle(X_DEBUG_STEAL(_Poller, InvalidEventPoller));
     }
 
     void xIoContext::LoopOnce(int TimeoutMS)
     {
-        DWORD IoEventCount = 0;
+        DWORD IoSize = 0;
         ULONG_PTR CompleteKeys = 0;
         LPOVERLAPPED OverlappedPtr = NULL;
-        BOOL Result = GetQueuedCompletionStatus(_Poller, &IoEventCount, &CompleteKeys, &OverlappedPtr, (TimeoutMS < 0 ? INFINITE : (DWORD)TimeoutMS));
+
+        OVERLAPPED_ENTRY EventEntries[256];
+        ULONG EventCount = 0;
+        BOOL Result = GetQueuedCompletionStatusEx (_Poller, EventEntries, (ULONG)Length(EventEntries), &EventCount, (TimeoutMS < 0 ? INFINITE : (DWORD)TimeoutMS), FALSE);
         if (!Result) {
+            if (ERROR_ABANDONED_WAIT_0 == GetLastError()) {
+                Fatal("xIoContext::LoopOnce, Invalid _Poller");                
+            }
             return;
         }
 
-        // process error:
+        for (ULONG i = 0 ; i < EventCount ; ++i) {
+            auto & Event = EventEntries[i];
+            auto ReactorPtr = (iIoReactor*)Event.lpCompletionKey;
+            auto OverlappedPtr = Event.lpOverlapped;
 
-        // process read:
+            X_DEBUG_PRINTF("xIoContext::LoopOnce, ReactorPtr=%p, lpOverlapped=%p, Transfered=%zi, Internal=%" PRIuPTR "\n", ReactorPtr, Event.lpOverlapped, (size_t)Event.dwNumberOfBytesTransferred, Event.Internal);
+            auto EventType = ReactorPtr->GetEventType(Event.lpOverlapped);
 
-        // process write:
+            if (EventType == eIoEventType::Error) {
+                ReactorPtr->OnIoEventError();
+                continue;
+            }
 
-        // do extra cleanup:
+            // process read:
+            if (EventType == eIoEventType::InReady) {
+                ReactorPtr->OnIoEventInReady();                
+            }
+            if (!ReactorPtr->IsAvailable()) {
+                ReactorPtr->OnIoEventError();
+                continue;
+            }
+
+            // process write:
+            if (EventType == eIoEventType::OutReady) {
+                ReactorPtr->OnIoEventOutReady();                
+            }
+            if (!ReactorPtr->IsAvailable()) {
+                ReactorPtr->OnIoEventError();
+                continue;
+            }
+
+            // do extra cleanup:
+
+        }
+
+        // exec pending operations:
+        _DeferredOperationList.GrabListTail(_PendingOperationList);
+        for (auto & Node : _DeferredOperationList) {            
+            if (!Node.PersistentDeferredOperation) {
+                _DeferredOperationList.Remove(Node);
+            }
+
+            // TODO: process pending operation:
+            auto & IoReactor = (iIoReactor&)Node;
+            IoReactor.OnDeferredOperation();
+        }
+
+        (void)Result;
     }
     
 }

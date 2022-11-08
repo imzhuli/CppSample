@@ -3,11 +3,12 @@
 
 #if defined(X_SYSTEM_WINDOWS)
     #define WIN32_LEAN_AND_MEAN
-    #include <windows.h>
+    #include <Windows.h>
     #include <windef.h>
     #include <ws2def.h>
-    #include <winsock2.h>
-    #include <Ws2tcpip.h>
+    #include <WinSock2.h>
+    #include <WS2tcpip.h>
+    #include <MSWSock.h>
 
 X_NS {
     typedef SSIZE_T                   ssize_t;

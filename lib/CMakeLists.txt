@@ -4,7 +4,7 @@ project(lib_${libname})
 
 # enable specific macors by system type:
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
-	set(PLATFORM_LIBRARIES wsock32)
+	set(PLATFORM_LIBRARIES ws2_32 Mswsock)
 elseif (CMAKE_SYSTEM_NAME MATCHES "Linux")
 	set(PLATFORM_LIBRARIES)
 elseif (CMAKE_SYSTEM_NAME MATCHES "Darwin")
@@ -39,9 +39,9 @@ aux_source_directory(./src/private_xel/Container                   X_SRC)
 aux_source_directory(./src/private_xel_ext/Lua                     X_SRC)
 
 aux_source_directory(./src/private_xel_ext/IO                      X_SRC)
-# aux_source_directory(./src/private_xel_ext/IO/Darwin               X_SRC)
-# aux_source_directory(./src/private_xel_ext/IO/Linux                X_SRC)
-# aux_source_directory(./src/private_xel_ext/IO/Windows              X_SRC)
+# aux_source_directory(./src/private_xel_ext/IO/Darwin             X_SRC)
+# aux_source_directory(./src/private_xel_ext/IO/Linux              X_SRC)
+# aux_source_directory(./src/private_xel_ext/IO/Windows            X_SRC)
 aux_source_directory(./src/private_xel_ext/Utility                 X_SRC)
 
 aux_source_directory(./src/private_xel_game/Base                   X_SRC)
