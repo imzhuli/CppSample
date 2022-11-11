@@ -14,10 +14,14 @@ X_NS {
 
     void xIoContext::Clean()
     {
-        assert(_PendingErrorList.IsEmpty());
         close(X_DEBUG_STEAL(_Poller, InvalidEventPoller));
     }
-    
+
+    void xIoContext::LoopOnce(int TimeoutMS)
+    {
+        Fatal("Not implemented");
+    }
+
 }
 
 

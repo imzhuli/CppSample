@@ -179,7 +179,7 @@ X_NS
 		template<typename T>
 		[[nodiscard]] X_STATIC_INLINE constexpr bool
 		IsPow2(const T x) { static_assert(std::is_integral_v<T>); return x > 0 && !(x & (x-1)); }
-		
+
 		template<typename T>
 		[[nodiscard]] X_STATIC_INLINE std::remove_reference_t<T> &
 		X2Ref(T && ref) { return ref; }
@@ -564,7 +564,7 @@ X_NS
 #endif
 
 #ifndef NDEBUG
-#define X_DEBUG_INIT(...) = {##__VA_ARGS__}
+#define X_DEBUG_INIT(...) = {__VA_ARGS__}
 #else
 #define X_DEBUG_INIT(...)
 #endif

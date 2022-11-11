@@ -10,8 +10,7 @@ X_NS
 {
 
     class xTcpServer
-    : iIoReactor
-	, xNonCopyable
+    : protected iIoReactor
     {
 	public:
 		struct iListener
@@ -34,7 +33,7 @@ X_NS
 		xSocket       _ListenSocket X_DEBUG_INIT(InvalidSocket);
 		iListener *   _ListenerPtr;
 
-	#if defined(X_SYSTEM_WINDOWS)		
+	#if defined(X_SYSTEM_WINDOWS)
 		ADDRESS_FAMILY    _AF;
 		xSocket           _PreAcceptSocket X_DEBUG_INIT(InvalidSocket);
 		struct {

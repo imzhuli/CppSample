@@ -4,6 +4,7 @@
 #include <xel/Util/Chrono.hpp>
 #include <xel/String.hpp>
 #include <thread>
+#include <cinttypes>
 
 using namespace xel;
 
@@ -15,7 +16,7 @@ struct xSample
 {
     void OnNewConnection(xTcpServer * TcpServerPtr, xSocket NativeHandle) override
     {
-        X_DEBUG_PRINTF("xSample: New connection accepted: handle=%p\n", (void*)NativeHandle);
+        X_DEBUG_PRINTF("xSample: New connection accepted: handle=%" PRIuPTR "\n", (uintptr_t)NativeHandle);
         auto ConnectionPtr = new xTcpConnection;
         if (!ConnectionPtr->Init(TcpServerPtr->GetIoContextPtr(), NativeHandle, this)) {
             XelCloseSocket(NativeHandle);
@@ -24,8 +25,8 @@ struct xSample
         }
     }
 
-    size_t OnData(xTcpConnection * ConnectionPtr, void * DataPtr, size_t DataSize) override 
-    {        
+    size_t OnData(xTcpConnection * ConnectionPtr, void * DataPtr, size_t DataSize) override
+    {
         auto Hex = HexShow(DataPtr, DataSize);
         X_DEBUG_PRINTF("xSample::OnData Instance=%p\nData=\n%s\n", this, Hex.c_str());
         ConnectionPtr->PostData("HTTP/1.1 200 OK\r\nContent-Length: 0\r\nConnection: close\r\n\r\n", 57);
@@ -58,9 +59,8 @@ int main(int, char **)
         for (auto & ConnectionPtr : DeleteList) {
             delete ConnectionPtr;
         }
-        DeleteList.clear();        
+        DeleteList.clear();
     }
-
 
     return 0;
 }
