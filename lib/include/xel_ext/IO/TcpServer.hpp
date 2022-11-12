@@ -43,8 +43,8 @@ X_NS
 		DWORD             _PreAcceptReceivedLength;
         OVERLAPPED        _Overlapped;
 
-		X_PRIVATE_MEMBER void TryPreAccept();
-		X_PRIVATE_MEMBER void OnDeferredOperation() override { TryPreAccept(); }
+		X_API_MEMBER void TryPreAccept();
+		X_API_MEMBER void OnDeferredOperation() override { TryPreAccept(); }
 		X_PRIVATE_MEMBER eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) {
 			assert(OverlappedPtr == &_Overlapped);
 			return eIoEventType::OutReady;

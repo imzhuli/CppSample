@@ -70,8 +70,8 @@ X_NS
             return OverlappedPtr == &_ReadOverlappedObject ? eIoEventType::InReady :
                     (OverlappedPtr == &_WriteOverlappedObject ? eIoEventType::OutReady : eIoEventType::Error);
         }
-        X_PRIVATE_MEMBER void OnIoEventInReady() override;
-        X_PRIVATE_MEMBER void OnIoEventOutReady() override;
+        X_API_MEMBER void OnIoEventInReady() override;
+        X_API_MEMBER void OnIoEventOutReady() override;
         X_PRIVATE_MEMBER void TryRecvData(size_t SkipSize = 0);
         X_PRIVATE_MEMBER void TrySendData();
     #endif

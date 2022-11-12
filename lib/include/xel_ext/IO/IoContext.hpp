@@ -47,9 +47,9 @@ X_NS
     {
     public:
         virtual void OnDeferredOperation() { Pass(); }
-        virtual void OnIoEventInReady()  { Pass(); }
-        virtual void OnIoEventOutReady() { Pass(); }
-        virtual void OnIoEventError()    { Pass(); }
+        virtual void OnIoEventInReady()    { Pass(); }
+        virtual void OnIoEventOutReady()   { Pass(); }
+        virtual void OnIoEventError()      { Pass(); }
 
         X_PRIVATE_INLINE bool IsAvailable() const { return _Available; }
     #if defined(X_SYSTEM_WINDOWS)
