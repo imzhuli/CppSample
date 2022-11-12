@@ -1,4 +1,5 @@
 #include <xel_ext/IO/IoContext.hpp>
+#include <cinttypes>
 
 #ifdef X_SYSTEM_DARWIN
 
@@ -19,7 +20,41 @@ X_NS {
 
     void xIoContext::LoopOnce(int TimeoutMS)
     {
-        Fatal("Not implemented");
+        struct kevent Events[128];
+        struct timespec TS = {
+            TimeoutMS / 1000,
+            ((long)TimeoutMS % 1000) * 1000000,
+        };
+        int Total = kevent(_Poller, NULL, 0, Events, Length(Events), TimeoutMS < 0 ? nullptr : &TS);
+        for (int i = 0 ; i < Total ; ++i) {
+            auto & EV = Events[i];
+            auto ReactorPtr = (iIoReactor*)EV.udata;
+
+            X_DEBUG_PRINTF("Kevent: id=%" PRIxPTR "\n", EV.ident);
+            if (EV.flags & EV_ERROR) {
+                ReactorPtr->OnIoEventError();
+                continue;
+            }
+
+            if (EV.flags & EVFILT_READ) {
+                ReactorPtr->OnIoEventInReady();
+            }
+            if (!ReactorPtr->IsAvailable()) {
+                ReactorPtr->OnIoEventError();
+                continue;
+            }
+
+            if (EV.flags & EVFILT_WRITE) {
+                ReactorPtr->OnIoEventOutReady();
+            }
+            if (!ReactorPtr->IsAvailable()) {
+                ReactorPtr->OnIoEventError();
+                continue;
+            }
+
+            // extra events:
+
+        }
     }
 
 }

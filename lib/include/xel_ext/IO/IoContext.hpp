@@ -41,7 +41,7 @@ X_NS
         Closed,
     };
 
-    class iIoReactor 
+    class iIoReactor
     : public xIoReactorNode
     , private xNonCopyable
     {
@@ -67,7 +67,7 @@ X_NS
         bool _Available = true;
     };
 
-    class iBufferedIoReactor 
+    class iBufferedIoReactor
     : public iIoReactor
     {
     protected:
@@ -82,7 +82,7 @@ X_NS
         DWORD      _ReadDataSize;
         WSABUF     _ReadBufferUsage;
         OVERLAPPED _ReadOverlappedObject;
-        
+
         xPacketBufferChain  _WriteBufferChain;
         xPacketBuffer *     _SendingBufferPtr;
         DWORD               _SentDataSize;
@@ -91,6 +91,9 @@ X_NS
     #else
         size_t _ReadBufferDataSize;
         size_t _WriteBufferDataSize;
+
+        xPacketBufferChain  _WriteBufferChain;
+        xPacketBuffer *     _SendingBufferPtr;
     #endif
     };
 

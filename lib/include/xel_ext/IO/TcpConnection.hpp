@@ -53,7 +53,7 @@ X_NS
 
         X_API_MEMBER void ResizeSendBuffer(size_t Size);
         X_API_MEMBER void ResizeReceiveBuffer(size_t Size);
-        
+
         X_API_MEMBER size_t GetPendingWriteBlockCount() const;
 
         /***
@@ -66,14 +66,19 @@ X_NS
 
     protected:
     #if defined (X_SYSTEM_WINDOWS)
-        X_API_MEMBER eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) override {
-            return OverlappedPtr == &_ReadOverlappedObject ? eIoEventType::InReady : 
+        X_PRIVATE_MEMBER eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) override {
+            return OverlappedPtr == &_ReadOverlappedObject ? eIoEventType::InReady :
                     (OverlappedPtr == &_WriteOverlappedObject ? eIoEventType::OutReady : eIoEventType::Error);
         }
-        X_API_MEMBER void OnIoEventInReady() override;
-        X_API_MEMBER void OnIoEventOutReady() override;
-        X_API_MEMBER void TryRecvData(size_t SkipSize = 0);
-        X_API_MEMBER void TrySendData();
+        X_PRIVATE_MEMBER void OnIoEventInReady() override;
+        X_PRIVATE_MEMBER void OnIoEventOutReady() override;
+        X_PRIVATE_MEMBER void TryRecvData(size_t SkipSize = 0);
+        X_PRIVATE_MEMBER void TrySendData();
+    #endif
+    #if defined (X_SYSTEM_DARWIN)
+        X_PRIVATE_MEMBER void OnIoEventInReady() override;
+        X_PRIVATE_MEMBER void OnIoEventOutReady() override;
+        X_PRIVATE_MEMBER void TrySendData();
     #endif
 
     private:

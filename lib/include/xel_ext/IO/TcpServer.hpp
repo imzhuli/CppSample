@@ -43,13 +43,19 @@ X_NS
 		DWORD             _PreAcceptReceivedLength;
         OVERLAPPED        _Overlapped;
 
-		X_API_MEMBER void TryPreAccept();
-		X_API_MEMBER void OnDeferredOperation() override { TryPreAccept(); }
-		X_API_MEMBER eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) {
+		X_PRIVATE_MEMBER void TryPreAccept();
+		X_PRIVATE_MEMBER void OnDeferredOperation() override { TryPreAccept(); }
+		X_PRIVATE_MEMBER eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) {
 			assert(OverlappedPtr == &_Overlapped);
 			return eIoEventType::OutReady;
 		};
 		X_API_MEMBER void OnIoEventOutReady() override;
+	#endif
+
+	#if defined(X_SYSTEM_DARWIN)
+		int    _AF; // address family
+
+		X_API_MEMBER void OnIoEventInReady() override;
 	#endif
 	};
 

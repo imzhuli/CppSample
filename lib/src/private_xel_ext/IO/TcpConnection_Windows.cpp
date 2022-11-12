@@ -18,8 +18,8 @@ X_NS
         }
 
         memset(&_ReadOverlappedObject, 0, sizeof(_ReadOverlappedObject));
-        memset(&_WriteOverlappedObject, 0, sizeof(_WriteOverlappedObject));        
-        
+        memset(&_WriteOverlappedObject, 0, sizeof(_WriteOverlappedObject));
+
         _SendingBufferPtr = nullptr;
         _Socket = NativeHandle;
         _IoContextPtr = IoContextPtr;
@@ -52,16 +52,17 @@ X_NS
         TryRecvData(SkipSize);
     }
 
-    void xTcpConnection::OnIoEventOutReady() 
+    void xTcpConnection::OnIoEventOutReady()
     {
         X_DEBUG_PRINTF("xTcpConnection::OnIoEventOutputReady Instance=%p, TransferedData=%zi\n", this, (size_t)_SentDataSize);
+        TrySendData();
     }
 
     size_t xTcpConnection::PostData(const void * DataPtr_, size_t DataSize)
     {
         assert(DataPtr_ && DataSize);
         assert(_Status != eStatus::Unspecified);
-        
+
         if (_Status >= eStatus::Closing) {
             return 0;
         }
@@ -82,7 +83,7 @@ X_NS
             BufferPtr->DataSize = DataSize;
             _WriteBufferChain.Push(BufferPtr);
         }
-        
+
         if (_Status == eStatus::Connecting) {
             return DataSize;
         }
