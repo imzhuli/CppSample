@@ -65,6 +65,19 @@ X_NS
         X_API_MEMBER void ResumeReading();
 
     protected:
+
+    #if defined (X_SYSTEM_DARWIN)
+        X_PRIVATE_MEMBER void OnIoEventInReady() override;
+        X_PRIVATE_MEMBER void OnIoEventOutReady() override;
+        X_PRIVATE_MEMBER void TrySendData();
+    #endif
+
+    #if defined (X_SYSTEM_LINUX)
+        X_PRIVATE_MEMBER void OnIoEventInReady() override;
+        X_PRIVATE_MEMBER void OnIoEventOutReady() override;
+        X_PRIVATE_MEMBER void TrySendData();
+    #endif
+
     #if defined (X_SYSTEM_WINDOWS)
         X_PRIVATE_MEMBER eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) override {
             return OverlappedPtr == &_ReadOverlappedObject ? eIoEventType::InReady :
@@ -73,11 +86,6 @@ X_NS
         X_API_MEMBER void OnIoEventInReady() override;
         X_API_MEMBER void OnIoEventOutReady() override;
         X_PRIVATE_MEMBER void TryRecvData(size_t SkipSize = 0);
-        X_PRIVATE_MEMBER void TrySendData();
-    #endif
-    #if defined (X_SYSTEM_DARWIN)
-        X_PRIVATE_MEMBER void OnIoEventInReady() override;
-        X_PRIVATE_MEMBER void OnIoEventOutReady() override;
         X_PRIVATE_MEMBER void TrySendData();
     #endif
 

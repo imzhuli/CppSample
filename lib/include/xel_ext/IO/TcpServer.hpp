@@ -33,6 +33,16 @@ X_NS
 		xSocket       _ListenSocket X_DEBUG_INIT(InvalidSocket);
 		iListener *   _ListenerPtr;
 
+	#if defined(X_SYSTEM_DARWIN)
+		int    _AF; // address family
+		X_API_MEMBER void OnIoEventInReady() override;
+	#endif
+
+	#if defined(X_SYSTEM_LINUX)
+		int    _AF; // address family
+		X_API_MEMBER void OnIoEventInReady() override;
+	#endif
+
 	#if defined(X_SYSTEM_WINDOWS)
 		ADDRESS_FAMILY    _AF;
 		xSocket           _PreAcceptSocket X_DEBUG_INIT(InvalidSocket);
@@ -50,12 +60,6 @@ X_NS
 			return eIoEventType::OutReady;
 		};
 		X_API_MEMBER void OnIoEventOutReady() override;
-	#endif
-
-	#if defined(X_SYSTEM_DARWIN)
-		int    _AF; // address family
-
-		X_API_MEMBER void OnIoEventInReady() override;
 	#endif
 	};
 
