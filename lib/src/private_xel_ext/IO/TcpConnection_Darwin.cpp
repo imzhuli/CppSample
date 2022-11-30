@@ -36,6 +36,11 @@ X_NS
         return true;
     }
 
+    bool xTcpConnection::Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr)
+    {
+        return false;
+    }
+
     void xTcpConnection::Clean()
     {
         XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));

@@ -29,7 +29,7 @@ X_NS {
     }
 
     void xIoContext::Clean()
-    {        
+    {
         X_DEBUG_PRINTF("xIoContext::Clean: Instance=%p Poller=%p\n", this, _Poller);
 
         assert(_DeferredOperationList.IsEmpty());
@@ -48,7 +48,7 @@ X_NS {
         BOOL Result = GetQueuedCompletionStatusEx (_Poller, EventEntries, (ULONG)Length(EventEntries), &EventCount, (TimeoutMS < 0 ? INFINITE : (DWORD)TimeoutMS), FALSE);
         if (!Result) {
             if (ERROR_ABANDONED_WAIT_0 == GetLastError()) {
-                Fatal("xIoContext::LoopOnce, Invalid _Poller");                
+                Fatal("xIoContext::LoopOnce, Invalid _Poller");
             }
             return;
         }
@@ -68,7 +68,7 @@ X_NS {
 
             // process read:
             if (EventType == eIoEventType::InReady) {
-                ReactorPtr->OnIoEventInReady();                
+                ReactorPtr->OnIoEventInReady();
             }
             if (!ReactorPtr->IsAvailable()) {
                 ReactorPtr->OnIoEventError();
@@ -77,7 +77,7 @@ X_NS {
 
             // process write:
             if (EventType == eIoEventType::OutReady) {
-                ReactorPtr->OnIoEventOutReady();                
+                ReactorPtr->OnIoEventOutReady();
             }
             if (!ReactorPtr->IsAvailable()) {
                 ReactorPtr->OnIoEventError();
@@ -90,7 +90,7 @@ X_NS {
 
         // exec pending operations:
         _DeferredOperationList.GrabListTail(_PendingOperationList);
-        for (auto & Node : _DeferredOperationList) {            
+        for (auto & Node : _DeferredOperationList) {
             if (!Node.PersistentDeferredOperation) {
                 _DeferredOperationList.Remove(Node);
             }
@@ -102,7 +102,7 @@ X_NS {
 
         (void)Result;
     }
-    
+
 }
 
 
