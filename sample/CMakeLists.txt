@@ -24,6 +24,7 @@ endfunction()
 #test lib:
 
 add_sub_sample(gm)
+add_sub_sample(tcp_client)
 add_sub_sample(tcp_server)
 
 install(TARGETS

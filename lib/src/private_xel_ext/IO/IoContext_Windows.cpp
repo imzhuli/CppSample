@@ -55,11 +55,11 @@ X_NS {
 
         for (ULONG i = 0 ; i < EventCount ; ++i) {
             auto & Event = EventEntries[i];
-            auto ReactorPtr = (iIoReactor*)Event.lpCompletionKey;
+            auto ReactorPtr = (iBufferedIoReactor*)Event.lpCompletionKey;
             auto OverlappedPtr = Event.lpOverlapped;
 
-            X_DEBUG_PRINTF("xIoContext::LoopOnce, ReactorPtr=%p, lpOverlapped=%p, Transfered=%zi, Internal=%" PRIuPTR "\n", ReactorPtr, Event.lpOverlapped, (size_t)Event.dwNumberOfBytesTransferred, Event.Internal);
             auto EventType = ReactorPtr->GetEventType(Event.lpOverlapped);
+            X_DEBUG_PRINTF("xIoContext::LoopOnce, ReactorPtr=%p, lpOverlapped=%p, Transfered=%zi, EventType=%i\n", ReactorPtr, Event.lpOverlapped, (size_t)Event.dwNumberOfBytesTransferred, (int)EventType);
 
             if (EventType == eIoEventType::Error) {
                 ReactorPtr->OnIoEventError();
@@ -68,6 +68,7 @@ X_NS {
 
             // process read:
             if (EventType == eIoEventType::InReady) {
+                ReactorPtr->SetReadTransfered(Event.dwNumberOfBytesTransferred);
                 ReactorPtr->OnIoEventInReady();
             }
             if (!ReactorPtr->IsAvailable()) {
@@ -77,6 +78,7 @@ X_NS {
 
             // process write:
             if (EventType == eIoEventType::OutReady) {
+                ReactorPtr->SetWriteTransfered(Event.dwNumberOfBytesTransferred);
                 ReactorPtr->OnIoEventOutReady();
             }
             if (!ReactorPtr->IsAvailable()) {

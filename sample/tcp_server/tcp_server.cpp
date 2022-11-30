@@ -51,8 +51,6 @@ int main(int, char **)
     xTcpServer TcpServer;
     auto TcpServerGuard = xResourceGuard{ TcpServer, &IoContext, Address, &SampleListener };
 
-
-    xTimer Timer;
     while(true)
     {
         IoContext.LoopOnce();

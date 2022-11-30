@@ -1,4 +1,5 @@
 #include <xel_ext/IO/TcpConnection.hpp>
+#include <xel/String.hpp>
 #include <cinttypes>
 
 #if defined(X_SYSTEM_WINDOWS)
@@ -20,7 +21,7 @@ X_NS
         memset(&_ReadOverlappedObject, 0, sizeof(_ReadOverlappedObject));
         memset(&_WriteOverlappedObject, 0, sizeof(_WriteOverlappedObject));
 
-        _SendingBufferPtr = nullptr;
+        _WriteBufferPtr = nullptr;
         _Socket = NativeHandle;
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
@@ -74,6 +75,22 @@ X_NS
             return false;
         }
 
+        // load connect ex:
+        GUID guid = WSAID_CONNECTEX;
+        DWORD dwBytes = 0;
+        auto LoadError = WSAIoctl(_Socket, SIO_GET_EXTENSION_FUNCTION_POINTER,
+                      &guid, sizeof(guid),
+                      &_ConnectEx, sizeof(_ConnectEx),
+                      &dwBytes, NULL, NULL);
+        if (LoadError) {
+            auto ErrorCode = WSAGetLastError();
+            if (ErrorCode != WSA_IO_PENDING) {
+                X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
+                SetUnavailable();
+            }
+            return false;
+        }
+
         if (CreateIoCompletionPort((HANDLE)_Socket, *IoContextPtr, (ULONG_PTR)this, 0) == NULL) {
             X_DEBUG_PRINTF("xTcpConnection::Init failed to create competion port\n");
             return false;
@@ -82,22 +99,29 @@ X_NS
         memset(&_ReadOverlappedObject, 0, sizeof(_ReadOverlappedObject));
         memset(&_WriteOverlappedObject, 0, sizeof(_WriteOverlappedObject));
 
-        _SendingBufferPtr = nullptr;
+        _WriteBufferPtr = nullptr;
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
 
-        auto Error = WSAConnect(_Socket, (SOCKADDR*)(&AddrStorage), (int)AddrLen, NULL, NULL, NULL, NULL);
-        if (Error) {
-            if (WSAGetLastError() != ERROR_IO_PENDING) {
+        /* ConnectEx requires the socket to be initially bound. */
+        do {
+            struct sockaddr_storage BindAddr;
+            memset(&BindAddr, 0, sizeof(BindAddr));
+            BindAddr.ss_family = AddrStorage.ss_family;
+            auto Error = bind(_Socket, (SOCKADDR*) &BindAddr, (int)AddrLen);
+            if (Error) {
+                X_DEBUG_PRINTF("bind failed: %u\n", WSAGetLastError());
                 return false;
             }
-        }
-        _Status = eStatus::Connected;
+        } while(false);
 
-        TryRecvData();
-        if (!IsAvailable()) {
+        auto Error = _ConnectEx(_Socket, (SOCKADDR*)(&AddrStorage), (int)AddrLen, NULL, NULL, NULL, &_WriteOverlappedObject);
+        if (Error) {
+            auto ErrorCode = WSAGetLastError();
+            X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
             return false;
         }
+        _Status = eStatus::Connecting;
 
         FailSafe.Dismiss();
         return true;
@@ -124,7 +148,32 @@ X_NS
 
     void xTcpConnection::OnIoEventOutReady()
     {
-        X_DEBUG_PRINTF("xTcpConnection::OnIoEventOutputReady Instance=%p, TransferedData=%zi\n", this, (size_t)_SentDataSize);
+        if (_Status == eStatus::Connecting) {
+            int seconds;
+            int bytes = sizeof(seconds);
+
+            auto iResult = getsockopt(_Socket, SOL_SOCKET, SO_CONNECT_TIME,
+                                (char *)&seconds, (PINT)&bytes );
+            if (iResult != NO_ERROR ) {
+                X_DEBUG_PRINTF( "getsockopt(SO_CONNECT_TIME) failed with error: %u\n", WSAGetLastError());
+                SetUnavailable();
+                return;
+            }
+            else {
+                if (seconds == -1) {
+                    X_DEBUG_PRINTF("Connection not established yet\n");
+                    SetUnavailable();
+                    return;
+                }
+                X_DEBUG_PRINTF("Connection has been established %u seconds\n", seconds);
+            }
+            _Status = eStatus::Connected;
+            _ListenerPtr->OnConnected(this);
+            TryRecvData();
+            if (!IsAvailable()) {
+                return;
+            }
+        }
         TrySendData();
     }
 
@@ -167,30 +216,40 @@ X_NS
     {
         _ReadBufferUsage.buf = (CHAR*)_ReadBuffer + SkipSize;
         _ReadBufferUsage.len = (ULONG)(sizeof(_ReadBuffer) - SkipSize);
-        _ReadDataSize = 0;
         _ReadFlags = 0;
         assert(_ReadBufferUsage.len);
-        auto Result = WSARecv(_Socket, &_ReadBufferUsage, 1, &_ReadDataSize, &_ReadFlags, &_ReadOverlappedObject, nullptr);
-        if (Result && WSAGetLastError() != WSA_IO_PENDING) {
-            SetUnavailable();
+        auto Error = WSARecv(_Socket, &_ReadBufferUsage, 1, nullptr, &_ReadFlags, &_ReadOverlappedObject, nullptr);
+        if (Error) {
+            auto ErrorCode = WSAGetLastError();
+            if (ErrorCode != WSA_IO_PENDING) {
+                X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
+                SetUnavailable();
+            }
         }
     }
 
     void xTcpConnection::TrySendData()
     {
-        assert(!_SendingBufferPtr);
-        _SendingBufferPtr = _WriteBufferChain.Pop();
-        if (!_SendingBufferPtr) {
+        if (_Status == eStatus::Connecting) {
             return;
         }
-        _WriteBufferUsage.buf = (CHAR*)_SendingBufferPtr->Buffer;
-        _WriteBufferUsage.len = (ULONG)_SendingBufferPtr->DataSize;
-        _SentDataSize = 0;
-        auto Result = WSASend(_Socket, &_WriteBufferUsage, 1, &_SentDataSize, 0, &_WriteOverlappedObject, nullptr);
-        if (Result && WSAGetLastError() != WSA_IO_PENDING) {
-            // Pending Error Procedure
-            SetUnavailable();
+        if (_WriteBufferPtr) {
+            assert(_WriteBufferUsage.len == (ULONG)_WriteBufferPtr->DataSize);
+            delete _WriteBufferPtr;
+        }
+        _WriteBufferPtr = _WriteBufferChain.Pop();
+        if (!_WriteBufferPtr) {
             return;
+        }
+        _WriteBufferUsage.buf = (CHAR*)_WriteBufferPtr->Buffer;
+        _WriteBufferUsage.len = (ULONG)_WriteBufferPtr->DataSize;
+        auto Error = WSASend(_Socket, &_WriteBufferUsage, 1, nullptr, 0, &_WriteOverlappedObject, nullptr);
+        if (Error) {
+            auto ErrorCode = WSAGetLastError();
+            if (ErrorCode != WSA_IO_PENDING) {
+                X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
+                SetUnavailable();
+            }
         }
         return;
     }

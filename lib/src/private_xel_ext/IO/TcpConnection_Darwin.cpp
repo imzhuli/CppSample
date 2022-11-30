@@ -31,7 +31,7 @@ X_NS
         _ListenerPtr = ListenerPtr;
         _ReadBufferDataSize = 0;
         _WriteBufferDataSize = 0;
-        _SendingBufferPtr = nullptr;
+        _WriteBufferPtr = nullptr;
         _Status = eStatus::Connected;
         return true;
     }
@@ -112,11 +112,11 @@ X_NS
 
     void xTcpConnection::TrySendData()
     {
-        if (!_SendingBufferPtr) {
-            _SendingBufferPtr = _WriteBufferChain.Pop();
+        if (!_WriteBufferPtr) {
+            _WriteBufferPtr = _WriteBufferChain.Pop();
         }
-        while(_SendingBufferPtr) {
-            ssize_t SendSize = write(_Socket, _SendingBufferPtr->Buffer, _SendingBufferPtr->DataSize);
+        while(_WriteBufferPtr) {
+            ssize_t SendSize = write(_Socket, _WriteBufferPtr->Buffer, _WriteBufferPtr->DataSize);
             if (SendSize == -1) {
                 if (errno == EAGAIN) {
                     Fatal("Not implemented");
@@ -125,13 +125,13 @@ X_NS
                 SetUnavailable();
                 return;
             }
-            size_t RemainSize = _SendingBufferPtr->DataSize - SendSize;
+            size_t RemainSize = _WriteBufferPtr->DataSize - SendSize;
             if (RemainSize) {
-                memmove(_SendingBufferPtr->Buffer, _SendingBufferPtr->Buffer + SendSize, RemainSize);
+                memmove(_WriteBufferPtr->Buffer, _WriteBufferPtr->Buffer + SendSize, RemainSize);
                 Fatal("Check if output event is required");
                 return;
             }
-            _SendingBufferPtr = _WriteBufferChain.Pop();
+            _WriteBufferPtr = _WriteBufferChain.Pop();
         }
         return;
     }

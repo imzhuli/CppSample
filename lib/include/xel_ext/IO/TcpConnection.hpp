@@ -43,7 +43,6 @@ X_NS
 
     public:
         X_API_MEMBER bool Init(xIoContext * IoContextPtr, xSocket NativeHandle, iListener * ListenerPtr);
-        X_API_MEMBER bool Init(xIoContext * IoContextPtr, const char * Ip, uint16_t Port, iListener * ListenerPtr);
         X_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr);
         X_API_MEMBER bool GracefulClose();  // return value: true: immediately closed, false pending writes
         X_API_MEMBER void Clean();
@@ -65,6 +64,11 @@ X_NS
         X_API_MEMBER void ResumeReading();
 
     protected:
+        X_PRIVATE_MEMBER void OnIoEventError() override {
+            if (_ListenerPtr) {
+                _ListenerPtr->OnError(this);
+            }
+        }
 
     #if defined (X_SYSTEM_DARWIN)
         X_PRIVATE_MEMBER void OnIoEventInReady() override;
@@ -90,15 +94,11 @@ X_NS
     #endif
 
     private:
-        X_PRIVATE_MEMBER void OnConnected();
-        X_PRIVATE_MEMBER void OnError();
-        X_PRIVATE_MEMBER void DoRead();
-
-    private:
         xSocket        _Socket X_DEBUG_INIT(InvalidSocket);
         eStatus        _Status X_DEBUG_INIT(eStatus::Unspecified);
         xIoContext *   _IoContextPtr X_DEBUG_INIT(nullptr);
         iListener *    _ListenerPtr X_DEBUG_INIT(nullptr);
+        LPFN_CONNECTEX _ConnectEx X_DEBUG_INIT(nullptr);
     };
 
 }

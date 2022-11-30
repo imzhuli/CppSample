@@ -70,6 +70,10 @@ X_NS
     class iBufferedIoReactor
     : public iIoReactor
     {
+    public:
+        X_INLINE void SetReadTransfered(DWORD Size) { _ReadDataSize = Size; }
+        X_INLINE void SetWriteTransfered(DWORD Size) { _WriteDataSize = Size; }
+
     protected:
         static constexpr const size_t InternalReadBufferSize  = 8192;
         static constexpr const size_t InternalWriteBufferSize = 8192;
@@ -77,6 +81,7 @@ X_NS
         ubyte  _ReadBuffer[InternalReadBufferSize];
         ubyte  _WriteBuffer[InternalWriteBufferSize];
 
+    protected:
     #if defined(X_SYSTEM_WINDOWS)
         DWORD      _ReadFlags;
         DWORD      _ReadDataSize;
@@ -84,8 +89,8 @@ X_NS
         OVERLAPPED _ReadOverlappedObject;
 
         xPacketBufferChain  _WriteBufferChain;
-        xPacketBuffer *     _SendingBufferPtr;
-        DWORD               _SentDataSize;
+        xPacketBuffer *     _WriteBufferPtr;
+        DWORD               _WriteDataSize;
         WSABUF              _WriteBufferUsage;
         OVERLAPPED          _WriteOverlappedObject;
     #else
@@ -93,7 +98,7 @@ X_NS
         size_t _WriteBufferDataSize;
 
         xPacketBufferChain  _WriteBufferChain;
-        xPacketBuffer *     _SendingBufferPtr;
+        xPacketBuffer *     _WriteBufferPtr;
     #endif
     };
 
