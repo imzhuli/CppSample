@@ -49,7 +49,7 @@ X_NS
         X_INLINE void Push() const {}
         X_INLINE void Push(char * StrValue) const { lua_pushstring(_LuaStatePtr, StrValue); }
         X_INLINE void Push(const char * StrValue) const { lua_pushstring(_LuaStatePtr, StrValue); }
-        X_INLINE void Push(const std::string& StrValue) const { lua_pushstring(_LuaStatePtr, StrValue.c_str()); }
+        X_INLINE void Push(const std::string& StrValue) const { lua_pushlstring(_LuaStatePtr, StrValue.data(), StrValue.length()); }
         X_INLINE void Push(int (*Func)(lua_State*)) const { lua_pushcfunction(_LuaStatePtr, Func); }
         template<typename tArg>
         X_INLINE std::enable_if_t<std::is_pointer_v<tArg>> Push(tArg Value) const { lua_pushlightuserdata(_LuaStatePtr, (void*)Value); }
@@ -132,9 +132,10 @@ X_NS
         X_INLINE std::string PopString() const {
             auto Top = lua_gettop(_LuaStatePtr);
             assert (Top);
-            std::string Ret = lua_tostring(_LuaStatePtr, Top);
+            size_t Length = 0;
+            const char * Ret = lua_tolstring(_LuaStatePtr, Top, &Length);
             lua_pop(_LuaStatePtr, 1);
-            return Ret;
+            return { Ret, Length };
         }
 
         template<typename...tArgs>
