@@ -577,8 +577,11 @@ X_NS
 #define X_DEBUG_RESET(Param, ...)
 #endif
 
+
 #ifndef NDEBUG
 #define X_DEBUG_PRINTF printf
+#define X_DEBUG_FPRINTF fprintf
 #else
-#define X_DEBUG_PRINTF(...)
+#define X_DEBUG_PRINTF(...) ::xel::Pass()
+#define X_DEBUG_FPRINTF(...) ::xel::Pass()
 #endif
