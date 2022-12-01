@@ -1,11 +1,15 @@
 #include <xel_ext/IO/TcpConnection.hpp>
 #include <xel/String.hpp>
+#include <atomic>
+#include <mutex>
 #include <cinttypes>
 
 #if defined(X_SYSTEM_WINDOWS)
 
 X_NS
 {
+    std::atomic<LPFN_CONNECTEX> AtomicConnectEx = nullptr;
+    std::mutex ConnectExLoaderMutex;
 
     bool xTcpConnection::Init(xIoContext * IoContextPtr, xSocket NativeHandle, iListener * ListenerPtr)
     {
@@ -76,20 +80,26 @@ X_NS
         }
 
         // load connect ex:
-        GUID guid = WSAID_CONNECTEX;
-        DWORD dwBytes = 0;
-        auto LoadError = WSAIoctl(_Socket, SIO_GET_EXTENSION_FUNCTION_POINTER,
-                      &guid, sizeof(guid),
-                      &_ConnectEx, sizeof(_ConnectEx),
-                      &dwBytes, NULL, NULL);
-        if (LoadError) {
-            auto ErrorCode = WSAGetLastError();
-            if (ErrorCode != WSA_IO_PENDING) {
-                X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
-                SetUnavailable();
+        auto ConnectEx = AtomicConnectEx.load();
+        if (!ConnectEx) {
+            auto LockGuard = std::lock_guard(ConnectExLoaderMutex);
+            GUID guid = WSAID_CONNECTEX;
+            DWORD dwBytes = 0;
+            auto LoadError = WSAIoctl(_Socket, SIO_GET_EXTENSION_FUNCTION_POINTER,
+                        &guid, sizeof(guid),
+                        &ConnectEx, sizeof(ConnectEx),
+                        &dwBytes, NULL, NULL);
+            if (LoadError) {
+                auto ErrorCode = WSAGetLastError();
+                if (ErrorCode != WSA_IO_PENDING) {
+                    X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
+                    SetUnavailable();
+                }
+                return false;
             }
-            return false;
-        }
+            X_DEBUG_PRINTF("ConnectEx: %p\n", ConnectEx);
+            AtomicConnectEx = ConnectEx;
+        }while(false);
 
         if (CreateIoCompletionPort((HANDLE)_Socket, *IoContextPtr, (ULONG_PTR)this, 0) == NULL) {
             X_DEBUG_PRINTF("xTcpConnection::Init failed to create competion port\n");
@@ -115,7 +125,7 @@ X_NS
             }
         } while(false);
 
-        auto Error = _ConnectEx(_Socket, (SOCKADDR*)(&AddrStorage), (int)AddrLen, NULL, NULL, NULL, &_WriteOverlappedObject);
+        auto Error = ConnectEx(_Socket, (SOCKADDR*)(&AddrStorage), (int)AddrLen, NULL, NULL, NULL, &_WriteOverlappedObject);
         if (Error) {
             auto ErrorCode = WSAGetLastError();
             X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);

@@ -28,7 +28,7 @@ struct xSample
     size_t OnData(xTcpConnection * ConnectionPtr, void * DataPtr, size_t DataSize) override
     {
         auto Hex = HexShow(DataPtr, DataSize);
-        printf("xSample::OnData Instance=%p\nData=\n%s\n", this, Hex.c_str());
+        printf("xSample::OnData Instance=%p\nDataSize=%zi\n", this, DataSize);
         return DataSize;
     }
 
@@ -58,12 +58,17 @@ int main(int argc, char * argv[])
     xNetAddress Address = xNetAddress::Parse(host, port);
     auto ConnectionGuard = xResourceGuard{ Connection, &IoContext, Address, &SampleListener };
 
+
+    xTcpConnection Connection2;
+    auto ConnectionGuard2 = xResourceGuard{ Connection2, &IoContext, Address, &SampleListener };
+
     if (!ConnectionGuard) {
         cerr << "Failed to init Connection" << endl;
         return 0;
     }
 
     Connection.PostData(SendData, strlen(SendData));
+    Connection2.PostData(SendData, strlen(SendData));
 
     while(true)
     {

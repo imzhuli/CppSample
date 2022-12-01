@@ -98,7 +98,6 @@ X_NS
         eStatus        _Status X_DEBUG_INIT(eStatus::Unspecified);
         xIoContext *   _IoContextPtr X_DEBUG_INIT(nullptr);
         iListener *    _ListenerPtr X_DEBUG_INIT(nullptr);
-        LPFN_CONNECTEX _ConnectEx X_DEBUG_INIT(nullptr);
     };
 
 }

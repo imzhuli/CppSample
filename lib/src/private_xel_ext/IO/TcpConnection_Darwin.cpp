@@ -131,6 +131,7 @@ X_NS
                 Fatal("Check if output event is required");
                 return;
             }
+            delete _WriteBufferPtr;
             _WriteBufferPtr = _WriteBufferChain.Pop();
         }
         return;
