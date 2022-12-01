@@ -32,6 +32,7 @@ X_NS
         _ListenerPtr = ListenerPtr;
         _Status = eStatus::Connected;
         _SuspendReading = false;
+        _Reading = false;
 
         TryRecvData();
         if (!IsAvailable()) {
@@ -163,6 +164,7 @@ X_NS
 
     void xTcpConnection::OnIoEventInReady()
     {
+        _Reading = false;
         if (!_ReadDataSize) {
             _Status = eStatus::Closed;
             _ListenerPtr->OnPeerClose(this);
@@ -196,6 +198,8 @@ X_NS
             }
             _Status = eStatus::Connected;
             _ListenerPtr->OnConnected(this);
+
+            assert(!_Reading);
             TryRecvData();
             if (!IsAvailable()) {
                 return;
@@ -241,6 +245,10 @@ X_NS
 
     void xTcpConnection::TryRecvData(size_t SkipSize)
     {
+        if (_SuspendReading) {
+            return;
+        }
+        _Reading = true;
         _ReadBufferUsage.buf = (CHAR*)_ReadBuffer + SkipSize;
         _ReadBufferUsage.len = (ULONG)(sizeof(_ReadBuffer) - SkipSize);
         _ReadFlags = 0;
@@ -279,6 +287,25 @@ X_NS
             }
         }
         return;
+    }
+
+    void xTcpConnection::SuspendReading()
+    {
+        if (_SuspendReading) {
+            return;
+        }
+        _SuspendReading = true;
+    }
+
+    void xTcpConnection::ResumeReading()
+    {
+        if (!_SuspendReading) {
+            return;
+        }
+        _SuspendReading = false;
+        if (!_Reading) {
+            TryRecvData();
+        }
     }
 
 }

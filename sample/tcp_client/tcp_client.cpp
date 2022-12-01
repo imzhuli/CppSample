@@ -78,6 +78,13 @@ int main(int argc, char * argv[])
     X_DEBUG_PRINTF("==============\n");
 
     Connection.ResumeReading();
+
+    // test: multi entry safety
+    Connection.SuspendReading();
+    Connection.ResumeReading();
+    Connection.SuspendReading();
+    Connection.ResumeReading();
+
     while(true)
     {
         if (SampleListener.IsClosed) {

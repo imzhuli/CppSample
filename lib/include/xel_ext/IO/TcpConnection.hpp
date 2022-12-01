@@ -81,7 +81,7 @@ X_NS
         X_PRIVATE_MEMBER void OnIoEventOutReady() override;
         X_PRIVATE_MEMBER void TrySendData();
         X_PRIVATE_MEMBER void UpdateEventTrigger();
-        bool _RequireOutputEvent = false;
+        bool _RequireOutputEvent X_DEBUG_INIT(false);
     #endif
 
     #if defined (X_SYSTEM_WINDOWS)
@@ -93,6 +93,7 @@ X_NS
         X_API_MEMBER void OnIoEventOutReady() override;
         X_PRIVATE_MEMBER void TryRecvData(size_t SkipSize = 0);
         X_PRIVATE_MEMBER void TrySendData();
+        bool _Reading X_DEBUG_INIT(false);
     #endif
 
     private:
