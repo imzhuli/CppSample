@@ -18,7 +18,7 @@ X_NS
 
         struct epoll_event Event = {};
         Event.data.ptr = this;
-        Event.events = EPOLLIN;
+        Event.events = EPOLLET | EPOLLIN;
         if (-1 == epoll_ctl(*IoContextPtr, EPOLL_CTL_ADD, NativeHandle, &Event)) {
             X_DEBUG_PRINTF("xTcpConnection::Init failed to register epoll event\n");
             return false;
@@ -31,13 +31,14 @@ X_NS
         _WriteBufferDataSize = 0;
         _WriteBufferPtr = nullptr;
         _Status = eStatus::Connected;
+        _SuspendReading = false;
         return true;
     }
 
     bool xTcpConnection::Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr)
     {
         int AF = AF_UNSPEC;
-        sockaddr_storage AddrStorage;
+        sockaddr_storage AddrStorage = {};
         size_t AddrLen = 0;
         memset(&AddrStorage, 0, sizeof(AddrStorage));
         if (Address.IsV4()) {
@@ -56,6 +57,7 @@ X_NS
             AF = AF_INET6;
         }
         else {
+            X_DEBUG_PRINTF("Invalid target address\n");
             return false;
         }
 
@@ -70,15 +72,46 @@ X_NS
             X_DEBUG_RESET(_ListenerPtr);
         }};
 
-        _Socket = socket(AF_INET, SOCK_STREAM, 0);
-        if (-1 == Socket) {
+        _Socket = socket(AF, SOCK_STREAM, 0);
+        if (_Socket == InvalidSocket) {
             X_DEBUG_PRINTF("Failed to create socket\n");
             return false;
         }
 
-        int flags = fcntl(NativeHandle, F_GETFL);
-        fcntl(NativeHandle, F_SETFL, flags | O_NONBLOCK);
-        return false;
+        int flags = fcntl(_Socket, F_GETFL);
+        fcntl(_Socket, F_SETFL, flags | O_NONBLOCK);
+
+        auto ConnectResult = connect(_Socket, (sockaddr*)&AddrStorage, AddrLen);
+        if (ConnectResult == -1) {
+            auto Error = errno;
+            if (Error != EINPROGRESS) {
+                X_DEBUG_PRINTF("Failed to start connection, Socket=%i Error=%s\n", _Socket,  strerror(Error));
+                return false;
+            }
+            _Status = eStatus::Connecting;
+            _RequireOutputEvent = true;
+        }
+        else {
+            _Status = eStatus::Connected;
+            _RequireOutputEvent = false;
+        }
+
+        struct epoll_event Event = {};
+        Event.data.ptr = this;
+        Event.events = EPOLLET | EPOLLIN | (_RequireOutputEvent ? EPOLLOUT : 0);
+        if (-1 == epoll_ctl(*IoContextPtr, EPOLL_CTL_ADD, _Socket, &Event)) {
+            X_DEBUG_PRINTF("xTcpConnection::Init failed to register epoll event\n");
+            return false;
+        }
+        _IoContextPtr = IoContextPtr;
+        _ListenerPtr = ListenerPtr;
+        _ReadBufferDataSize = 0;
+        _WriteBufferDataSize = 0;
+        _WriteBufferPtr = nullptr;
+        _SuspendReading = false;
+
+        FailSafe.Dismiss();
+        return true;
     }
 
     void xTcpConnection::Clean()
@@ -88,6 +121,7 @@ X_NS
 
     void xTcpConnection::OnIoEventInReady()
     {
+        X_DEBUG_PRINTF("xTcpConnection::OnIoEventInReady\n");
         size_t TotalSpace = sizeof(_ReadBuffer) - _ReadBufferDataSize;
         assert(TotalSpace);
 
@@ -112,6 +146,12 @@ X_NS
 
     void xTcpConnection::OnIoEventOutReady()
     {
+        X_DEBUG_PRINTF("xTcpConnection::OnIoEventOutReady\n");
+        if (_Status == eStatus::Connecting) {
+            X_DEBUG_PRINTF("Connection established\n");
+            _Status = eStatus::Connected;
+            _ListenerPtr->OnConnected(this);
+        }
         TrySendData();
     }
 
@@ -159,7 +199,10 @@ X_NS
             ssize_t SendSize = write(_Socket, _WriteBufferPtr->Buffer, _WriteBufferPtr->DataSize);
             if (SendSize == -1) {
                 if (errno == EAGAIN) {
-                    Fatal("Not implemented");
+                    if (!_RequireOutputEvent) {
+                        _RequireOutputEvent = true;
+                        UpdateEventTrigger();
+                    }
                     return;
                 }
                 SetUnavailable();
@@ -168,13 +211,50 @@ X_NS
             size_t RemainSize = _WriteBufferPtr->DataSize - SendSize;
             if (RemainSize) {
                 memmove(_WriteBufferPtr->Buffer, _WriteBufferPtr->Buffer + SendSize, RemainSize);
-                Fatal("Check if output event is required");
+                if (!_RequireOutputEvent) {
+                    _RequireOutputEvent = true;
+                    UpdateEventTrigger();
+                }
                 return;
             }
             delete _WriteBufferPtr;
             _WriteBufferPtr = _WriteBufferChain.Pop();
         }
+        if (_RequireOutputEvent) {
+            _RequireOutputEvent = false;
+            UpdateEventTrigger();
+        }
         return;
+    }
+
+    void xTcpConnection::SuspendReading()
+    {
+        if (_SuspendReading) {
+            return;
+        }
+        _SuspendReading = true;
+        UpdateEventTrigger();
+    }
+
+    void xTcpConnection::ResumeReading()
+    {
+        if (!_SuspendReading) {
+            return;
+        }
+        _SuspendReading = false;
+        UpdateEventTrigger();
+    }
+
+    void xTcpConnection::UpdateEventTrigger()
+    {
+        struct epoll_event Event = {};
+        Event.data.ptr = this;
+        Event.events = EPOLLET | (_SuspendReading ? 0 : EPOLLIN) | (_RequireOutputEvent ? EPOLLOUT : 0);
+        if (-1 == epoll_ctl(*_IoContextPtr, EPOLL_CTL_MOD, _Socket, &Event)) {
+            X_DEBUG_PRINTF("xTcpConnection::UpdateEventTrigger failed to modify epoll event, Reason=%s\n", strerror(errno));
+            Fatal("");
+            return;
+        }
     }
 
 }

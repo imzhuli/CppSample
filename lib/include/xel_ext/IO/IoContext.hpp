@@ -71,8 +71,10 @@ X_NS
     : public iIoReactor
     {
     public:
+    #if defined(X_SYSTEM_WINDOWS)
         X_INLINE void SetReadTransfered(DWORD Size) { _ReadDataSize = Size; }
         X_INLINE void SetWriteTransfered(DWORD Size) { _WriteDataSize = Size; }
+    #endif
 
     protected:
         static constexpr const size_t InternalReadBufferSize  = 8192;

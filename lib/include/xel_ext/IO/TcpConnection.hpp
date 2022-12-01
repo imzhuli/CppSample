@@ -80,6 +80,8 @@ X_NS
         X_PRIVATE_MEMBER void OnIoEventInReady() override;
         X_PRIVATE_MEMBER void OnIoEventOutReady() override;
         X_PRIVATE_MEMBER void TrySendData();
+        X_PRIVATE_MEMBER void UpdateEventTrigger();
+        bool _RequireOutputEvent = false;
     #endif
 
     #if defined (X_SYSTEM_WINDOWS)
@@ -98,6 +100,7 @@ X_NS
         eStatus        _Status X_DEBUG_INIT(eStatus::Unspecified);
         xIoContext *   _IoContextPtr X_DEBUG_INIT(nullptr);
         iListener *    _ListenerPtr X_DEBUG_INIT(nullptr);
+        bool           _SuspendReading X_DEBUG_INIT(false);
     };
 
 }

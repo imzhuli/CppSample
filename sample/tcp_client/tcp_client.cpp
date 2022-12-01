@@ -58,18 +58,26 @@ int main(int argc, char * argv[])
     xNetAddress Address = xNetAddress::Parse(host, port);
     auto ConnectionGuard = xResourceGuard{ Connection, &IoContext, Address, &SampleListener };
 
-
-    xTcpConnection Connection2;
-    auto ConnectionGuard2 = xResourceGuard{ Connection2, &IoContext, Address, &SampleListener };
-
     if (!ConnectionGuard) {
         cerr << "Failed to init Connection" << endl;
         return 0;
     }
 
     Connection.PostData(SendData, strlen(SendData));
-    Connection2.PostData(SendData, strlen(SendData));
+    Connection.SuspendReading();
 
+    xTimer Timer;
+    while(!Timer.TestAndTag(1s))
+    {
+        if (SampleListener.IsClosed) {
+            break;
+        }
+        IoContext.LoopOnce(100);
+    }
+
+    X_DEBUG_PRINTF("==============\n");
+
+    Connection.ResumeReading();
     while(true)
     {
         if (SampleListener.IsClosed) {
