@@ -196,7 +196,7 @@ X_NS
             _WriteBufferPtr = _WriteBufferChain.Pop();
         }
         while(_WriteBufferPtr) {
-            ssize_t SendSize = write(_Socket, _WriteBufferPtr->Buffer, _WriteBufferPtr->DataSize);
+            ssize_t SendSize = send(_Socket, _WriteBufferPtr->Buffer, _WriteBufferPtr->DataSize, XelNoWriteSignal);
             if (SendSize == -1) {
                 if (errno == EAGAIN) {
                     if (!_RequireOutputEvent) {

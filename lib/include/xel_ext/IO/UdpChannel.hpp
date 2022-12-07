@@ -1,15 +1,12 @@
 #pragma once
 
-#include <xel/Common.hpp>
-#include <atomic>
+#include "./IoBase.hpp"
 #include "./IoContext.hpp"
-#include "./NetBase.hpp"
+#include "./NetAddress.hpp"
 #include "./Packet.hpp"
 
 X_NS
 {
-    class xUdpSocketContext;
-    class xUdpChannel;
 
     class xUdpChannel final
     : xNonCopyable
@@ -25,13 +22,11 @@ X_NS
         X_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & BindAddress, iListener * ListenerPtr);
         X_API_MEMBER void Clean();
 
-        X_API_MEMBER void ResizeSendBuffer(size_t Size);
-        X_API_MEMBER void ResizeReceiveBuffer(size_t Size);
-
         X_API_MEMBER void PostData(const void * DataPtr, size_t DataSize, const xNetAddress & DestiationAddress);
 
     private:
-        xUdpSocketContext *  _SocketPtr = nullptr;
+        xSocket        _Socket         X_DEBUG_INIT(InvalidSocket);
+        iListener *    _ListenerPtr    X_DEBUG_INIT(nullptr);
     };
 
 }
