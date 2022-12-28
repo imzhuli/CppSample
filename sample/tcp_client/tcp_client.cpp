@@ -28,7 +28,7 @@ struct xSample
     size_t OnData(xTcpConnection * ConnectionPtr, void * DataPtr, size_t DataSize) override
     {
         auto Hex = HexShow(DataPtr, DataSize);
-        printf("xSample::OnData Instance=%p\nDataSize=%zi\n", this, DataSize);
+        printf("xSample::OnData Instance=%p\nDataSize=%zi\nData=\n%s\n", this, DataSize, Hex.c_str());
         return DataSize;
     }
 

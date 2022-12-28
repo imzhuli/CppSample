@@ -15,13 +15,18 @@ X_NS
 
         int flags = fcntl(NativeHandle, F_GETFL);
         fcntl(NativeHandle, F_SETFL, flags | O_NONBLOCK);
+        setsockopt(NativeHandle, SOL_SOCKET, SO_NOSIGPIPE, (char *)X2Ptr(int(1)), sizeof(int));
 
-        struct kevent Event = {};
-        Event.ident = NativeHandle;
-        Event.flags = EV_ADD | EV_CLEAR;
-        Event.filter = EVFILT_READ;
-        Event.udata = this;
-        if (-1 == kevent(*IoContextPtr, &Event, 1, nullptr, 0, nullptr)) {
+        struct kevent Event[2] = {};
+        Event[0].ident = NativeHandle;
+        Event[0].flags = EV_ADD | EV_CLEAR;
+        Event[0].filter = EVFILT_READ;
+        Event[0].udata = this;
+        Event[1].ident = NativeHandle;
+        Event[1].flags = EV_ADD | EV_DISABLE | EV_CLEAR;
+        Event[1].filter = EVFILT_WRITE;
+        Event[1].udata = this;
+        if (-1 == kevent(*IoContextPtr, Event, 2, nullptr, 0, nullptr)) {
             X_DEBUG_PRINTF("xTcpConnection::Init failed to register kevent\n");
             return false;
         }
@@ -33,12 +38,95 @@ X_NS
         _WriteBufferDataSize = 0;
         _WriteBufferPtr = nullptr;
         _Status = eStatus::Connected;
+        _SuspendReading = false;
         return true;
     }
 
     bool xTcpConnection::Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr)
     {
-        return false;
+        int AF = AF_UNSPEC;
+        sockaddr_storage AddrStorage = {};
+        size_t AddrLen = 0;
+        memset(&AddrStorage, 0, sizeof(AddrStorage));
+        if (Address.IsV4()) {
+            auto & Addr4 = (sockaddr_in&)AddrStorage;
+            Addr4.sin_family = AF_INET;
+            Addr4.sin_addr = (decltype(sockaddr_in::sin_addr)&)(Address.Ipv4);
+            Addr4.sin_port = htons(Address.Port);
+            AddrLen = sizeof(sockaddr_in);
+            AF = AF_INET;
+        } else if (Address.IsV6()) {
+            auto & Addr6 = (sockaddr_in6&)AddrStorage;
+            Addr6.sin6_family = AF_INET6;
+            Addr6.sin6_addr = (decltype(sockaddr_in6::sin6_addr)&)(Address.Ipv6);
+            Addr6.sin6_port = htons(Address.Port);
+            AddrLen = sizeof(sockaddr_in6);
+            AF = AF_INET6;
+        }
+        else {
+            X_DEBUG_PRINTF("Invalid target address\n");
+            return false;
+        }
+
+        assert(_Socket == InvalidSocket);
+        _Socket = InvalidSocket;
+
+        auto FailSafe = xScopeGuard{[this]{
+            if (_Socket != InvalidSocket) {
+                XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
+            }
+            X_DEBUG_RESET(_IoContextPtr);
+            X_DEBUG_RESET(_ListenerPtr);
+        }};
+
+        _Socket = socket(AF, SOCK_STREAM, 0);
+        if (_Socket == InvalidSocket) {
+            X_DEBUG_PRINTF("Failed to create socket\n");
+            return false;
+        }
+
+        int flags = fcntl(_Socket, F_GETFL);
+        fcntl(_Socket, F_SETFL, flags | O_NONBLOCK);
+        setsockopt(_Socket, SOL_SOCKET, SO_NOSIGPIPE, (char *)X2Ptr(int(1)), sizeof(int));
+
+        auto ConnectResult = connect(_Socket, (sockaddr*)&AddrStorage, AddrLen);
+        if (ConnectResult == -1) {
+            auto Error = errno;
+            if (Error != EINPROGRESS) {
+                X_DEBUG_PRINTF("Failed to start connection, Socket=%i Error=%s\n", _Socket,  strerror(Error));
+                return false;
+            }
+            _Status = eStatus::Connecting;
+            _RequireOutputEvent = true;
+        }
+        else {
+            _Status = eStatus::Connected;
+            _RequireOutputEvent = false;
+        }
+
+        struct kevent Event[2] = {};
+        Event[0].ident = _Socket;
+        Event[0].flags = EV_ADD | EV_CLEAR;
+        Event[0].filter = EVFILT_READ;
+        Event[0].udata = this;
+        Event[1].ident = _Socket;
+        Event[1].flags = EV_ADD | (_RequireOutputEvent ? 0 : EV_DISABLE) | EV_CLEAR;
+        Event[1].filter = EVFILT_WRITE;
+        Event[1].udata = this;
+        if (-1 == kevent(*IoContextPtr, Event, 2, nullptr, 0, nullptr)) {
+            X_DEBUG_PRINTF("xTcpConnection::Init failed to register kevent\n");
+            return false;
+        }
+
+        _IoContextPtr = IoContextPtr;
+        _ListenerPtr = ListenerPtr;
+        _ReadBufferDataSize = 0;
+        _WriteBufferDataSize = 0;
+        _WriteBufferPtr = nullptr;
+        _SuspendReading = false;
+
+        FailSafe.Dismiss();
+        return true;
     }
 
     void xTcpConnection::Clean()
@@ -48,6 +136,7 @@ X_NS
 
     void xTcpConnection::OnIoEventInReady()
     {
+        X_DEBUG_PRINTF("xTcpConnection::OnIoEventInReady\n");
         size_t TotalSpace = sizeof(_ReadBuffer) - _ReadBufferDataSize;
         assert(TotalSpace);
 
@@ -59,7 +148,7 @@ X_NS
             return;
         }
         if (-1 == ReadSize) {
-            if (EAGAIN == ReadSize) {
+            if (EAGAIN == errno) {
                 return;
             }
             SetUnavailable();
@@ -72,6 +161,12 @@ X_NS
 
     void xTcpConnection::OnIoEventOutReady()
     {
+        X_DEBUG_PRINTF("xTcpConnection::OnIoEventOutReady\n");
+        if (_Status == eStatus::Connecting) {
+            X_DEBUG_PRINTF("Connection established\n");
+            _Status = eStatus::Connected;
+            _ListenerPtr->OnConnected(this);
+        }
         TrySendData();
     }
 
@@ -116,10 +211,13 @@ X_NS
             _WriteBufferPtr = _WriteBufferChain.Pop();
         }
         while(_WriteBufferPtr) {
-            ssize_t SendSize = write(_Socket, _WriteBufferPtr->Buffer, _WriteBufferPtr->DataSize);
+            ssize_t SendSize = send(_Socket, _WriteBufferPtr->Buffer, _WriteBufferPtr->DataSize, XelNoWriteSignal);
             if (SendSize == -1) {
                 if (errno == EAGAIN) {
-                    Fatal("Not implemented");
+                    if (!_RequireOutputEvent) {
+                        _RequireOutputEvent = true;
+                        EnableWritingTrigger();
+                    }
                     return;
                 }
                 SetUnavailable();
@@ -128,13 +226,91 @@ X_NS
             size_t RemainSize = _WriteBufferPtr->DataSize - SendSize;
             if (RemainSize) {
                 memmove(_WriteBufferPtr->Buffer, _WriteBufferPtr->Buffer + SendSize, RemainSize);
-                Fatal("Check if output event is required");
+                if (!_RequireOutputEvent) {
+                    _RequireOutputEvent = true;
+                    EnableWritingTrigger();
+                }
                 return;
             }
             delete _WriteBufferPtr;
             _WriteBufferPtr = _WriteBufferChain.Pop();
         }
+        if (_RequireOutputEvent) {
+            _RequireOutputEvent = false;
+            DisableWritingTrigger();
+        }
         return;
+    }
+
+
+    void xTcpConnection::SuspendReading()
+    {
+        if (_SuspendReading) {
+            return;
+        }
+        _SuspendReading = true;
+        DisableReadingTrigger();
+    }
+
+    void xTcpConnection::ResumeReading()
+    {
+        if (!_SuspendReading) {
+            return;
+        }
+        _SuspendReading = false;
+        EnableReadingTrigger();
+    }
+
+    void xTcpConnection::EnableReadingTrigger()
+    {
+        struct kevent Event = {};
+        Event.ident = _Socket;
+        Event.flags = EV_ENABLE | EV_CLEAR;
+        Event.filter = EVFILT_READ;
+        Event.udata = this;
+        if (-1 == kevent(*_IoContextPtr, &Event, 1, nullptr, 0, nullptr)) {
+            X_DEBUG_PRINTF("kevent error: %s\n", strerror(errno));
+            Fatal("EnableReadingTrigger: Failed to update kevent");
+        }
+    }
+
+    void xTcpConnection::DisableReadingTrigger()
+    {
+        struct kevent Event = {};
+        Event.ident = _Socket;
+        Event.flags = EV_DISABLE | EV_CLEAR;
+        Event.filter = EVFILT_READ;
+        Event.udata = this;
+        if (-1 == kevent(*_IoContextPtr, &Event, 1, nullptr, 0, nullptr)) {
+            X_DEBUG_PRINTF("kevent error: %s\n", strerror(errno));
+            Fatal("DisableReadingTrigger: Failed to update kevent");
+        }
+    }
+
+    void xTcpConnection::EnableWritingTrigger()
+    {
+        struct kevent Event = {};
+        Event.ident = _Socket;
+        Event.flags = EV_ENABLE | EV_CLEAR;
+        Event.filter = EVFILT_WRITE;
+        Event.udata = this;
+        if (-1 == kevent(*_IoContextPtr, &Event, 1, nullptr, 0, nullptr)) {
+            X_DEBUG_PRINTF("kevent error: %s\n", strerror(errno));
+            Fatal("EnableWritingTrigger: Failed to update kevent");
+        }
+    }
+
+    void xTcpConnection::DisableWritingTrigger()
+    {
+        struct kevent Event = {};
+        Event.ident = _Socket;
+        Event.flags = EV_DISABLE | EV_CLEAR;
+        Event.filter = EVFILT_WRITE;
+        Event.udata = this;
+        if (-1 == kevent(*_IoContextPtr, &Event, 1, nullptr, 0, nullptr)) {
+            X_DEBUG_PRINTF("kevent error: %s\n", strerror(errno));
+            Fatal("DisableWritingTrigger: Failed to update kevent");
+        }
     }
 
 }

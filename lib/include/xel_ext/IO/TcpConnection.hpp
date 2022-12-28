@@ -74,6 +74,11 @@ X_NS
         X_PRIVATE_MEMBER void OnIoEventInReady() override;
         X_PRIVATE_MEMBER void OnIoEventOutReady() override;
         X_PRIVATE_MEMBER void TrySendData();
+        X_PRIVATE_MEMBER void EnableReadingTrigger();
+        X_PRIVATE_MEMBER void DisableReadingTrigger();
+        X_PRIVATE_MEMBER void EnableWritingTrigger();
+        X_PRIVATE_MEMBER void DisableWritingTrigger();
+        bool _RequireOutputEvent X_DEBUG_INIT(false);
     #endif
 
     #if defined (X_SYSTEM_LINUX)

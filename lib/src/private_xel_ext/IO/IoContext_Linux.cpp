@@ -28,6 +28,10 @@ X_NS {
             auto & EV = Events[i];
             auto ReactorPtr = (iIoReactor*)EV.data.ptr;
 
+            if (!ReactorPtr->IsAvailable()) {
+                continue;
+            }
+
             if (EV.events & (EPOLLERR | EPOLLHUP)) {
                 ReactorPtr->OnIoEventError();
                 continue;

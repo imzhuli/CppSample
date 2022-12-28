@@ -31,12 +31,16 @@ X_NS {
             auto ReactorPtr = (iIoReactor*)EV.udata;
 
             X_DEBUG_PRINTF("Kevent: id=%" PRIxPTR "\n", EV.ident);
+            if (!ReactorPtr->IsAvailable()) {
+                continue;
+            }
+
             if (EV.flags & EV_ERROR) {
                 ReactorPtr->OnIoEventError();
                 continue;
             }
 
-            if (EV.flags & EVFILT_READ) {
+            if (EV.filter == EVFILT_READ) {
                 ReactorPtr->OnIoEventInReady();
             }
             if (!ReactorPtr->IsAvailable()) {
@@ -44,7 +48,7 @@ X_NS {
                 continue;
             }
 
-            if (EV.flags & EVFILT_WRITE) {
+            if (EV.filter == EVFILT_WRITE) {
                 ReactorPtr->OnIoEventOutReady();
             }
             if (!ReactorPtr->IsAvailable()) {
