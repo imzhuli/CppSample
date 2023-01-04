@@ -39,7 +39,7 @@ X_NS
             AddrLen = sizeof(sockaddr_in6);
         }
 
-		sendto(_Socket, DataPtr, DataSize, 0, (const sockaddr*)&AddrStorage, (socklen_t)AddrLen);
+		sendto(_Socket, (const char *)DataPtr, DataSize, 0, (const sockaddr*)&AddrStorage, (socklen_t)AddrLen);
 	}
 
 }
