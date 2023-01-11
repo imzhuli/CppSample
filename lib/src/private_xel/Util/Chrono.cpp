@@ -36,7 +36,7 @@ namespace {
 }
 #endif
 
-#if __cplusplus < 202002L
+#if __cplusplus < 202002L && !defined(X_SYSTEM_WINDOWS)
 X_NS
 {
 	uint64_t GetTimestampUS() {

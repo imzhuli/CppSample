@@ -20,7 +20,7 @@ X_NS
 	using xMicroSeconds   = std::chrono::microseconds;
 	using xNanoSeconds    = std::chrono::nanoseconds;
 
-#if __cplusplus < 202002L
+#if __cplusplus < 202002L && !defined(X_SYSTEM_WINDOWS)
 	X_API uint64_t GetTimestampUS();
 #else
 	X_INLINE uint64_t GetTimestampUS() {
