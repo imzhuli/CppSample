@@ -1,5 +1,7 @@
 #include <xel_ext/IO/UdpChannel.hpp>
 
+#if defined(X_SYSTEM_LINUX) || defined(X_SYSTEM_DARWIN)
+
 X_NS
 {
 
@@ -43,3 +45,5 @@ X_NS
 	}
 
 }
+
+#endif
