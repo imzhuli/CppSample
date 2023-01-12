@@ -7,17 +7,27 @@ X_NS
 
 	bool xUdpChannel::Init(xIoContext * IoContextPtr, iListener * ListenerPtr)
 	{
+		assert(IoContextPtr);
+		assert(ListenerPtr);
+		_ListenerPtr = ListenerPtr;
 		return false;
 	}
 
 	bool xUdpChannel::Init(xIoContext * IoContextPtr, const xNetAddress & BindAddress, iListener * ListenerPtr)
 	{
+		Todo();
+
+		assert(IoContextPtr);
+		assert(ListenerPtr);
+		_ListenerPtr = ListenerPtr;
 		return false;
 	}
 
 	void xUdpChannel::Clean()
 	{
+		assert(_ListenerPtr);
 		assert(_Socket != InvalidSocket);
+
 		XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
 		X_DEBUG_RESET(_ListenerPtr);
 	}
@@ -44,6 +54,16 @@ X_NS
         }
 
 		sendto(_Socket, (const char *)DataPtr, (int)DataSize, 0, (const sockaddr*)&AddrStorage, (socklen_t)AddrLen);
+	}
+
+    void xUdpChannel::OnIoEventInReady()
+	{
+		Todo();
+	}
+
+    void xUdpChannel::OnIoEventError()
+	{
+		_ListenerPtr->OnError(this);
 	}
 
 }

@@ -36,4 +36,23 @@ X_NS
         return Parse(IpStr, Port);
     }
 
+    xNetAddress xNetAddress::Parse(const struct sockaddr * SockAddrPtr)
+    {
+        if (SockAddrPtr->sa_family == AF_INET) {
+            auto Addr4Ptr = (const sockaddr_in * )SockAddrPtr;
+            xNetAddress Result = {};
+            Result.Type = xNetAddress::eIpv4;
+            Result.Port = ntohs(Addr4Ptr->sin_port);
+            memcpy(Result.Ipv4, &Addr4Ptr->sin_addr, sizeof(Result.Ipv4));
+        }
+        else if (SockAddrPtr->sa_family == AF_INET6) {
+            auto Addr6Ptr = (const sockaddr_in6 * )SockAddrPtr;
+            xNetAddress Result = {};
+            Result.Type = xNetAddress::eIpv6;
+            Result.Port = ntohs(Addr6Ptr->sin6_port);
+            memcpy(Result.Ipv6, &Addr6Ptr->sin6_addr, sizeof(Result.Ipv6));
+        }
+        return {};
+    }
+
 }

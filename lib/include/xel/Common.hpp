@@ -110,7 +110,7 @@ X_NS
 		X_STATIC_INLINE void Fatal() { std::abort(); }
 		X_STATIC_INLINE void Fatal(const char *) { std::abort(); }
 		X_STATIC_INLINE void Todo() { Fatal(); }
-		X_STATIC_INLINE void Todo(const char * info) { Fatal(); }
+		X_STATIC_INLINE void Todo(const char * info) { Fatal(info); }
 		X_STATIC_INLINE void Pure() { Fatal("placeholder of pure function called, which is not expected"); }
 		X_STATIC_INLINE constexpr const char * YN(bool y) { return y ? "yes" : "no"; }
 		X_STATIC_INLINE constexpr const char * TF(bool t) { return t ? "true" : "false"; }
@@ -166,7 +166,7 @@ X_NS
 
 		template<typename T, size_t L>
 		[[nodiscard]] X_STATIC_INLINE constexpr size_t
-		SafeLength(const T(&)[L]) { return L ? L - 1 : L; }
+		SafeLength(const T(&)[L]) { return L ? L - 1 : 0; }
 
 		template<typename... Args>
 		[[nodiscard]] X_STATIC_INLINE constexpr size_t

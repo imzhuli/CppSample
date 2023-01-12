@@ -48,6 +48,7 @@ X_NS
 
         X_API_STATIC_MEMBER xNetAddress Parse(const char * IpStr, uint16_t Port = 0);
         X_API_STATIC_MEMBER xNetAddress Parse(const std::string & AddressStr);
+        X_API_STATIC_MEMBER xNetAddress Parse(const struct sockaddr * SockAddrPtr);
     };
 
 }
