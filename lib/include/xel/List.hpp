@@ -36,6 +36,9 @@ X_NS
 		X_INLINE bool Linked() const {
 			return pPrev != this;
 		}
+		X_INLINE bool IsSafelyDetached() const {
+			return pPrev == this && pNext == this;
+		}
 
 	private:
 		X_INLINE void AppendTo(xListNode& prev_node) {
@@ -45,7 +48,7 @@ X_NS
 			pPrev = &prev_node;
 			pNext = &next_node;
 		}
-		
+
 		X_INLINE void InsertBefore(xListNode& next_node) {
 			AppendTo(*next_node.pPrev);
 		}
@@ -134,9 +137,11 @@ X_NS
 	public:
 		X_INLINE bool IsEmpty() const { return _Head.pNext == &_Head;  }
 		X_INLINE void AddHead(tNode& rTarget) {
+			assert(static_cast<xListNode&>(rTarget).IsSafelyDetached());
 			static_cast<xListNode&>(rTarget).AppendTo(_Head);
 		}
 		X_INLINE void AddTail(tNode& rTarget) {
+			assert(static_cast<xListNode&>(rTarget).IsSafelyDetached());
 			static_cast<xListNode&>(rTarget).AppendTo(*_Head.pPrev);
 		}
 		X_INLINE void GrabHead(tNode& rTarget) {
