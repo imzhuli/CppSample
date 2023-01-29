@@ -351,7 +351,7 @@ X_NS
 		xResourceGuardThrowable(T & Resource, tArgs&& ... Args) -> xResourceGuardThrowable<T>;
 
 		/* change variable value, and reset it to its original value after scope of the guard */
-		template<typename T>
+		template<typename T, typename StorageType = T>
 		class xValueGuard final : xNonCopyable
 		{
 		public:
@@ -364,7 +364,7 @@ X_NS
 			}
 		private:
 			T & _Ref;
-			T _OriginalValue;
+			StorageType _OriginalValue;
 		};
 
 		template<size_t TargetSize, size_t Alignment = alignof(std::max_align_t)>
