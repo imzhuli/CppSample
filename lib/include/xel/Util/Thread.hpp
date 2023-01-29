@@ -7,8 +7,8 @@
 #include <condition_variable>
 
 X_NS
-{	
-	
+{
+
 	template<typename tMutex, typename tFuncObj, typename ... tArgs>
 	auto SyncCall(tMutex && Mutex, tFuncObj && Func, tArgs && ... Args)
 	{
@@ -177,7 +177,7 @@ X_NS
 				do {
 					auto Lock = std::unique_lock(_Mutex);
 					PreNotifyFunc();
-					_Ready = true; 
+					_Ready = true;
 				} while(false);
 				_ConditionVariable.notify_all();
 			}
