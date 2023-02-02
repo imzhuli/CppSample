@@ -180,6 +180,9 @@
 #include <stdbool.h>
 #include <assert.h>
 
+#define __X_STRINGIFY__(x) #x
+#define X_STRINGIFY(x) __X_STRINGIFY__(x)
+
 X_CNAME_BEGIN
 
 #define X_AddressOf(T) (&(T))
