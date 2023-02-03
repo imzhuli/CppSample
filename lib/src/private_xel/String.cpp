@@ -1,5 +1,6 @@
 #include <xel/String.hpp>
 #include <xel/Byte.hpp>
+#include <sstream>
 #include <fstream>
 #include <locale>
 #include <cinttypes>
@@ -151,23 +152,43 @@ X_NS
 		}
 	}
 
-	static std::string __show__(const void * buffer_, size_t len, const char (&hexfmt)[5], bool header)
+	static constexpr const size_t MaxIndentSize = 64;
+	static constexpr const size_t LineDataLength = 69;
+	static const char IndentSpaces[MaxIndentSize + LineDataLength] = {
+		' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+		' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+		' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+		' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+		' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+		' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+		' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+		' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',' ',
+		' ',' ',' ',' ',' ',
+	};
+
+	static std::string __show__(const void * buffer_, size_t len, const char (&hexfmt)[5], size_t IndentSize, bool header)
 	{
-		if (!len) {
-			return "<-- Empty Data -->";
+		if (IndentSize > MaxIndentSize) {
+			IndentSize = MaxIndentSize;
 		}
+
+		std::stringstream h;
+		auto Indent = std::string_view(IndentSpaces, IndentSize);
+		if (!len) {
+			h << Indent << "<-- Empty Data -->";
+			return h.str();
+		}
+
 		const char * buffer = static_cast<const char*>(buffer_);
-		std::string h;
 		std::string p;
 		char lineno[32];
 		char ch [32];
 		char bh [128];
 		char bp [128];
 		if (header) {
-		//	h.append("00000000  0001 0203 0405 0607 0809 0a0b 0c0d 0e0f : ................")
-			h.append("+-Line-+  +-----------------Hex-----------------+   +-----Char-----+\n");
+			h << Indent << "+-Line-+  +-----------------Hex-----------------+   +-----Char-----+\n";
 		}
-		h.append("00000000  ");
+		h << Indent << "00000000  ";
 		for (size_t oi = 0 ; oi < len ; ++oi) {
 			char c = buffer[oi];
 			char cs = (c > 0 && isgraph(c)) ? c : '.' ;
@@ -176,37 +197,29 @@ X_NS
 			sprintf(bp, "%c", cs);
 			if (oi) {
 				if(oi%16 == 0) {
-					h.append("  ");
-					h.append(p);
-					h.append("\n");
+					h << "  " << p << std::endl;
 					sprintf(lineno, "%08" PRIx32 "  ", (uint32_t)((oi / 16)));
-					h.append(lineno, 10);
+					h << Indent << std::string_view(lineno, 10);
 					p.clear();
 				}
 			}
-			h.append(bh);
+			h << bh;
 			p.append(bp);
 		}
-		size_t f = 50 - h.length() % 69;
-		h.append(
-				"                "
-				"                "
-				"                "
-				"                "
-				, f);
-		h.append("  ");
-		h.append(p);
-		return h;
+		size_t f = IndentSize + 50 - h.tellp() % (LineDataLength + IndentSize);
+		h << std::string_view(IndentSpaces, f);
+		h << "  " << p;
+		return h.str();
 	}
 
-	std::string HexShowLower(const void * buffer_, size_t len, bool header)
+	std::string HexShowLower(const void * buffer_, size_t len, size_t IndentSize, bool header)
 	{
-		return __show__(buffer_, len, "%02x", header);
+		return __show__(buffer_, len, "%02x", IndentSize, header);
 	}
 
-	std::string HexShow(const void * buffer_, size_t len, bool header)
+	std::string HexShow(const void * buffer_, size_t len, size_t IndentSize, bool header)
 	{
-		return __show__(buffer_, len, "%02X", header);
+		return __show__(buffer_, len, "%02X", IndentSize, header);
 	}
 
 

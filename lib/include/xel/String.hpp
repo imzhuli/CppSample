@@ -20,8 +20,8 @@ X_NS
 		CStrNCpy((char *)dsrArr, N, src);
 	}
 
-	X_API std::string HexShowLower(const void * buffer, size_t len, bool header = false);
-	X_API std::string HexShow(const void * buffer, size_t len, bool header = false);
+	X_API std::string HexShowLower(const void * buffer, size_t len, size_t IndentSize = 0, bool header = false);
+	X_API std::string HexShow(const void * buffer, size_t len, size_t IndentSize = 0, bool header = false);
 
 	X_API void HexToStr(void * dst, const void * str, size_t len);
 	X_API std::string HexToStr(const void * str, size_t len);
