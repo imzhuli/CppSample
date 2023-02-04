@@ -172,7 +172,7 @@ X_NS
 			IndentSize = MaxIndentSize;
 		}
 
-		std::stringstream h;
+		std::stringostream h;
 		auto Indent = std::string_view(IndentSpaces, IndentSize);
 		if (!len) {
 			h << Indent << "<-- Empty Data -->";

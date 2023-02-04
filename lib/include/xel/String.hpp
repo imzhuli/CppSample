@@ -4,6 +4,7 @@
 #include <string>
 #include <string_view>
 #include <cstring>
+#include <sstream>
 
 X_NS
 {
@@ -46,5 +47,18 @@ X_NS
 	X_INLINE xOptional<std::string> FileToStr(const std::string & filename)  {
 		return FileToStr(filename.c_str());
 	}
+
+	template <typename tIterator, typename tSeprrator>
+    std::string JoinStr(tIterator Begin, tIterator End, tSeprrator separator)
+    {
+        std::ostringstream o;
+        if(Begin != End)
+        {
+            o << *Begin++;
+            for(;Begin != End; ++Begin)
+                o  << separator << *Begin;
+        }
+        return o.str();
+    }
 
 }
