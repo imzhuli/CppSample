@@ -125,7 +125,7 @@ X_NS
 
 	std::string xCommandLine::DescribeOptions()
 	{
-		std::stringostream ss;
+		std::ostringstream ss;
 		for (auto & [c, opt] : _ShortOptions) {
 			ss << '-' << c << ' ' << (opt.NeedValue ? "<value>" : "")  << " : " << opt.KeyName <<  std::endl;
 		}
