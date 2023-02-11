@@ -68,7 +68,7 @@ X_NS
 			uint64_t                      U64;
 
 			struct { int32_t  x, y; }     IV2;
-			struct { uint32_t x, y; }     UV32;
+			struct { uint32_t x, y; }     UV2;
 		};
 
 
