@@ -56,7 +56,7 @@ if (X_OPTION_STATIC)
 	target_link_libraries(${libname} PRIVATE ${shared_lib_dependency_private})
 	target_link_libraries(${libname} PUBLIC ${shared_lib_dependency_public})
 	target_compile_definitions(${libname} PRIVATE X_OPTION_STATIC)
-
+	target_compile_definitions(${libname} PRIVATE LUA_USE_POSIX)
 else()
 #dynamic lib:
 	add_library(${libname} SHARED  ${X_SRC})
@@ -64,6 +64,7 @@ else()
 	target_link_libraries(${libname} PRIVATE ${shared_lib_dependency_private})
 	target_link_libraries(${libname} PUBLIC ${shared_lib_dependency_public})
 	target_compile_definitions(${libname} PRIVATE X_OPTION_EXPORT_API)
+	target_compile_definitions(${libname} PRIVATE LUA_USE_POSIX)
 endif()
 
 #install
