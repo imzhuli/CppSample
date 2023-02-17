@@ -1,5 +1,6 @@
 #pragma once
 #include <xel/Common.hpp>
+#include <filesystem>
 #include <string>
 
 X_NS
@@ -25,5 +26,22 @@ X_NS
 	private:
 		std::string _FixedPath;
 	};
+
+	class xTempPath
+    {
+    public:
+        X_API_MEMBER xTempPath();
+        X_API_MEMBER ~xTempPath();
+        xTempPath(const xTempPath &) = delete;
+
+        X_INLINE operator bool () const { return _Created; }
+        X_INLINE std::string ToString () const { return _TempPath.string(); }
+        X_INLINE const std::filesystem::path & Get() const { return _TempPath; }
+
+    private:
+        bool                  _Created = false;
+        std::filesystem::path _TempPath;
+    };
+
 
 }
