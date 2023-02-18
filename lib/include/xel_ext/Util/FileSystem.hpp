@@ -35,11 +35,14 @@ X_NS
         xTempPath(const xTempPath &) = delete;
 
         X_INLINE operator bool () const { return _Created; }
-        X_INLINE std::string ToString () const { return _TempPath.string(); }
         X_INLINE const std::filesystem::path & Get() const { return _TempPath; }
+		X_INLINE void Dismiss() { _DismissAutoDelete = true; }
+
+        X_INLINE std::string ToString () const { return _TempPath.string(); }
 
     private:
         bool                  _Created = false;
+		bool                  _DismissAutoDelete = false;
         std::filesystem::path _TempPath;
     };
 

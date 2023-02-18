@@ -59,7 +59,7 @@ X_NS
 
     xTempPath::~xTempPath()
     {
-        if (_Created) {
+        if (_Created && !_DismissAutoDelete) {
             remove_all(_TempPath, X2Ref(std::error_code()));
         }
     }
