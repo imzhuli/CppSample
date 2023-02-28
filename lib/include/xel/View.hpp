@@ -11,7 +11,7 @@ X_NS
 
 	public:
 		X_INLINE xDataView()                                = default;
-		X_INLINE xDataView(const xDataView &)                = default;
+		X_INLINE xDataView(const xDataView &)               = default;
 		X_INLINE xDataView(const void *pv, size_t sz)       : pData(pv), Size(sz) {}
 
 		template<typename T, std::enable_if_t<!std::is_same_v<T, xDataView>, size_t> N>
