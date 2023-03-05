@@ -48,17 +48,23 @@ X_NS
 		return FileToStr(filename.c_str());
 	}
 
-	template <typename tIterator, typename tSeprrator>
-    std::string JoinStr(tIterator Begin, tIterator End, tSeprrator separator)
+	template <typename tIterator, typename tSeparator>
+    std::string JoinStr(tIterator Begin, tIterator End, tSeparator Separator)
     {
         std::ostringstream o;
         if(Begin != End)
         {
             o << *Begin++;
             for(;Begin != End; ++Begin)
-                o  << separator << *Begin;
+                o  << Separator << *Begin;
         }
         return o.str();
+    }
+
+	template <typename tIterable, typename tSeparator>
+    std::string JoinStr(tIterable & Iterable, tSeparator Separator)
+    {
+		return JoinStr(Iterable.begin(), Iterable.end(), Separator);
     }
 
 }
