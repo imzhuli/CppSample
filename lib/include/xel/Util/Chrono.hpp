@@ -3,6 +3,8 @@
 #include <chrono>
 #include <ctime>
 
+using namespace std::chrono_literals;
+
 X_NS
 {
 
@@ -13,7 +15,6 @@ X_NS
 	using xSteadyxClock = std::conditional<xHiResxClock::is_steady, xHiResxClock, std::chrono::steady_clock>::type;
 	using xSteadyxTimePoint = xSteadyxClock::time_point;
 	using xSteadyDuration = xSteadyxClock::duration;
-	using namespace std::chrono_literals;
 
 	using xSeconds        = std::chrono::seconds;
 	using xMilliSeconds   = std::chrono::milliseconds;
