@@ -3,7 +3,7 @@
 #include <chrono>
 #include <ctime>
 
-using namespace std::chrono_literals;
+using namespace std::literals::chrono_literals;
 
 X_NS
 {
