@@ -8,6 +8,7 @@
 
 X_NS
 {
+	using namespace std::literals::string_literals;
     using namespace std::literals::string_view_literals;
 
 	X_API               std::vector<std::string> Split(const std::string_view & s, const char * d, size_t len);
