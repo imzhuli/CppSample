@@ -130,7 +130,15 @@ X_NS
 		template<typename T, typename ... Args>
 		X_INLINE T * CreateValue(Args&& ... args) {
 			void * p = this->Alloc(sizeof(T), AllocAlignSize<T>);
-			try { new (p) T{ std::forward<Args>(args)... }; }
+			try { new (p) T ( std::forward<Args>(args)... ); }
+			catch (...) { this->Free(p); throw; }
+			return (T*)p;
+		}
+
+		template<typename T, typename ... Args>
+		X_INLINE T * CreateValueWithListInit(Args&& ... args) {
+			void * p = this->Alloc(sizeof(T), AllocAlignSize<T>);
+			try { new (p) T { std::forward<Args>(args)... }; }
 			catch (...) { this->Free(p); throw; }
 			return (T*)p;
 		}
@@ -146,7 +154,15 @@ X_NS
 		template<typename T, typename ... Args>
 		X_INLINE T * AlignedCreateValue(size_t vxAlignment, Args&& ... args) {
 			void * p = this->Alloc(sizeof(T), vxAlignment);
-			try { new (p) T{ std::forward<Args>(args)... }; }
+			try { new (p) T ( std::forward<Args>(args)... ); }
+			catch (...) { this->Free(p); throw; }
+			return (T*)p;
+		}
+
+		template<typename T, typename ... Args>
+		X_INLINE T * AlignedCreateValueWithListInit(size_t vxAlignment, Args&& ... args) {
+			void * p = this->Alloc(sizeof(T), vxAlignment);
+			try { new (p) T { std::forward<Args>(args)... }; }
 			catch (...) { this->Free(p); throw; }
 			return (T*)p;
 		}
@@ -163,6 +179,14 @@ X_NS
 
 		template<typename T, typename ... Args>
 		X_INLINE T * CreateValueArray(size_t n, Args&& ... args) {
+			void * p = this->Alloc(sizeof(T) * n, AllocAlignSize<T>);
+			try { new (p) T[n] ( std::forward<Args>(args)... ); }
+			catch (...) { this->Free(p); throw; }
+			return (T*)p;
+		}
+
+		template<typename T, typename ... Args>
+		X_INLINE T * CreateValueArrayWithListInit(size_t n, Args&& ... args) {
 			void * p = this->Alloc(sizeof(T) * n, AllocAlignSize<T>);
 			try { new (p) T[n] { std::forward<Args>(args)... }; }
 			catch (...) { this->Free(p); throw; }
