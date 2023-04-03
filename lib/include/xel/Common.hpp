@@ -85,6 +85,7 @@ X_NS
 		constexpr std::in_place_type_t<T> xType {};
 
 		struct xPass final { X_INLINE void operator()() const {} };
+		struct xVBase { protected: constexpr xVBase() = default; virtual ~xVBase() = default; };
 		struct xAbstract { protected: constexpr xAbstract() = default; virtual ~xAbstract() = default; xAbstract(xAbstract &&) = delete; };
 		struct xNonCopyable { protected: constexpr xNonCopyable() = default; ~xNonCopyable() = default; xNonCopyable(xNonCopyable &&) = delete; };
     	struct xNonCatchable final { private: constexpr xNonCatchable() = default; ~xNonCatchable() = default; };
