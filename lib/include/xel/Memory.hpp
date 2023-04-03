@@ -160,7 +160,7 @@ X_NS
 		}
 
 		template<typename T, typename ... Args>
-		X_INLINE T * AlignedCreateValueWithListInit(size_t vxAlignment, Args&& ... args) {
+		X_INLINE T * AlignedCreateValueWithList(size_t vxAlignment, Args&& ... args) {
 			void * p = this->Alloc(sizeof(T), vxAlignment);
 			try { new (p) T { std::forward<Args>(args)... }; }
 			catch (...) { this->Free(p); throw; }
