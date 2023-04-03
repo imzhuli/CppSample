@@ -180,14 +180,6 @@ X_NS
 		template<typename T, typename ... Args>
 		X_INLINE T * CreateValueArray(size_t n, Args&& ... args) {
 			void * p = this->Alloc(sizeof(T) * n, AllocAlignSize<T>);
-			try { new (p) T[n] ( std::forward<Args>(args)... ); }
-			catch (...) { this->Free(p); throw; }
-			return (T*)p;
-		}
-
-		template<typename T, typename ... Args>
-		X_INLINE T * CreateValueArrayWithListInit(size_t n, Args&& ... args) {
-			void * p = this->Alloc(sizeof(T) * n, AllocAlignSize<T>);
 			try { new (p) T[n] { std::forward<Args>(args)... }; }
 			catch (...) { this->Free(p); throw; }
 			return (T*)p;
