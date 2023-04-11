@@ -130,7 +130,15 @@ ZEC_NS
 		template<typename T, typename ... Args>
 		ZEC_INLINE T * CreateValue(Args&& ... args) {
 			void * p = this->Alloc(sizeof(T), AllocAlignSize<T>);
-			try { new (p) T{ std::forward<Args>(args)... }; }
+			try { new (p) T ( std::forward<Args>(args)... ); }
+			catch (...) { this->Free(p); throw; }
+			return (T*)p;
+		}
+
+		template<typename T, typename ... Args>
+		ZEC_INLINE T * CreateValueWithList(Args&& ... args) {
+			void * p = this->Alloc(sizeof(T), AllocAlignSize<T>);
+			try { new (p) T { std::forward<Args>(args)... }; }
 			catch (...) { this->Free(p); throw; }
 			return (T*)p;
 		}
@@ -146,7 +154,15 @@ ZEC_NS
 		template<typename T, typename ... Args>
 		ZEC_INLINE T * AlignedCreateValue(size_t vxAlignment, Args&& ... args) {
 			void * p = this->Alloc(sizeof(T), vxAlignment);
-			try { new (p) T{ std::forward<Args>(args)... }; }
+			try { new (p) T ( std::forward<Args>(args)... ); }
+			catch (...) { this->Free(p); throw; }
+			return (T*)p;
+		}
+
+		template<typename T, typename ... Args>
+		ZEC_INLINE T * AlignedCreateValueWithList(size_t vxAlignment, Args&& ... args) {
+			void * p = this->Alloc(sizeof(T), vxAlignment);
+			try { new (p) T { std::forward<Args>(args)... }; }
 			catch (...) { this->Free(p); throw; }
 			return (T*)p;
 		}
