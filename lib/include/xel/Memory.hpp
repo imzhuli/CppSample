@@ -136,7 +136,7 @@ X_NS
 		}
 
 		template<typename T, typename ... Args>
-		X_INLINE T * CreateValueWithListInit(Args&& ... args) {
+		X_INLINE T * CreateValueWithList(Args&& ... args) {
 			void * p = this->Alloc(sizeof(T), AllocAlignSize<T>);
 			try { new (p) T { std::forward<Args>(args)... }; }
 			catch (...) { this->Free(p); throw; }
