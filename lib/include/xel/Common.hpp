@@ -98,7 +98,6 @@ X_NS
 		constexpr struct xSizeInit final { size_t value; } ZeroSizeInit {};
 		constexpr struct xCapacityInit final { size_t value; } ZeroCapacityInit{};
 
-
 		template<typename T1, typename T2 = T1>
 		using xDiff = decltype(std::declval<T1>() - std::declval<T2>());
 		template<typename T1, typename T2> X_INLINE constexpr auto Diff(const T1& Value, const T2& ComparedToValue) { return Value - ComparedToValue; }
@@ -113,6 +112,7 @@ X_NS
 		X_STATIC_INLINE void Todo() { Fatal(); }
 		X_STATIC_INLINE void Todo(const char * info) { Fatal(info); }
 		X_STATIC_INLINE void Pure() { Fatal("placeholder of pure function called, which is not expected"); }
+		X_STATIC_INLINE void Breakpoint() {};
 		X_STATIC_INLINE constexpr const char * YN(bool y) { return y ? "yes" : "no"; }
 		X_STATIC_INLINE constexpr const char * TF(bool t) { return t ? "true" : "false"; }
 
@@ -578,11 +578,16 @@ X_NS
 #define X_DEBUG_RESET(Param, ...)
 #endif
 
-
 #ifndef NDEBUG
 #define X_DEBUG_PRINTF printf
 #define X_DEBUG_FPRINTF fprintf
 #else
 #define X_DEBUG_PRINTF(...) ::xel::Pass()
 #define X_DEBUG_FPRINTF(...) ::xel::Pass()
+#endif
+
+#ifndef NDEBUG
+#define X_DEBUG_BREAKPOINT(...) ::xel::Breakpoint()
+#else
+#define X_DEBUG_BREAKPOINT(...)
 #endif
