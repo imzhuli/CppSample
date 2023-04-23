@@ -112,9 +112,10 @@ X_NS
 		X_STATIC_INLINE void Todo() { Fatal(); }
 		X_STATIC_INLINE void Todo(const char * info) { Fatal(info); }
 		X_STATIC_INLINE void Pure() { Fatal("placeholder of pure function called, which is not expected"); }
-		X_STATIC_INLINE void Breakpoint() {};
 		X_STATIC_INLINE constexpr const char * YN(bool y) { return y ? "yes" : "no"; }
 		X_STATIC_INLINE constexpr const char * TF(bool t) { return t ? "true" : "false"; }
+
+		X_API void Breakpoint();
 
 		template<typename T>
 		X_STATIC_INLINE bool IsDefaultValue(const T& Target) { return Target == T{}; }
@@ -387,6 +388,13 @@ X_NS
 				return *(new ((void*)_PlaceHolder) T(std::forward<tArgs>(Args)...));
 			}
 
+			template<typename T, typename ... tArgs>
+			X_INLINE T& CreateValueWithListAs(tArgs && ... Args) {
+                static_assert(Alignment >= alignof(T));
+				static_assert(sizeof(_PlaceHolder) >= sizeof(T));
+				return *(new ((void*)_PlaceHolder) T{std::forward<tArgs>(Args)...});
+			}
+
 			template<typename T>
 			X_INLINE void DestroyAs() {
                 static_assert(Alignment >= alignof(T));
@@ -432,6 +440,13 @@ X_NS
 				auto ObjectPtr = new ((void*)_PlaceHolder) T(std::forward<tArgs>(Args)...);
 				return ObjectPtr;
 			}
+
+			template<typename ... tArgs>
+			X_INLINE T* CreateValueWithList(tArgs && ... Args) {
+				auto ObjectPtr = new ((void*)_PlaceHolder) T{std::forward<tArgs>(Args)...};
+				return ObjectPtr;
+			}
+
 
 			X_INLINE void Destroy() {
 				Get()->~T();

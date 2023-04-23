@@ -9,8 +9,8 @@ X_NS {
 	/***
 	 * According to C++ standard,
 	 * char32_t is of size of uint_least32_t, but a distinct type
-	 * but it would a big wast of apce if char32_t size is larger than sizeof(uint32_t)
-	 * we assume and check that chat32_t is of same sizeof(uing32_t)
+	 * but it would a bit waste of space if char32_t size is larger than sizeof(uint32_t)
+	 * we assume and check that chat32_t is of same sizeof(uint32_t)
 	 *
 	 * it will be complex to have another defination of char32_t in such cases,
 	 * like enum my_char32_t : uint32_t {};
@@ -18,5 +18,9 @@ X_NS {
 	 * so, such implementation would not be supported unless it becomes a common thing on most platforms
 	 * */
 	static_assert(sizeof(char32_t) == sizeof(uint32_t));
+
+	namespace common {
+		void Breakpoint() {}
+	}
 
 }
