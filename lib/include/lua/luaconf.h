@@ -51,6 +51,13 @@
 #define LUA_USE_WINDOWS  /* enable goodies for regular Windows */
 #endif
 
+#if defined(__linux__)
+#define LUA_USE_LINUX
+#endif
+
+#if defined(__APPLE__)
+#define LUA_USE_MACOSX
+#endif
 
 #if defined(LUA_USE_WINDOWS)
 #define LUA_DL_DLL	/* enable support for DLL */

@@ -6,11 +6,11 @@ project(lib_${libname})
 if (CMAKE_SYSTEM_NAME MATCHES "Windows")
 	set(PLATFORM_LIBRARIES ws2_32 Mswsock)
 elseif (CMAKE_SYSTEM_NAME MATCHES "Linux")
-	set(PLATFORM_LIBRARIES)
+	set(PLATFORM_LIBRARIES dl)
 elseif (CMAKE_SYSTEM_NAME MATCHES "Darwin")
 	find_library(COCOA_LIBRARY Cocoa REQUIRED)
 	find_library(IOKIT_LIBRARY IOKit REQUIRED)
-	set(PLATFORM_LIBRARIES ${IOKIT_LIBRARY} ${COCOA_LIBRARY})
+	set(PLATFORM_LIBRARIES dl ${IOKIT_LIBRARY} ${COCOA_LIBRARY})
 endif()
 
 # local dependencies

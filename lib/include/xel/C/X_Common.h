@@ -13,16 +13,16 @@
 		//define something for Windows (32-bit only)
 		#define X_SYSTEM_WIN32
 	#endif
-#elif __APPLE__
+#elif defined(__APPLE__)
 	#define X_SYSTEM_APPLE
 	#include <TargetConditionals.h>
-	#if TARGET_IPHONE_SIMULATOR
+	#if defined(TARGET_IPHONE_SIMULATOR)
 		// iOS Simulator
 		#define X_SYSTEM_IPHONE_SIMULATOR
-	#elif TARGET_OS_IPHONE
+	#elif defined(TARGET_OS_IPHONE)
 		// iOS device
 		#define X_SYSTEM_IPHONE
-	#elif TARGET_OS_MAC
+	#elif defined(TARGET_OS_MAC)
 		// Other kinds of Mac OS
 		#define X_SYSTEM_MACOS
 	#else
@@ -31,13 +31,13 @@
 #elif defined(__ANDROID_API__)
 	#define X_SYSTEM_LINUX
 	#define X_SYSTEM_ANDROID
-#elif __linux__
+#elif defined(__linux__)
 	// linux
 	#define X_SYSTEM_LINUX
 	#ifdef __FreeBSD__
 		#define X_SYSTEM_FREEBSD
 	#endif
-#elif __unix__ // all unices not caught above
+#elif defined(__unix__) // all unices not caught above
 	// Unix
 	#error "unsupported unix"
 #elif defined(_POSIX_VERSION)
