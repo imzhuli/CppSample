@@ -44,12 +44,16 @@ ZEC_NS
 		if (_Connected) {
 			return;
 		}
-		if (_Active && _CheckTimestamp - NowMS >= 1'000) { // connection timeout
-			_Dying = true;
+		if (_Active && NowMS - _CheckTimestamp>= 5'000) { // connection timeout
+			_Connection.Clean();
+			_Active = false;
+			_Connected = false;
+			_CheckTimestamp = NowMS;
+			_Dying = false;
 			return;
 		}
 		// reconnect
-		if (_CheckTimestamp - NowMS >= 15'000) { // reconnect timeout}
+		if (NowMS - _CheckTimestamp >= 15'000) { // reconnect timeout}
 			if (!_Connection.Init(_IoContextPtr, _ServerAddress, this)) {
 				_CheckTimestamp = NowMS;
 				return;

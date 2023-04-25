@@ -123,11 +123,14 @@ ZEC_NS
 		ZEC_STATIC_INLINE void Pass() {};
 		ZEC_STATIC_INLINE void Error() { throw nullptr; }
 		ZEC_STATIC_INLINE void Error(const char * message) { throw message; }
-		ZEC_STATIC_INLINE void Fatal() { std::abort(); }
-		ZEC_STATIC_INLINE void Fatal(const char *) { std::abort(); }
+
+		ZEC_STATIC_INLINE [[noreturn]] void Fatal() { std::abort(); }
+		ZEC_STATIC_INLINE [[noreturn]] void Fatal(const char *) { std::abort(); }
+
 		ZEC_STATIC_INLINE void Todo() { Fatal(); }
 		ZEC_STATIC_INLINE void Todo(const char * info) { Fatal(); }
 		ZEC_STATIC_INLINE void Pure() { Fatal("placeholder of pure function called, which is not expected"); }
+
 		ZEC_STATIC_INLINE constexpr const char * YN(bool y) { return y ? "yes" : "no"; }
 		ZEC_STATIC_INLINE constexpr const char * TF(bool t) { return t ? "true" : "false"; }
 
@@ -195,7 +198,7 @@ ZEC_NS
 		template<typename T>
 		[[nodiscard]] ZEC_STATIC_INLINE constexpr bool
 		IsPow2(const T x) { static_assert(std::is_integral_v<T>); return x > 0 && !(x & (x-1)); }
-		
+
 		template<typename T>
 		[[nodiscard]] ZEC_STATIC_INLINE std::remove_reference_t<T> &
 		X2Ref(T && ref) { return ref; }
