@@ -104,18 +104,20 @@ X_NS
 		template<typename T1, typename T2> X_INLINE constexpr auto SignedDiff(const T1& Value, const T2& ComparedToValue) { return static_cast<std::make_signed_t<xDiff<T1, T2>>>(Value - ComparedToValue); }
 		template<typename T1, typename T2> X_INLINE constexpr auto UnsignedDiff(const T1& Value, const T2& ComparedToValue) { return static_cast<std::make_unsigned_t<xDiff<T1, T2>>>(Value - ComparedToValue); }
 
+		X_API           void Breakpoint();
 		X_STATIC_INLINE void Pass() {};
 		X_STATIC_INLINE void Error() { throw nullptr; }
 		X_STATIC_INLINE void Error(const char * message) { throw message; }
-		X_STATIC_INLINE void Fatal() { std::abort(); }
-		X_STATIC_INLINE void Fatal(const char *) { std::abort(); }
+
+		X_STATIC_INLINE [[noreturn]] void Fatal() { std::abort(); }
+		X_STATIC_INLINE [[noreturn]] void Fatal(const char *) { std::abort(); }
+
 		X_STATIC_INLINE void Todo() { Fatal(); }
 		X_STATIC_INLINE void Todo(const char * info) { Fatal(info); }
 		X_STATIC_INLINE void Pure() { Fatal("placeholder of pure function called, which is not expected"); }
+
 		X_STATIC_INLINE constexpr const char * YN(bool y) { return y ? "yes" : "no"; }
 		X_STATIC_INLINE constexpr const char * TF(bool t) { return t ? "true" : "false"; }
-
-		X_API void Breakpoint();
 
 		template<typename T>
 		X_STATIC_INLINE bool IsDefaultValue(const T& Target) { return Target == T{}; }
