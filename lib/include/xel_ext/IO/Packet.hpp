@@ -90,7 +90,7 @@ X_NS
             return PacketHeaderSize;
         }
 
-        X_STATIC_INLINE bool IsServerCheckKeepAlive(const xPacketHeader & Header) {
+        X_STATIC_INLINE bool IsCheckKeepAlive(const xPacketHeader & Header) {
             return Header.CommandId == CmdId_KeepAlive && Header.RequestId == 0xFFFF'FFFF'FFFF'FFFFul;
         }
 
