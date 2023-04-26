@@ -80,6 +80,10 @@ ZEC_NS
 	void xAutoClientTcpConnection::OnConnected(xTcpConnection * TcpConnectionPtr)
 	{
 		_Connected = true;
+		auto PostDataOnConnected = _ListenerPtr->PostOnConnected(this);
+		if (PostDataOnConnected.size()) {
+			_Connection.PostData(PostDataOnConnected.data(), PostDataOnConnected.size());
+		}
 	}
 
 	void xAutoClientTcpConnection::OnPeerClose(xTcpConnection * TcpConnectionPtr)

@@ -31,6 +31,7 @@ ZEC_NS
     {
     public:
         struct iListener {
+            virtual std::string PostOnConnected(xAutoClientTcpConnection * ConnectionPtr) { return {}; };
             virtual size_t OnData(xAutoClientTcpConnection * ConnectionPtr, void * DataPtr, size_t DataSize) = 0;
         };
 
