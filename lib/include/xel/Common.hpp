@@ -107,13 +107,13 @@ X_NS
 		X_STATIC_INLINE void Pass() {};
 		X_API           void Breakpoint();
 
-		X_STATIC_INLINE [[noreturn]] void Error() { throw nullptr; }
-		X_STATIC_INLINE [[noreturn]] void Error(const char * message) { throw message; }
-		X_STATIC_INLINE [[noreturn]] void Fatal() { std::abort(); }
-		X_STATIC_INLINE [[noreturn]] void Fatal(const char *) { std::abort(); }
-		X_STATIC_INLINE [[noreturn]] void Todo() { Fatal(); }
-		X_STATIC_INLINE [[noreturn]] void Todo(const char * info) { Fatal(info); }
-		X_STATIC_INLINE [[noreturn]] void Pure() { Fatal("placeholder of pure function called, which is not expected"); }
+		[[noreturn]] X_STATIC_INLINE void Error() { throw nullptr; }
+		[[noreturn]] X_STATIC_INLINE void Error(const char * message) { throw message; }
+		[[noreturn]] X_STATIC_INLINE void Fatal() { std::abort(); }
+		[[noreturn]] X_STATIC_INLINE void Fatal(const char *) { std::abort(); }
+		[[noreturn]] X_STATIC_INLINE void Todo() { Fatal(); }
+		[[noreturn]] X_STATIC_INLINE void Todo(const char * info) { Fatal(info); }
+		[[noreturn]] X_STATIC_INLINE void Pure() { Fatal("placeholder of pure function called, which is not expected"); }
 
 		X_STATIC_INLINE constexpr const char * YN(bool y) { return y ? "yes" : "no"; }
 		X_STATIC_INLINE constexpr const char * TF(bool t) { return t ? "true" : "false"; }

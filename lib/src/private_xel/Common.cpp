@@ -19,7 +19,7 @@ X_NS {
 	 * */
 	static_assert(sizeof(char32_t) == sizeof(uint32_t));
 
-	namespace common {
+	inline namespace common {
 		void Breakpoint() {}
 	}
 
