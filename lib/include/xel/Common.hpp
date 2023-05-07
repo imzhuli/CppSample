@@ -581,29 +581,21 @@ X_NS
 #endif
 
 #ifndef NDEBUG
-#define X_DEBUG_INIT(...) = {__VA_ARGS__}
-#else
-#define X_DEBUG_INIT(...)
-#endif
+#define X_DEBUG
 
-#ifndef NDEBUG
+#define X_DEBUG_INIT(...) = {__VA_ARGS__}
 #define X_DEBUG_STEAL(Param, ...) (::xel::Steal(Param, ##__VA_ARGS__))
 #define X_DEBUG_RESET(Param, ...) (::xel::Reset(Param, ##__VA_ARGS__))
-#else
-#define X_DEBUG_STEAL(Param, ...) Param
-#define X_DEBUG_RESET(Param, ...)
-#endif
 
-#ifndef NDEBUG
 #define X_DEBUG_PRINTF printf
 #define X_DEBUG_FPRINTF fprintf
-#else
-#define X_DEBUG_PRINTF(...) ::xel::Pass()
-#define X_DEBUG_FPRINTF(...) ::xel::Pass()
-#endif
-
-#ifndef NDEBUG
 #define X_DEBUG_BREAKPOINT(...) ::xel::Breakpoint()
 #else
+#define X_DEBUG_INIT(...)
+#define X_DEBUG_STEAL(Param, ...) Param
+#define X_DEBUG_RESET(Param, ...)
+
+#define X_DEBUG_PRINTF(...) ::xel::Pass()
+#define X_DEBUG_FPRINTF(...) ::xel::Pass()
 #define X_DEBUG_BREAKPOINT(...)
 #endif
