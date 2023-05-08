@@ -252,12 +252,13 @@ X_NS
 		}
 	}
 
-	const char * xIniReader::Get(const char * key) const
+	const char * xIniReader::Get(const char * key, const char * defaultValue) const
 	{
 		if (!_pContent) {
-			return nullptr;
+			return defaultValue;
 		}
-		return XelIniGet(_pContent, key);
+		auto Value =  XelIniGet(_pContent, key);
+		return Value ? Value : defaultValue;
 	}
 
 	bool xIniReader::GetBool(const char *key, bool vxDefaultValue) const

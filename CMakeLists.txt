@@ -85,6 +85,8 @@ if(CMAKE_INSTALL_PREFIX_INITIALIZED_TO_DEFAULT)
 	endif()
 endif()
 
+set(CMAKE_POSITION_INDEPENDENT_CODE            ON)
+
 set(LIBRARY_OUTPUT_PATH                        "${PROJECT_BINARY_DIR}/bin")
 set(EXECUTABLE_OUTPUT_PATH                     "${PROJECT_BINARY_DIR}/bin")
 set(CMAKE_MODULE_PATH                          ${CMAKE_MODULE_PATH} "${PROJECT_SOURCE_DIR}/cmake/Modules/")
