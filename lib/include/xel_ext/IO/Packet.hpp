@@ -26,7 +26,9 @@ X_NS
     struct xPacketHeader final
     {
         static constexpr const size32_t Size = 2 * sizeof(uint64_t) + 16;
-        static constexpr const xPacketCommandId CmdId_KeepAlive   = 0x00'00;
+        static constexpr const xPacketCommandId CmdId_InnernalRequest             = 0x00'00;
+        static constexpr const xPacketRequestId InternalRequest_KeepAlive         = 0x00;
+        static constexpr const xPacketRequestId InternalRequest_RequestKeepAlive  = static_cast<uint64_t>(-1);
 
         xPacketLength            PacketLength = 0; // header size included, lower 24 bits as length, higher 8 bits as a magic check
         xPacketSequence          PackageSequenceId = 0; // the index of the packet in a full package, (this is no typo)
@@ -35,7 +37,7 @@ X_NS
         xPacketRequestId         RequestId = 0;
         ubyte                    TraceId[16] = {}; // allow uuid
 
-        X_API_MEMBER void      Serialize(void * DestPtr) const {
+        X_API_MEMBER void Serialize(void * DestPtr) const {
             xStreamWriter S(DestPtr);
             S.W4L(MakeHeaderLength(PacketLength));
             S.W1L(PackageSequenceId);
@@ -45,7 +47,7 @@ X_NS
             S.W(TraceId, 16);
         }
 
-        X_INLINE size32_t  Deserialize(const void * SourcePtr) {
+        X_INLINE size32_t Deserialize(const void * SourcePtr) {
             xStreamReader S(SourcePtr);
             PacketLength = S.R4L();
             if (!CheckPackageLength(PacketLength)) {
@@ -75,7 +77,8 @@ X_NS
 
         X_STATIC_INLINE size_t MakeKeepAlive(void * PackageHeaderBuffer) {
             xPacketHeader Header;
-            Header.CommandId = CmdId_KeepAlive;
+            Header.CommandId = CmdId_InnernalRequest;
+            Header.RequestId = InternalRequest_KeepAlive;
             Header.PacketLength = PacketHeaderSize;
             Header.Serialize(PackageHeaderBuffer);
             return PacketHeaderSize;
@@ -83,15 +86,25 @@ X_NS
 
         X_STATIC_INLINE size_t MakeCheckKeepAlive(void * PackageHeaderBuffer) {
             xPacketHeader Header;
-            Header.CommandId = CmdId_KeepAlive;
-            Header.RequestId = 0xFFFF'FFFF'FFFF'FFFFul;
+            Header.CommandId = CmdId_InnernalRequest;
+            Header.RequestId = InternalRequest_RequestKeepAlive;
             Header.PacketLength = PacketHeaderSize;
             Header.Serialize(PackageHeaderBuffer);
             return PacketHeaderSize;
         }
 
-        X_STATIC_INLINE bool IsCheckKeepAlive(const xPacketHeader & Header) {
-            return Header.CommandId == CmdId_KeepAlive && Header.RequestId == 0xFFFF'FFFF'FFFF'FFFFul;
+        X_STATIC_INLINE bool IsInternalRequest(const xPacketHeader & Header) {
+            return Header.CommandId == CmdId_InnernalRequest;
+        }
+
+        X_STATIC_INLINE bool IsKeepAlive(const xPacketHeader & Header) {
+            assert(Header.CommandId == CmdId_InnernalRequest);
+            return Header.RequestId == InternalRequest_KeepAlive;
+        }
+
+        X_STATIC_INLINE bool IsRequestKeepAlive(const xPacketHeader & Header) {
+            assert(Header.CommandId == CmdId_InnernalRequest);
+            return Header.RequestId == InternalRequest_RequestKeepAlive;
         }
 
     private:

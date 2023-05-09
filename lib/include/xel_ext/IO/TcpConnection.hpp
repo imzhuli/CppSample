@@ -44,7 +44,6 @@ X_NS
     public:
         X_API_MEMBER bool Init(xIoContext * IoContextPtr, xSocket NativeHandle, iListener * ListenerPtr);
         X_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr);
-        X_API_MEMBER bool GracefulClose();  // return value: true: immediately closed, false pending writes
         X_API_MEMBER void Clean();
 
         X_API_MEMBER xNetAddress GetRemoteAddress() const;
