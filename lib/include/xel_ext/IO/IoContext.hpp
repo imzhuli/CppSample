@@ -78,10 +78,7 @@ X_NS
 
     protected:
         static constexpr const size_t InternalReadBufferSize  = 8192;
-        static constexpr const size_t InternalWriteBufferSize = 8192;
-
         ubyte  _ReadBuffer[InternalReadBufferSize];
-        ubyte  _WriteBuffer[InternalWriteBufferSize];
 
     protected:
     #if defined(X_SYSTEM_WINDOWS)
@@ -97,7 +94,6 @@ X_NS
         OVERLAPPED          _WriteOverlappedObject;
     #else
         size_t _ReadBufferDataSize;
-        size_t _WriteBufferDataSize;
 
         xPacketBufferChain  _WriteBufferChain;
         xPacketBuffer *     _WriteBufferPtr;

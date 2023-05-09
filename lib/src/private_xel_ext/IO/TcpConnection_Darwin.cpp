@@ -35,7 +35,6 @@ X_NS
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
         _ReadBufferDataSize = 0;
-        _WriteBufferDataSize = 0;
         _WriteBufferPtr = nullptr;
         _Status = eStatus::Connected;
         _SuspendReading = false;
@@ -121,7 +120,6 @@ X_NS
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
         _ReadBufferDataSize = 0;
-        _WriteBufferDataSize = 0;
         _WriteBufferPtr = nullptr;
         _SuspendReading = false;
 
