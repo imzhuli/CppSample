@@ -46,14 +46,14 @@ X_NS
         X_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr);
         X_API_MEMBER void Clean();
 
-        X_API_MEMBER xNetAddress GetRemoteAddress() const;
-        X_API_MEMBER xNetAddress GetLocalAddress() const;
+        // X_API_MEMBER xNetAddress GetRemoteAddress() const;
+        // X_API_MEMBER xNetAddress GetLocalAddress() const;
 
-        X_API_MEMBER void    ResizeSendBuffer(size_t Size);
-        X_API_MEMBER void    ResizeReceiveBuffer(size_t Size);
-        
-        X_API_MEMBER size_t  GetPendingWriteBlockCount() const;
-        X_API_MEMBER bool    GracefulClose();  // return value: true: immediately closed, false pending writes
+        // X_API_MEMBER void    ResizeSendBuffer(size_t Size);
+        // X_API_MEMBER void    ResizeReceiveBuffer(size_t Size);
+
+        // X_API_MEMBER size_t  GetPendingWriteBlockCount() const;
+        // X_API_MEMBER bool    GracefulClose();  /* return value: true: immediately closed, false pending writes */
 
         /***
          * @brief aync post data, try to buffer(copy) data into internal buffer
