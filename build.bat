@@ -11,7 +11,7 @@ copy ..\.local\bin\*.dll .\build\bin\%version%\ /Y
 
 cd build
 
-cmake -DCMAKE_TOOLCHAIN_FILE=%VCPKG_PATH% -DCMAKE_BUILD_TYPE=%version% -Wno-dev ../
+cmake --no-warn-unused-cli -DCMAKE_TOOLCHAIN_FILE=%VCPKG_PATH% -DCMAKE_BUILD_TYPE=%version% -Wno-dev ../
 if "%errorlevel%" NEQ "0" goto :cmake_failed
 
 cmake --build . --config %version%

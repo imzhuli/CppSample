@@ -16,7 +16,7 @@ mkdir logs
 fi
 
 cd build
-cmake -DCMAKE_BUILD_TYPE=Debug -Wno-dev ../
+cmake --no-warn-unused-cli -DCMAKE_BUILD_TYPE=Debug -Wno-dev ../
 make -j ${PARAL}
 make test
 cd ..
