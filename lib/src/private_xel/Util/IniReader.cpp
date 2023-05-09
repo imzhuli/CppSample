@@ -64,6 +64,14 @@ X_NS
 			++vhValueStart;
 		}
 		vhLine->hValueStart = vhValueStart;
+		// r-Trim value
+		if (char * pc = vhLine->hValueStart; *pc) {
+			while(*++pc) 
+			{}
+			while(isspace(*--pc)) {
+				*pc = '\0';
+			}
+		}
 	}
 
 	static int XelIniKeyCompare(const void * vhLeft, const void * vhRight)
@@ -86,7 +94,7 @@ X_NS
 		if(vhCurr < vhEnd) {
 			do {
 				if (vhCurr[0] == '\r' && vhCurr[1]) {
-					// replace \r\n with "\n " (a newline and a space)
+					// replace \r? with "\n " (a newline and a space)
 					// it is guaranteed that file content ends with '\0',
 					// so accessing vhCurr[1] never causes overflow.
 					// the space will be removed in later procedures
@@ -179,7 +187,7 @@ X_NS
 			goto LABEL_FILE_SEEK_ERROR;
 		}
 		vxFileSize = ftell(fp);
-		if (vxFileSize == (size_t)-1L) {
+		if (vxFileSize == (size_t)-1L || vxFileSize == 0) {
 			goto LABEL_INVALID_FILE_SIZE_ERROR;
 		}
 		fseek(fp, 0, SEEK_SET);
