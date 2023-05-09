@@ -71,7 +71,6 @@ X_NS
 			struct { uint32_t x, y; }     UV2;
 		};
 
-
 		namespace __common_detail__ {
 			template<typename T>
 			struct xRemoveCVR {
@@ -82,7 +81,10 @@ X_NS
 		using xNonCVR = typename __common_detail__::xRemoveCVR<T>::Type;
 
 		template<typename T>
-		constexpr std::in_place_type_t<T> xType {};
+		using xInPlaceType = std::in_place_type_t<T>;
+
+		template<typename T>
+		constexpr xInPlaceType<T> Type{};
 
 		struct xPass final { X_INLINE void operator()() const {} };
 		struct xVBase { protected: constexpr xVBase() = default; virtual ~xVBase() = default; };
@@ -326,7 +328,7 @@ X_NS
 				X_INLINE constexpr xResourceGuardBase(T & Resource, tArgs&& ... Args) : _Resource(Resource), _Inited(Resource.Init(std::forward<tArgs>(Args)...)) {
 					if constexpr (DoThrow) {
 						if (!_Inited) {
-							throw "xResourceGuardBase Error: Failed to init resource";
+							throw "xResourceGuardBase failed to init resource";
 						}
 					}
 				}
@@ -353,6 +355,16 @@ X_NS
 		template<typename T, typename ... tArgs>
 		xResourceGuardThrowable(T & Resource, tArgs&& ... Args) -> xResourceGuardThrowable<T>;
 
+		template<typename T>
+		class xStorage final
+		{
+		public:
+			T Value;
+			xStorage() = default;
+			xStorage(const T& InputValue) : Value(InputValue) {}
+			xStorage(T && InputValue) : Value(std::move(InputValue)) {}
+		};
+
 		/* change variable value, and reset it to its original value after scope of the guard */
 		template<typename T, typename StorageType = T>
 		class xValueGuard final : xNonCopyable
@@ -361,6 +373,11 @@ X_NS
 			template<typename tU>
 			xValueGuard(T & Ref, tU && U) : _Ref(Ref), _OriginalValue(std::move(Ref)) {
 				_Ref = std::forward<tU>(U);
+			}
+			xValueGuard(T & Ref, xStorage<StorageType> & U) = delete;
+			xValueGuard(T & Ref, const xStorage<StorageType> & U) = delete;
+			xValueGuard(T & Ref, xStorage<StorageType> && U) : _Ref(Ref), _OriginalValue(std::move(Ref)) {
+				_Ref = std::move(U.Value);
 			}
 			~xValueGuard() {
 				_Ref = std::move(_OriginalValue);
@@ -447,7 +464,6 @@ X_NS
 				auto ObjectPtr = new ((void*)_PlaceHolder) T{std::forward<tArgs>(Args)...};
 				return ObjectPtr;
 			}
-
 
 			X_INLINE void Destroy() {
 				Get()->~T();

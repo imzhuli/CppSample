@@ -15,7 +15,7 @@ X_NS
 		T _Array[N];
 	public:
 		template<typename CT, typename... CArgs>
-		X_INLINE constexpr xArray(const std::in_place_type_t<CT> &, CArgs&& ... args)
+		X_INLINE constexpr xArray(const xInPlaceType<CT> &, CArgs&& ... args)
 			: _Array{std::forward<CArgs>(args)...}
 		{}
 

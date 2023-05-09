@@ -14,7 +14,7 @@ X_NS
 {
 
 	static constexpr auto gcHint = xArray {
-		xType<const char>,
+		Type<const char>,
 		'V',
 		'D',
 		'I',
