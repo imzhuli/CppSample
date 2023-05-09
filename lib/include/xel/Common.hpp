@@ -572,30 +572,32 @@ X_NS
 }
 
 #ifndef X_CATCH_NONE
-#define X_CATCH_NONE catch(const ::xel::xNonCatchable &)
+	#define X_CATCH_NONE catch(const ::xel::xNonCatchable &)
 #endif
 
 #ifdef  X_AddressOf
-#undef  X_AddressOf
-#define X_AddressOf ::xel::AddressOf
+	#undef  X_AddressOf
+	#define X_AddressOf ::xel::AddressOf
 #endif
 
 #ifndef NDEBUG
-#define X_DEBUG
+	#define X_DEBUG
 
-#define X_DEBUG_INIT(...) = {__VA_ARGS__}
-#define X_DEBUG_STEAL(Param, ...) (::xel::Steal(Param, ##__VA_ARGS__))
-#define X_DEBUG_RESET(Param, ...) (::xel::Reset(Param, ##__VA_ARGS__))
+	#define X_DEBUG_INIT(...)           = (__VA_ARGS__)
+	#define X_DEBUG_INIT_WITH_LIST(...) = {__VA_ARGS__}
 
-#define X_DEBUG_PRINTF printf
-#define X_DEBUG_FPRINTF fprintf
-#define X_DEBUG_BREAKPOINT(...) ::xel::Breakpoint()
+	#define X_DEBUG_STEAL(Param, ...) (::xel::Steal(Param, ##__VA_ARGS__))
+	#define X_DEBUG_RESET(Param, ...) (::xel::Reset(Param, ##__VA_ARGS__))
+
+	#define X_DEBUG_PRINTF printf
+	#define X_DEBUG_FPRINTF fprintf
+	#define X_DEBUG_BREAKPOINT(...) ::xel::Breakpoint()
 #else
-#define X_DEBUG_INIT(...)
-#define X_DEBUG_STEAL(Param, ...) Param
-#define X_DEBUG_RESET(Param, ...)
+	#define X_DEBUG_INIT(...)
+	#define X_DEBUG_STEAL(Param, ...) Param
+	#define X_DEBUG_RESET(Param, ...)
 
-#define X_DEBUG_PRINTF(...) ::xel::Pass()
-#define X_DEBUG_FPRINTF(...) ::xel::Pass()
-#define X_DEBUG_BREAKPOINT(...)
+	#define X_DEBUG_PRINTF(...) ::xel::Pass()
+	#define X_DEBUG_FPRINTF(...) ::xel::Pass()
+	#define X_DEBUG_BREAKPOINT(...)
 #endif
