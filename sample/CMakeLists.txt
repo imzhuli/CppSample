@@ -21,14 +21,6 @@ if (X_OPTION_STATIC)
 endif()
 endfunction()
 
-#test lib:
-
-add_sub_sample(gm)
 add_sub_sample(tcp_client)
 add_sub_sample(tcp_server)
 
-install(TARGETS
-	RUNTIME DESTINATION bin
-	ARCHIVE DESTINATION lib
-	LIBRARY DESTINATION lib
-	)
