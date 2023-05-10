@@ -17,7 +17,8 @@ X_NS
 		Verbose = 0,
 		Debug   = 1,
 		Info    = 2,
-		Error   = 3,
+		Warning = 3,
+		Error   = 4,
 		Quiet   = 1024,
 	};
 
@@ -55,6 +56,11 @@ X_NS
 		template<typename ... Args>
 		X_INLINE void I(const char * fmt, Args&& ... args) {
 			Log(eLogLevel::Info, fmt, std::forward<Args>(args)...);
+		}
+
+		template<typename ... Args>
+		X_INLINE void W(const char * fmt, Args&& ... args) {
+			Log(eLogLevel::Warning, fmt, std::forward<Args>(args)...);
 		}
 
 		template<typename ... Args>
