@@ -34,7 +34,11 @@ X_NS {
     typedef size_t                     send_len_t;
     typedef size_t                     recv_len_t;
     typedef int                        xEventPoller;        // epoll
+#ifdef X_SYSTEM_ANDROID
+    typedef uint32_t                   xNativeEventType;
+#else
     typedef enum EPOLL_EVENTS          xNativeEventType;    // EPOLLIN EPOLLOUT EPOLLERR ...
+#endif
     typedef int                        xSocket;
     constexpr xEventPoller             InvalidEventPoller = ((xEventPoller)-1);
     constexpr xSocket                  InvalidSocket = ((xSocket)-1);
