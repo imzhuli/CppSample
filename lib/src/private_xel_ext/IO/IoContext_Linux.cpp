@@ -8,7 +8,11 @@ X_NS {
     bool xIoContext::Init()
     {
         assert(_Poller == InvalidEventPoller);
+#if defined(X_SYSTEM_ANDROID) && X_SYSTEM_ANDROID < 23
+        _Poller = epoll_create(2048);
+#else
         _Poller = epoll_create1(EPOLL_CLOEXEC);
+#endif
         if (-1 == _Poller) {
             return false;
         }
