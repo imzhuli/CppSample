@@ -30,7 +30,7 @@
 	#endif
 #elif defined(__ANDROID_API__)
 	#define X_SYSTEM_LINUX
-	#define X_SYSTEM_ANDROID
+	#define X_SYSTEM_ANDROID __ANDROID_API__
 #elif defined(__linux__)
 	// linux
 	#define X_SYSTEM_LINUX
@@ -151,6 +151,7 @@
 #define X_EXPAND_STRING(s) X_MAKE_STRING(s)
 #define X_EXPECT(x) do { bool test=(bool)(x); if(!test) { throw #x; } } while(0)
 
+#define X_HAS_ALIGNED_ALLOC 1
 #if defined(_MSC_VER)
 #	define XelAlignedAlloc                      _aligned_malloc
 #	define XelAlignedFree                       _aligned_free
@@ -159,6 +160,13 @@
 #	define XelAlignedAlloc(size, alignment)     aligned_alloc(alignment, size)
 #	define XelAlignedFree                       free
 #   define XelLocalTime(Timestamp, ST)          localtime_r((Timestamp), (ST));
+#endif
+
+#if defined(X_SYSTEM_ANDROID) && (X_SYSTEM_ANDROID < 28)
+#	undef  XelAlignedAlloc
+#	define XelAlignedAlloc(size, alignment)        malloc(size)
+#   undef  X_HAS_ALIGNED_ALLOC
+#	define X_HAS_ALIGNED_ALLOC 0
 #endif
 
 #if defined(X_SYSTEM_ANDROID)
