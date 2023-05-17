@@ -137,11 +137,9 @@ X_NS
 	public:
 		X_INLINE bool IsEmpty() const { return _Head.pNext == &_Head;  }
 		X_INLINE void AddHead(tNode& rTarget) {
-			assert(static_cast<xListNode&>(rTarget).IsSafelyDetached());
 			static_cast<xListNode&>(rTarget).AppendTo(_Head);
 		}
 		X_INLINE void AddTail(tNode& rTarget) {
-			assert(static_cast<xListNode&>(rTarget).IsSafelyDetached());
 			static_cast<xListNode&>(rTarget).AppendTo(*_Head.pPrev);
 		}
 		X_INLINE void GrabHead(tNode& rTarget) {
