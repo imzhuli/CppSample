@@ -4,6 +4,48 @@
 X_NS
 {
 
+	// class helping iterating an list or map,
+	// might be useful in some script language that accept cpp list or map as an input
+	template<typename IteratorType>
+	class xIteratorRange
+	{
+		static_assert(!std::is_reference<IteratorType>::value);
+		template<typename tIterator>
+		struct xIsPairReference : std::false_type {};
+		template<typename tK, typename tV>
+		struct xIsPairReference<std::pair<tK, tV> &> : std::true_type {};
+		template<typename tK, typename tV>
+		struct xIsPairReference<const std::pair<tK, tV> &> : std::true_type {};
+
+	public:
+		using iterator = IteratorType;
+		static constexpr const bool IsPairIterator = xIsPairReference<decltype(*std::declval<IteratorType>())>::value;
+
+		X_INLINE xIteratorRange() = delete;
+		X_INLINE constexpr xIteratorRange(const IteratorType & Begin, const IteratorType & End): _Begin(Begin), _End(End) {}
+		template<typename tContainer>
+		X_INLINE constexpr xIteratorRange(tContainer & Container) : xIteratorRange(Container.begin(), Container.end()) {}
+		template<typename tContainer>
+		X_INLINE constexpr xIteratorRange(tContainer && Container) : xIteratorRange(Container.begin(), Container.end()) {}
+
+		X_INLINE constexpr xIteratorRange(const xIteratorRange &) = default;
+		X_INLINE constexpr xIteratorRange(xIteratorRange &&) = default;
+		X_INLINE constexpr xIteratorRange & operator = (const xIteratorRange &) = default;
+		X_INLINE constexpr xIteratorRange & operator = (xIteratorRange &&) = default;
+
+		X_INLINE constexpr IteratorType begin() const { return _Begin; }
+		X_INLINE constexpr IteratorType end()   const { return _End; }
+		X_INLINE constexpr auto size() const { return _End - _Begin; }
+
+	private:
+		IteratorType _Begin;
+		IteratorType _End;
+	};
+	template<typename tWrapper>
+	xIteratorRange(const tWrapper&) -> xIteratorRange<typename tWrapper::iterator>;
+	template<typename tWrapper>
+	xIteratorRange(tWrapper&&) -> xIteratorRange<typename tWrapper::iterator>;
+
 	class xDataView final
 	{
 	private:

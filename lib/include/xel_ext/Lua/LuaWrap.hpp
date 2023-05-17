@@ -1,5 +1,6 @@
 #pragma once
 #include <xel/Common.hpp>
+#include <xel/View.hpp>
 #include <lua/lua.hpp>
 #include <tuple>
 #include <string>

@@ -59,6 +59,6 @@ X_NS
 	};
 
 	template<typename CT, typename... CArgs>
-	xArray(const std::in_place_type_t<CT> &, CArgs&& ... args) -> xArray<CT, sizeof...(CArgs)>;
+	xArray(const xInPlaceType<CT> &, CArgs&& ... args) -> xArray<CT, sizeof...(CArgs)>;
 
 }
