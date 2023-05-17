@@ -22,11 +22,7 @@ X_NS
 
         inline namespace numeric
         {
-#if __cplusplus >= 201703L
             using byte  = ::std::byte;
-#else
-            enum class byte : unsigned char {};
-#endif
             using ubyte = unsigned char;
 
             using size8_t      = ::std::uint8_t;
@@ -189,12 +185,12 @@ X_NS
         Count(const Args& ... args) { return sizeof...(args); }
 
         template<typename T>
-        [[nodiscard]] X_STATIC_INLINE constexpr std::conditional_t<std::is_const<T>::value, const void *, void *>
-        AddressOf(T & obj) { return &reinterpret_cast<std::conditional_t<std::is_const<T>::value, const unsigned char, unsigned char>&>(obj); }
+        [[nodiscard]] X_STATIC_INLINE constexpr std::conditional_t<std::is_const_v<T>, const void *, void *>
+        AddressOf(T & obj) { return &reinterpret_cast<std::conditional_t<std::is_const_v<T>, const unsigned char, unsigned char>&>(obj); }
 
         template<typename T>
         [[nodiscard]] X_STATIC_INLINE constexpr bool
-        IsPow2(const T x) { static_assert(std::is_integral<T>::value); return x > 0 && !(x & (x-1)); }
+        IsPow2(const T x) { static_assert(std::is_integral_v<T>); return x > 0 && !(x & (x-1)); }
 
         template<typename T>
         [[nodiscard]] X_STATIC_INLINE std::remove_reference_t<T> &
@@ -217,14 +213,14 @@ X_NS
 
         template<typename RefedT>
         struct xRefCaster {
-            static_assert(!std::is_reference<RefedT>::value);
+            static_assert(!std::is_reference_v<RefedT>);
             using Type = RefedT;
             X_STATIC_INLINE RefedT& Get(RefedT & R) { return R; }
             X_STATIC_INLINE const RefedT& Get(const RefedT & R) { return R; }
         };
         template<typename RefedT>
         struct xRefCaster<xRef<RefedT>> {
-            static_assert(!std::is_reference<RefedT>::value);
+            static_assert(!std::is_reference_v<RefedT>);
             using Type = RefedT;
             X_STATIC_INLINE RefedT& Get(const xRef<RefedT> & RR) { return RR.Get(); }
         };

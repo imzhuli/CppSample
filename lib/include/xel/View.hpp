@@ -9,7 +9,7 @@ X_NS
 	template<typename IteratorType>
 	class xIteratorRange
 	{
-		static_assert(!std::is_reference<IteratorType>::value);
+		static_assert(!std::is_reference_v<IteratorType>);
 		template<typename tIterator>
 		struct xIsPairReference : std::false_type {};
 		template<typename tK, typename tV>
