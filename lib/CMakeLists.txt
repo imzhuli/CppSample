@@ -33,11 +33,11 @@ set(shared_lib_dependency_public
 aux_source_directory(./src/private_lua                             X_SRC)
 
 aux_source_directory(./src/private_xel                             X_SRC)
+aux_source_directory(./src/private_xel/C                           X_SRC)
 aux_source_directory(./src/private_xel/Algorithm                   X_SRC)
 aux_source_directory(./src/private_xel/Util                        X_SRC)
 aux_source_directory(./src/private_xel/Container                   X_SRC)
 
-aux_source_directory(./src/private_xel_ext/C                      X_SRC)
 aux_source_directory(./src/private_xel_ext/IO                      X_SRC)
 aux_source_directory(./src/private_xel_ext/Lua                     X_SRC)
 aux_source_directory(./src/private_xel_ext/Util                    X_SRC)
