@@ -45,22 +45,26 @@ X_NS {
 
             if (EV.events & EPOLLIN) {
                 ReactorPtr->OnIoEventInReady();
-            }
-            if (!ReactorPtr->IsAvailable()) {
-                ReactorPtr->OnIoEventError();
-                continue;
+                if (!ReactorPtr->IsAvailable()) {
+                    ReactorPtr->OnIoEventError();
+                    continue;
+                }
             }
 
             if (EV.events & EPOLLOUT) {
                 ReactorPtr->OnIoEventOutReady();
+                if (!ReactorPtr->IsAvailable()) {
+                    ReactorPtr->OnIoEventError();
+                    continue;
+                }
             }
-            if (!ReactorPtr->IsAvailable()) {
-                ReactorPtr->OnIoEventError();
-                continue;
-            }
+        }
 
-            // extra events:
-
+        _DeferredOperationList.GrabListTail(_PendingOperationList);
+        for (auto & Node : _DeferredOperationList) {
+            _DeferredOperationList.Remove(Node);
+            auto & IoReactor = (iIoReactor&)Node;
+            IoReactor.OnDeferredOperation();
         }
     }
 
@@ -72,6 +76,14 @@ X_NS {
             return false;
         }
         auto Guard = xScopeGuard([&]{ close(_UserEventFd); });
+
+        struct epoll_event Event = {};
+        Event.data.ptr = this;
+        Event.events = EPOLLET | EPOLLIN;
+        if (-1 == epoll_ctl(*IoContextPtr, EPOLL_CTL_ADD, _UserEventFd, &Event)) {
+            X_DEBUG_PRINTF("xTcpConnection::Init failed to register epoll event\n");
+            return false;
+        }
 
         Guard.Dismiss();
         return true;

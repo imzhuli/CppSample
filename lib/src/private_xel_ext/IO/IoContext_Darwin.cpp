@@ -42,23 +42,38 @@ X_NS {
 
             if (EV.filter == EVFILT_READ) {
                 ReactorPtr->OnIoEventInReady();
-            }
-            if (!ReactorPtr->IsAvailable()) {
-                ReactorPtr->OnIoEventError();
-                continue;
+                if (!ReactorPtr->IsAvailable()) {
+                    ReactorPtr->OnIoEventError();
+                    continue;
+                }
             }
 
             if (EV.filter == EVFILT_WRITE) {
                 ReactorPtr->OnIoEventOutReady();
-            }
-            if (!ReactorPtr->IsAvailable()) {
-                ReactorPtr->OnIoEventError();
-                continue;
+                if (!ReactorPtr->IsAvailable()) {
+                    ReactorPtr->OnIoEventError();
+                    continue;
+                }
             }
 
-            // extra events:
-
+            /* this is not neccessary
+            if (EV.filter == EVFILT_USER) {
+                ReactorPtr->OnIoEventInReady();
+                if (!ReactorPtr->IsAvailable()) {
+                    ReactorPtr->OnIoEventError();
+                    continue;
+                }
+            }
+            */
         }
+
+        _DeferredOperationList.GrabListTail(_PendingOperationList);
+        for (auto & Node : _DeferredOperationList) {
+            _DeferredOperationList.Remove(Node);
+            auto & IoReactor = (iIoReactor&)Node;
+            IoReactor.OnDeferredOperation();
+        }
+
     }
 
 }

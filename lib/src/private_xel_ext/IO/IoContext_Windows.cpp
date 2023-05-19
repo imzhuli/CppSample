@@ -70,39 +70,29 @@ X_NS {
             if (EventType == eIoEventType::InReady) {
                 ReactorPtr->SetReadTransfered(Event.dwNumberOfBytesTransferred);
                 ReactorPtr->OnIoEventInReady();
-            }
-            if (!ReactorPtr->IsAvailable()) {
-                ReactorPtr->OnIoEventError();
-                continue;
+                if (!ReactorPtr->IsAvailable()) {
+                    ReactorPtr->OnIoEventError();
+                    continue;
+                }
             }
 
             // process write:
             if (EventType == eIoEventType::OutReady) {
                 ReactorPtr->SetWriteTransfered(Event.dwNumberOfBytesTransferred);
                 ReactorPtr->OnIoEventOutReady();
+                if (!ReactorPtr->IsAvailable()) {
+                    ReactorPtr->OnIoEventError();
+                    continue;
+                }
             }
-            if (!ReactorPtr->IsAvailable()) {
-                ReactorPtr->OnIoEventError();
-                continue;
-            }
-
-            // do extra cleanup:
-
         }
 
-        // exec pending operations:
         _DeferredOperationList.GrabListTail(_PendingOperationList);
         for (auto & Node : _DeferredOperationList) {
-            if (!Node.PersistentDeferredOperation) {
-                _DeferredOperationList.Remove(Node);
-            }
-
-            // TODO: process pending operation:
+            _DeferredOperationList.Remove(Node);
             auto & IoReactor = (iIoReactor&)Node;
             IoReactor.OnDeferredOperation();
         }
-
-        (void)Result;
     }
 
 }

@@ -11,7 +11,7 @@ X_NS
 {
     class xIoContext;
     class iIoReactor;
-    struct xIoReactorNode : xListNode { bool PersistentDeferredOperation = false; };
+    struct xIoReactorNode : xListNode {};
     using  xIoReactorList = xList<xIoReactorNode>;
 
     class xIoContext
