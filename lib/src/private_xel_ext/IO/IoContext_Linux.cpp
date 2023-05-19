@@ -3,6 +3,8 @@
 
 #ifdef X_SYSTEM_LINUX
 
+#include <sys/eventfd.h>
+
 X_NS {
 
     bool xIoContext::Init()
@@ -61,7 +63,51 @@ X_NS {
 
         }
     }
-}
 
+
+    bool xUserEventTrigger::Init(xIoContext * IoContextPtr)
+    {
+        _UserEventFd = eventfd(0, EFD_CLOEXEC | EFD_NONBLOCK);
+        if (-1 == _UserEventFd) {
+            return false;
+        }
+        auto Guard = xScopeGuard([&]{ close(_UserEventFd); });
+
+        Guard.Dismiss();
+        return true;
+    }
+
+    void xUserEventTrigger::Clean()
+    {
+        close(X_DEBUG_STEAL(_UserEventFd, -1));
+    }
+
+    void xUserEventTrigger::OnIoEventInReady()
+    {
+        uint64_t PseudoData;
+        while(true) {
+            auto Result = read(_UserEventFd, &PseudoData, 8);
+            if (Result < 0) {
+                auto Error = errno;
+                assert(Error == EAGAIN);
+                break;
+            }
+            assert(Result == 8);
+        }
+    }
+
+    void xUserEventTrigger::Trigger()
+    {
+        uint64_t PseudoData = 1;
+        auto Result = write(_UserEventFd, &PseudoData, 8);
+        if (Result < 0) {
+            auto Error = errno;
+            assert(Error == EAGAIN);
+            return;
+        }
+        assert(Result == 8);
+    }
+
+}
 
 #endif

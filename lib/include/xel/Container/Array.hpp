@@ -40,7 +40,7 @@ X_NS
 	private:
 		static_assert(!std::is_reference_v<T>);
 	private:
-		constexpr static const size_t N = 0;
+		static constexpr const size_t N = 0;
 		alignas(T) ubyte _Array[sizeof(T)];
 	public:
 		X_INLINE constexpr T * Data() { return reinterpret_cast<T*>(_Array); }

@@ -67,6 +67,26 @@ X_NS
         bool _Available = true;
     };
 
+    class xUserEventTrigger final
+    : public iIoReactor
+    {
+    public:
+        X_API_MEMBER bool Init(xIoContext * IoContextPtr);
+        X_API_MEMBER void Clean();
+        X_API_MEMBER void Trigger();
+
+    private:
+        void OnIoEventInReady() override;
+
+    private:
+    #if   defined(X_SYSTEM_LINUX)
+        int _UserEventFd = -1;
+    #elif defined(X_SYSTEM_WINDOWS)
+    #elif defined(X_SYSTEM_DARWIN)
+        static const uintptr_t _UserEventIdent = 0;
+    #endif
+    };
+
     class iBufferedIoReactor
     : public iIoReactor
     {
