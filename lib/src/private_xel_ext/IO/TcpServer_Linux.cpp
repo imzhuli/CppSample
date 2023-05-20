@@ -19,21 +19,7 @@ X_NS
         assert(Address);
 
         sockaddr_storage AddrStorage;
-        size_t AddrLen = 0;
-        memset(&AddrStorage, 0, sizeof(AddrStorage));
-        if (Address.IsV4()) {
-            auto & Addr4 = (sockaddr_in&)AddrStorage;
-            Addr4.sin_family = AF_INET;
-            Addr4.sin_addr = (decltype(sockaddr_in::sin_addr)&)(Address.Ipv4);
-            Addr4.sin_port = htons(Address.Port);
-            AddrLen = sizeof(sockaddr_in);
-        } else {
-            auto & Addr6 = (sockaddr_in6&)AddrStorage;
-            Addr6.sin6_family = AF_INET6;
-            Addr6.sin6_addr = (decltype(sockaddr_in6::sin6_addr)&)(Address.Ipv6);
-            Addr6.sin6_port = htons(Address.Port);
-            AddrLen = sizeof(sockaddr_in6);
-        }
+        size_t AddrLen = Address.Dump(&AddrStorage);
 
         assert(_ListenSocket == InvalidSocket);
 

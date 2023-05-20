@@ -19,7 +19,7 @@ X_NS
         };
 
     public:
-        X_API_MEMBER bool Init(xIoContext * IoContextPtr, iListener * ListenerPtr);
+        X_API_MEMBER bool Init(xIoContext * IoContextPtr, int AddressFamily, iListener * ListenerPtr);
         X_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & BindAddress, iListener * ListenerPtr);
         X_API_MEMBER void Clean();
         X_API_MEMBER void PostData(const void * DataPtr, size_t DataSize, const xNetAddress & DestiationAddress);

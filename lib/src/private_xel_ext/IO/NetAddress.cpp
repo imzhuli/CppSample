@@ -55,4 +55,76 @@ X_NS
         return {};
     }
 
+
+    xNetAddress xNetAddress::Parse(const sockaddr_in * SockAddr4Ptr)
+    {
+        assert(SockAddr4Ptr->sin_family == AF_INET);
+        auto Ret = Make4();
+        memcpy(Ret.Ipv4, &SockAddr4Ptr->sin_addr,sizeof(Ret.Ipv4));
+        Ret.Port = ntohs(SockAddr4Ptr->sin_port);
+        return Ret;
+    }
+
+    xNetAddress xNetAddress::Parse(const sockaddr_in6 * SockAddr6Ptr)
+    {
+        assert(SockAddr6Ptr->sin6_family == AF_INET6);
+        auto Ret = Make6();
+        memcpy(Ret.Ipv6, &SockAddr6Ptr->sin6_addr,sizeof(Ret.Ipv6));
+        Ret.Port = ntohs(SockAddr6Ptr->sin6_port);
+        return Ret;
+    }
+
+    std::string xNetAddress::IpToString() const
+    {
+        char Buffer[64];
+        if (Type == eUnknown) {
+            return "Unknown";
+        }
+        if (Type == eIpv4) {
+            return {Buffer, (size_t)sprintf(Buffer, "%d.%d.%d.%d",
+                (int)Ipv4[0],
+                (int)Ipv4[1],
+                (int)Ipv4[2],
+                (int)Ipv4[3])};
+        }
+        // ipv6
+        return {Buffer, (size_t)sprintf(Buffer,
+            "%02x:%02x:%02x:%02x:"
+            "%02x:%02x:%02x:%02x:"
+            "%02x:%02x:%02x:%02x:"
+            "%02x:%02x:%02x:%02x",
+            (int)Ipv6[0],(int)Ipv6[1],(int)Ipv6[2],(int)Ipv6[3],
+            (int)Ipv6[4],(int)Ipv6[5],(int)Ipv6[6],(int)Ipv6[7],
+            (int)Ipv6[8],(int)Ipv6[9],(int)Ipv6[10],(int)Ipv6[11],
+            (int)Ipv6[12],(int)Ipv6[13],(int)Ipv6[14],(int)Ipv6[15])};
+    }
+
+    std::string xNetAddress::ToString() const
+    {
+        char Buffer[64];
+        if (Type == eUnknown) {
+            return "Unknown";
+        }
+        if (Type == eIpv4) {
+            return {Buffer, (size_t)sprintf(Buffer, "%d.%d.%d.%d:%u",
+                (int)Ipv4[0],
+                (int)Ipv4[1],
+                (int)Ipv4[2],
+                (int)Ipv4[3],
+                (int)Port)};
+        }
+        // ipv6
+        return {Buffer, (size_t)sprintf(Buffer,
+            "%02x:%02x:%02x:%02x:"
+            "%02x:%02x:%02x:%02x:"
+            "%02x:%02x:%02x:%02x:"
+            "%02x:%02x:%02x:%02x:"
+            "%u",
+            (int)Ipv6[0],(int)Ipv6[1],(int)Ipv6[2],(int)Ipv6[3],
+            (int)Ipv6[4],(int)Ipv6[5],(int)Ipv6[6],(int)Ipv6[7],
+            (int)Ipv6[8],(int)Ipv6[9],(int)Ipv6[10],(int)Ipv6[11],
+            (int)Ipv6[12],(int)Ipv6[13],(int)Ipv6[14],(int)Ipv6[15],
+            (int)Port)};
+    }
+
 }

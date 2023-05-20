@@ -7,21 +7,20 @@
 X_NS
 {
 
-    struct xNetAddress
+    struct xNetAddress final
     {
-        enum : uint16_t {
-            eUnknown, eIpv4, eIpv6
-        } Type = eUnknown;
-
+        using xKeyType = std::array<ubyte, 20>;
         union {
             ubyte Ipv4[4];
             ubyte Ipv6[16];
             ubyte IpStorage[16] = {};
         };
+        enum : uint16_t {
+            eUnknown, eIpv4, eIpv6
+        } Type = eUnknown;
         uint16_t Port = 0;
 
-        using xKeyType = std::array<ubyte, 20>;
-
+        // methods:
         X_INLINE bool IsV4() const { return Type == eIpv4; }
         X_INLINE bool IsV6() const { return Type == eIpv6; }
         X_INLINE operator bool () const { return Type != eUnknown; }
@@ -30,6 +29,7 @@ X_NS
             memcpy(Ret.data(), this, sizeof(*this));
             return Ret;
         }
+
         X_INLINE bool operator == (const xNetAddress & Other) const {
             if (Type == eUnknown || Type != Other.Type || Port != Other.Port) {
                 return false;
@@ -43,12 +43,60 @@ X_NS
             return false;
         }
 
+        X_INLINE int GetAddressFamily() const {
+            if (Type == eIpv4) {
+                return AF_INET;
+            }
+            if (Type == eIpv6) {
+                return AF_INET6;
+            }
+            return AF_UNSPEC;
+        }
+
+        X_INLINE void Dump(sockaddr_in * Addr4Ptr) const {
+            assert(IsV4());
+            memset(Addr4Ptr, 0, sizeof(*Addr4Ptr));
+            auto & Addr4 = *Addr4Ptr;
+            Addr4.sin_family = AF_INET;
+            Addr4.sin_addr = (decltype(sockaddr_in::sin_addr)&)(Ipv4);
+            Addr4.sin_port = htons(Port);
+        }
+
+        X_INLINE void Dump(sockaddr_in6 * Addr6Ptr) const {
+            assert(IsV6());
+            memset(Addr6Ptr, 0, sizeof(*Addr6Ptr));
+            auto & Addr6 = *Addr6Ptr;
+            Addr6.sin6_family = AF_INET6;
+            Addr6.sin6_addr = (decltype(sockaddr_in6::sin6_addr)&)(Ipv6);
+            Addr6.sin6_port = htons(Port);
+        }
+
+        X_INLINE size_t Dump(sockaddr_storage * AddrStoragePtr) const {
+            if (IsV4()) {
+                Dump((sockaddr_in *)AddrStoragePtr);
+                return sizeof(sockaddr_in);
+            }
+            if (IsV6()) {
+                Dump((sockaddr_in6 *)AddrStoragePtr);
+                return sizeof(sockaddr_in6);
+            }
+            *AddrStoragePtr = sockaddr_storage{};
+            AddrStoragePtr->ss_family = AF_UNSPEC;
+            return 0;
+        }
+
         X_API_MEMBER std::string IpToString() const;
         X_API_MEMBER std::string ToString() const;
 
-        X_API_STATIC_MEMBER xNetAddress Parse(const char * IpStr, uint16_t Port = 0);
+        X_STATIC_INLINE xNetAddress Make4() { return xNetAddress { .Type = eIpv4 }; }
+        X_STATIC_INLINE xNetAddress Make6() { return xNetAddress { .Type = eIpv6 }; }
+
+        X_API_STATIC_MEMBER xNetAddress Parse(const char * IpStr, uint16_t Port);
         X_API_STATIC_MEMBER xNetAddress Parse(const std::string & AddressStr);
         X_API_STATIC_MEMBER xNetAddress Parse(const struct sockaddr * SockAddrPtr);
+
+        X_API_STATIC_MEMBER xNetAddress Parse(const sockaddr_in * SockAddr4Ptr);
+        X_API_STATIC_MEMBER xNetAddress Parse(const sockaddr_in6 * SockAddr6Ptr);
     };
 
 }

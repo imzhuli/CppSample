@@ -259,6 +259,11 @@ X_NS
         template<typename tEntry, typename tExit>
         xScopeGuard(xScopeGuard<tEntry, tExit> && Other) -> xScopeGuard<tEntry, tExit>;
 
+        template<typename xTarget>
+        auto MakeCleaner(xTarget & Target) {
+            return xScopeGuard([TargetPtr=&Target]{ TargetPtr->Clean(); });
+        }
+
         namespace __common_detail__ {
             template<bool IsAtomic = false>
             class xReentryFlag final : xNonCopyable

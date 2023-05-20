@@ -1,38 +1,24 @@
 #include <xel_ext/IO/TcpServer.hpp>
 
-#if defined(X_SYSTEM_WINDOWS) 
+#if defined(X_SYSTEM_WINDOWS)
 
 #include <cinttypes>
 X_NS
 {
-    
+
     bool xTcpServer::Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr, bool ReusePort)
     {
         assert(Address);
 
         sockaddr_storage AddrStorage;
-        size_t AddrLen = 0;
-        memset(&AddrStorage, 0, sizeof(AddrStorage));
-        if (Address.IsV4()) {
-            auto & Addr4 = (sockaddr_in&)AddrStorage;
-            Addr4.sin_family = AF_INET;
-            Addr4.sin_addr = (decltype(sockaddr_in::sin_addr)&)(Address.Ipv4);
-            Addr4.sin_port = htons(Address.Port);
-            AddrLen = sizeof(sockaddr_in);
-        } else {
-            auto & Addr6 = (sockaddr_in6&)AddrStorage;
-            Addr6.sin6_family = AF_INET6;
-            Addr6.sin6_addr = (decltype(sockaddr_in6::sin6_addr)&)(Address.Ipv6);
-            Addr6.sin6_port = htons(Address.Port);
-            AddrLen = sizeof(sockaddr_in6);
-        }
-        
+        size_t AddrLen = Address.Dump(&AddrStorage);
+
         assert(_ListenSocket == InvalidSocket);
         _ListenSocket = InvalidSocket;
 
         assert(_PreAcceptSocket == InvalidSocket);
         _PreAcceptSocket = InvalidSocket;
-        
+
         auto FailSafe = xScopeGuard{[&]{
             if (_ListenSocket != InvalidSocket) {
                 XelCloseSocket(X_DEBUG_STEAL(_ListenSocket, InvalidSocket));
@@ -44,7 +30,7 @@ X_NS
 
         struct addrinfo * addrlocal = NULL;
         _AF = Address.IsV4() ? AF_INET : AF_INET6; // address family
-        _ListenSocket = WSASocket(_AF, SOCK_STREAM, IPPROTO_IP, NULL, 0, WSA_FLAG_OVERLAPPED); 
+        _ListenSocket = WSASocket(_AF, SOCK_STREAM, IPPROTO_IP, NULL, 0, WSA_FLAG_OVERLAPPED);
         if (_ListenSocket == InvalidSocket) {
             return false;
         }
@@ -64,7 +50,7 @@ X_NS
             X_DEBUG_PRINTF("xTcpServer::TryPreAccept failed to create completion port\n");
             return false;
         }
-        
+
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
 
@@ -75,7 +61,7 @@ X_NS
         return true;
     }
 
-    void xTcpServer::TryPreAccept()    
+    void xTcpServer::TryPreAccept()
     {
         if (_PreAcceptSocket == InvalidSocket) {
             _PreAcceptSocket = WSASocket(_AF, SOCK_STREAM, IPPROTO_IP, NULL, 0, WSA_FLAG_OVERLAPPED);

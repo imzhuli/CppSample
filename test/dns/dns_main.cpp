@@ -1,5 +1,5 @@
 #include <xel/Common.hpp>
-#include <xel_ext/IO/Dns.hpp>
+#include <xel_ext/IO/LocalDns.hpp>
 #include <thread>
 #include <chrono>
 #include <iostream>
@@ -8,32 +8,20 @@ using namespace xel;
 using namespace std;
 using namespace std::literals;
 
-auto IoContext = xIoContext();
-auto UserEventTriggerPtr = static_cast<xIoContext::iUserEventTrigger*>(nullptr);
-
-void Trigger()
-{
-    UserEventTriggerPtr->Trigger();
-}
+auto DnsService = xLocalDnsServer();
+auto DnsClient = xLocalDnsClient();
 
 int main(int argc, char *argv[])
 {
-    auto IoContextGuard = xResourceGuard(IoContext);
-    UserEventTriggerPtr = IoContext.GetUserEventTrigger();
+    auto DnsServerAddress = xNetAddress::Parse("113.96.236.11:53");
+    X_DEBUG_PRINTF("Using dns server: %s\n", DnsServerAddress.ToString().c_str());
 
-    auto Thread = std::thread([]{
-        std::this_thread::sleep_for(1s);
-        Trigger();
-        std::this_thread::sleep_for(1s);
-        Trigger();
-    });
+    auto ServiceGuard = xResourceGuard(DnsService, DnsServerAddress);
+    auto ClientGuard = xResourceGuard(DnsClient, &DnsService);
 
-    IoContext.LoopOnce(3'000);
-    cout << "UE1" << endl;
-    IoContext.LoopOnce(3'000);
-    cout << "UE2" << endl;
+    assert(ServiceGuard);
+    assert(ClientGuard);
 
-    Thread.join();
     return 0;
 }
 
