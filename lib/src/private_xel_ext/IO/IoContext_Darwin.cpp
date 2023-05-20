@@ -8,13 +8,29 @@ X_NS {
 
     bool xIoContext::Init()
     {
-        assert(_Poller == InvalidEventPoller);
         _Poller = kqueue();
+        if (_Poller == InvalidEventPoller) {
+            return false;
+        }
+        auto PollerGuard = xScopeGuard([&]{
+            close(X_DEBUG_STEAL(_Poller, InvalidEventPoller));
+        });
+
+        if (!SetupUserEventTrigger()) {
+            return false;
+        }
+        auto TriggerGuard = xScopeGuard([this]{ CleanUserEventTrigger(); });
+
+        TriggerGuard.Dismiss();
+        PollerGuard.Dismiss();
         return false;
     }
 
     void xIoContext::Clean()
     {
+        assert(_DeferredOperationList.IsEmpty());
+        assert(_PendingOperationList.IsEmpty());
+        CleanUserEventTrigger();
         close(X_DEBUG_STEAL(_Poller, InvalidEventPoller));
     }
 
@@ -74,6 +90,46 @@ X_NS {
             IoReactor.OnDeferredOperation();
         }
 
+    }
+
+    namespace __io_detail__
+    {
+
+        class xUserEventTrigger final
+        : public iIoReactor
+        , public xIoContext::iUserEventTrigger
+        {
+        public:
+            X_API_MEMBER bool Init(xIoContext * IoContextPtr);
+            X_API_MEMBER void Clean();
+            X_API_MEMBER void Trigger() override;
+
+        private:
+            void OnIoEventInReady() override;
+
+        private:
+            static const uintptr_t _UserEventIdent = 0;
+        };
+
+        // TODO: implementaion
+
+    }
+
+    bool xIoContext::SetupUserEventTrigger()
+    {
+        auto TriggerPtr = new __io_detail__::xUserEventTrigger();
+        if (!TriggerPtr->Init(this)) {
+            return false;
+        }
+        _UserEventTriggerPtr = TriggerPtr;
+        return true;
+    }
+
+    void xIoContext::CleanUserEventTrigger()
+    {
+        auto TriggerPtr = (__io_detail__::xUserEventTrigger *)Steal(_UserEventTriggerPtr);
+        TriggerPtr->Clean();
+        delete TriggerPtr;
     }
 
 }

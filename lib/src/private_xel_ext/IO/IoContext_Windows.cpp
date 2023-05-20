@@ -24,16 +24,25 @@ X_NS {
         if (_Poller == INVALID_HANDLE_VALUE) {
             return false;
         }
-        X_DEBUG_PRINTF("xIoContext::Init: Instance=%p Poller=%p\n", this, _Poller);
+        auto PollerGuard = xScopeGuard([&]{
+            CloseHandle(X_DEBUG_STEAL(_Poller, InvalidEventPoller));
+        });
+
+        if (!SetupUserEventTrigger()) {
+            return false;
+        }
+        auto TriggerGuard = xScopeGuard([this]{ CleanUserEventTrigger(); });
+
+        TriggerGuard.Dismiss();
+        PollerGuard.Dismiss();
         return true;
     }
 
     void xIoContext::Clean()
     {
-        X_DEBUG_PRINTF("xIoContext::Clean: Instance=%p Poller=%p\n", this, _Poller);
-
         assert(_DeferredOperationList.IsEmpty());
         assert(_PendingOperationList.IsEmpty());
+        CleanUserEventTrigger();
         CloseHandle(X_DEBUG_STEAL(_Poller, InvalidEventPoller));
     }
 
@@ -93,6 +102,47 @@ X_NS {
             auto & IoReactor = (iIoReactor&)Node;
             IoReactor.OnDeferredOperation();
         }
+    }
+
+
+    namespace __io_detail__
+    {
+
+        class xUserEventTrigger final
+        : public iIoReactor
+        , public xIoContext::iUserEventTrigger
+        {
+        public:
+            X_API_MEMBER bool Init(xIoContext * IoContextPtr);
+            X_API_MEMBER void Clean();
+            X_API_MEMBER void Trigger() override;
+
+        private:
+            void OnIoEventInReady() override;
+
+        private:
+            // TODO add members
+        };
+
+        // TODO implementation
+
+    }
+
+    bool xIoContext::SetupUserEventTrigger()
+    {
+        auto TriggerPtr = new __io_detail__::xUserEventTrigger();
+        if (!TriggerPtr->Init(this)) {
+            return false;
+        }
+        _UserEventTriggerPtr = TriggerPtr;
+        return true;
+    }
+
+    void xIoContext::CleanUserEventTrigger()
+    {
+        auto TriggerPtr = (__io_detail__::xUserEventTrigger *)Steal(_UserEventTriggerPtr);
+        TriggerPtr->Clean();
+        delete TriggerPtr;
     }
 
 }

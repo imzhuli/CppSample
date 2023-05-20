@@ -18,19 +18,31 @@ X_NS
     : xNonCopyable
     {
     public:
+        class iUserEventTrigger {
+        public:
+            virtual void Trigger() = 0;
+        };
+
+    public:
         X_API_MEMBER bool Init();
         X_API_MEMBER void Clean();
         X_API_MEMBER void LoopOnce(int TimeoutMS = 50);
 
+        X_INLINE iUserEventTrigger * GetUserEventTrigger() const { return _UserEventTriggerPtr; }
         X_INLINE operator xEventPoller () const { return _Poller; }
         X_INLINE void DeferOperation(xIoReactorNode & Node) {
             _PendingOperationList.GrabTail(Node);
         }
 
     private:
-        xEventPoller     _Poller X_DEBUG_INIT(InvalidEventPoller);
-        xIoReactorList   _DeferredOperationList;
-        xIoReactorList   _PendingOperationList;
+        X_PRIVATE_MEMBER bool SetupUserEventTrigger();
+        X_PRIVATE_MEMBER void CleanUserEventTrigger();
+
+    private:
+        xEventPoller          _Poller X_DEBUG_INIT(InvalidEventPoller);
+        xIoReactorList        _DeferredOperationList;
+        xIoReactorList        _PendingOperationList;
+        iUserEventTrigger *   _UserEventTriggerPtr = nullptr;
     };
 
     enum struct eIoEventType
@@ -65,26 +77,6 @@ X_NS
 
     private:
         bool _Available = true;
-    };
-
-    class xUserEventTrigger final
-    : public iIoReactor
-    {
-    public:
-        X_API_MEMBER bool Init(xIoContext * IoContextPtr);
-        X_API_MEMBER void Clean();
-        X_API_MEMBER void Trigger();
-
-    private:
-        void OnIoEventInReady() override;
-
-    private:
-    #if   defined(X_SYSTEM_LINUX)
-        int _UserEventFd = -1;
-    #elif defined(X_SYSTEM_WINDOWS)
-    #elif defined(X_SYSTEM_DARWIN)
-        static const uintptr_t _UserEventIdent = 0;
-    #endif
     };
 
     class iBufferedIoReactor
