@@ -28,35 +28,35 @@ X_NS
             uint64_t    TimestampMS = 0;
 
             std::string Hostname;
-            xNetAddress Ipv4;
-            xNetAddress Ipv6;
+            xNetAddress Address1;
+            xNetAddress Address2;
         };
 
         static constexpr const size_t MaxQueryCount = 256;
-        static constexpr const size_t DefaultCacheTimeoutMS = 10 * 60'000;
 
     public:
         X_API_MEMBER bool Init(const xNetAddress & Server);
         X_API_MEMBER void Clean();
 
-    private: // for dns client:
+    public:
         void PostQuery(xRequest * RequestPtr);
+        void Pick(xList<xRequest> & Receiver);
 
     private:
-    public: // debug
-        X_API_MEMBER void OnError(xUdpChannel * ChannelPtr) override;
-        X_API_MEMBER void OnData (xUdpChannel * ChannelPtr, void * DataPtr, size_t DataSize, const xNetAddress & RemoteAddress) override;
-        X_API_MEMBER bool DoSendDnsQuery(xRequest * RequestPtr);
-        X_API_MEMBER void DoPushResolvResult(uint16_t Index, const char * HostnameBuffer, const xNetAddress * ResolvedList, size_t ResolvedCounter);
-        X_API_MEMBER void ReleaseQuery(uint16_t Index);
-        X_INLINE     void ReleaseQuery(xRequest * RequestPtr) { ReleaseQuery((uint16_t)RequestPtr->Ident); }
-        X_INLINE     void IoLoop() { IoContext.LoopOnce(1000); }
+        X_PRIVATE_MEMBER void OnError(xUdpChannel * ChannelPtr) override;
+        X_PRIVATE_MEMBER void OnData (xUdpChannel * ChannelPtr, void * DataPtr, size_t DataSize, const xNetAddress & RemoteAddress) override;
+        X_PRIVATE_MEMBER bool DoSendDnsQuery(xRequest * RequestPtr);
+        X_PRIVATE_MEMBER void DoPushResolvResult(uint16_t Index, const char * HostnameBuffer, const xNetAddress * ResolvedList, size_t ResolvedCounter);
+        X_PRIVATE_MEMBER void ReleaseQuery(uint16_t Index);
+        X_PRIVATE_MEMBER void ReleaseQuery(xRequest * RequestPtr) { ReleaseQuery((uint16_t)RequestPtr->Ident); }
+        X_PRIVATE_MEMBER void Loop();
 
     private:
         xIoContext        IoContext            = {};
         xUdpChannel       UdpChannel           = {};
         xNetAddress       DnsServerAddress     = {};
-        xSpinlock         SpinLock             = {};
+        xSpinlock         Spinlock             = {};
+        xList<xRequest>   RequestList          = {};
         xList<xRequest>   RequestTimeoutList   = {};
         xList<xRequest>   RequestResultList    = {};
 
@@ -75,6 +75,7 @@ X_NS
         X_API_MEMBER bool Init(xLocalDnsServer * DnsServicePtr);
         X_API_MEMBER void Clean();
         X_API_MEMBER bool Query(const std::string & Hostname);
+        X_API_MEMBER void Pick();
 
     private:
         void RecycleRequest();

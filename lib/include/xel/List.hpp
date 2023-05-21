@@ -22,11 +22,12 @@ X_NS
 		X_INLINE xListNode(const xListNode & Other) noexcept { Reset(); }
 		X_INLINE ~xListNode() noexcept { DetachUnsafe(); }
 
+	public:
 		X_STATIC_INLINE bool IsLinked(const xListNode & Node) {
 			return Node.pPrev != &Node;
 		}
-		X_STATIC_INLINE bool IsSafelyDetached(const xListNode & Node) {
-			return Node.pPrev == &Node && Node.pNext == &Node;
+		X_STATIC_INLINE void UnLink(xListNode & Node) {
+			return Node.Detach();
 		}
 
 	private:

@@ -5,6 +5,17 @@
 X_NS
 {
 
+    static constexpr const uint64_t QuerTimeoutMS = 3'000;
+
+    static inline bool TestAndReduceSize(size_t & Size, size_t RequiredSize)
+    {
+        if (Size < RequiredSize) {
+            return false;
+        }
+        Size -= RequiredSize;
+        return true;
+    }
+
     bool xLocalDnsServer::Init(const xNetAddress & ServerAddress)
     {
         assert(ServerAddress);
@@ -30,29 +41,79 @@ X_NS
         IdPoolGuard.Dismiss();
         UdpChannelGuard.Dismiss();
         IoContextGuard.Dismiss();
+
+        StopFlag = false;
+        ServiceThread = std::thread([this]{ this->Loop(); });
         return true;
     }
 
     void xLocalDnsServer::Clean()
     {
+        StopFlag = true;
+        ServiceThread.join();
+        Renew(ServiceThread);
+
         Renew(IdMarks);
         IdPool.Clean();
         UdpChannel.Clean();
         IoContext.Clean();
     }
 
+    void xLocalDnsServer::Loop()
+    {
+        while(!StopFlag) {
+            auto NowMS = GetTimestampMS();
+            xList<xRequest> TempResultList;
+
+            // pick requests
+            do {
+                xList<xRequest> TempRequestList;
+                do {
+                    auto Guard = xSpinlockGuard(Spinlock);
+                    TempRequestList.GrabListTail(RequestList);
+                } while(false);
+                for (auto & Request : TempRequestList) {
+                    if (DoSendDnsQuery(&Request)) {
+                        Request.TimestampMS = NowMS;
+                        RequestTimeoutList.GrabTail(Request);
+                    } else {
+                        TempResultList.GrabTail(Request);
+                    }
+                }
+            } while(false);
+
+            // Check Timeout
+            do {
+                auto KillTimepoint = NowMS - QuerTimeoutMS;
+                for (auto & Request : RequestTimeoutList) {
+                    if (SignedDiff(KillTimepoint, Request.TimestampMS) < 0) {
+                        break;
+                    }
+                    TempResultList.GrabTail(Request);
+                }
+            } while(false);
+
+            if (!TempResultList.IsEmpty()) {
+                auto Guard = xSpinlockGuard(Spinlock);
+                RequestResultList.GrabListTail(RequestTimeoutList);
+            }
+
+            // IO Loop
+            IoContext.LoopOnce(100);
+        }
+        for (auto & Request : RequestTimeoutList) {
+            X_DEBUG_PRINTF("xLocalDnsServer non-notified request: hostname=%s\n", Request.Hostname.c_str());
+        }
+        do {
+            auto Guard = xSpinlockGuard(Spinlock);
+            RequestResultList.GrabListTail(RequestTimeoutList);
+        } while(false);
+
+    }
+
     void xLocalDnsServer::OnError(xUdpChannel * ChannelPtr)
     {
         Fatal("UdpChannelError");
-    }
-
-    static inline bool TestAndReduceSize(size_t & Size, size_t RequiredSize)
-    {
-        if (Size < RequiredSize) {
-            return false;
-        }
-        Size -= RequiredSize;
-        return true;
     }
 
     void xLocalDnsServer::OnData (xUdpChannel * ChannelPtr, void * DataPtr, size_t DataSize, const xNetAddress & RemoteAddress)
@@ -193,10 +254,7 @@ X_NS
         if (!Ident) {
             return false;
         }
-
         RequestPtr->Ident = Ident;
-        RequestPtr->TimestampMS = GetTimestampMS();
-        RequestTimeoutList.AddTail(*RequestPtr);
 
         auto Index = (uint16_t)Ident;
         assert(!IdMarks[Index]);
@@ -248,10 +306,8 @@ X_NS
         Writer.W2(1); /* IN */
 
         // X_DEBUG_PRINTF("DnsQuery: \n%s\n", HexShow(Writer.Origin(), Writer.Offset()).c_str());
-        // X_DEBUG_PRINTF("QueryServer: %s\n", DnsServerAddress.ToString().c_str());
         UdpChannel.PostData(Writer.Origin(), Writer.Offset(), DnsServerAddress);
-
-        return false;
+        return true;
     }
 
     void xLocalDnsServer::DoPushResolvResult(uint16_t Index, const char * HostnameBuffer, const xNetAddress * ResolvedList, size_t ResolvedCounter)
@@ -265,14 +321,13 @@ X_NS
             X_DEBUG_PRINTF("xLocalDnsServer::DoPushResolvResult Query hostname don't match. \n");
             return;
         }
+        if (TestAndReduceSize(ResolvedCounter, 1)) {
+            RequestPtr->Address1 = ResolvedList[1];
+        }
+        if (TestAndReduceSize(ResolvedCounter, 1)) {
+            RequestPtr->Address2 = ResolvedList[2];
+        }
         ReleaseQuery(Index);
-
-        // TODO: put query to result list:
-        do {
-            auto Guard = xSpinlockGuard(SpinLock);
-
-        } while(false);
-
         return;
     }
 
@@ -286,11 +341,32 @@ X_NS
         assert(Index == static_cast<uint16_t>(RequestPtr->Ident));
 
         // remove it from list
-        RequestTimeoutList.Remove(*RequestPtr);
         IdMarks[Index] = false;
-        IdPool.Release(RequestPtr->Ident);
+        IdPool.Release(Steal(RequestPtr->Ident));
 
-        // TODO: post result
+        // remove from timeout list and post result
+        do {
+            auto Guard = xSpinlockGuard(Spinlock);
+            RequestResultList.GrabTail(*RequestPtr);
+        } while(false);
+    }
+
+    void xLocalDnsServer::PostQuery(xRequest * RequestPtr)
+    {
+        do {
+            assert(!xListNode::IsLinked(*RequestPtr));
+            auto Guard = xSpinlockGuard(Spinlock);
+            RequestList.GrabTail(*RequestPtr);
+        } while(false);
+        IoContext.GetUserEventTrigger()->Trigger();
+    }
+
+    void xLocalDnsServer::Pick(xList<xRequest> & Receiver)
+    {
+        do {
+            auto Guard = xSpinlockGuard(Spinlock);
+            Receiver.GrabListTail(RequestResultList);
+        } while(false);
     }
 
     /******** Client ************/
