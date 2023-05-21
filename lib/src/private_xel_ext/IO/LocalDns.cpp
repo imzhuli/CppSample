@@ -110,7 +110,7 @@ X_NS
             } while(false);
 
             if (!InternalRequestResultList.IsEmpty()) {
-                Spinlock.SyncCall([this]{ExchangeRequestResultList.GrabListTail(InternalRequestResultList);});
+                Spinlock.SynchronizedCall([this]{ExchangeRequestResultList.GrabListTail(InternalRequestResultList);});
                 (*NotifyCallbackPtr)(NotifyVariable);
             }
 

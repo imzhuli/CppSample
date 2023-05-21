@@ -9,6 +9,13 @@
 X_NS
 {
 
+	template<typename tMutex, typename tFuncObj, typename ... tArgs>
+	auto SynchronizedCall(tMutex && Mutex, tFuncObj && Func, tArgs && ... Args)
+	{
+		auto Guard = std::lock_guard(std::forward<tMutex>(Mutex));
+		return std::forward<tFuncObj>(Func)(std::forward<tArgs>(Args)...);
+	}
+
 	class xSpinlock final
 	{
 	public:
@@ -40,7 +47,7 @@ X_NS
 		}
 
 		template<typename tFuncObj, typename ... tArgs>
-		auto SyncCall(tFuncObj && Func, tArgs && ... Args) const
+		auto SynchronizedCall(tFuncObj && Func, tArgs && ... Args) const
 		{
 			auto Guard = xScopeGuard([this]{ Lock(); }, [this]{ Unlock(); });
 			return std::forward<tFuncObj>(Func)(std::forward<tArgs>(Args)...);
@@ -82,15 +89,8 @@ X_NS
 	public:
 		X_API_MEMBER void Aquire();
 		X_API_MEMBER void Release();
-		X_API_MEMBER void Sync();
+		X_API_MEMBER void Synchronize();
 	};
-
-	template<typename tMutex, typename tFuncObj, typename ... tArgs>
-	auto SyncCall(tMutex && Mutex, tFuncObj && Func, tArgs && ... Args)
-	{
-		auto Guard = std::lock_guard(std::forward<tMutex>(Mutex));
-		return std::forward<tFuncObj>(Func)(std::forward<tArgs>(Args)...);
-	}
 
 	namespace __detail__
 	{
@@ -110,7 +110,7 @@ X_NS
 			}
 
 			template<typename tFuncObj, typename ... tArgs>
-			auto SyncCall(tFuncObj && Func, tArgs && ... Args)
+			auto SynchronizedCall(tFuncObj && Func, tArgs && ... Args)
 			{
 				auto Guard = std::lock_guard(_Mutex);
 				return std::forward<tFuncObj>(Func)(std::forward<tArgs>(Args)...);

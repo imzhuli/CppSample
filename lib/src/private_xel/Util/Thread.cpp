@@ -23,7 +23,7 @@ X_NS
 		}
 	}
 
-	void xThreadSynchronizer::Sync()
+	void xThreadSynchronizer::Synchronize()
 	{
 		std::unique_lock lock(_Mutex);
 		auto & context = _Coutnexts[_ActiveContext];
