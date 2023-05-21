@@ -16,7 +16,12 @@ X_NS
         return true;
     }
 
-    bool xLocalDnsServer::Init(const xNetAddress & ServerAddress)
+    static void NoNotify(xVariable Variable)
+    {
+        Pass();
+    }
+
+    bool xLocalDnsServer::Init(const xNetAddress & ServerAddress, NotifyCallback * NotifyCallbackPtr, xVariable NotifyVariable)
     {
         assert(ServerAddress);
         if (!IoContext.Init()) {
@@ -38,6 +43,14 @@ X_NS
         auto IdPoolGuard = MakeCleaner(IdPool);
 
         DnsServerAddress = ServerAddress;
+        if (NotifyCallbackPtr) {
+            this->NotifyCallbackPtr = NotifyCallbackPtr;
+            this->NotifyVariable = NotifyVariable;
+        } else {
+            this->NotifyCallbackPtr = &NoNotify;
+            this->NotifyVariable = {};
+        }
+
         IdPoolGuard.Dismiss();
         UdpChannelGuard.Dismiss();
         IoContextGuard.Dismiss();
@@ -52,6 +65,8 @@ X_NS
         StopFlag = true;
         ServiceThread.join();
         Renew(ServiceThread);
+        Reset(NotifyCallbackPtr);
+        Reset(NotifyVariable);
 
         Renew(IdMarks);
         IdPool.Clean();
@@ -95,8 +110,8 @@ X_NS
             } while(false);
 
             if (!InternalRequestResultList.IsEmpty()) {
-                auto Guard = xSpinlockGuard(Spinlock);
-                ExchangeRequestResultList.GrabListTail(InternalRequestResultList);
+                Spinlock.SyncCall([this]{ExchangeRequestResultList.GrabListTail(InternalRequestResultList);});
+                (*NotifyCallbackPtr)(NotifyVariable);
             }
 
         } // end of while
@@ -360,20 +375,6 @@ X_NS
             auto Guard = xSpinlockGuard(Spinlock);
             Receiver.GrabListTail(ExchangeRequestResultList);
         } while(false);
-    }
-
-    /******** Client ************/
-
-    bool xLocalDnsClient::Init(xLocalDnsServer * DnsServicePtr)
-    {
-        assert(DnsServicePtr);
-        LocalDnsServerPtr = DnsServicePtr;
-        return true;
-    }
-
-    void xLocalDnsClient::Clean()
-    {
-
     }
 
 }

@@ -11,15 +11,15 @@
 X_NS
 {
 
-    class xLocalDnsClient;
     class xLocalDnsServer;
 
     class xLocalDnsServer final
     : public xUdpChannel::iListener
     , xNonCopyable
     {
-        friend class xLocalDnsClient;
     public:
+        static constexpr const size_t MaxQueryCount = 256;
+
         class xRequest
         : public xListNode
         {
@@ -32,10 +32,10 @@ X_NS
             xNetAddress Address2;
         };
 
-        static constexpr const size_t MaxQueryCount = 256;
+        using NotifyCallback = void (xVariable);
 
     public:
-        X_API_MEMBER bool Init(const xNetAddress & Server);
+        X_API_MEMBER bool Init(const xNetAddress & Server, NotifyCallback * NotifyCallbackPtr = nullptr, xVariable NotifyVariable = {});
         X_API_MEMBER void Clean();
 
     public:
@@ -66,23 +66,9 @@ X_NS
 
         std::thread        ServiceThread;
         std::atomic_bool   StopFlag;
-    };
 
-    class xLocalDnsClient final
-    : xNonCopyable
-    {
-        friend class xLocalDnsServer;
-    public:
-        X_API_MEMBER bool Init(xLocalDnsServer * DnsServicePtr);
-        X_API_MEMBER void Clean();
-        X_API_MEMBER bool Query(const std::string & Hostname);
-        X_API_MEMBER void Pick();
-
-    private:
-        void RecycleRequest();
-
-    private:
-        xLocalDnsServer * LocalDnsServerPtr X_DEBUG_INIT(nullptr);
+        NotifyCallback * NotifyCallbackPtr;
+        xVariable        NotifyVariable;
     };
 
 }

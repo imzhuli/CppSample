@@ -10,7 +10,6 @@ using namespace std;
 using namespace std::literals;
 
 auto DnsService = xLocalDnsServer();
-auto DnsClient = xLocalDnsClient();
 
 int main(int argc, char *argv[])
 {
@@ -22,14 +21,10 @@ int main(int argc, char *argv[])
     X_DEBUG_PRINTF("Using dns server: %s\n", DnsServerAddress.ToString().c_str());
 
     auto ServiceGuard = xResourceGuard(DnsService, DnsServerAddress);
-    auto ClientGuard = xResourceGuard(DnsClient, &DnsService);
     assert(ServiceGuard);
-    assert(ClientGuard);
 
     Query1->Hostname = "www.baidu.com";
     DnsService.PostQuery(Query1.get());
-
-    std::this_thread::sleep_for(1s);
     Query2->Hostname = "www.qq.com";
     DnsService.PostQuery(Query2.get());
 
