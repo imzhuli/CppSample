@@ -10,14 +10,14 @@ X_NS
     struct xNetAddress final
     {
         using xKeyType = std::array<ubyte, 20>;
+        enum : uint16_t {
+            eUnknown, eIpv4, eIpv6
+        } Type = eUnknown;
         union {
             ubyte Ipv4[4];
             ubyte Ipv6[16];
             ubyte IpStorage[16] = {};
         };
-        enum : uint16_t {
-            eUnknown, eIpv4, eIpv6
-        } Type = eUnknown;
         uint16_t Port = 0;
 
         // methods:
@@ -90,6 +90,17 @@ X_NS
 
         X_STATIC_INLINE xNetAddress Make4() { return xNetAddress { .Type = eIpv4 }; }
         X_STATIC_INLINE xNetAddress Make6() { return xNetAddress { .Type = eIpv6 }; }
+
+        X_STATIC_INLINE xNetAddress Make4Raw(const void * RawPtr, uint16_t Port) {
+            auto Address = xNetAddress { .Type = eIpv4, .Port = Port };
+            memcpy(Address.Ipv4, RawPtr, sizeof(Address.Ipv4));
+            return Address;
+        }
+        X_STATIC_INLINE xNetAddress Make6Raw(const void * RawPtr, uint16_t Port) {
+            auto Address = xNetAddress { .Type = eIpv6, .Port = Port };
+            memcpy(Address.Ipv6, RawPtr, sizeof(Address.Ipv6));
+            return Address;
+        }
 
         X_API_STATIC_MEMBER xNetAddress Parse(const char * IpStr, uint16_t Port);
         X_API_STATIC_MEMBER xNetAddress Parse(const std::string & AddressStr);
