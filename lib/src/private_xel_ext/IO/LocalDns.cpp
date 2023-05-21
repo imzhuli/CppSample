@@ -116,11 +116,11 @@ X_NS
 
         } // end of while
 
-        do { // clear the queries given up.
-            InternalRequestResultList.GrabListTail(RequestTimeoutList);
-            auto Guard = xSpinlockGuard(Spinlock);
-            ExchangeRequestResultList.GrabListTail(InternalRequestResultList);
-        } while(false);
+        InternalRequestResultList.GrabListTail(RequestTimeoutList);
+        if (!InternalRequestResultList.IsEmpty()) {
+            Spinlock.SynchronizedCall([this]{ExchangeRequestResultList.GrabListTail(InternalRequestResultList);});
+            (*NotifyCallbackPtr)(NotifyVariable);
+        }
 
     }
 
