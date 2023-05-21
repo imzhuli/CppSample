@@ -107,9 +107,6 @@ ZEC_NS
 
     struct xPacket
     {
-        xPacketHeader Header;
-        ubyte Payload[MaxPacketSize - xPacketHeader::Size];
-
         ZEC_STATIC_INLINE ubyte * GetPayload(void * PacketPtr) { return (ubyte *)PacketPtr + xPacketHeader::Size; }
         ZEC_STATIC_INLINE const ubyte * GetPayload(const void * PacketPtr) { return (const ubyte *)PacketPtr + xPacketHeader::Size; }
     };
