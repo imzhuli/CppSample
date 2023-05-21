@@ -55,7 +55,6 @@ X_NS
         return {};
     }
 
-
     xNetAddress xNetAddress::Parse(const sockaddr_in * SockAddr4Ptr)
     {
         assert(SockAddr4Ptr->sin_family == AF_INET);
