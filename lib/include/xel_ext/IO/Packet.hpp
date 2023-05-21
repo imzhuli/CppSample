@@ -93,18 +93,16 @@ X_NS
             return PacketHeaderSize;
         }
 
-        X_STATIC_INLINE bool IsInternalRequest(const xPacketHeader & Header) {
-            return Header.CommandId == CmdId_InnernalRequest;
+        X_INLINE bool IsInternalRequest() const {
+            return CommandId == CmdId_InnernalRequest;
         }
 
-        X_STATIC_INLINE bool IsKeepAlive(const xPacketHeader & Header) {
-            assert(Header.CommandId == CmdId_InnernalRequest);
-            return Header.RequestId == InternalRequest_KeepAlive;
+        X_INLINE bool IsKeepAlive() const {
+            return IsInternalRequest() && RequestId == InternalRequest_KeepAlive;
         }
 
-        X_STATIC_INLINE bool IsRequestKeepAlive(const xPacketHeader & Header) {
-            assert(Header.CommandId == CmdId_InnernalRequest);
-            return Header.RequestId == InternalRequest_RequestKeepAlive;
+        X_INLINE bool IsRequestKeepAlive() const {
+            return IsInternalRequest() && RequestId == InternalRequest_RequestKeepAlive;
         }
 
     private:
