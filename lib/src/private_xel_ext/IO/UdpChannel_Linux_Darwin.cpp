@@ -7,14 +7,12 @@ X_NS
 
 	bool xUdpChannel::Init(xIoContext * IoContextPtr, int AddressFamily, iListener * ListenerPtr)
 	{
-		assert(IoContextPtr);
-		assert(ListenerPtr);
-		_Socket = socket(AF_INET, SOCK_DGRAM, 0);
-		if (_Socket == InvalidSocket) {
-			return false;
+		if (AddressFamily == AF_INET) {
+			return Init(IoContextPtr, xNetAddress::Make4(), ListenerPtr);
 		}
-
-		_ListenerPtr = ListenerPtr;
+		else if (AddressFamily == AF_INET6) {
+			return Init(IoContextPtr, xNetAddress::Make6(), ListenerPtr);
+		}
 		return false;
 	}
 
@@ -35,9 +33,22 @@ X_NS
             return false;
         }
 
+#if defined(X_SYSTEM_LINUX)
+        struct epoll_event Event = {};
+        Event.data.ptr = this;
+        Event.events = EPOLLET | EPOLLIN;
+        if (-1 == epoll_ctl(*IoContextPtr, EPOLL_CTL_ADD, _Socket, &Event)) {
+            X_DEBUG_PRINTF("xTcpConnection::Init failed to register epoll event\n");
+            return false;
+        }
+#else /* defined(X_SYSTEM_DARWIN) */
+	#error "not implemented"
+#endif
+
+		_IoContextPtr = IoContextPtr;
 		_ListenerPtr = ListenerPtr;
 		SocketGuard.Dismiss();
-		return false;
+		return true;
 	}
 
 	void xUdpChannel::Clean()
@@ -45,8 +56,9 @@ X_NS
 		assert(_ListenerPtr);
 		assert(_Socket != InvalidSocket);
 
-		XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
 		X_DEBUG_RESET(_ListenerPtr);
+		XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
+		X_DEBUG_RESET(_IoContextPtr);
 	}
 
 	void xUdpChannel::PostData(const void * DataPtr, size_t DataSize, const xNetAddress & Address)
@@ -63,6 +75,7 @@ X_NS
 		sockaddr_storage SockAddr;
 		socklen_t SockAddrLen = sizeof(SockAddr);
 		int ReadSize = recvfrom(_Socket, Buffer, sizeof(Buffer), 0, (sockaddr*)&SockAddr, &SockAddrLen);
+
 		if (ReadSize == -1) {
 			if (errno != EAGAIN) {
 				SetUnavailable();

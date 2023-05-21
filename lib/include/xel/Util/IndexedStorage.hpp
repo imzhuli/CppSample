@@ -200,6 +200,30 @@ X_NS
 			_NextFreeIdIndex = NoFreeIndex;
 		}
 
+		X_INLINE xIndexId Acquire() {
+			uint32_t Index;
+			xNode * NodePtr;
+			if (_NextFreeIdIndex == NoFreeIndex) {
+				if (X_UNLIKELY(_InitedId >= _IdPoolSize)) {
+					return xIndexId::InvalidValue;
+				}
+				NodePtr = &_IdPoolPtr[Index = _InitedId++];
+			} else {
+				NodePtr = &_IdPoolPtr[Index = Steal(_NextFreeIdIndex, _IdPoolPtr[_NextFreeIdIndex].NextFreeIdIndex)];
+			}
+			uint32_t Rand = RandomKey ? _Random32() : (_Counter += CounterStep);
+			Rand |= xIndexId::KeyInUseBitmask;
+			Rand &= xIndexId::KeyMask;
+			NodePtr->Key = Rand;
+			try {
+				NodePtr->ValueHolder.Create();
+			} catch (...) {
+				NodePtr->NextFreeIdIndex = Steal(_NextFreeIdIndex, Index);
+				throw;
+			}
+			return { (static_cast<uint64_t>(Rand) << 32) + Index };
+		}
+
 		X_INLINE xIndexId Acquire(const tValue & Value) {
 			uint32_t Index;
 			xNode * NodePtr;
@@ -308,18 +332,14 @@ X_NS
 			return std::move(*Node.ValueHolder);
 		}
 
-		X_INLINE tValue & Get(const xIndexId& Id) {
+		X_INLINE tValue & operator [] (const xIndexId& Id) {
 			return *_IdPoolPtr[Id.GetIndex()].ValueHolder;
 		}
 
-		X_INLINE const tValue & Get(const xIndexId& Id) const {
+		X_INLINE const tValue & operator [] (const xIndexId& Id) const {
 			return *_IdPoolPtr[Id.GetIndex()].ValueHolder;
 		}
 
-		template<typename tAssignValue>
-		X_INLINE void Set(const xIndexId& Id, tAssignValue && Value) {
-			*_IdPoolPtr[Id.GetIndex()].ValueHolder = std::forward<tAssignValue>(Value);
-		}
 
 	private:
 		xNode *       _IdPoolPtr  = nullptr;

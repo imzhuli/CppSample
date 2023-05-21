@@ -29,6 +29,7 @@ X_NS
         X_API_MEMBER void OnIoEventError() override;
 
     private:
+        xIoContext * _IoContextPtr;
         xSocket      _Socket X_DEBUG_INIT(InvalidSocket);
         iListener *  _ListenerPtr X_DEBUG_INIT(nullptr);
     };

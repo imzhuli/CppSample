@@ -22,25 +22,28 @@ X_NS
 		X_INLINE xListNode(const xListNode & Other) noexcept { Reset(); }
 		X_INLINE ~xListNode() noexcept { DetachUnsafe(); }
 
+		X_STATIC_INLINE bool IsLinked(const xListNode & Node) {
+			return Node.pPrev != &Node;
+		}
+		X_STATIC_INLINE bool IsSafelyDetached(const xListNode & Node) {
+			return Node.pPrev == &Node && Node.pNext == &Node;
+		}
+
+	private:
 		X_INLINE void Reset() {
 			pPrev = pNext = this;
 		}
+
 		X_INLINE void Detach() {
 			DetachUnsafe();
 			Reset();
 		}
+
 		X_INLINE void TakePlaceOf(xListNode& other) {
 			TakePlaceOfUnsafe(other);
 			other.Reset();
 		}
-		X_INLINE bool Linked() const {
-			return pPrev != this;
-		}
-		X_INLINE bool IsSafelyDetached() const {
-			return pPrev == this && pNext == this;
-		}
 
-	private:
 		X_INLINE void AppendTo(xListNode& prev_node) {
 			xListNode& next_node = *prev_node.pNext;
 			prev_node.pNext = this;

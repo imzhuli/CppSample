@@ -37,7 +37,7 @@ X_NS
         xPacketRequestId         RequestId = 0;
         ubyte                    TraceId[16] = {}; // allow uuid
 
-        X_API_MEMBER void Serialize(void * DestPtr) const {
+        X_INLINE void Serialize(void * DestPtr) const {
             xStreamWriter S(DestPtr);
             S.W4L(MakeHeaderLength(PacketLength));
             S.W1L(PackageSequenceId);
@@ -120,9 +120,6 @@ X_NS
 
     struct xPacket
     {
-        xPacketHeader Header;
-        ubyte Payload[MaxPacketSize - xPacketHeader::Size];
-
         X_STATIC_INLINE ubyte * GetPayload(void * PacketPtr) { return (ubyte *)PacketPtr + xPacketHeader::Size; }
         X_STATIC_INLINE const ubyte * GetPayload(const void * PacketPtr) { return (const ubyte *)PacketPtr + xPacketHeader::Size; }
     };

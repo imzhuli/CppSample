@@ -16,8 +16,6 @@ X_NS
         eType    ConnectionType = eUnSpecifiedType;
         uint64_t ConnectionId  = 0;
         uint64_t ConnectionTimestampMS   = 0;
-
-        using xListNode::Detach;
     };
     using xTcpConnectionExList = xList<xTcpConnectionExNode>;
 
