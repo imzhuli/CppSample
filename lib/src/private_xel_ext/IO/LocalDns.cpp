@@ -302,7 +302,7 @@ X_NS
         const char * Hostname = RequestPtr->Hostname.data();
         while(auto C = *Hostname) {
             if (C == '.') {
-                Writer.W1(Counter);
+                Writer.W1((uint8_t)Counter);
                 Writer.W(Hostname - Counter, Counter);
                 Counter = 0;
                 ++Hostname;
@@ -311,7 +311,7 @@ X_NS
             ++Counter;
             ++Hostname;
         }
-        Writer.W1(Counter);
+        Writer.W1((uint8_t)Counter);
         Writer.W(Hostname - Counter, Counter);
         Writer.W(0);
 

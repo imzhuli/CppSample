@@ -39,12 +39,13 @@ X_NS
         X_API_MEMBER void Clean();
 
     public:
-        void PostQuery(xRequest * RequestPtr);
-        void Pick(xList<xRequest> & Receiver);
+        X_API_MEMBER void PostQuery(xRequest * RequestPtr);
+        X_API_MEMBER void Pick(xList<xRequest> & Receiver);
 
     private:
-        X_PRIVATE_MEMBER void OnError(xUdpChannel * ChannelPtr) override;
-        X_PRIVATE_MEMBER void OnData (xUdpChannel * ChannelPtr, void * DataPtr, size_t DataSize, const xNetAddress & RemoteAddress) override;
+        X_API_MEMBER void OnError(xUdpChannel * ChannelPtr) override;
+        X_API_MEMBER void OnData (xUdpChannel * ChannelPtr, void * DataPtr, size_t DataSize, const xNetAddress & RemoteAddress) override;
+
         X_PRIVATE_MEMBER bool DoSendDnsQuery(xRequest * RequestPtr);
         X_PRIVATE_MEMBER void DoPushResolvResult(uint16_t Index, const char * HostnameBuffer, const xNetAddress * ResolvedList, size_t ResolvedCounter);
         X_PRIVATE_MEMBER void ReleaseQuery(uint16_t Index);

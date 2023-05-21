@@ -98,12 +98,7 @@ X_NS {
             void OnIoEventInReady() override;
 
         private:
-        #if   defined(X_SYSTEM_LINUX)
             int _UserEventFd = -1;
-        #elif defined(X_SYSTEM_WINDOWS)
-        #elif defined(X_SYSTEM_DARWIN)
-            static const uintptr_t _UserEventIdent = 0;
-        #endif
         };
 
         bool xUserEventTrigger::Init(xIoContext * IoContextPtr)

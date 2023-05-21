@@ -94,6 +94,10 @@ X_NS {
                     continue;
                 }
             }
+
+            // if (EventType == eIoEventType::Ignored) {
+            //     continue;
+            // }
         }
 
         _DeferredOperationList.GrabListTail(_PendingOperationList);
@@ -116,15 +120,30 @@ X_NS {
             X_API_MEMBER bool Init(xIoContext * IoContextPtr);
             X_API_MEMBER void Clean();
             X_API_MEMBER void Trigger() override;
+            X_API_MEMBER eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) override { return eIoEventType::Ignored; }
 
         private:
             void OnIoEventInReady() override;
 
-        private:
-            // TODO add members
+            xIoContext * _IoContextPtr;
         };
 
-        // TODO implementation
+        bool xUserEventTrigger::Init(xIoContext * IoContextPtr)
+        {
+            _IoContextPtr = IoContextPtr;
+            return true;
+        }
+
+        void xUserEventTrigger::Clean()
+        {}
+
+        void xUserEventTrigger::OnIoEventInReady()
+        {}
+
+        void xUserEventTrigger::Trigger()
+        {
+            PostQueuedCompletionStatus(*_IoContextPtr, 0, (ULONG_PTR)this, nullptr);
+        }
 
     }
 

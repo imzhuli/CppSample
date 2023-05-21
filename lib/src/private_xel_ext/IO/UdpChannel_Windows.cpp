@@ -58,12 +58,18 @@ X_NS
 
     void xUdpChannel::OnIoEventInReady()
 	{
+		// TODO
 		Todo();
 	}
 
     void xUdpChannel::OnIoEventError()
 	{
 		_ListenerPtr->OnError(this);
+	}
+
+	eIoEventType xUdpChannel::GetEventType(OVERLAPPED * OverlappedPtr)
+	{
+		return eIoEventType::InReady;
 	}
 
 }

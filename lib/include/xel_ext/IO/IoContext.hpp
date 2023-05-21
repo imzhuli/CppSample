@@ -45,13 +45,16 @@ X_NS
         iUserEventTrigger *   _UserEventTriggerPtr = nullptr;
     };
 
+    #if defined(X_SYSTEM_WINDOWS)
     enum struct eIoEventType
     {
         Error,
         InReady,
         OutReady,
         Closed,
+        Ignored,
     };
+    #endif
 
     class iIoReactor
     : public xIoReactorNode
