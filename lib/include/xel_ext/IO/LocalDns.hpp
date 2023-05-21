@@ -58,7 +58,8 @@ X_NS
         xSpinlock         Spinlock             = {};
         xList<xRequest>   RequestList          = {};
         xList<xRequest>   RequestTimeoutList   = {};
-        xList<xRequest>   RequestResultList    = {};
+        xList<xRequest>   InternalRequestResultList   = {};
+        xList<xRequest>   ExchangeRequestResultList   = {};
 
         xIndexedStorage<xRequest*>   IdPool;
         std::vector<bool>            IdMarks;

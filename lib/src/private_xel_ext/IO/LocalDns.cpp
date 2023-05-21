@@ -62,8 +62,9 @@ X_NS
     void xLocalDnsServer::Loop()
     {
         while(!StopFlag) {
+            // IO Loop
+            IoContext.LoopOnce(100);
             auto NowMS = GetTimestampMS();
-            xList<xRequest> TempResultList;
 
             // pick requests
             do {
@@ -77,7 +78,7 @@ X_NS
                         Request.TimestampMS = NowMS;
                         RequestTimeoutList.GrabTail(Request);
                     } else {
-                        TempResultList.GrabTail(Request);
+                        InternalRequestResultList.GrabTail(Request);
                     }
                 }
             } while(false);
@@ -86,27 +87,24 @@ X_NS
             do {
                 auto KillTimepoint = NowMS - QuerTimeoutMS;
                 for (auto & Request : RequestTimeoutList) {
-                    if (SignedDiff(KillTimepoint, Request.TimestampMS) < 0) {
+                    if (SignedDiff(Request.TimestampMS, KillTimepoint) < 0) {
                         break;
                     }
-                    TempResultList.GrabTail(Request);
+                    InternalRequestResultList.GrabTail(Request);
                 }
             } while(false);
 
-            if (!TempResultList.IsEmpty()) {
+            if (!InternalRequestResultList.IsEmpty()) {
                 auto Guard = xSpinlockGuard(Spinlock);
-                RequestResultList.GrabListTail(RequestTimeoutList);
+                ExchangeRequestResultList.GrabListTail(InternalRequestResultList);
             }
 
-            // IO Loop
-            IoContext.LoopOnce(100);
-        }
-        for (auto & Request : RequestTimeoutList) {
-            X_DEBUG_PRINTF("xLocalDnsServer non-notified request: hostname=%s\n", Request.Hostname.c_str());
-        }
-        do {
+        } // end of while
+
+        do { // clear the queries given up.
+            InternalRequestResultList.GrabListTail(RequestTimeoutList);
             auto Guard = xSpinlockGuard(Spinlock);
-            RequestResultList.GrabListTail(RequestTimeoutList);
+            ExchangeRequestResultList.GrabListTail(InternalRequestResultList);
         } while(false);
 
     }
@@ -343,12 +341,7 @@ X_NS
         // remove it from list
         IdMarks[Index] = false;
         IdPool.Release(Steal(RequestPtr->Ident));
-
-        // remove from timeout list and post result
-        do {
-            auto Guard = xSpinlockGuard(Spinlock);
-            RequestResultList.GrabTail(*RequestPtr);
-        } while(false);
+        InternalRequestResultList.GrabTail(*RequestPtr);
     }
 
     void xLocalDnsServer::PostQuery(xRequest * RequestPtr)
@@ -365,7 +358,7 @@ X_NS
     {
         do {
             auto Guard = xSpinlockGuard(Spinlock);
-            Receiver.GrabListTail(RequestResultList);
+            Receiver.GrabListTail(ExchangeRequestResultList);
         } while(false);
     }
 
