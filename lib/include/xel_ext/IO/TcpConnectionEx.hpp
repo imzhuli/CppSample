@@ -4,6 +4,7 @@
 #include <xel/Util/MemoryPool.hpp>
 #include <xel/Util/IndexedStorage.hpp>
 #include "./TcpConnection.hpp"
+#include <string>
 
 X_NS
 {
@@ -29,7 +30,7 @@ X_NS
     {
     public:
         struct iListener {
-            virtual void   OnConnected(xAutoClientTcpConnection * ConnectionPtr) {};
+            virtual void   OnConnected(xAutoClientTcpConnection * ConnectionPtr) {}
             virtual size_t OnData(xAutoClientTcpConnection * ConnectionPtr, void * DataPtr, size_t DataSize) = 0;
         };
 
