@@ -159,9 +159,20 @@ X_NS
             _ListenerPtr->OnPeerClose(this);
             return;
         }
-        size_t TotalSize = (_ReadBufferUsage.buf - (CHAR*)_ReadBuffer) + _ReadDataSize;
-        size_t SkipSize  = TotalSize - _ListenerPtr->OnData(this, _ReadBuffer, TotalSize);
-        TryRecvData(SkipSize);
+        auto ProcessDataPtr = (ubyte*)_ReadBuffer;
+        size_t RemainDataSize = (_ReadBufferUsage.buf - (CHAR*)_ReadBuffer) + _ReadDataSize;
+        while(RemainDataSize) {
+            auto ProcessedData = _ListenerPtr->OnData(this, ProcessDataPtr, RemainDataSize);
+            if (!ProcessedData){
+                if (ProcessDataPtr != _ReadBuffer) { // some data are processed
+                    memmove(_ReadBuffer, ProcessDataPtr, RemainDataSize);
+                }
+                break;
+            }
+            ProcessDataPtr += ProcessedData;
+            RemainDataSize -= ProcessedData;
+        }
+        TryRecvData(RemainDataSize);
     }
 
     void xTcpConnection::OnIoEventOutReady()

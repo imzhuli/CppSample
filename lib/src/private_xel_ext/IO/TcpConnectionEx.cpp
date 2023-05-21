@@ -80,6 +80,7 @@ X_NS
 	void xAutoClientTcpConnection::OnConnected(xTcpConnection * TcpConnectionPtr)
 	{
 		_Connected = true;
+		_ListenerPtr->OnConnected(this);
 	}
 
 	void xAutoClientTcpConnection::OnPeerClose(xTcpConnection * TcpConnectionPtr)
