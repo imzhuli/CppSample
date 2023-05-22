@@ -31,9 +31,10 @@ X_NS
 		X_INLINE xIndexId() = default;
 		X_INLINE constexpr xIndexId(uint64_t Value) : _Value(Value) {};
 		X_INLINE constexpr operator uint64_t () const { return _Value; }
+		X_INLINE constexpr uint64_t operator ()() const { return _Value; }
 
-		X_INLINE uint32_t GetIndex() const { return (uint32_t)_Value; }
-		X_INLINE uint32_t GetKey() const { return static_cast<uint32_t>(_Value >> 32);}
+		X_INLINE uint32_t GetIndex() const { return static_cast<uint32_t>(_Value); }
+		X_INLINE uint32_t GetKey()   const { return static_cast<uint32_t>(_Value >> 32);}
 
 		static constexpr uint64_t InvalidValue  = static_cast<uint64_t>(0);
 
