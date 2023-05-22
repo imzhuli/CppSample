@@ -18,6 +18,12 @@ X_NS
         assert(!_ListenerPtr && ListenerPtr);
         X_DEBUG_PRINTF("xTcpConnection::Init IoContextPtr=%p, Socket=%" PRIuPTR "\n", IoContextPtr, (uintptr_t&)NativeHandle);
 
+        auto FailSafe = xScopeGuard{[=]{
+            XelCloseSocket(NativeHandle);
+            X_DEBUG_RESET(_IoContextPtr);
+            X_DEBUG_RESET(_ListenerPtr);
+        }};
+
         if (CreateIoCompletionPort((HANDLE)NativeHandle, *IoContextPtr, (ULONG_PTR)this, 0) == NULL) {
             X_DEBUG_PRINTF("xTcpConnection::Init failed to create competion port\n");
             return false;
@@ -33,11 +39,14 @@ X_NS
         _Status = eStatus::Connected;
         _SuspendReading = false;
         _Reading = false;
+        SetAvailable();
 
         TryRecvData();
         if (!IsAvailable()) {
             return false;
         }
+
+        FailSafe.Dismiss();
         return true;
     }
 
@@ -52,24 +61,22 @@ X_NS
             AF = AF_INET6;
         }
         else {
+            X_DEBUG_PRINTF("Invalid target address\n");
             return false;
         }
 
         assert(_Socket == InvalidSocket);
-        _Socket = InvalidSocket;
+        _Socket = WSASocket(AF, SOCK_STREAM, IPPROTO_IP, NULL, 0, WSA_FLAG_OVERLAPPED);
+        if (_Socket == InvalidSocket) {
+            X_DEBUG_PRINTF("Failed to create socket\n");
+            return false;
+        }
 
         auto FailSafe = xScopeGuard{[this]{
-            if (_Socket != InvalidSocket) {
-                XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
-            }
+            XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
             X_DEBUG_RESET(_IoContextPtr);
             X_DEBUG_RESET(_ListenerPtr);
         }};
-
-        _Socket = WSASocket(AF, SOCK_STREAM, IPPROTO_IP, NULL, 0, WSA_FLAG_OVERLAPPED);
-        if (_Socket == InvalidSocket) {
-            return false;
-        }
 
         // load connect ex:
         LPFN_CONNECTEX ConnectEx = nullptr;
@@ -141,6 +148,7 @@ X_NS
         _SuspendReading = false;
 
         FailSafe.Dismiss();
+        SetAvailable();
         return true;
     }
 
@@ -155,8 +163,9 @@ X_NS
     {
         _Reading = false;
         if (!_ReadDataSize) {
-            _Status = eStatus::Closed;
+            _Status = eStatus::Closing;
             _ListenerPtr->OnPeerClose(this);
+            SetUnavailable();
             return;
         }
         auto ProcessDataPtr = (ubyte*)_ReadBuffer;

@@ -13,6 +13,12 @@ X_NS
         assert(NativeHandle != InvalidSocket);
         X_DEBUG_PRINTF("xTcpConnection::Init NewConnection poller=%i socket=%i\n", (int)*IoContextPtr, NativeHandle);
 
+        auto FailSafe = xScopeGuard{[=]{
+            XelCloseSocket(NativeHandle);
+            X_DEBUG_RESET(_IoContextPtr);
+            X_DEBUG_RESET(_ListenerPtr);
+        }};
+
         int flags = fcntl(NativeHandle, F_GETFL);
         fcntl(NativeHandle, F_SETFL, flags | O_NONBLOCK);
 
@@ -31,6 +37,9 @@ X_NS
         _WriteBufferPtr = nullptr;
         _Status = eStatus::Connected;
         _SuspendReading = false;
+        SetAvailable();
+
+        FailSafe.Dismiss();
         return true;
     }
 
@@ -50,21 +59,17 @@ X_NS
         }
 
         assert(_Socket == InvalidSocket);
-        _Socket = InvalidSocket;
-
-        auto FailSafe = xScopeGuard{[this]{
-            if (_Socket != InvalidSocket) {
-                XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
-            }
-            X_DEBUG_RESET(_IoContextPtr);
-            X_DEBUG_RESET(_ListenerPtr);
-        }};
-
         _Socket = socket(AF, SOCK_STREAM, 0);
         if (_Socket == InvalidSocket) {
             X_DEBUG_PRINTF("Failed to create socket\n");
             return false;
         }
+
+        auto FailSafe = xScopeGuard{[this]{
+            XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
+            X_DEBUG_RESET(_IoContextPtr);
+            X_DEBUG_RESET(_ListenerPtr);
+        }};
 
         int flags = fcntl(_Socket, F_GETFL);
         fcntl(_Socket, F_SETFL, flags | O_NONBLOCK);
@@ -96,6 +101,7 @@ X_NS
         _ReadBufferDataSize = 0;
         _WriteBufferPtr = nullptr;
         _SuspendReading = false;
+        SetAvailable();
 
         FailSafe.Dismiss();
         return true;
@@ -117,8 +123,9 @@ X_NS
             int ReadSize = read(_Socket, _ReadBuffer + _ReadBufferDataSize, TotalSpace);
             if (0 == ReadSize) {
                 X_DEBUG_PRINTF("xTcpConnection::OnIoEventInReady EOF\n");
-                _Status = eStatus::Closed;
+                _Status = eStatus::Closing;
                 _ListenerPtr->OnPeerClose(this);
+                SetUnavailable();
                 return;
             }
             if (-1 == ReadSize) {

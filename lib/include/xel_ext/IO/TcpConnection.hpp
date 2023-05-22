@@ -24,7 +24,6 @@ X_NS
             Connecting,
             Connected,
             Closing,
-            Closed,
         };
 
         struct iListener
@@ -65,7 +64,7 @@ X_NS
 
     protected:
         X_PRIVATE_MEMBER void OnIoEventError() override {
-            if (_ListenerPtr) {
+            if (_Status < eStatus::Closing) {
                 _ListenerPtr->OnError(this);
             }
         }

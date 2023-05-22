@@ -76,10 +76,11 @@ X_NS
     #endif
 
     protected:
+        X_INLINE void SetAvailable()   { _Available = true; }
         X_INLINE void SetUnavailable() { _Available = false; }
 
     private:
-        bool _Available = true;
+        bool _Available = false;
     };
 
     class iBufferedIoReactor
