@@ -35,7 +35,7 @@ X_NS
              * called when there is some data in,
              * @return consumed bytes
              * */
-            virtual size_t  OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize) { return 0; }
+            virtual size_t  OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize) { return DataSize; }
             virtual void    OnPeerClose(xTcpConnection * TcpConnectionPtr)  {}
             virtual void    OnError(xTcpConnection * TcpConnectionPtr) {}
         };
