@@ -55,9 +55,10 @@ X_NS
         _ListenerPtr = ListenerPtr;
 
         TryPreAccept();
-        FailSafe.Dismiss();
 
         X_DEBUG_PRINTF("xTcpServer::Init succeeded: Object=%p\n", this);
+        FailSafe.Dismiss();
+		SetAvailable();
         return true;
     }
 

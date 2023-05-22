@@ -48,6 +48,7 @@ X_NS
 		_IoContextPtr = IoContextPtr;
 		_ListenerPtr = ListenerPtr;
 		SocketGuard.Dismiss();
+		SetAvailable();
 		return true;
 	}
 

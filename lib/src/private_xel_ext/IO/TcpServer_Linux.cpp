@@ -67,8 +67,9 @@ X_NS
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
 
-        FailSafe.Dismiss();
         X_DEBUG_PRINTF("xTcpServer::Init succeeded: Object=%p\n", this);
+        FailSafe.Dismiss();
+		SetAvailable();
         return true;
     }
 
