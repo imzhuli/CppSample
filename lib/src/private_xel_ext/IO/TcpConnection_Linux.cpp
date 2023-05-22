@@ -114,7 +114,7 @@ X_NS
 
     void xTcpConnection::OnIoEventInReady()
     {
-        X_DEBUG_PRINTF("xTcpConnection::OnIoEventInReady\n");
+        // X_DEBUG_PRINTF("xTcpConnection::OnIoEventInReady\n");
 
         while(true) {
             size_t TotalSpace = sizeof(_ReadBuffer) - _ReadBufferDataSize;
@@ -155,7 +155,7 @@ X_NS
 
     void xTcpConnection::OnIoEventOutReady()
     {
-        X_DEBUG_PRINTF("xTcpConnection::OnIoEventOutReady\n");
+        // X_DEBUG_PRINTF("xTcpConnection::OnIoEventOutReady\n");
         if (_Status == eStatus::Connecting) {
             X_DEBUG_PRINTF("Connection established\n");
             _Status = eStatus::Connected;
