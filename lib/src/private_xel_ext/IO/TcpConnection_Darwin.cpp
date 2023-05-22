@@ -128,7 +128,7 @@ X_NS
 
     void xTcpConnection::OnIoEventInReady()
     {
-        X_DEBUG_PRINTF("xTcpConnection::OnIoEventInReady\n");
+        // X_DEBUG_PRINTF("xTcpConnection::OnIoEventInReady\n");
 
         while(true) {
             size_t TotalSpace = sizeof(_ReadBuffer) - _ReadBufferDataSize;
@@ -136,7 +136,7 @@ X_NS
 
             int ReadSize = read(_Socket, _ReadBuffer + _ReadBufferDataSize, TotalSpace);
             if (0 == ReadSize) {
-                X_DEBUG_PRINTF("xTcpConnection::OnIoEventInReady EOF\n");
+                // X_DEBUG_PRINTF("xTcpConnection::OnIoEventInReady EOF\n");
                 _Status = eStatus::Closing;
                 _ListenerPtr->OnPeerClose(this);
                 SetUnavailable();
