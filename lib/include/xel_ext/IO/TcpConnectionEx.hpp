@@ -9,7 +9,7 @@
 X_NS
 {
 
-    struct xTcpConnectionExNode : xListNode
+    struct xTcpConnectionExNode : xListNode, xNonCopyable
     {
         using eType = uint8_t;
         static constexpr const eType eUnSpecifiedType = 0;
