@@ -31,7 +31,7 @@ X_NS
         }
 
         X_INLINE bool operator == (const xNetAddress & Other) const {
-            if (Type == eUnknown || Type != Other.Type || Port != Other.Port) {
+            if (Type != Other.Type || Port != Other.Port) {
                 return false;
             }
             if (Type == eIpv4) {
@@ -40,7 +40,11 @@ X_NS
             if (Type == eIpv6) {
                 return !memcmp(Ipv6, Other.Ipv6, sizeof(Ipv6));
             }
-            return false;
+            return true; // both of type unknown
+        }
+
+        X_INLINE bool operator != (const xNetAddress & Other) const {
+            return ! (*this == Other);
         }
 
         X_INLINE int GetAddressFamily() const {

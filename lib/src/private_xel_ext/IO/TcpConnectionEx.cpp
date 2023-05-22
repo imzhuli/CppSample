@@ -44,7 +44,7 @@ X_NS
 		if (_Connected) {
 			return;
 		}
-		if (_Active && NowMS - _CheckTimestamp>= 5'000) { // connection timeout
+		if (_Active && NowMS - _CheckTimestamp >= 5'000) { // connection timeout
 			_Connection.Clean();
 			_Active = false;
 			_Connected = false;
