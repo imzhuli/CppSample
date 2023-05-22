@@ -56,7 +56,7 @@ X_NS
 
         TryPreAccept();
 
-        X_DEBUG_PRINTF("xTcpServer::Init succeeded: Object=%p\n", this);
+        X_DEBUG_PRINTF("xTcpServer::Init succeeded BinAddress=%s\n", Address.ToString().c_str());
         FailSafe.Dismiss();
 		SetAvailable();
         return true;
