@@ -249,7 +249,7 @@ X_NS
             [[nodiscard]] X_INLINE xScopeGuard(const tEntry& Entry, const tExit& Exit) : _ExitCallback(Exit) { Entry(); }
             [[nodiscard]] X_INLINE xScopeGuard(const tExit& Exit) : _ExitCallback(Exit) {}
             [[nodiscard]] X_INLINE xScopeGuard(xScopeGuard && Other) : _ExitCallback(Other._ExitCallback), _DismissExit(Steal(Other._DismissExit, true)) {}
-            X_INLINE void Dismiss() { assert(!_DismissExit); _DismissExit = true; }
+            X_INLINE void Dismiss() { _DismissExit = true; }
             X_INLINE ~xScopeGuard() { if (_DismissExit) { return; } xRefCaster<tExit>::Get(_ExitCallback)(); }
         };
         template<typename tEntry, typename tExit>
