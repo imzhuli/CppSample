@@ -48,8 +48,8 @@ X_NS
         // X_API_MEMBER xNetAddress GetRemoteAddress() const;
         // X_API_MEMBER xNetAddress GetLocalAddress() const;
 
-        // X_API_MEMBER void    ResizeSendBuffer(size_t Size);
-        // X_API_MEMBER void    ResizeReceiveBuffer(size_t Size);
+        X_API_MEMBER void ResizeSendBuffer(size_t Size);
+        X_API_MEMBER void ResizeReceiveBuffer(size_t Size);
 
         // X_API_MEMBER size_t  GetPendingWriteBlockCount() const;
         // X_API_MEMBER bool    GracefulClose();  /* return value: true: immediately closed, false pending writes */
