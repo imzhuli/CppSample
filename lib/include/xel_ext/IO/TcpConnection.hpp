@@ -65,6 +65,7 @@ X_NS
     protected:
         X_PRIVATE_MEMBER void OnIoEventError() override {
             if (_Status < eStatus::Closing) {
+                _Status = eStatus::Closing;
                 _ListenerPtr->OnError(this);
             }
         }
