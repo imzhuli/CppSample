@@ -247,11 +247,11 @@ X_NS
                 auto & Address4 = Resolved[ResolvedCounter++];
                 Address4 = xNetAddress::Make4();
                 Reader.R(Address4.Ipv4, 4);
-                X_DEBUG_PRINTF("Resolved record, %s\n", Address4.IpToString().c_str());
+                // X_DEBUG_PRINTF("Resolved record, %s\n", Address4.IpToString().c_str());
                 continue;
             }
             else {
-                X_DEBUG_PRINTF("Ignore record, Hostname: %s, type=%i, class=%i\n", HostnameBuffer, (int)Type, (int)Class);
+                // X_DEBUG_PRINTF("Ignore record, Hostname: %s, type=%i, class=%i\n", HostnameBuffer, (int)Type, (int)Class);
             }
             Reader.Skip(RecordLength);
         }

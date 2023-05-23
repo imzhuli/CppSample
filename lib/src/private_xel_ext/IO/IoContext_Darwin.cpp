@@ -48,7 +48,7 @@ X_NS {
             auto & EV = Events[i];
             auto ReactorPtr = (iIoReactor*)EV.udata;
 
-            X_DEBUG_PRINTF("Kevent: id=%" PRIxPTR "\n", EV.ident);
+            // X_DEBUG_PRINTF("Kevent: id=%" PRIxPTR "\n", EV.ident);
             if (!ReactorPtr->IsAvailable()) {
                 continue;
             }
