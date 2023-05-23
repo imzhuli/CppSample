@@ -1,5 +1,7 @@
 #include <xel_ext/IO/IoContext.hpp>
 #include <cinttypes>
+#include <sys/types.h>
+#include <sys/event.h>
 
 #ifdef X_SYSTEM_DARWIN
 
@@ -23,7 +25,7 @@ X_NS {
 
         TriggerGuard.Dismiss();
         PollerGuard.Dismiss();
-        return false;
+        return true;
     }
 
     void xIoContext::Clean()
@@ -108,10 +110,32 @@ X_NS {
             void OnIoEventInReady() override;
 
         private:
+            xIoContext * _IoContextPtr = nullptr;
             static const uintptr_t _UserEventIdent = 0;
         };
 
-        // TODO: implementaion
+        bool xUserEventTrigger::Init(xIoContext * IoContextPtr)
+        {
+            _IoContextPtr = IoContextPtr;
+            return true;
+        }
+
+        void xUserEventTrigger::Clean()
+        {
+            X_DEBUG_RESET(_IoContextPtr);
+        }
+
+        void xUserEventTrigger::OnIoEventInReady()
+        {
+            Pass();
+        }
+
+        void xUserEventTrigger::Trigger()
+        {
+            struct kevent event;
+            EV_SET(&event, _UserEventIdent, EVFILT_USER, 0, NOTE_TRIGGER, 0, NULL);
+            kevent(*_IoContextPtr, &event, 1, NULL, 0, NULL);
+        }
 
     }
 

@@ -38,13 +38,20 @@ X_NS
         Event.data.ptr = this;
         Event.events = EPOLLET | EPOLLIN;
         if (-1 == epoll_ctl(*IoContextPtr, EPOLL_CTL_ADD, _Socket, &Event)) {
-            X_DEBUG_PRINTF("xTcpConnection::Init failed to register epoll event\n");
+            X_DEBUG_PRINTF("xUdpChannel::Init failed to register epoll event\n");
             return false;
         }
 #else /* defined(X_SYSTEM_DARWIN) */
-	#error "not implemented"
+        struct kevent Event[1] = {};
+        Event[0].ident = _Socket;
+        Event[0].flags = EV_ADD | EV_CLEAR;
+        Event[0].filter = EVFILT_READ;
+        Event[0].udata = this;
+        if (-1 == kevent(*IoContextPtr, Event, 1, nullptr, 0, nullptr)) {
+            X_DEBUG_PRINTF("xUdpChannel::Init failed to register kevent\n");
+            return false;
+        }
 #endif
-
 		_IoContextPtr = IoContextPtr;
 		_ListenerPtr = ListenerPtr;
 		SocketGuard.Dismiss();
@@ -66,7 +73,11 @@ X_NS
 	{
         sockaddr_storage AddrStorage = {};
         size_t AddrLen = Address.Dump(&AddrStorage);
-		sendto(_Socket, (const char *)DataPtr, DataSize, 0, (const sockaddr*)&AddrStorage, (socklen_t)AddrLen);
+		auto SendResult = sendto(_Socket, (const char *)DataPtr, DataSize, 0, (const sockaddr*)&AddrStorage, (socklen_t)AddrLen);
+        if (SendResult == -1) {
+            [[maybe_unused]] auto Error = errno;
+            X_DEBUG_PRINTF("Udp send error: code=%i, description=%s\n", Error, strerror(Error));
+        }
 	}
 
     void xUdpChannel::OnIoEventInReady()

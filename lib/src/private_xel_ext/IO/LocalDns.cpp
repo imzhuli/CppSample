@@ -157,11 +157,11 @@ X_NS
         (void)ARCount;
 
         if (!(Flags & 0x8000)) {
-            // X_DEBUG_PRINTF("xLocalDnsServer::OnData not an dns answer\n");
+            X_DEBUG_PRINTF("xLocalDnsServer::OnData not an dns answer\n");
             return; // not an answer
         }
         if (QCount != 1 || !ACount) {
-            // X_DEBUG_PRINTF("xLocalDnsServer::OnData qcount != 1 or acount == 0.\n");
+            X_DEBUG_PRINTF("xLocalDnsServer::OnData qcount != 1 or acount == 0.\n");
             return;
         }
 
@@ -174,7 +174,7 @@ X_NS
                 HostnameBuffer[TotalHostnameLength++] = '.';
             }
             if (!TestAndReduceSize(DataSize, 1)) { // invalid response, drop it
-                // X_DEBUG_PRINTF("xLocalDnsServer::OnData Invalid domain segment length. \n");
+                X_DEBUG_PRINTF("xLocalDnsServer::OnData Invalid domain segment length. \n");
                 return;
             }
             auto SegLength = Reader.R1();
@@ -185,7 +185,7 @@ X_NS
                 break;
             }
             if (!TestAndReduceSize(DataSize, SegLength)) { // invalid response, drop it
-                // X_DEBUG_PRINTF("xLocalDnsServer::OnData Invalid domain segment length. \n");
+                X_DEBUG_PRINTF("xLocalDnsServer::OnData Invalid domain segment length. \n");
                 return;
             }
             Reader.R(HostnameBuffer + TotalHostnameLength, SegLength);
@@ -194,7 +194,7 @@ X_NS
         auto QueryType = Reader.R2();
         auto QueryClass = Reader.R2();
         if (QueryType != 1 || QueryClass != 1) {
-            // X_DEBUG_PRINTF("xLocalDnsServer::OnData unsupported query type=%i class=%i\n", (int)QueryType, (int)QueryClass);
+            X_DEBUG_PRINTF("xLocalDnsServer::OnData unsupported query type=%i class=%i\n", (int)QueryType, (int)QueryClass);
             return;
         }
 
@@ -247,11 +247,11 @@ X_NS
                 auto & Address4 = Resolved[ResolvedCounter++];
                 Address4 = xNetAddress::Make4();
                 Reader.R(Address4.Ipv4, 4);
-                // X_DEBUG_PRINTF("Resolved record, %s\n", Address4.IpToString().c_str());
+                X_DEBUG_PRINTF("Resolved record, %s\n", Address4.IpToString().c_str());
                 continue;
             }
             else {
-                // X_DEBUG_PRINTF("Ignore record, type=%i, class=%i\n", (int)Type, (int)Class);
+                X_DEBUG_PRINTF("Ignore record, Hostname: %s, type=%i, class=%i\n", HostnameBuffer, (int)Type, (int)Class);
             }
             Reader.Skip(RecordLength);
         }
@@ -290,7 +290,7 @@ X_NS
         //     uint16_t     arcount;  /* Number of additional records */
         // } dns_header_t;
         Writer.W2((uint16_t)Index);
-        Writer.W2(0x0100); /* Q=0, Recursion Desired=0 */
+        Writer.W2(0x0100); /* Q=0, Recursion Desired=1 */
         Writer.W2(1); /* Questions */
         Writer.W2(0);
         Writer.W2(0);
@@ -340,10 +340,10 @@ X_NS
             return;
         }
         if (TestAndReduceSize(ResolvedCounter, 1)) {
-            RequestPtr->Address1 = ResolvedList[1];
+            RequestPtr->Address1 = ResolvedList[0];
         }
         if (TestAndReduceSize(ResolvedCounter, 1)) {
-            RequestPtr->Address2 = ResolvedList[2];
+            RequestPtr->Address2 = ResolvedList[1];
         }
         ReleaseQuery(Index);
         return;
