@@ -1,9 +1,10 @@
 #include <xel_ext/IO/IoContext.hpp>
 #include <cinttypes>
 #include <sys/types.h>
-#include <sys/event.h>
 
 #ifdef X_SYSTEM_DARWIN
+
+#include <sys/event.h>
 
 X_NS {
 
