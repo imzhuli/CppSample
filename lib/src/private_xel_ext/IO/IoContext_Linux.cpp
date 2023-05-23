@@ -132,8 +132,7 @@ X_NS {
             while(true) {
                 auto Result = read(_UserEventFd, &PseudoData, 8);
                 if (Result < 0) {
-                    auto Error = errno;
-                    assert(Error == EAGAIN);
+                    assert(EAGAIN == errno);
                     break;
                 }
                 assert(Result == 8);
@@ -145,8 +144,7 @@ X_NS {
             uint64_t PseudoData = 1;
             auto Result = write(_UserEventFd, &PseudoData, 8);
             if (Result < 0) {
-                auto Error = errno;
-                assert(Error == EAGAIN);
+                assert(EAGAIN == errno);
                 return;
             }
             assert(Result == 8);
