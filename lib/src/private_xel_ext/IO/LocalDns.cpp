@@ -42,7 +42,7 @@ X_NS
         IdMarks.resize(MaxQueryCount);
         auto IdPoolGuard = MakeCleaner(IdPool);
 
-        DnsServerAddress = ServerAddress;
+        DnsServerAddress = NewDnsServerAddress = ServerAddress;
         if (NotifyCallbackPtr) {
             this->NotifyCallbackPtr = NotifyCallbackPtr;
             this->NotifyVariable = NotifyVariable;
@@ -86,6 +86,7 @@ X_NS
                 xList<xRequest> TempRequestList;
                 do {
                     auto Guard = xSpinlockGuard(Spinlock);
+                    DnsServerAddress = NewDnsServerAddress;
                     TempRequestList.GrabListTail(RequestList);
                 } while(false);
                 for (auto & Request : TempRequestList) {
@@ -261,6 +262,10 @@ X_NS
 
     bool xLocalDnsServer::DoSendDnsQuery(xRequest * RequestPtr)
     {
+        if (!DnsServerAddress || !DnsServerAddress.Port) {
+            return false;
+        }
+
         assert(RequestPtr);
         assert(!RequestPtr->Ident);
         auto Ident = IdPool.Acquire(RequestPtr);
@@ -357,6 +362,12 @@ X_NS
         IdMarks[Index] = false;
         IdPool.Release(Steal(RequestPtr->Ident));
         InternalRequestResultList.GrabTail(*RequestPtr);
+    }
+
+    void xLocalDnsServer::SetDnsServer(const xNetAddress & NewAddress)
+    {
+        Spinlock.SynchronizedCall([=]{ NewDnsServerAddress = NewAddress; });
+        IoContext.GetUserEventTrigger()->Trigger();
     }
 
     void xLocalDnsServer::PostQuery(xRequest * RequestPtr)

@@ -39,6 +39,7 @@ X_NS
         X_API_MEMBER void Clean();
 
     public:
+        X_API_MEMBER void SetDnsServer(const xNetAddress & NewAddress);
         X_API_MEMBER void PostQuery(xRequest * RequestPtr);
         X_API_MEMBER void Pick(xList<xRequest> & Receiver);
 
@@ -53,14 +54,16 @@ X_NS
         X_PRIVATE_MEMBER void Loop();
 
     private:
-        xIoContext        IoContext            = {};
-        xUdpChannel       UdpChannel           = {};
-        xNetAddress       DnsServerAddress     = {};
-        xSpinlock         Spinlock             = {};
-        xList<xRequest>   RequestList          = {};
-        xList<xRequest>   RequestTimeoutList   = {};
+        xIoContext        IoContext                   = {};
+        xUdpChannel       UdpChannel                  = {};
+        xNetAddress       DnsServerAddress            = {};
+        xSpinlock         Spinlock                    = {};
+        xList<xRequest>   RequestList                 = {};
+        xList<xRequest>   RequestTimeoutList          = {};
         xList<xRequest>   InternalRequestResultList   = {};
         xList<xRequest>   ExchangeRequestResultList   = {};
+
+        xNetAddress       NewDnsServerAddress         = {};
 
         xIndexedStorage<xRequest*>   IdPool;
         std::vector<bool>            IdMarks;
@@ -68,8 +71,8 @@ X_NS
         std::thread        ServiceThread;
         std::atomic_bool   StopFlag;
 
-        NotifyCallback * NotifyCallbackPtr;
-        xVariable        NotifyVariable;
+        NotifyCallback *   NotifyCallbackPtr;
+        xVariable          NotifyVariable;
     };
 
 }
