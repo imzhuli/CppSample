@@ -118,7 +118,7 @@ X_NS
 
 			template<typename tFuncPre, typename tFuncPost>
 			X_INLINE void Wait(const tFuncPre & funcPre, const tFuncPost & funcPost) {
-				auto Lock = std::lock_guard(_Mutex);
+				auto Lock = std::unique_lock(_Mutex);
 				funcPre();
 				_ConditionVariable.wait(Lock, [this](){return _Ready;});
 				if constexpr (AutoReset) {
@@ -130,7 +130,7 @@ X_NS
 			}
 			template<typename tFuncPost = xPass>
 			void Wait(const tFuncPost & funcPost = {}) {
-				auto Lock = std::lock_guard(_Mutex);
+				auto Lock = std::unique_lock(_Mutex);
 				_ConditionVariable.wait(Lock, [this](){return _Ready;});
 				if constexpr (AutoReset) {
 					_Ready = false;
@@ -143,7 +143,7 @@ X_NS
 			template<typename Rep, typename Period, typename tFuncPre, typename tFuncPost>
 			X_INLINE bool WaitFor(const std::chrono::duration<Rep, Period>& RelTime
 					, const tFuncPre & funcPre,  const tFuncPost & funcPost) {
-				auto Lock = std::lock_guard(_Mutex);
+				auto Lock = std::unique_lock(_Mutex);
 				funcPre();
 				if (!_ConditionVariable.wait_for(Lock, RelTime, [this](){return _Ready;})) {
 					return false;
@@ -158,7 +158,7 @@ X_NS
 			}
 			template<typename Rep, typename Period, typename tFuncPost = xPass>
 			X_INLINE bool WaitFor(const std::chrono::duration<Rep, Period>& RelTime, const tFuncPost & funcPost = {}) {
-				auto Lock = std::lock_guard(_Mutex);
+				auto Lock = std::unique_lock(_Mutex);
 				if (!_ConditionVariable.wait_for(Lock, RelTime, [this](){return _Ready;})) {
 					return false;
 				}
@@ -177,12 +177,12 @@ X_NS
 					auto Lock = std::lock_guard(_Mutex);
 					PreNotifyFunc();
 					_Ready = true;
-					} while(false);
+				} while(false);
 				_ConditionVariable.notify_one();
 			}
 
 			template<typename tFuncObj = xPass>
-			X_INLINE std::enable_if_t<std::is_same_v<void, std::invoke_result_t<tFuncObj>>> NotifyAll(const tFuncObj & PreNotifyFunc = {}) {
+			X_INLINE std::enable_if_t<!AutoReset && std::is_same_v<void, std::invoke_result_t<tFuncObj>>> NotifyAll(const tFuncObj & PreNotifyFunc = {}) {
 				do {
 					auto Lock = std::lock_guard(_Mutex);
 					PreNotifyFunc();
