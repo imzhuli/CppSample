@@ -6,18 +6,19 @@
 
 X_NS
 {
+    using xPacketCommandId = uint16_t;
+    using xPacketLength    = uint32_t;
+    using xPacketRequestId = uint64_t;
+    using xPacketSequence  = uint8_t;
 
-    static constexpr const size_t PacketHeaderSize           = 32;
-    static constexpr const size_t PacketMagicMask            = 0xFF'000000;
-    static constexpr const size_t PacketMagicValue           = 0xCD'000000;
-    static constexpr const size_t PacketLengthMask           = 0x00'FFFFFF;
-    static constexpr const size_t MaxPacketSize              = 4096 & PacketLengthMask;
-    static constexpr const size_t MaxPacketPayloadSize       = MaxPacketSize - PacketHeaderSize;
+    static constexpr const size_t   PacketHeaderSize = 32u;
+    static constexpr const uint32_t PacketMagicMask  = 0xFF'000000u;
+    static constexpr const uint32_t PacketMagicValue = 0xCD'000000u;
+    static constexpr const uint32_t PacketLengthMask = 0x00'FFFFFFu;
 
-    using xPacketCommandId     = uint16_t;
-    using xPacketLength        = uint32_t;
-    using xPacketSequence      = uint8_t;
-    using xPacketRequestId     = uint64_t;
+    static constexpr const size_t   InvalidPacketSize          = static_cast<size_t>(-1);
+    static constexpr const size_t   MaxPacketSize              = 4096 & PacketLengthMask;
+    static constexpr const size_t   MaxPacketPayloadSize       = MaxPacketSize - PacketHeaderSize;
 
     /***
         @brief Such class is a 'almost' direct mapping to stream data header.
@@ -25,7 +26,7 @@ X_NS
     */
     struct xPacketHeader final
     {
-        static constexpr const size32_t Size = 2 * sizeof(uint64_t) + 16;
+        static constexpr const size_t Size = 2 * sizeof(uint64_t) + 16;
         static constexpr const xPacketCommandId CmdId_InnernalRequest             = 0x00'00;
         static constexpr const xPacketRequestId InternalRequest_KeepAlive         = 0x00;
         static constexpr const xPacketRequestId InternalRequest_RequestKeepAlive  = static_cast<uint64_t>(-1);

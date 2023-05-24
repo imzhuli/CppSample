@@ -172,6 +172,10 @@ X_NS
         size_t RemainDataSize = (_ReadBufferUsage.buf - (CHAR*)_ReadBuffer) + _ReadDataSize;
         while(RemainDataSize) {
             auto ProcessedData = _ListenerPtr->OnData(this, ProcessDataPtr, RemainDataSize);
+            if (ProcessedData == InvalidPacketSize) {
+                SetUnavailable();
+                return;
+            }
             if (!ProcessedData){
                 if (ProcessDataPtr != _ReadBuffer) { // some data are processed
                     memmove(_ReadBuffer, ProcessDataPtr, RemainDataSize);

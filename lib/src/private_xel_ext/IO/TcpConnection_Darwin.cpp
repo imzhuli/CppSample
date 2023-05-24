@@ -154,6 +154,10 @@ X_NS
             auto ProcessDataPtr = (ubyte*)_ReadBuffer;
             while(_ReadBufferDataSize) {
                 auto ProcessedData = _ListenerPtr->OnData(this, ProcessDataPtr, _ReadBufferDataSize);
+                if (ProcessedData == InvalidPacketSize) {
+                    SetUnavailable();
+                    return;
+                }
                 if (!ProcessedData){
                     if (ProcessDataPtr != _ReadBuffer) { // some data are processed
                         memmove(_ReadBuffer, ProcessDataPtr, _ReadBufferDataSize);
