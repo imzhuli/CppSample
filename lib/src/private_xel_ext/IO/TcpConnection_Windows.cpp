@@ -29,9 +29,6 @@ X_NS
             return false;
         }
 
-        memset(&_ReadOverlappedObject, 0, sizeof(_ReadOverlappedObject));
-        memset(&_WriteOverlappedObject, 0, sizeof(_WriteOverlappedObject));
-
         _WriteBufferPtr = nullptr;
         _Socket = NativeHandle;
         _IoContextPtr = IoContextPtr;
@@ -119,9 +116,6 @@ X_NS
             return false;
         }
 
-        memset(&_ReadOverlappedObject, 0, sizeof(_ReadOverlappedObject));
-        memset(&_WriteOverlappedObject, 0, sizeof(_WriteOverlappedObject));
-
         _WriteBufferPtr = nullptr;
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
@@ -138,6 +132,7 @@ X_NS
             }
         } while(false);
 
+        memset(&_WriteOverlappedObject, 0, sizeof(_WriteOverlappedObject));
         auto Error = ConnectEx(_Socket, (SOCKADDR*)(&AddrStorage), (int)AddrLen, NULL, NULL, NULL, &_WriteOverlappedObject);
         if (Error) {
             auto ErrorCode = WSAGetLastError();
@@ -223,6 +218,7 @@ X_NS
         _ReadBufferUsage.buf = (CHAR*)_ReadBuffer + SkipSize;
         _ReadBufferUsage.len = (ULONG)(sizeof(_ReadBuffer) - SkipSize);
         _ReadFlags = 0;
+        memset(&_ReadOverlappedObject, 0, sizeof(_ReadOverlappedObject));
         assert(_ReadBufferUsage.len);
         auto Error = WSARecv(_Socket, &_ReadBufferUsage, 1, nullptr, &_ReadFlags, &_ReadOverlappedObject, nullptr);
         if (Error) {
@@ -249,6 +245,7 @@ X_NS
         }
         _WriteBufferUsage.buf = (CHAR*)_WriteBufferPtr->Buffer;
         _WriteBufferUsage.len = (ULONG)_WriteBufferPtr->DataSize;
+        memset(&_WriteOverlappedObject, 0, sizeof(_WriteOverlappedObject));
         auto Error = WSASend(_Socket, &_WriteBufferUsage, 1, nullptr, 0, &_WriteOverlappedObject, nullptr);
         if (Error) {
             auto ErrorCode = WSAGetLastError();

@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
     Query5->Hostname = "www.zhuli.cool";
     DnsService.PostQuery(Query5.get());
 
-    std::this_thread::sleep_for(10s);
+    std::this_thread::sleep_for(5s);
     auto List = xList<xLocalDnsServer::xRequest>();
     DnsService.Pick(List);
 

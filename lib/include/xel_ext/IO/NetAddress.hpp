@@ -108,10 +108,13 @@ X_NS
 
         X_API_STATIC_MEMBER xNetAddress Parse(const char * IpStr, uint16_t Port);
         X_API_STATIC_MEMBER xNetAddress Parse(const std::string & AddressStr);
-        X_API_STATIC_MEMBER xNetAddress Parse(const struct sockaddr * SockAddrPtr);
 
+        X_API_STATIC_MEMBER xNetAddress Parse(const sockaddr * SockAddrPtr);
         X_API_STATIC_MEMBER xNetAddress Parse(const sockaddr_in * SockAddr4Ptr);
         X_API_STATIC_MEMBER xNetAddress Parse(const sockaddr_in6 * SockAddr6Ptr);
+        X_INLINE xNetAddress Parse(const struct sockaddr_storage * SockAddrStoragePtr) {
+            return Parse((sockaddr*)SockAddrStoragePtr);
+        }
     };
 
 }

@@ -93,7 +93,11 @@ X_NS
     #endif
 
     protected:
-        static constexpr const size_t InternalReadBufferSize  = 2 * MaxPacketSize;
+        static constexpr const size_t InternalReadBufferSizeForTcp  = 2 * MaxPacketSize;
+        static constexpr const size_t InternalReadBufferSizeForUdp = 8192;
+        static constexpr const size_t InternalReadBufferSize =
+            (InternalReadBufferSizeForTcp > InternalReadBufferSizeForUdp) ?
+            InternalReadBufferSizeForTcp : InternalReadBufferSizeForUdp;
         ubyte  _ReadBuffer[InternalReadBufferSize];
 
     protected:
@@ -108,6 +112,10 @@ X_NS
         DWORD               _WriteDataSize;
         WSABUF              _WriteBufferUsage;
         OVERLAPPED          _WriteOverlappedObject;
+
+        sockaddr_storage    _RemoteAddress;
+        int                 _RemoteAddressLength;
+
     #else
         size_t _ReadBufferDataSize;
 

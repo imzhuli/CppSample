@@ -9,7 +9,7 @@ X_NS
 {
 
     class xUdpChannel final
-    : public iIoReactor
+    : public iBufferedIoReactor
     , xAbstract
     {
     public:
@@ -30,6 +30,7 @@ X_NS
 
     #if defined(X_SYSTEM_WINDOWS)
         X_API_MEMBER eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) override;
+        X_API_MEMBER void TryRecvData();
     #endif
 
     private:
