@@ -27,7 +27,7 @@ X_NS
     #define WORDS_BIGENDIAN 1
     #endif
 
-    typedef uint32_t md5_uint32;
+    typedef uint32_t  md5_uint32;
     typedef uintptr_t md5_uintptr;
 
     // #define MD5_DIGEST_SIZE 16
@@ -109,8 +109,9 @@ X_NS
         size_t pad;
         /* Now count remaining bytes.  */
         ctx->total[0] += bytes;
-        if (ctx->total[0] < bytes)
+        if (ctx->total[0] < bytes) {
             ++ctx->total[1];
+        }
         pad = bytes >= 56 ? 64 + 56 - bytes : 56 - bytes;
         memcpy(&ctx->buffer[bytes], fillbuf, pad);
         /* Put the 64-bit file length in *bits* at the end of the buffer.  */
@@ -130,7 +131,7 @@ X_NS
             size_t left_over = ctx->buflen;
             size_t add = 128 - left_over > len ? len : 128 - left_over;
             memcpy(&ctx->buffer[left_over], buffer, add);
-            ctx->buflen += add;
+            ctx->buflen += (md5_uint32)add;
             if (ctx->buflen > 64)
             {
                 __md5_process_block(ctx->buffer, ctx->buflen & ~63, ctx);
@@ -180,7 +181,7 @@ X_NS
                 left_over -= 64;
                 memcpy(ctx->buffer, &ctx->buffer[64], left_over);
             }
-            ctx->buflen = left_over;
+            ctx->buflen = (md5_uint32)left_over;
         }
     }
 
@@ -220,12 +221,12 @@ X_NS
         md5_uint32 B = ctx->B;
         md5_uint32 C = ctx->C;
         md5_uint32 D = ctx->D;
-        md5_uint32 lolen = len;
+        md5_uint32 lolen = (md5_uint32)len;
         /* First increment the byte count.  RFC 1321 specifies the possible
         length of the file up to 2^64 bits.  Here we only compute the
         number of bytes.  Do a double word increment.  */
         ctx->total[0] += lolen;
-        ctx->total[1] += (len >> 31 >> 1) + (ctx->total[0] < lolen);
+        ctx->total[1] += (md5_uint32)((len >> 31 >> 1) + (ctx->total[0] < lolen ? 1 : 0));
         /* Process all bytes in the buffer with 64 bytes in each round of
         the loop.  */
         while (words < endp)

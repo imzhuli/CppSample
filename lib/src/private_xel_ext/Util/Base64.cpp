@@ -48,7 +48,8 @@ X_NS
     size_t Base64Decode(unsigned char *out, const void * in_, size_t out_size)
     {
         auto in = (const unsigned char *)in_;
-        size_t i, v;
+        size_t i;
+        uint32_t v;
         unsigned char *dst = out;
 
         v = 0;
@@ -60,7 +61,7 @@ X_NS
             v = (v << 6) + map2[index];
             if (i & 3) {
                 if (static_cast<size_t>(dst - out) < out_size) {
-                    *dst++ = v >> (6 - 2 * (i & 3));
+                    *dst++ = (uint8_t)(v >> (6 - 2 * (i & 3)));
                 }
             }
         }
