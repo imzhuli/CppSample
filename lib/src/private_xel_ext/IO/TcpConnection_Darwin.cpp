@@ -199,7 +199,7 @@ X_NS
                 memmove(_WriteBufferPtr->Buffer, _WriteBufferPtr->Buffer + SendSize, _WriteBufferPtr->DataSize);
                 if (!_RequireOutputEvent) {
                     _RequireOutputEvent = true;
-                    UpdateEventTrigger();
+                    EnableWritingTrigger();
                 }
                 return;
             }
