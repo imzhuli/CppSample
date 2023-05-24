@@ -108,6 +108,12 @@ X_NS
 
     void xTcpConnection::Clean()
     {
+        if (_WriteBufferPtr) {
+            delete _WriteBufferPtr;
+            while(auto WriteBufferPtr = _WriteBufferChain.Pop()) {
+                delete WriteBufferPtr;
+            }
+        }
         XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
     }
 
@@ -220,9 +226,8 @@ X_NS
                 SetUnavailable();
                 return;
             }
-            size_t RemainSize = _WriteBufferPtr->DataSize - SendSize;
-            if (RemainSize) {
-                memmove(_WriteBufferPtr->Buffer, _WriteBufferPtr->Buffer + SendSize, RemainSize);
+            if ((_WriteBufferPtr->DataSize -= SendSize)) {
+                memmove(_WriteBufferPtr->Buffer, _WriteBufferPtr->Buffer + SendSize, _WriteBufferPtr->DataSize);
                 if (!_RequireOutputEvent) {
                     _RequireOutputEvent = true;
                     UpdateEventTrigger();

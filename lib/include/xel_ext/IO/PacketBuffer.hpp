@@ -8,35 +8,44 @@ X_NS
     : xNonCopyable
     {
     public:
-        ubyte           Buffer[MaxPacketSize];
+        ubyte           Buffer[MaxPacketSize * 2];
         size_t          DataSize = 0;
 
     public:
         X_INLINE size_t Pop(void * DstDataPtr, size_t DstDataBufferSize) {
             auto CopySize = std::min(DataSize, DstDataBufferSize);
-            memcpy(DstDataPtr, Buffer, CopySize);
-            if(auto Remains = DataSize - CopySize) {
-                memmove(Buffer, Buffer + CopySize, Remains);
-            } else {
-                DataSize = 0;
+            if (X_LIKELY(CopySize)) {
+                memcpy(DstDataPtr, Buffer, CopySize);
+                if((DataSize -= CopySize)) {
+                    memmove(Buffer, Buffer + CopySize, DataSize);
+                }
             }
             return CopySize;
         }
         X_INLINE size_t Push(const void * SrcDataPtr, size_t SrcDataSize) {
             auto CopySize = std::min(sizeof(Buffer) - DataSize, SrcDataSize);
-            memcpy(Buffer + DataSize, SrcDataPtr, CopySize);
-            DataSize += CopySize;
+            if (X_LIKELY(CopySize)) {
+                memcpy(Buffer + DataSize, SrcDataPtr, CopySize);
+                DataSize += CopySize;
+            }
             return CopySize;
         }
 
     private:
-        xPacketBuffer *   NextBufferPtr = nullptr;
+        xPacketBuffer * NextBufferPtr = nullptr;
         friend class xPacketBufferChain;
     };
 
     class xPacketBufferChain final
     {
     public:
+        X_INLINE ~xPacketBufferChain()
+        {
+            assert(!_FirstPtr);
+            assert(!_LastPtr);
+            assert(!_TotalBufferCount);
+        }
+
         X_INLINE xPacketBuffer * Peek() {
             return _FirstPtr;
         }
@@ -45,7 +54,7 @@ X_NS
             if (!(_FirstPtr = Steal(_FirstPtr->NextBufferPtr))) {
                 _LastPtr = nullptr;
             }
-            --TotalBufferCount;
+            --_TotalBufferCount;
             return _FirstPtr;
         }
         X_INLINE xPacketBuffer * Pop() {
@@ -64,7 +73,7 @@ X_NS
                 _LastPtr->NextBufferPtr = BufferPtr;
                 _LastPtr = BufferPtr;
             }
-            ++TotalBufferCount;
+            ++_TotalBufferCount;
         }
         X_INLINE size_t Push(const void * DataPtr, size_t DataSize) {
             if (!_LastPtr) {
@@ -73,14 +82,14 @@ X_NS
             return _LastPtr->Push(DataPtr, DataSize);
         }
 
-        X_INLINE size_t GetSize () const { return TotalBufferCount; }
+        X_INLINE size_t GetSize () const { return _TotalBufferCount; }
         X_INLINE size_t IsEmpty () const { return !GetSize(); }
         X_INLINE xPacketBuffer * GetLast() const { return _LastPtr; }
 
     private:
         xPacketBuffer * _FirstPtr = nullptr;
         xPacketBuffer * _LastPtr = nullptr;
-        size_t TotalBufferCount = 0;
+        size_t _TotalBufferCount = 0;
     };
 
 }

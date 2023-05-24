@@ -50,17 +50,18 @@ X_NS
 
         X_INLINE size32_t Deserialize(const void * SourcePtr) {
             xStreamReader S(SourcePtr);
-            PacketLength = S.R4L();
-            if (!CheckPackageLength(PacketLength)) {
-                return 0;
-            }
-            PacketLength &= PacketLengthMask;
+            PacketLength = PickPackageLength(S.R4L());
             PackageSequenceId = S.R1L();
             PackageSequenceTotalMax = S.R1L();
             CommandId = S.R2L();
             RequestId = S.R8L();
             S.R(TraceId, 16);
             return PacketLength;
+        }
+
+        X_INLINE size32_t Deserialize(const void * SourcePtr, size_t PacketSizeLimit) {
+            Deserialize(SourcePtr);
+            return PacketLength <= PacketSizeLimit ? PacketLength : 0;
         }
 
         X_INLINE size_t GetPayloadSize() const {
@@ -108,12 +109,12 @@ X_NS
 
     private:
         X_STATIC_INLINE uint32_t MakeHeaderLength(uint32_t PacketLength) {
-            assert(PacketLength <= MaxPacketSize);
+            assert(PacketLength <= PacketLengthMask);
             return PacketLength | PacketMagicValue;
         }
-        X_STATIC_INLINE bool CheckPackageLength(uint32_t PacketLength) {
-            return (PacketLength & PacketMagicMask) == PacketMagicValue
-                && (PacketLength & PacketLengthMask) <= MaxPacketSize;
+        X_STATIC_INLINE uint32_t PickPackageLength(uint32_t PacketLengthField) {
+            uint32_t PacketLength = PacketLengthField ^ PacketMagicValue;
+            return X_LIKELY(PacketLength <= PacketLengthMask) ? PacketLength : 0;
         }
     };
 

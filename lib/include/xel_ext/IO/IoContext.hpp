@@ -93,7 +93,7 @@ X_NS
     #endif
 
     protected:
-        static constexpr const size_t InternalReadBufferSize  = 8192;
+        static constexpr const size_t InternalReadBufferSize  = 2 * MaxPacketSize;
         ubyte  _ReadBuffer[InternalReadBufferSize];
 
     protected:
