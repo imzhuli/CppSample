@@ -53,7 +53,7 @@ X_NS
     bool xTcpConnection::Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr)
     {
         int AF = AF_UNSPEC;
-        sockaddr_storage AddrStorage;
+        sockaddr_storage AddrStorage = {};
         size_t AddrLen = Address.Dump(&AddrStorage);
         if (Address.IsV4()) {
             AF = AF_INET;
@@ -152,13 +152,6 @@ X_NS
         return true;
     }
 
-    void xTcpConnection::Clean()
-    {
-        XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
-        X_DEBUG_RESET(_ListenerPtr);
-        X_DEBUG_RESET(_Status);
-    }
-
     void xTcpConnection::OnIoEventInReady()
     {
         _Reading = false;
@@ -219,41 +212,6 @@ X_NS
             }
         }
         TrySendData();
-    }
-
-    size_t xTcpConnection::PostData(const void * DataPtr_, size_t DataSize)
-    {
-        assert(DataPtr_ && DataSize);
-        assert(_Status != eStatus::Unspecified);
-
-        if (_Status >= eStatus::Closing) {
-            return 0;
-        }
-
-        auto DataPtr = (const ubyte*)DataPtr_;
-        auto Packets = DataSize / sizeof(xPacketBuffer::Buffer);
-        for (size_t i = 0 ; i < Packets; ++i) {
-            auto BufferPtr = new xPacketBuffer;
-            memcpy(BufferPtr->Buffer, DataPtr, sizeof(xPacketBuffer::Buffer));
-            BufferPtr->DataSize = sizeof(xPacketBuffer::Buffer);
-            DataPtr  += sizeof(xPacketBuffer::Buffer);
-            DataSize -= sizeof(xPacketBuffer::Buffer);
-            _WriteBufferChain.Push(BufferPtr);
-        }
-        if (DataSize) {
-            auto BufferPtr = new xPacketBuffer;
-            memcpy(BufferPtr->Buffer, DataPtr, DataSize);
-            BufferPtr->DataSize = DataSize;
-            _WriteBufferChain.Push(BufferPtr);
-        }
-
-        if (_Status == eStatus::Connecting) {
-            return DataSize;
-        }
-
-        // _Status == eStatus::Connected
-        TrySendData();
-        return DataSize;
     }
 
     void xTcpConnection::TryRecvData(size_t SkipSize)
