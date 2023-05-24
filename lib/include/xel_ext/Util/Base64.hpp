@@ -39,7 +39,7 @@ X_NS
      * @return         number of bytes written, or a negative value in case of
      *                 invalid input
      */
-    size_t Base64Decode(unsigned char * out, const void *in, size_t out_size);
+    X_API size_t Base64Decode(unsigned char * out, const void *in, size_t out_size);
 
     /**
      * Encode data to base64 and null-terminate.
@@ -50,6 +50,6 @@ X_NS
      * @param in_size  size in bytes of the 'in' buffer
      * @return         'out' or NULL in case of error
      */
-    char * Base64Encode(char *out, size_t out_size, const void * in, size_t in_size);
+    X_API char * Base64Encode(char *out, size_t out_size, const void * in, size_t in_size);
 
 }

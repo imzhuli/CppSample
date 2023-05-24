@@ -352,7 +352,7 @@ X_NS
      Exported functions
         void X_Md5(xel::ubyte resblock[X_MD5_DIGEST_SIZE], const void *buffer, size_t len);
     *********************************/
-    void MD5(xel::ubyte resblock[X_MD5_DIGEST_SIZE], const void *buffer, size_t len)
+    void Md5(xel::ubyte resblock[X_MD5_DIGEST_SIZE], const void *buffer, size_t len)
     {
         md5_buffer((const char *)buffer, len, (void *)resblock);
     }
