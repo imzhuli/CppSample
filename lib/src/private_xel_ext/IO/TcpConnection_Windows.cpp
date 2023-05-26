@@ -36,12 +36,10 @@ X_NS
         _Status = eStatus::Connected;
         _SuspendReading = false;
         _Reading = false;
+        _FlushFlag = false;
         SetAvailable();
 
         TryRecvData();
-        if (!IsAvailable()) {
-            return false;
-        }
 
         FailSafe.Dismiss();
         return true;
@@ -139,8 +137,11 @@ X_NS
             X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
             return false;
         }
+
         _Status = eStatus::Connecting;
         _SuspendReading = false;
+        _Reading = false;
+        _FlushFlag = false;
 
         FailSafe.Dismiss();
         SetAvailable();
@@ -199,19 +200,18 @@ X_NS
             }
             _Status = eStatus::Connected;
             _ListenerPtr->OnConnected(this);
-
-            assert(!_Reading);
             TryRecvData();
-            if (!IsAvailable()) {
-                return;
-            }
+        } else {
+            TrySendData();
         }
-        TrySendData();
+        if (Steal(_FlushFlag)) {
+            _ListenerPtr->OnFlush(this);
+        }
     }
 
     void xTcpConnection::TryRecvData(size_t SkipSize)
     {
-        if (_SuspendReading) {
+        if (_SuspendReading || _Reading) {
             return;
         }
         _Reading = true;
@@ -240,6 +240,7 @@ X_NS
             delete _WriteBufferPtr;
         }
         if (!(_WriteBufferPtr = _WriteBufferChain.Pop())) {
+            _FlushFlag = true;
             return;
         }
         _WriteBufferUsage.buf = (CHAR*)_WriteBufferPtr->Buffer;
@@ -259,21 +260,13 @@ X_NS
 
     void xTcpConnection::SuspendReading()
     {
-        if (_SuspendReading) {
-            return;
-        }
         _SuspendReading = true;
     }
 
     void xTcpConnection::ResumeReading()
     {
-        if (!_SuspendReading) {
-            return;
-        }
         _SuspendReading = false;
-        if (!_Reading) {
-            TryRecvData();
-        }
+        TryRecvData();
     }
 
 }

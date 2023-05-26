@@ -46,6 +46,7 @@ X_NS
         }
 
         // _Status == eStatus::Connected
+        _FlushFlag = false; // prevent OnFlush overhead
         TrySendData();
         return DataSize;
     }

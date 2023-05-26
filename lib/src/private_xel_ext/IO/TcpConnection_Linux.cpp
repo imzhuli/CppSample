@@ -36,6 +36,7 @@ X_NS
         _WriteBufferPtr = nullptr;
         _Status = eStatus::Connected;
         _SuspendReading = false;
+        _FlushFlag = false;
         SetAvailable();
 
         FailSafe.Dismiss();
@@ -100,6 +101,7 @@ X_NS
         _ReadBufferDataSize = 0;
         _WriteBufferPtr = nullptr;
         _SuspendReading = false;
+        _FlushFlag = false;
         SetAvailable();
 
         FailSafe.Dismiss();
@@ -158,8 +160,12 @@ X_NS
             X_DEBUG_PRINTF("Connection established\n");
             _Status = eStatus::Connected;
             _ListenerPtr->OnConnected(this);
+        } else {
+            TrySendData();
         }
-        TrySendData();
+        if (Steal(_FlushFlag)) {
+            _ListenerPtr->OnFlush(this);
+        }
     }
 
     void xTcpConnection::TrySendData()
@@ -191,6 +197,7 @@ X_NS
             delete _WriteBufferPtr;
             _WriteBufferPtr = _WriteBufferChain.Pop();
         }
+        _FlushFlag = true;
         if (_RequireOutputEvent) {
             _RequireOutputEvent = false;
             UpdateEventTrigger();

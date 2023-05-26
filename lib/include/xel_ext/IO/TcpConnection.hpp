@@ -36,6 +36,7 @@ X_NS
              * @return consumed bytes
              * */
             virtual size_t OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize) { return DataSize; }
+            virtual void   OnFlush(xTcpConnection * TcpConnectionPtr) {}
             virtual void   OnPeerClose(xTcpConnection * TcpConnectionPtr)  {}
             virtual void   OnError(xTcpConnection * TcpConnectionPtr) {}
         };
@@ -107,6 +108,7 @@ X_NS
         xIoContext *   _IoContextPtr X_DEBUG_INIT(nullptr);
         iListener *    _ListenerPtr X_DEBUG_INIT(nullptr);
         bool           _SuspendReading X_DEBUG_INIT(false);
+        bool           _FlushFlag = false;
     };
 
 }
