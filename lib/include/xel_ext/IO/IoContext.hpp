@@ -11,8 +11,6 @@ X_NS
 {
     class xIoContext;
     class iIoReactor;
-    struct xIoReactorNode : xListNode {};
-    using  xIoReactorList = xList<xIoReactorNode>;
 
     class xIoContext
     : xNonCopyable
@@ -30,9 +28,6 @@ X_NS
 
         X_INLINE iUserEventTrigger * GetUserEventTrigger() const { return _UserEventTriggerPtr; }
         X_INLINE operator xEventPoller () const { return _Poller; }
-        X_INLINE void DeferOperation(xIoReactorNode & Node) {
-            _PendingOperationList.GrabTail(Node);
-        }
 
     private:
         X_PRIVATE_MEMBER bool SetupUserEventTrigger();
@@ -40,8 +35,6 @@ X_NS
 
     private:
         xEventPoller          _Poller X_DEBUG_INIT(InvalidEventPoller);
-        xIoReactorList        _DeferredOperationList;
-        xIoReactorList        _PendingOperationList;
         iUserEventTrigger *   _UserEventTriggerPtr = nullptr;
     };
 
@@ -57,12 +50,10 @@ X_NS
     #endif
 
     class iIoReactor
-    : public xIoReactorNode
-    , private xNonCopyable
+    : private xNonCopyable
     {
         friend class xIoContext;
     public:
-        virtual void OnDeferredOperation() { Pass(); }
         virtual void OnIoEventInReady()    { Pass(); }
         virtual void OnIoEventOutReady()   { Pass(); }
         virtual void OnIoEventError()      { Pass(); }

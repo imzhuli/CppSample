@@ -76,7 +76,7 @@ X_NS
             _PreAcceptSocket = WSASocket(_AF, SOCK_STREAM, IPPROTO_IP, NULL, 0, WSA_FLAG_OVERLAPPED);
             if (_PreAcceptSocket == InvalidSocket) {
                 X_DEBUG_PRINTF("xTcpServer::TryPreAccept failed to create pre accept socket\n");
-                _IoContextPtr->DeferOperation(*this);
+                Fatal();
                 return;
             }
             setsockopt(_PreAcceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (char *)&_ListenSocket, sizeof(_ListenSocket));
@@ -85,7 +85,7 @@ X_NS
         auto AcceptResult = AcceptEx(_ListenSocket, _PreAcceptSocket, &_PreAcceptAddress, 0, sizeof(_PreAcceptAddress.Local), sizeof(_PreAcceptAddress.Remote), &_PreAcceptReceivedLength, &_Overlapped);
         if (!AcceptResult && ERROR_IO_PENDING != WSAGetLastError()) {
             X_DEBUG_PRINTF("xTcpServer::TryPreAccept failed to exec AcceptEx: reason=%i\n", WSAGetLastError());
-            _IoContextPtr->DeferOperation(*this);
+            Fatal();
             return;
         }
     }

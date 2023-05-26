@@ -239,8 +239,7 @@ X_NS
             assert(_WriteBufferUsage.len == (ULONG)_WriteBufferPtr->DataSize);
             delete _WriteBufferPtr;
         }
-        _WriteBufferPtr = _WriteBufferChain.Pop();
-        if (!_WriteBufferPtr) {
+        if (!(_WriteBufferPtr = _WriteBufferChain.Pop())) {
             return;
         }
         _WriteBufferUsage.buf = (CHAR*)_WriteBufferPtr->Buffer;
