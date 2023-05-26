@@ -4,12 +4,13 @@
 #include <fcntl.h>
 #include <cinttypes>
 
+// linux < 3.9
 #ifndef SO_REUSEPORT
 #define SO_REUSEPORT SO_REUSEADDR
 #endif
 
+// linux > 3.9 or bsd
 #define X_ENABLE_REUSEPORT SO_REUSEPORT
-#include <sys/socket.h>
 #if defined(SO_REUSEPORT_LB)
 #undef  X_ENABLE_REUSEPORT
 #define X_ENABLE_REUSEPORT SO_REUSEPORT_LB
@@ -35,10 +36,7 @@ X_NS
         }
 
         if (ReusePort) {
-        #ifdef X_ENABLE_REUSEPORT
-            int one = 1;
-            setsockopt(_ListenSocket, SOL_SOCKET, X_ENABLE_REUSEPORT, &one, sizeof(one));
-        #endif
+            setsockopt(_ListenSocket, SOL_SOCKET, SO_REUSEADDR, (char *)X2Ptr(int(1)), sizeof(int));
         }
 
         int flags = fcntl(_ListenSocket, F_GETFL);

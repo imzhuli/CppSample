@@ -3,6 +3,13 @@
 #if defined(X_SYSTEM_DARWIN)
 #include <fcntl.h>
 #include <cinttypes>
+
+#define X_ENABLE_REUSEPORT SO_REUSEPORT
+#if defined(SO_REUSEPORT_LB)
+#undef  X_ENABLE_REUSEPORT
+#define X_ENABLE_REUSEPORT SO_REUSEPORT_LB
+#endif
+
 X_NS
 {
 
@@ -21,6 +28,11 @@ X_NS
             X_DEBUG_PRINTF("xTcpServer::Init failed to create listen socket\n");
             return false;
         }
+
+        if (ReusePort) {
+            setsockopt(_ListenSocket, SOL_SOCKET, SO_REUSEADDR, (char *)X2Ptr(int(1)), sizeof(int));
+        }
+
         int flags = fcntl(_ListenSocket, F_GETFL);
         fcntl(_ListenSocket, F_SETFL, flags | O_NONBLOCK);
 
