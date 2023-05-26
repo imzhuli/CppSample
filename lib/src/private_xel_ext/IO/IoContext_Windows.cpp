@@ -62,7 +62,7 @@ X_NS {
 
         for (ULONG i = 0 ; i < EventCount ; ++i) {
             auto & Event = EventEntries[i];
-            auto ReactorPtr = (iBufferedIoReactor*)Event.lpCompletionKey;
+            auto ReactorPtr = (iIoReactor*)Event.lpCompletionKey;
             auto OverlappedPtr = Event.lpOverlapped;
 
             auto EventType = ReactorPtr->GetEventType(Event.lpOverlapped);
@@ -88,6 +88,7 @@ X_NS {
 
             // process write:
             if (EventType == eIoEventType::OutReady) {
+                X_DEBUG_PRINTF("ReactorPtr: %p\n", ReactorPtr);
                 ReactorPtr->SetWriteTransfered(Event.dwNumberOfBytesTransferred);
                 ReactorPtr->OnIoEventOutReady();
                 if (!ReactorPtr->IsAvailable()) {

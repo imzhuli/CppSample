@@ -37,6 +37,11 @@ X_NS
         xIoContext * _IoContextPtr;
         xSocket      _Socket X_DEBUG_INIT(InvalidSocket);
         iListener *  _ListenerPtr X_DEBUG_INIT(nullptr);
+
+    #if defined(X_SYSTEM_WINDOWS)
+        sockaddr_storage    _RemoteAddress;
+        int                 _RemoteAddressLength;
+    #endif
     };
 
 }

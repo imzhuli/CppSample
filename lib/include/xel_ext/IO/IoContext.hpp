@@ -62,15 +62,17 @@ X_NS
         X_PRIVATE_INLINE bool IsDisabled() const  { return _StatusFlags & SF_Disabled; }
         X_PRIVATE_INLINE bool HasError() const    { return _StatusFlags & SF_Error; }
 
+    private:
     #if defined(X_SYSTEM_WINDOWS)
+        // for IoContext to update aync-call-result:
         virtual eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) = 0;
+        X_INLINE void SetReadTransfered(DWORD Size)  { _ReadDataSize = Size; }
+        X_INLINE void SetWriteTransfered(DWORD Size) { _WriteDataSize = Size; }
     #elif defined(X_SYSTEM_LINUX)
     #elif defined(X_SYSTEM_DARWIN)
     #elif
         #error "Unsupported system"
     #endif
-
-    private:
         static constexpr const uint8_t SF_Disabled = 0x01;
         static constexpr const uint8_t SF_Error    = 0x02;
         uint8_t _StatusFlags = SF_Disabled;
@@ -81,17 +83,16 @@ X_NS
         X_INLINE void SetDisabled()    { _StatusFlags |= SF_Disabled; }
         X_INLINE void ClearError()     { _StatusFlags &= ~SF_Error; }
         X_INLINE void SetError()       { _StatusFlags |= SF_Error; }
+
+    #if defined(X_SYSTEM_WINDOWS)
+        DWORD      _ReadDataSize;
+        DWORD      _WriteDataSize;
+    #endif
     };
 
     class iBufferedIoReactor
     : public iIoReactor
     {
-    public:
-    #if defined(X_SYSTEM_WINDOWS)
-        X_INLINE void SetReadTransfered(DWORD Size) { _ReadDataSize = Size; }
-        X_INLINE void SetWriteTransfered(DWORD Size) { _WriteDataSize = Size; }
-    #endif
-
     protected:
         static constexpr const size_t InternalReadBufferSizeForTcp  = 2 * MaxPacketSize;
         static constexpr const size_t InternalReadBufferSizeForUdp = 8192;
@@ -103,22 +104,15 @@ X_NS
     protected:
     #if defined(X_SYSTEM_WINDOWS)
         DWORD      _ReadFlags;
-        DWORD      _ReadDataSize;
         WSABUF     _ReadBufferUsage;
         OVERLAPPED _ReadOverlappedObject;
 
         xPacketBufferChain  _WriteBufferChain;
         xPacketBuffer *     _WriteBufferPtr;
-        DWORD               _WriteDataSize;
         WSABUF              _WriteBufferUsage;
         OVERLAPPED          _WriteOverlappedObject;
-
-        sockaddr_storage    _RemoteAddress;
-        int                 _RemoteAddressLength;
-
     #else
-        size_t _ReadBufferDataSize;
-
+        size_t              _ReadBufferDataSize;
         xPacketBufferChain  _WriteBufferChain;
         xPacketBuffer *     _WriteBufferPtr;
     #endif
