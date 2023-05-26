@@ -4,6 +4,10 @@
 #include <fcntl.h>
 #include <cinttypes>
 
+#ifndef SO_REUSEPORT
+#define SO_REUSEPORT SO_REUSEADDR
+#endif
+
 #define X_ENABLE_REUSEPORT SO_REUSEPORT
 #include <sys/socket.h>
 #if defined(SO_REUSEPORT_LB)
