@@ -31,8 +31,6 @@ X_NS {
 
     void xIoContext::Clean()
     {
-        assert(_DeferredOperationList.IsEmpty());
-        assert(_PendingOperationList.IsEmpty());
         CleanUserEventTrigger();
         close(X_DEBUG_STEAL(_Poller, InvalidEventPoller));
     }
@@ -90,14 +88,6 @@ X_NS {
             }
             */
         }
-
-        _DeferredOperationList.GrabListTail(_PendingOperationList);
-        for (auto & Node : _DeferredOperationList) {
-            _DeferredOperationList.Remove(Node);
-            auto & IoReactor = (iIoReactor&)Node;
-            IoReactor.OnDeferredOperation();
-        }
-
     }
 
     namespace __io_detail__
