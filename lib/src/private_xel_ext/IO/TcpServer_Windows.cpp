@@ -82,7 +82,9 @@ X_NS
             setsockopt(_PreAcceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (char *)&_ListenSocket, sizeof(_ListenSocket));
         }
         memset(&_Overlapped, 0 , sizeof(_Overlapped));
-        auto AcceptResult = AcceptEx(_ListenSocket, _PreAcceptSocket, &_PreAcceptAddress, 0, sizeof(_PreAcceptAddress.Local), sizeof(_PreAcceptAddress.Remote), &_PreAcceptReceivedLength, &_Overlapped);
+        auto AcceptResult = AcceptEx(_ListenSocket, _PreAcceptSocket, &_PreAcceptAddress, 0,
+            sizeof(_PreAcceptAddress.Local) + 16,
+            sizeof(_PreAcceptAddress.Remote) + 16, &_PreAcceptAddress._PreAcceptReceivedLength, &_Overlapped);
         if (!AcceptResult && ERROR_IO_PENDING != WSAGetLastError()) {
             X_DEBUG_PRINTF("xTcpServer::TryPreAccept failed to exec AcceptEx: reason=%i\n", WSAGetLastError());
             Fatal();

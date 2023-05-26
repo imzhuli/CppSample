@@ -48,9 +48,11 @@ X_NS
 		xSocket           _PreAcceptSocket X_DEBUG_INIT(InvalidSocket);
 		struct {
 			sockaddr_storage  Local;
+			ubyte             _LocalAddressPadding[16];
 			sockaddr_storage  Remote;
+			ubyte             _RemoteAddressPadding[16];
+			DWORD             _PreAcceptReceivedLength = 0;
 		} _PreAcceptAddress;
-		DWORD             _PreAcceptReceivedLength;
         OVERLAPPED        _Overlapped;
 
 		X_API_MEMBER void TryPreAccept();
