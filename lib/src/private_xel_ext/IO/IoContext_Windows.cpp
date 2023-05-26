@@ -46,13 +46,10 @@ X_NS {
 
     void xIoContext::LoopOnce(int TimeoutMS)
     {
-        DWORD IoSize = 0;
-        ULONG_PTR CompleteKeys = 0;
-        LPOVERLAPPED OverlappedPtr = NULL;
-
         OVERLAPPED_ENTRY EventEntries[256];
         ULONG EventCount = 0;
         BOOL Result = GetQueuedCompletionStatusEx (_Poller, EventEntries, (ULONG)Length(EventEntries), &EventCount, (TimeoutMS < 0 ? INFINITE : (DWORD)TimeoutMS), FALSE);
+
         if (!Result) {
             if (ERROR_ABANDONED_WAIT_0 == GetLastError()) {
                 Fatal("xIoContext::LoopOnce, Invalid _Poller");
@@ -63,7 +60,6 @@ X_NS {
         for (ULONG i = 0 ; i < EventCount ; ++i) {
             auto & Event = EventEntries[i];
             auto ReactorPtr = (iIoReactor*)Event.lpCompletionKey;
-            auto OverlappedPtr = Event.lpOverlapped;
 
             auto EventType = ReactorPtr->GetEventType(Event.lpOverlapped);
             X_DEBUG_PRINTF("xIoContext::LoopOnce, ReactorPtr=%p, lpOverlapped=%p, Transfered=%zi, EventType=%i\n", ReactorPtr, Event.lpOverlapped, (size_t)Event.dwNumberOfBytesTransferred, (int)EventType);
@@ -88,7 +84,6 @@ X_NS {
 
             // process write:
             if (EventType == eIoEventType::OutReady) {
-                X_DEBUG_PRINTF("ReactorPtr: %p\n", ReactorPtr);
                 ReactorPtr->SetWriteTransfered(Event.dwNumberOfBytesTransferred);
                 ReactorPtr->OnIoEventOutReady();
                 if (!ReactorPtr->IsAvailable()) {

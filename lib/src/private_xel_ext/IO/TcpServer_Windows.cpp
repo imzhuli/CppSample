@@ -79,7 +79,6 @@ X_NS
                 Fatal();
                 return;
             }
-            setsockopt(_PreAcceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (char *)&_ListenSocket, sizeof(_ListenSocket));
         }
         memset(&_Overlapped, 0 , sizeof(_Overlapped));
         auto AcceptResult = AcceptEx(_ListenSocket, _PreAcceptSocket, &_PreAcceptAddress, 0,
@@ -94,6 +93,7 @@ X_NS
 
     void xTcpServer::OnIoEventOutReady()
     {
+        setsockopt(_PreAcceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (char *)&_ListenSocket, sizeof(_ListenSocket));
         _ListenerPtr->OnNewConnection(this, Steal(_PreAcceptSocket, InvalidSocket));
         TryPreAccept();
     }
