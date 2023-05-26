@@ -50,6 +50,26 @@ X_NS
         return DataSize;
     }
 
+    xNetAddress xTcpConnection::GetRemoteAddress() const
+    {
+		sockaddr_storage SockAddr;
+		socklen_t SockAddrLen = sizeof(SockAddr);
+        if(getpeername(_Socket, (sockaddr*)&SockAddr, &SockAddrLen)) {
+            return {};
+        }
+        return xNetAddress::Parse(&SockAddr);
+    }
+
+    xNetAddress xTcpConnection::GetLocalAddress() const
+    {
+		sockaddr_storage SockAddr;
+		socklen_t SockAddrLen = sizeof(SockAddr);
+        if(getpeername(_Socket, (sockaddr*)&SockAddr, &SockAddrLen)) {
+            return {};
+        }
+        return xNetAddress::Parse(&SockAddr);
+    }
+
     void xTcpConnection::ResizeSendBuffer(size_t Size)
     {
         assert(Size < INT_MAX);

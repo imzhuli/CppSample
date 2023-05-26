@@ -112,7 +112,7 @@ X_NS
         X_API_STATIC_MEMBER xNetAddress Parse(const sockaddr * SockAddrPtr);
         X_API_STATIC_MEMBER xNetAddress Parse(const sockaddr_in * SockAddr4Ptr);
         X_API_STATIC_MEMBER xNetAddress Parse(const sockaddr_in6 * SockAddr6Ptr);
-        X_INLINE xNetAddress Parse(const struct sockaddr_storage * SockAddrStoragePtr) {
+        X_STATIC_INLINE     xNetAddress Parse(const struct sockaddr_storage * SockAddrStoragePtr) {
             return Parse((sockaddr*)SockAddrStoragePtr);
         }
     };

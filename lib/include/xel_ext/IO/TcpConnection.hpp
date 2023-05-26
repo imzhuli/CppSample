@@ -45,8 +45,8 @@ X_NS
         X_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr);
         X_API_MEMBER void Clean();
 
-        // X_API_MEMBER xNetAddress GetRemoteAddress() const;
-        // X_API_MEMBER xNetAddress GetLocalAddress() const;
+        X_API_MEMBER xNetAddress GetRemoteAddress() const;
+        X_API_MEMBER xNetAddress GetLocalAddress() const;
 
         X_API_MEMBER void ResizeSendBuffer(size_t Size);
         X_API_MEMBER void ResizeReceiveBuffer(size_t Size);
