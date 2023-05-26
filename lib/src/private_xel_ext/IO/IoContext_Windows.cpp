@@ -71,6 +71,7 @@ X_NS {
             X_DEBUG_PRINTF("xIoContext::LoopOnce, ReactorPtr=%p, lpOverlapped=%p, Transfered=%zi, EventType=%i\n", ReactorPtr, Event.lpOverlapped, (size_t)Event.dwNumberOfBytesTransferred, (int)EventType);
 
             if (EventType == eIoEventType::Error) {
+                ReactorPtr->SetError();
                 ReactorPtr->OnIoEventError();
                 continue;
             }
@@ -80,7 +81,9 @@ X_NS {
                 ReactorPtr->SetReadTransfered(Event.dwNumberOfBytesTransferred);
                 ReactorPtr->OnIoEventInReady();
                 if (!ReactorPtr->IsAvailable()) {
-                    ReactorPtr->OnIoEventError();
+                    if (ReactorPtr->HasError()) {
+                        ReactorPtr->OnIoEventError();
+                    }
                     continue;
                 }
             }
@@ -90,7 +93,9 @@ X_NS {
                 ReactorPtr->SetWriteTransfered(Event.dwNumberOfBytesTransferred);
                 ReactorPtr->OnIoEventOutReady();
                 if (!ReactorPtr->IsAvailable()) {
-                    ReactorPtr->OnIoEventError();
+                    if (ReactorPtr->HasError()) {
+                        ReactorPtr->OnIoEventError();
+                    }
                     continue;
                 }
             }

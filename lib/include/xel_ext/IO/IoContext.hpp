@@ -60,6 +60,7 @@ X_NS
     : public xIoReactorNode
     , private xNonCopyable
     {
+        friend class xIoContext;
     public:
         virtual void OnDeferredOperation() { Pass(); }
         virtual void OnIoEventInReady()    { Pass(); }
@@ -89,7 +90,6 @@ X_NS
         X_INLINE void SetDisabled()    { _StatusFlags |= SF_Disabled; }
         X_INLINE void ClearError()     { _StatusFlags &= ~SF_Error; }
         X_INLINE void SetError()       { _StatusFlags |= SF_Error; }
-
     };
 
     class iBufferedIoReactor

@@ -53,6 +53,7 @@ X_NS {
             }
 
             if (EV.events & (EPOLLERR | EPOLLHUP)) {
+                ReactorPtr->SetError();
                 ReactorPtr->OnIoEventError();
                 continue;
             }
@@ -60,7 +61,9 @@ X_NS {
             if (EV.events & EPOLLIN) {
                 ReactorPtr->OnIoEventInReady();
                 if (!ReactorPtr->IsAvailable()) {
-                    ReactorPtr->OnIoEventError();
+                    if (ReactorPtr->HasError()) {
+                        ReactorPtr->OnIoEventError();
+                    }
                     continue;
                 }
             }
@@ -68,7 +71,9 @@ X_NS {
             if (EV.events & EPOLLOUT) {
                 ReactorPtr->OnIoEventOutReady();
                 if (!ReactorPtr->IsAvailable()) {
-                    ReactorPtr->OnIoEventError();
+                    if (ReactorPtr->HasError()) {
+                        ReactorPtr->OnIoEventError();
+                    }
                     continue;
                 }
             }

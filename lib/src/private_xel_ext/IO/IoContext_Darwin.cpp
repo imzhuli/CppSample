@@ -55,6 +55,7 @@ X_NS {
             }
 
             if (EV.flags & EV_ERROR) {
+                ReactorPtr->SetError();
                 ReactorPtr->OnIoEventError();
                 continue;
             }
@@ -62,7 +63,9 @@ X_NS {
             if (EV.filter == EVFILT_READ) {
                 ReactorPtr->OnIoEventInReady();
                 if (!ReactorPtr->IsAvailable()) {
-                    ReactorPtr->OnIoEventError();
+                    if (ReactorPtr->HasError()) {
+                        ReactorPtr->OnIoEventError();
+                    }
                     continue;
                 }
             }
@@ -70,7 +73,9 @@ X_NS {
             if (EV.filter == EVFILT_WRITE) {
                 ReactorPtr->OnIoEventOutReady();
                 if (!ReactorPtr->IsAvailable()) {
-                    ReactorPtr->OnIoEventError();
+                    if (ReactorPtr->HasError()) {
+                        ReactorPtr->OnIoEventError();
+                    }
                     continue;
                 }
             }
