@@ -90,7 +90,7 @@ X_NS
 
 		if (ReadSize == -1) {
 			if (errno != EAGAIN) {
-				SetUnavailable();
+				SetError();
 				return;
 			}
 			return;

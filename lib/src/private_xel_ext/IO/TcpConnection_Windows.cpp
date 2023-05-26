@@ -96,7 +96,7 @@ X_NS
                 auto ErrorCode = WSAGetLastError();
                 if (ErrorCode != WSA_IO_PENDING) {
                     X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
-                    SetUnavailable();
+                    SetError();
                 }
                 return false;
             }
@@ -153,7 +153,7 @@ X_NS
         if (!_ReadDataSize) {
             _Status = eStatus::Closing;
             _ListenerPtr->OnPeerClose(this);
-            SetUnavailable();
+            SetDisabled();
             return;
         }
         auto ProcessDataPtr = (ubyte*)_ReadBuffer;
@@ -161,7 +161,7 @@ X_NS
         while(RemainDataSize) {
             auto ProcessedData = _ListenerPtr->OnData(this, ProcessDataPtr, RemainDataSize);
             if (ProcessedData == InvalidPacketSize) {
-                SetUnavailable();
+                SetError();
                 return;
             }
             if (!ProcessedData){
@@ -186,13 +186,13 @@ X_NS
                                 (char *)&seconds, (PINT)&bytes );
             if (iResult != NO_ERROR ) {
                 X_DEBUG_PRINTF( "getsockopt(SO_CONNECT_TIME) failed with error: %u\n", WSAGetLastError());
-                SetUnavailable();
+                SetError();
                 return;
             }
             else {
                 if (seconds == -1) {
                     X_DEBUG_PRINTF("Connection not established yet\n");
-                    SetUnavailable();
+                    SetError();
                     return;
                 }
                 X_DEBUG_PRINTF("Connection has been established %u seconds\n", seconds);
@@ -224,8 +224,8 @@ X_NS
         if (Error) {
             auto ErrorCode = WSAGetLastError();
             if (ErrorCode != WSA_IO_PENDING) {
-                X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
-                SetUnavailable();
+                X_DEBUG_PRINTF("xTcpConnection::TryRecvData ErrorCode: %u\n", ErrorCode);
+                SetError();
             }
         }
     }
@@ -251,7 +251,7 @@ X_NS
             auto ErrorCode = WSAGetLastError();
             if (ErrorCode != WSA_IO_PENDING) {
                 X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
-                SetUnavailable();
+                SetError();
                 return;
             }
         }

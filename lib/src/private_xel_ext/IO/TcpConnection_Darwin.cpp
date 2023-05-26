@@ -134,7 +134,7 @@ X_NS
                 X_DEBUG_PRINTF("xTcpConnection::OnIoEventInReady EOF\n");
                 _Status = eStatus::Closing;
                 _ListenerPtr->OnPeerClose(this);
-                SetUnavailable();
+                SetDisabled();
                 return;
             }
             if (-1 == ReadSize) {
@@ -142,7 +142,7 @@ X_NS
                 if (EAGAIN == Error) {
                     return;
                 }
-                SetUnavailable();
+                SetError();
                 return;
             }
             _ReadBufferDataSize += ReadSize;
@@ -150,7 +150,7 @@ X_NS
             while(_ReadBufferDataSize) {
                 auto ProcessedData = _ListenerPtr->OnData(this, ProcessDataPtr, _ReadBufferDataSize);
                 if (ProcessedData == InvalidPacketSize) {
-                    SetUnavailable();
+                    SetError();
                     return;
                 }
                 if (!ProcessedData){
@@ -192,7 +192,7 @@ X_NS
                     }
                     return;
                 }
-                SetUnavailable();
+                SetError();
                 return;
             }
             if ((_WriteBufferPtr->DataSize -= SendSize)) {
@@ -212,7 +212,6 @@ X_NS
         }
         return;
     }
-
 
     void xTcpConnection::SuspendReading()
     {

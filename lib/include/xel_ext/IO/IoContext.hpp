@@ -66,7 +66,10 @@ X_NS
         virtual void OnIoEventOutReady()   { Pass(); }
         virtual void OnIoEventError()      { Pass(); }
 
-        X_PRIVATE_INLINE bool IsAvailable() const { return _Available; }
+        X_PRIVATE_INLINE bool IsAvailable() const { return !_StatusFlags; }
+        X_PRIVATE_INLINE bool IsDisabled() const  { return _StatusFlags & SF_Disabled; }
+        X_PRIVATE_INLINE bool HasError() const    { return _StatusFlags & SF_Error; }
+
     #if defined(X_SYSTEM_WINDOWS)
         virtual eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) = 0;
     #elif defined(X_SYSTEM_LINUX)
@@ -75,12 +78,18 @@ X_NS
         #error "Unsupported system"
     #endif
 
-    protected:
-        X_INLINE void SetAvailable()   { _Available = true; }
-        X_INLINE void SetUnavailable() { _Available = false; }
-
     private:
-        bool _Available = false;
+        static constexpr const uint8_t SF_Disabled = 0x01;
+        static constexpr const uint8_t SF_Error    = 0x02;
+        uint8_t _StatusFlags = SF_Disabled;
+
+    protected:
+        X_INLINE void SetAvailable()   { _StatusFlags = 0; }
+        X_INLINE void SetEnabled()     { _StatusFlags &= ~SF_Disabled; }
+        X_INLINE void SetDisabled()    { _StatusFlags |= SF_Disabled; }
+        X_INLINE void ClearError()     { _StatusFlags &= ~SF_Error; }
+        X_INLINE void SetError()       { _StatusFlags |= SF_Error; }
+
     };
 
     class iBufferedIoReactor

@@ -76,7 +76,7 @@ X_NS
             auto ErrorCode = WSAGetLastError();
             if (ErrorCode != WSA_IO_PENDING) {
                 X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
-                SetUnavailable();
+                SetError();
             }
         }
 	}
