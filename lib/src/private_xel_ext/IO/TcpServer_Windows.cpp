@@ -36,6 +36,14 @@ X_NS
         }
         setsockopt(_ListenSocket, SOL_SOCKET, SO_SNDBUF, (char *)X2Ptr(int(0)), sizeof(int));
 
+        if (ReusePort) {
+        #ifdef SO_REUSEADDR
+            setsockopt(_ListenSocket, SOL_SOCKET, SO_REUSEADDR, (char *)X2Ptr(int(1)), sizeof(int));
+        #else
+            #pragma message("warning SO_REUSEADDR is not enabled on target platform")
+        #endif
+        }
+
         auto BindRet = bind(_ListenSocket, (sockaddr*)&AddrStorage, (int)AddrLen);
         if( BindRet == SOCKET_ERROR ) {
             return false;
