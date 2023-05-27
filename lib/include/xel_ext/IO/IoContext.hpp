@@ -116,19 +116,19 @@ X_NS
 
     protected:
         friend class xIoContext; // called on completion event port
-        X_INLINE void SetReadTransfered(DWORD Size)  { Todo(); }
-        X_INLINE void SetWriteTransfered(DWORD Size) { Todo(); }
+        X_INLINE void SetReadTransfered(DWORD Size)  { IoBufferPtr->ReadObject.DataSize  = Size; }
+        X_INLINE void SetWriteTransfered(DWORD Size) { IoBufferPtr->WriteObject.DataSize = Size; }
 
     protected:
-        struct xOverlappedBuffer;
+        struct xOverlappedIoBuffer;
         struct xOverlappedBlock
         {
-            xOverlappedBuffer *  Outter;
-            DWORD                DataSize;
-            OVERLAPPED           OverlappedObject;
+            xOverlappedIoBuffer *  Outter;
+            DWORD                  DataSize;
+            OVERLAPPED             OverlappedObject;
         };
 
-        struct xOverlappedBuffer
+        struct xOverlappedIoBuffer
         {
             bool                  DeleteMark;
             xOverlappedBlock      ReadObject;
@@ -137,19 +137,8 @@ X_NS
             xPacketBufferChain    WriteBufferChain;
         };
 
-        struct {
-            DWORD               _ReadDataSize;
-            WSABUF              _ReadBufferUsage;
-            OVERLAPPED          _ReadOverlappedObject;
+        xOverlappedIoBuffer * IoBufferPtr;
 
-            DWORD               _WriteDataSize;
-            WSABUF              _WriteBufferUsage;
-            OVERLAPPED          _WriteOverlappedObject;
-        };
-
-        size_t              _ReadBufferDataSize;
-        xPacketBufferChain  _WriteBufferChain;
-        xPacketBuffer *     _WriteBufferPtr;
     #endif
     };
 

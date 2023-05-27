@@ -108,6 +108,18 @@ X_NS
         return true;
     }
 
+    void xTcpConnection::Clean()
+    {
+        X_DEBUG_PRINTF("Cleaning tcp connection: %p\n", this);
+        if (_WriteBufferPtr) {
+            delete _WriteBufferPtr;
+            while(auto WriteBufferPtr = _WriteBufferChain.Pop()) {
+                delete WriteBufferPtr;
+            }
+        }
+        XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
+    }
+
     void xTcpConnection::OnIoEventInReady()
     {
         // X_DEBUG_PRINTF("xTcpConnection::OnIoEventInReady\n");

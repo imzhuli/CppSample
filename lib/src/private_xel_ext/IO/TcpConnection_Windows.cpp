@@ -33,8 +33,13 @@ X_NS
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
         _Status = eStatus::Connected;
+
         _SuspendReading = false;
         _Reading = false;
+        _FlushFlag = false;
+
+        Todo(); // TODO
+
         SetAvailable();
 
         TryRecvData();
@@ -124,13 +129,14 @@ X_NS
             }
         } while(false);
 
-        memset(&_WriteOverlappedObject, 0, sizeof(_WriteOverlappedObject));
-        auto Error = ConnectEx(_Socket, (SOCKADDR*)(&AddrStorage), (int)AddrLen, NULL, NULL, NULL, &_WriteOverlappedObject);
-        if (Error) {
-            auto ErrorCode = WSAGetLastError();
-            X_DEBUG_PRINTF("Failed to build connection ErrorCode: %u\n", ErrorCode);
-            return false;
-        }
+        // TODO: make connection
+        // memset(&_WriteOverlappedObject, 0, sizeof(_WriteOverlappedObject));
+        // auto Error = ConnectEx(_Socket, (SOCKADDR*)(&AddrStorage), (int)AddrLen, NULL, NULL, NULL, &_WriteOverlappedObject);
+        // if (Error) {
+        //     auto ErrorCode = WSAGetLastError();
+        //     X_DEBUG_PRINTF("Failed to build connection ErrorCode: %u\n", ErrorCode);
+        //     return false;
+        // }
 
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
@@ -139,9 +145,25 @@ X_NS
         _Reading = false;
         _FlushFlag = false;
 
+
+        Todo(); // TODO
+
         FailSafe.Dismiss();
         SetAvailable();
         return true;
+    }
+
+
+    void xTcpConnection::Clean()
+    {
+        // X_DEBUG_PRINTF("Cleaning tcp connection: %p\n", this);
+        // if (_WriteBufferPtr) {
+        //     delete _WriteBufferPtr;
+        //     while(auto WriteBufferPtr = _WriteBufferChain.Pop()) {
+        //         delete WriteBufferPtr;
+        //     }
+        // }
+        // XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
     }
 
     void xTcpConnection::OnIoEventInReady()
