@@ -29,7 +29,6 @@ X_NS
         X_API_MEMBER void OnIoEventError() override;
 
     #if defined(X_SYSTEM_WINDOWS)
-        X_API_MEMBER eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) override;
         X_API_MEMBER void TryRecvData();
     #endif
 

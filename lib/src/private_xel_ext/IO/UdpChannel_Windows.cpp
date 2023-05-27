@@ -65,37 +65,32 @@ X_NS
 
 	void xUdpChannel::TryRecvData()
 	{
-        _ReadBufferUsage.buf = (CHAR*)_ReadBuffer;
-        _ReadBufferUsage.len = (ULONG)sizeof(_ReadBuffer);
-		memset(&_RemoteAddress, 0, sizeof(_RemoteAddress));
-		_RemoteAddressLength = sizeof(_RemoteAddress);
-        memset(&_ReadOverlappedObject, 0, sizeof(_ReadOverlappedObject));
-        auto Error = WSARecvFrom(_Socket, &_ReadBufferUsage, 1, nullptr, X2Ptr(DWORD(0)), (sockaddr*)&_RemoteAddress, &_RemoteAddressLength, &_ReadOverlappedObject, nullptr);
-        if (Error) {
-            auto ErrorCode = WSAGetLastError();
-            if (ErrorCode != WSA_IO_PENDING) {
-                X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
-                SetError();
-            }
-        }
+        // _ReadBufferUsage.buf = (CHAR*)_ReadBuffer;
+        // _ReadBufferUsage.len = (ULONG)sizeof(_ReadBuffer);
+		// memset(&_RemoteAddress, 0, sizeof(_RemoteAddress));
+		// _RemoteAddressLength = sizeof(_RemoteAddress);
+        // memset(&_ReadOverlappedObject, 0, sizeof(_ReadOverlappedObject));
+        // auto Error = WSARecvFrom(_Socket, &_ReadBufferUsage, 1, nullptr, X2Ptr(DWORD(0)), (sockaddr*)&_RemoteAddress, &_RemoteAddressLength, &_ReadOverlappedObject, nullptr);
+        // if (Error) {
+        //     auto ErrorCode = WSAGetLastError();
+        //     if (ErrorCode != WSA_IO_PENDING) {
+        //         X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
+        //         SetError();
+        //     }
+        // }
 	}
 
     void xUdpChannel::OnIoEventInReady()
 	{
-		assert(_ReadDataSize);
-		auto RemoteAddress = xNetAddress::Parse((sockaddr*)&_RemoteAddress);
-		_ListenerPtr->OnData(this, _ReadBuffer, _ReadDataSize, RemoteAddress);
-		TryRecvData();
+		// assert(_ReadDataSize);
+		// auto RemoteAddress = xNetAddress::Parse((sockaddr*)&_RemoteAddress);
+		// _ListenerPtr->OnData(this, _ReadBuffer, _ReadDataSize, RemoteAddress);
+		// TryRecvData();
 	}
 
     void xUdpChannel::OnIoEventError()
 	{
 		_ListenerPtr->OnError(this);
-	}
-
-	eIoEventType xUdpChannel::GetEventType(OVERLAPPED * OverlappedPtr)
-	{
-		return eIoEventType::InReady;
 	}
 
 }

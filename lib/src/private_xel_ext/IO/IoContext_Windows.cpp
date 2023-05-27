@@ -60,15 +60,31 @@ X_NS {
         for (ULONG i = 0 ; i < EventCount ; ++i) {
             auto & Event = EventEntries[i];
             auto ReactorPtr = (iBufferedIoReactor*)Event.lpCompletionKey;
+            auto OverlappedPtr = Event.lpOverlapped;
 
-            auto EventType = ReactorPtr->GetEventType(Event.lpOverlapped);
-            X_DEBUG_PRINTF("xIoContext::LoopOnce, ReactorPtr=%p, lpOverlapped=%p, Transfered=%zi, EventType=%i\n", ReactorPtr, Event.lpOverlapped, (size_t)Event.dwNumberOfBytesTransferred, (int)EventType);
-
-            if (EventType == eIoEventType::Error) {
-                ReactorPtr->SetError();
-                ReactorPtr->OnIoEventError();
+            // Get Outter object and see, if ioevent should be ignored:
+            auto OverlappedBlockPtr = X_Entry(OverlappedPtr, iBufferedIoReactor::xOverlappedBlock, OverlappedObject);
+            if (!OverlappedBlockPtr) { // User Trigger event does not have overlapped object
                 continue;
             }
+
+            auto OverlappedBufferPtr = OverlappedBlockPtr->Outter;
+
+            eIoEventType EventType = eIoEventType::Unspecified;
+            if (OverlappedBufferPtr->DeleteMark) {
+                EventType = eIoEventType::Cleanup;
+            }
+            else if (OverlappedPtr == &OverlappedBufferPtr->ReadObject.OverlappedObject) {
+                EventType = eIoEventType::InReady;
+            }
+            else if (OverlappedPtr == &OverlappedBufferPtr->WriteObject.OverlappedObject) {
+                EventType = eIoEventType::OutReady;
+            }
+            else {
+                X_DEBUG_BREAKPOINT("Invalid event type test.");
+                Fatal();
+            }
+            X_DEBUG_PRINTF("xIoContext::LoopOnce, ReactorPtr=%p, lpOverlapped=%p, Transfered=%zi, EventType=%i\n", ReactorPtr, Event.lpOverlapped, (size_t)Event.dwNumberOfBytesTransferred, (int)EventType);
 
             // process read:
             if (EventType == eIoEventType::InReady) {
@@ -103,7 +119,6 @@ X_NS {
 
     namespace __io_detail__
     {
-
         class xUserEventTrigger final
         : public iBufferedIoReactor
         , public xIoContext::iUserEventTrigger
@@ -112,7 +127,6 @@ X_NS {
             X_API_MEMBER bool Init(xIoContext * IoContextPtr);
             X_API_MEMBER void Clean();
             X_API_MEMBER void Trigger() override;
-            X_API_MEMBER eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) override { return eIoEventType::Ignored; }
 
         private:
             void OnIoEventInReady() override;
@@ -132,8 +146,7 @@ X_NS {
         void xUserEventTrigger::OnIoEventInReady()
         {}
 
-        void xUserEventTrigger::Trigger()
-        {
+        void xUserEventTrigger::Trigger() {
             PostQueuedCompletionStatus(*_IoContextPtr, 0, (ULONG_PTR)this, nullptr);
         }
 

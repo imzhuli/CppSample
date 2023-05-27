@@ -29,14 +29,12 @@ X_NS
             return false;
         }
 
-        _WriteBufferPtr = nullptr;
         _Socket = NativeHandle;
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
         _Status = eStatus::Connected;
         _SuspendReading = false;
         _Reading = false;
-        _FlushFlag = false;
         SetAvailable();
 
         TryRecvData();
@@ -114,10 +112,6 @@ X_NS
             return false;
         }
 
-        _WriteBufferPtr = nullptr;
-        _IoContextPtr = IoContextPtr;
-        _ListenerPtr = ListenerPtr;
-
         /* ConnectEx requires the socket to be initially bound. */
         do {
             struct sockaddr_storage BindAddr;
@@ -134,10 +128,12 @@ X_NS
         auto Error = ConnectEx(_Socket, (SOCKADDR*)(&AddrStorage), (int)AddrLen, NULL, NULL, NULL, &_WriteOverlappedObject);
         if (Error) {
             auto ErrorCode = WSAGetLastError();
-            X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
+            X_DEBUG_PRINTF("Failed to build connection ErrorCode: %u\n", ErrorCode);
             return false;
         }
 
+        _IoContextPtr = IoContextPtr;
+        _ListenerPtr = ListenerPtr;
         _Status = eStatus::Connecting;
         _SuspendReading = false;
         _Reading = false;
@@ -150,63 +146,63 @@ X_NS
 
     void xTcpConnection::OnIoEventInReady()
     {
-        _Reading = false;
-        if (!_ReadDataSize) {
-            _Status = eStatus::Closing;
-            _ListenerPtr->OnPeerClose(this);
-            SetDisabled();
-            return;
-        }
-        auto ProcessDataPtr = (ubyte*)_ReadBuffer;
-        size_t RemainDataSize = (_ReadBufferUsage.buf - (CHAR*)_ReadBuffer) + _ReadDataSize;
-        while(RemainDataSize) {
-            auto ProcessedData = _ListenerPtr->OnData(this, ProcessDataPtr, RemainDataSize);
-            if (ProcessedData == InvalidPacketSize) {
-                SetError();
-                return;
-            }
-            if (!ProcessedData){
-                if (ProcessDataPtr != _ReadBuffer) { // some data are processed
-                    memmove(_ReadBuffer, ProcessDataPtr, RemainDataSize);
-                }
-                break;
-            }
-            ProcessDataPtr += ProcessedData;
-            RemainDataSize -= ProcessedData;
-        }
-        TryRecvData(RemainDataSize);
+        // _Reading = false;
+        // if (!_ReadDataSize) {
+        //     _Status = eStatus::Closing;
+        //     _ListenerPtr->OnPeerClose(this);
+        //     SetDisabled();
+        //     return;
+        // }
+        // auto ProcessDataPtr = (ubyte*)_ReadBuffer;
+        // size_t RemainDataSize = (_ReadBufferUsage.buf - (CHAR*)_ReadBuffer) + _ReadDataSize;
+        // while(RemainDataSize) {
+        //     auto ProcessedData = _ListenerPtr->OnData(this, ProcessDataPtr, RemainDataSize);
+        //     if (ProcessedData == InvalidPacketSize) {
+        //         SetError();
+        //         return;
+        //     }
+        //     if (!ProcessedData){
+        //         if (ProcessDataPtr != _ReadBuffer) { // some data are processed
+        //             memmove(_ReadBuffer, ProcessDataPtr, RemainDataSize);
+        //         }
+        //         break;
+        //     }
+        //     ProcessDataPtr += ProcessedData;
+        //     RemainDataSize -= ProcessedData;
+        // }
+        // TryRecvData(RemainDataSize);
     }
 
     void xTcpConnection::OnIoEventOutReady()
     {
-        if (_Status == eStatus::Connecting) {
-            int seconds;
-            int bytes = sizeof(seconds);
+        // if (_Status == eStatus::Connecting) {
+        //     int seconds;
+        //     int bytes = sizeof(seconds);
 
-            auto iResult = getsockopt(_Socket, SOL_SOCKET, SO_CONNECT_TIME,
-                                (char *)&seconds, (PINT)&bytes );
-            if (iResult != NO_ERROR ) {
-                X_DEBUG_PRINTF( "getsockopt(SO_CONNECT_TIME) failed with error: %u\n", WSAGetLastError());
-                SetError();
-                return;
-            }
-            else {
-                if (seconds == -1) {
-                    X_DEBUG_PRINTF("Connection not established yet\n");
-                    SetError();
-                    return;
-                }
-                X_DEBUG_PRINTF("Connection has been established %u seconds\n", seconds);
-            }
-            _Status = eStatus::Connected;
-            _ListenerPtr->OnConnected(this);
-            TryRecvData();
-        } else {
-            TrySendData();
-        }
-        if (Steal(_FlushFlag)) {
-            _ListenerPtr->OnFlush(this);
-        }
+        //     auto iResult = getsockopt(_Socket, SOL_SOCKET, SO_CONNECT_TIME,
+        //                         (char *)&seconds, (PINT)&bytes );
+        //     if (iResult != NO_ERROR ) {
+        //         X_DEBUG_PRINTF( "getsockopt(SO_CONNECT_TIME) failed with error: %u\n", WSAGetLastError());
+        //         SetError();
+        //         return;
+        //     }
+        //     else {
+        //         if (seconds == -1) {
+        //             X_DEBUG_PRINTF("Connection not established yet\n");
+        //             SetError();
+        //             return;
+        //         }
+        //         X_DEBUG_PRINTF("Connection has been established %u seconds\n", seconds);
+        //     }
+        //     _Status = eStatus::Connected;
+        //     _ListenerPtr->OnConnected(this);
+        //     TryRecvData();
+        // } else {
+        //     TrySendData();
+        // }
+        // if (Steal(_FlushFlag)) {
+        //     _ListenerPtr->OnFlush(this);
+        // }
     }
 
     void xTcpConnection::TryRecvData(size_t SkipSize)
@@ -214,47 +210,47 @@ X_NS
         if (_SuspendReading || _Reading) {
             return;
         }
-        _Reading = true;
-        _ReadBufferUsage.buf = (CHAR*)_ReadBuffer + SkipSize;
-        _ReadBufferUsage.len = (ULONG)(sizeof(_ReadBuffer) - SkipSize);
-        memset(&_ReadOverlappedObject, 0, sizeof(_ReadOverlappedObject));
-        assert(_ReadBufferUsage.len);
-        auto Error = WSARecv(_Socket, &_ReadBufferUsage, 1, nullptr, X2Ptr(DWORD(0)), &_ReadOverlappedObject, nullptr);
-        if (Error) {
-            auto ErrorCode = WSAGetLastError();
-            if (ErrorCode != WSA_IO_PENDING) {
-                X_DEBUG_PRINTF("xTcpConnection::TryRecvData ErrorCode: %u\n", ErrorCode);
-                SetError();
-            }
-        }
+        // _Reading = true;
+        // _ReadBufferUsage.buf = (CHAR*)_ReadBuffer + SkipSize;
+        // _ReadBufferUsage.len = (ULONG)(sizeof(_ReadBuffer) - SkipSize);
+        // memset(&_ReadOverlappedObject, 0, sizeof(_ReadOverlappedObject));
+        // assert(_ReadBufferUsage.len);
+        // auto Error = WSARecv(_Socket, &_ReadBufferUsage, 1, nullptr, X2Ptr(DWORD(0)), &_ReadOverlappedObject, nullptr);
+        // if (Error) {
+        //     auto ErrorCode = WSAGetLastError();
+        //     if (ErrorCode != WSA_IO_PENDING) {
+        //         X_DEBUG_PRINTF("xTcpConnection::TryRecvData ErrorCode: %u\n", ErrorCode);
+        //         SetError();
+        //     }
+        // }
     }
 
     void xTcpConnection::TrySendData()
     {
-        if (_Status == eStatus::Connecting) {
-            return;
-        }
-        if (_WriteBufferPtr) {
-            assert(_WriteBufferUsage.len == (ULONG)_WriteBufferPtr->DataSize);
-            delete _WriteBufferPtr;
-        }
-        if (!(_WriteBufferPtr = _WriteBufferChain.Pop())) {
-            _FlushFlag = true;
-            return;
-        }
-        _WriteBufferUsage.buf = (CHAR*)_WriteBufferPtr->Buffer;
-        _WriteBufferUsage.len = (ULONG)_WriteBufferPtr->DataSize;
-        memset(&_WriteOverlappedObject, 0, sizeof(_WriteOverlappedObject));
-        auto Error = WSASend(_Socket, &_WriteBufferUsage, 1, nullptr, 0, &_WriteOverlappedObject, nullptr);
-        if (Error) {
-            auto ErrorCode = WSAGetLastError();
-            if (ErrorCode != WSA_IO_PENDING) {
-                X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
-                SetError();
-                return;
-            }
-        }
-        return;
+        // if (_Status == eStatus::Connecting) {
+        //     return;
+        // }
+        // if (_WriteBufferPtr) {
+        //     assert(_WriteBufferUsage.len == (ULONG)_WriteBufferPtr->DataSize);
+        //     delete _WriteBufferPtr;
+        // }
+        // if (!(_WriteBufferPtr = _WriteBufferChain.Pop())) {
+        //     _FlushFlag = true;
+        //     return;
+        // }
+        // _WriteBufferUsage.buf = (CHAR*)_WriteBufferPtr->Buffer;
+        // _WriteBufferUsage.len = (ULONG)_WriteBufferPtr->DataSize;
+        // memset(&_WriteOverlappedObject, 0, sizeof(_WriteOverlappedObject));
+        // auto Error = WSASend(_Socket, &_WriteBufferUsage, 1, nullptr, 0, &_WriteOverlappedObject, nullptr);
+        // if (Error) {
+        //     auto ErrorCode = WSAGetLastError();
+        //     if (ErrorCode != WSA_IO_PENDING) {
+        //         X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
+        //         SetError();
+        //         return;
+        //     }
+        // }
+        // return;
     }
 
     void xTcpConnection::SuspendReading()

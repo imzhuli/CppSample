@@ -36,19 +36,36 @@ X_NS
     private:
         xEventPoller          _Poller X_DEBUG_INIT(InvalidEventPoller);
         iUserEventTrigger *   _UserEventTriggerPtr = nullptr;
+
+    #ifdef X_SYSTEM_WINDOWS
+    public:
+        struct xDeferredEventNode : xListNode, xNonCopyable {};
+        using  xDeferredEventList = xList<xDeferredEventNode>;
+        void DeferEvent(xDeferredEventNode & Node) { PendingEventList.GrabTail(Node); }
+    private:
+        xDeferredEventList PendingEventList; // to prevent infinate loop
+        xDeferredEventList DeferredEventList;
+    #endif
     };
 
     #if defined(X_SYSTEM_WINDOWS)
     enum struct eIoEventType
     {
+        Unspecified,
         Error,
         InReady,
         OutReady,
         Closed,
         Ignored,
+        Cleanup, // the event owner is already invalidated, cleanup the overlapped object.
     };
     #endif
 
+    /** NOTE: !!! important !!!
+        Due to CompletionPort design, it's very important to process overlapped object AFTER its owner might have been released.
+        To unrelate overlapped object and it's owner, I am defining a small object in iBufferedIoReactor to help with that.
+        On windows, Io object SHOULD NEVER directly derive from iIoReactor, but iBufferedIoReactor.
+    */
     class iIoReactor
     : private xNonCopyable
     {
@@ -63,12 +80,6 @@ X_NS
         X_PRIVATE_INLINE bool HasError() const    { return _StatusFlags & SF_Error; }
 
     private:
-    #if defined(X_SYSTEM_WINDOWS)
-    #elif defined(X_SYSTEM_LINUX)
-    #elif defined(X_SYSTEM_DARWIN)
-    #elif
-        #error "Unsupported system"
-    #endif
         static constexpr const uint8_t SF_Disabled = 0x01;
         static constexpr const uint8_t SF_Error    = 0x02;
         uint8_t _StatusFlags = SF_Disabled;
@@ -79,13 +90,13 @@ X_NS
         X_INLINE void SetDisabled()    { _StatusFlags |= SF_Disabled; }
         X_INLINE void ClearError()     { _StatusFlags &= ~SF_Error; }
         X_INLINE void SetError()       { _StatusFlags |= SF_Error; }
-
-    #if defined(X_SYSTEM_WINDOWS)
-    #endif
     };
 
     class iBufferedIoReactor
     : public iIoReactor
+#ifdef X_SYSTEM_WINDOWS
+    , xIoContext::xDeferredEventNode
+#endif
     {
     protected:
         static constexpr const size_t InternalReadBufferSizeForTcp  = 2 * MaxPacketSize;
@@ -93,31 +104,49 @@ X_NS
         static constexpr const size_t InternalReadBufferSize =
             (InternalReadBufferSizeForTcp > InternalReadBufferSizeForUdp) ?
             InternalReadBufferSizeForTcp : InternalReadBufferSizeForUdp;
-        ubyte  _ReadBuffer[InternalReadBufferSize];
 
-    #if defined(X_SYSTEM_WINDOWS)
+    #ifndef X_SYSTEM_WINDOWS
+        ubyte  _ReadBuffer[InternalReadBufferSize];
+    protected:
+        size_t              _ReadBufferDataSize;
+        xPacketBufferChain  _WriteBufferChain;
+        xPacketBuffer *     _WriteBufferPtr;
+
+    #else
+
     protected:
         friend class xIoContext; // called on completion event port
-        virtual eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) = 0;
-        X_INLINE void SetReadTransfered(DWORD Size)  { _ReadDataSize = Size; }
-        X_INLINE void SetWriteTransfered(DWORD Size) { _WriteDataSize = Size; }
+        X_INLINE void SetReadTransfered(DWORD Size)  { Todo(); }
+        X_INLINE void SetWriteTransfered(DWORD Size) { Todo(); }
 
     protected:
-        struct {
+        struct xOverlappedBuffer;
+        struct xOverlappedBlock
+        {
+            xOverlappedBuffer *  Outter;
+            DWORD                DataSize;
+            OVERLAPPED           OverlappedObject;
+        };
 
+        struct xOverlappedBuffer
+        {
+            bool                  DeleteMark;
+            xOverlappedBlock      ReadObject;
+            ubyte                 ReadBuffer[InternalReadBufferSize];
+            xOverlappedBlock      WriteObject;
+            xPacketBufferChain    WriteBufferChain;
+        };
+
+        struct {
             DWORD               _ReadDataSize;
             WSABUF              _ReadBufferUsage;
             OVERLAPPED          _ReadOverlappedObject;
 
+            DWORD               _WriteDataSize;
             WSABUF              _WriteBufferUsage;
             OVERLAPPED          _WriteOverlappedObject;
-            DWORD               _WriteDataSize;
         };
 
-        xPacketBufferChain  _WriteBufferChain;
-        xPacketBuffer *     _WriteBufferPtr;
-    #else
-    protected:
         size_t              _ReadBufferDataSize;
         xPacketBufferChain  _WriteBufferChain;
         xPacketBuffer *     _WriteBufferPtr;

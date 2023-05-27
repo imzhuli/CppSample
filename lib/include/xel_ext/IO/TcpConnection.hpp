@@ -91,10 +91,6 @@ X_NS
     #endif
 
     #if defined (X_SYSTEM_WINDOWS)
-        X_PRIVATE_MEMBER eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) override {
-            return OverlappedPtr == &_ReadOverlappedObject ? eIoEventType::InReady :
-                    (OverlappedPtr == &_WriteOverlappedObject ? eIoEventType::OutReady : eIoEventType::Error);
-        }
         X_API_MEMBER void OnIoEventInReady() override;
         X_API_MEMBER void OnIoEventOutReady() override;
         X_PRIVATE_MEMBER void TryRecvData(size_t SkipSize = 0);
