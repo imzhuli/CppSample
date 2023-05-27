@@ -59,7 +59,7 @@ X_NS {
 
         for (ULONG i = 0 ; i < EventCount ; ++i) {
             auto & Event = EventEntries[i];
-            auto ReactorPtr = (iIoReactor*)Event.lpCompletionKey;
+            auto ReactorPtr = (iBufferedIoReactor*)Event.lpCompletionKey;
 
             auto EventType = ReactorPtr->GetEventType(Event.lpOverlapped);
             X_DEBUG_PRINTF("xIoContext::LoopOnce, ReactorPtr=%p, lpOverlapped=%p, Transfered=%zi, EventType=%i\n", ReactorPtr, Event.lpOverlapped, (size_t)Event.dwNumberOfBytesTransferred, (int)EventType);
@@ -101,12 +101,11 @@ X_NS {
 
     }
 
-
     namespace __io_detail__
     {
 
         class xUserEventTrigger final
-        : public iIoReactor
+        : public iBufferedIoReactor
         , public xIoContext::iUserEventTrigger
         {
         public:

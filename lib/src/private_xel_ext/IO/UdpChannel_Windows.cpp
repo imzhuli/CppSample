@@ -67,11 +67,10 @@ X_NS
 	{
         _ReadBufferUsage.buf = (CHAR*)_ReadBuffer;
         _ReadBufferUsage.len = (ULONG)sizeof(_ReadBuffer);
-		_ReadFlags = 0;
 		memset(&_RemoteAddress, 0, sizeof(_RemoteAddress));
 		_RemoteAddressLength = sizeof(_RemoteAddress);
         memset(&_ReadOverlappedObject, 0, sizeof(_ReadOverlappedObject));
-        auto Error = WSARecvFrom(_Socket, &_ReadBufferUsage, 1, nullptr, &_ReadFlags, (sockaddr*)&_RemoteAddress, &_RemoteAddressLength, &_ReadOverlappedObject, nullptr);
+        auto Error = WSARecvFrom(_Socket, &_ReadBufferUsage, 1, nullptr, X2Ptr(DWORD(0)), (sockaddr*)&_RemoteAddress, &_RemoteAddressLength, &_ReadOverlappedObject, nullptr);
         if (Error) {
             auto ErrorCode = WSAGetLastError();
             if (ErrorCode != WSA_IO_PENDING) {

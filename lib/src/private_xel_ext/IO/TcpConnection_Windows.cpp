@@ -217,10 +217,9 @@ X_NS
         _Reading = true;
         _ReadBufferUsage.buf = (CHAR*)_ReadBuffer + SkipSize;
         _ReadBufferUsage.len = (ULONG)(sizeof(_ReadBuffer) - SkipSize);
-        _ReadFlags = 0;
         memset(&_ReadOverlappedObject, 0, sizeof(_ReadOverlappedObject));
         assert(_ReadBufferUsage.len);
-        auto Error = WSARecv(_Socket, &_ReadBufferUsage, 1, nullptr, &_ReadFlags, &_ReadOverlappedObject, nullptr);
+        auto Error = WSARecv(_Socket, &_ReadBufferUsage, 1, nullptr, X2Ptr(DWORD(0)), &_ReadOverlappedObject, nullptr);
         if (Error) {
             auto ErrorCode = WSAGetLastError();
             if (ErrorCode != WSA_IO_PENDING) {

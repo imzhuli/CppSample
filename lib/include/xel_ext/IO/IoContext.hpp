@@ -64,10 +64,6 @@ X_NS
 
     private:
     #if defined(X_SYSTEM_WINDOWS)
-        // for IoContext to update aync-call-result:
-        virtual eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) = 0;
-        X_INLINE void SetReadTransfered(DWORD Size)  { _ReadDataSize = Size; }
-        X_INLINE void SetWriteTransfered(DWORD Size) { _WriteDataSize = Size; }
     #elif defined(X_SYSTEM_LINUX)
     #elif defined(X_SYSTEM_DARWIN)
     #elif
@@ -85,8 +81,6 @@ X_NS
         X_INLINE void SetError()       { _StatusFlags |= SF_Error; }
 
     #if defined(X_SYSTEM_WINDOWS)
-        DWORD      _ReadDataSize;
-        DWORD      _WriteDataSize;
     #endif
     };
 
@@ -101,17 +95,29 @@ X_NS
             InternalReadBufferSizeForTcp : InternalReadBufferSizeForUdp;
         ubyte  _ReadBuffer[InternalReadBufferSize];
 
-    protected:
     #if defined(X_SYSTEM_WINDOWS)
-        DWORD      _ReadFlags;
-        WSABUF     _ReadBufferUsage;
-        OVERLAPPED _ReadOverlappedObject;
+    protected:
+        friend class xIoContext; // called on completion event port
+        virtual eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) = 0;
+        X_INLINE void SetReadTransfered(DWORD Size)  { _ReadDataSize = Size; }
+        X_INLINE void SetWriteTransfered(DWORD Size) { _WriteDataSize = Size; }
+
+    protected:
+        struct {
+
+            DWORD               _ReadDataSize;
+            WSABUF              _ReadBufferUsage;
+            OVERLAPPED          _ReadOverlappedObject;
+
+            WSABUF              _WriteBufferUsage;
+            OVERLAPPED          _WriteOverlappedObject;
+            DWORD               _WriteDataSize;
+        };
 
         xPacketBufferChain  _WriteBufferChain;
         xPacketBuffer *     _WriteBufferPtr;
-        WSABUF              _WriteBufferUsage;
-        OVERLAPPED          _WriteOverlappedObject;
     #else
+    protected:
         size_t              _ReadBufferDataSize;
         xPacketBufferChain  _WriteBufferChain;
         xPacketBuffer *     _WriteBufferPtr;

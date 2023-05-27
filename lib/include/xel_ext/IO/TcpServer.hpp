@@ -10,7 +10,7 @@ X_NS
 {
 
     class xTcpServer
-    : protected iIoReactor
+    : protected iBufferedIoReactor
     {
 	public:
 		struct iListener
