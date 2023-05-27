@@ -4,41 +4,56 @@
 X_NS
 {
 
+#ifndef X_SYSTEM_WINDOWS
+
+    void xTcpConnection::Clean()
+    {
+        X_DEBUG_PRINTF("Cleaning tcp connection: %p\n", this);
+        if (_WriteBufferPtr) {
+            delete _WriteBufferPtr;
+            while(auto WriteBufferPtr = _WriteBufferChain.Pop()) {
+                delete WriteBufferPtr;
+            }
+        }
+        XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
+    }
+
     size_t xTcpConnection::PostData(const void * DataPtr_, size_t DataSize)
     {
-        // assert(DataPtr_ && DataSize);
-        // assert(_Status != eStatus::Unspecified);
+        assert(DataPtr_ && DataSize);
+        assert(_Status != eStatus::Unspecified);
 
-        // if (_Status >= eStatus::Closing) {
-        //     return 0;
-        // }
+        if (_Status >= eStatus::Closing) {
+            return 0;
+        }
 
-        // auto DataPtr = (const ubyte*)DataPtr_;
-        // auto Packets = DataSize / sizeof(xPacketBuffer::Buffer);
-        // for (size_t i = 0 ; i < Packets; ++i) {
-        //     auto BufferPtr = new xPacketBuffer;
-        //     memcpy(BufferPtr->Buffer, DataPtr, sizeof(xPacketBuffer::Buffer));
-        //     BufferPtr->DataSize = sizeof(xPacketBuffer::Buffer);
-        //     DataPtr  += sizeof(xPacketBuffer::Buffer);
-        //     DataSize -= sizeof(xPacketBuffer::Buffer);
-        //     _WriteBufferChain.Push(BufferPtr);
-        // }
-        // if (DataSize) {
-        //     auto BufferPtr = new xPacketBuffer;
-        //     memcpy(BufferPtr->Buffer, DataPtr, DataSize);
-        //     BufferPtr->DataSize = DataSize;
-        //     _WriteBufferChain.Push(BufferPtr);
-        // }
+        auto DataPtr = (const ubyte*)DataPtr_;
+        auto Packets = DataSize / sizeof(xPacketBuffer::Buffer);
+        for (size_t i = 0 ; i < Packets; ++i) {
+            auto BufferPtr = new xPacketBuffer;
+            memcpy(BufferPtr->Buffer, DataPtr, sizeof(xPacketBuffer::Buffer));
+            BufferPtr->DataSize = sizeof(xPacketBuffer::Buffer);
+            DataPtr  += sizeof(xPacketBuffer::Buffer);
+            DataSize -= sizeof(xPacketBuffer::Buffer);
+            _WriteBufferChain.Push(BufferPtr);
+        }
+        if (DataSize) {
+            auto BufferPtr = new xPacketBuffer;
+            memcpy(BufferPtr->Buffer, DataPtr, DataSize);
+            BufferPtr->DataSize = DataSize;
+            _WriteBufferChain.Push(BufferPtr);
+        }
 
-        // if (_Status == eStatus::Connecting) {
-        //     return DataSize;
-        // }
+        if (_Status == eStatus::Connecting) {
+            return DataSize;
+        }
 
-        // // _Status == eStatus::Connected
-        // _FlushFlag = false; // prevent OnFlush overhead
-        // TrySendData();
+        // _Status == eStatus::Connected
+        _FlushFlag = false; // prevent OnFlush overhead
+        TrySendData();
         return DataSize;
     }
+#endif
 
     xNetAddress xTcpConnection::GetRemoteAddress() const
     {

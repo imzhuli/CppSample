@@ -153,7 +153,6 @@ X_NS
         return true;
     }
 
-
     void xTcpConnection::Clean()
     {
         // X_DEBUG_PRINTF("Cleaning tcp connection: %p\n", this);
@@ -164,6 +163,12 @@ X_NS
         //     }
         // }
         // XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
+    }
+
+    size_t xTcpConnection::PostData(const void * DataPtr_, size_t DataSize)
+    {
+        // TODO
+        return 0;
     }
 
     void xTcpConnection::OnIoEventInReady()
