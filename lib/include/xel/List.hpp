@@ -26,7 +26,7 @@ X_NS
 		X_STATIC_INLINE bool IsLinked(const xListNode & Node) {
 			return Node.pPrev != &Node;
 		}
-		X_STATIC_INLINE void UnLink(xListNode & Node) {
+		X_STATIC_INLINE void Unlink(xListNode & Node) {
 			return Node.Detach();
 		}
 

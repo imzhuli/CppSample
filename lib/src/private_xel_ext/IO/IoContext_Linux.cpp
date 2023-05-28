@@ -79,7 +79,7 @@ X_NS {
 
         DeferredCallbackList.GrabListTail(PendingEventList);
         for (auto & CallbackNode : DeferredCallbackList) {
-            xListNode::Detach(CallbackNode);
+            xListNode::Unlink(CallbackNode);
             CallbackNode.OnDeferredCallback();
         }
     }
