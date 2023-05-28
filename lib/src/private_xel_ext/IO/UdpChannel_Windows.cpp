@@ -74,7 +74,6 @@ X_NS
 
 	void xUdpChannel::OnDeferredCallback()
 	{
-		X_DEBUG_PRINTF("xUdpChannel::OnDeferredCallback");
 		// this implementation won't see any chance of getting unavailable, unless env changed (like ip)
 		assert(IsAvailable());
 		TryRecvData();

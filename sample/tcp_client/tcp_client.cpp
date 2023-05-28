@@ -34,14 +34,12 @@ struct xSample
 
     void OnPeerClose(xTcpConnection * TcpConnectionPtr) override
     {
-        TcpConnectionPtr->Clean();
         printf("xSample::OnPeerClose Instance=%p\n", this);
         IsClosed = true;
     }
 
     void OnError(xTcpConnection * TcpConnectionPtr) override
     {
-        TcpConnectionPtr->Clean();
         printf("xSample::OnConnectionError Instance=%p\n", this);
         IsClosed = true;
     }

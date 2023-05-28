@@ -37,6 +37,7 @@ X_NS
     };
 
     class xPacketBufferChain final
+    : xNonCopyable
     {
     public:
         X_INLINE ~xPacketBufferChain()
@@ -83,7 +84,7 @@ X_NS
         }
 
         X_INLINE size_t GetSize () const { return _TotalBufferCount; }
-        X_INLINE size_t IsEmpty () const { return !GetSize(); }
+        X_INLINE bool   IsEmpty () const { return !GetSize(); }
         X_INLINE xPacketBuffer * GetLast() const { return _LastPtr; }
 
     private:

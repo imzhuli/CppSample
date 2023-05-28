@@ -94,18 +94,19 @@ X_NS
     #if defined (X_SYSTEM_WINDOWS)
         X_API_MEMBER void OnIoEventInReady() override;
         X_API_MEMBER void OnIoEventOutReady() override;
-        X_PRIVATE_MEMBER bool TryRecvData();
+        X_API_MEMBER void OnDeferredCallback() override;
+        X_PRIVATE_MEMBER void TryRecvData();
         X_PRIVATE_MEMBER void TrySendData();
-        bool _Reading X_DEBUG_INIT(false);
     #endif
 
     private:
         xSocket        _Socket X_DEBUG_INIT(InvalidSocket);
         eStatus        _Status X_DEBUG_INIT(eStatus::Unspecified);
+
         xIoContext *   _IoContextPtr X_DEBUG_INIT(nullptr);
         iListener *    _ListenerPtr X_DEBUG_INIT(nullptr);
+
         bool           _SuspendReading X_DEBUG_INIT(false);
-        bool           _FlushFlag = false;
     };
 
 }

@@ -132,6 +132,7 @@ X_NS
             ssize_t               ReferenceCount;
             xOverlappedObject     ReadObject;
             ubyte                 ReadBuffer[InternalReadBufferSize];
+            size_t                UnprocessedDataSize;
             xOverlappedObject     WriteObject;
             xPacketBufferChain    WriteBufferChain;
         };

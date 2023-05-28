@@ -54,13 +54,15 @@ X_NS {
             if (ERROR_ABANDONED_WAIT_0 == GetLastError()) {
                 Fatal("xIoContext::LoopOnce, Invalid _Poller");
             }
-            return;
         }
 
         for (ULONG i = 0 ; i < EventCount ; ++i) {
             auto & Event = EventEntries[i];
             auto ReactorPtr = (iBufferedIoReactor*)Event.lpCompletionKey;
             auto OverlappedPtr = Event.lpOverlapped;
+
+            // X_DEBUG_PRINTF("xIoContext::LoopOnce, ReactorPtr=%p, lpOverlapped=%p, Transfered=%zi\n",
+            //     ReactorPtr, Event.lpOverlapped, (size_t)Event.dwNumberOfBytesTransferred);
 
             // Get Outter object and see, if ioevent should be ignored:
             auto OverlappedBlockPtr = X_Entry(OverlappedPtr, iBufferedIoReactor::xOverlappedObject, NativeOverlappedObject);
@@ -84,7 +86,6 @@ X_NS {
                 X_DEBUG_BREAKPOINT("Invalid event type test.");
                 Fatal();
             }
-            X_DEBUG_PRINTF("xIoContext::LoopOnce, ReactorPtr=%p, lpOverlapped=%p, Transfered=%zi, EventType=%i\n", ReactorPtr, Event.lpOverlapped, (size_t)Event.dwNumberOfBytesTransferred, (int)EventType);
 
             // process read:
             if (EventType == eIoEventType::InReady) {
@@ -115,10 +116,15 @@ X_NS {
             // }
         }
 
-        DeferredCallbackList.GrabListTail(PendingEventList);
-        for (auto & CallbackNode : DeferredCallbackList) {
-            xListNode::UnLink(CallbackNode);
-            CallbackNode.OnDeferredCallback();
+        while(true) {
+            DeferredCallbackList.GrabListTail(PendingEventList);
+            if (DeferredCallbackList.IsEmpty()) {
+                break;
+            }
+            for (auto & CallbackNode : DeferredCallbackList) {
+                xListNode::UnLink(CallbackNode);
+                CallbackNode.OnDeferredCallback();
+            }
         }
 
     }
@@ -137,7 +143,7 @@ X_NS {
         private:
             void OnIoEventInReady() override;
 
-            xIoContext * _IoContextPtr;
+            xIoContext * _IoContextPtr X_DEBUG_INIT(nullptr);
         };
 
         bool xUserEventTrigger::Init(xIoContext * IoContextPtr)
@@ -187,6 +193,10 @@ X_NS {
     {
         auto NewRefCount = --IoBufferPtr->ReferenceCount;
         if (!NewRefCount) {
+            /* Cleanup and delete */
+            while(auto BufferPtr = IoBufferPtr->WriteBufferChain.Pop()) {
+                delete BufferPtr;
+            }
             delete IoBufferPtr;
         }
         assert(NewRefCount >= 0);
