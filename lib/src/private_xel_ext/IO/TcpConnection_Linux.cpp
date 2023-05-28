@@ -1,9 +1,10 @@
 #include <xel_ext/IO/TcpConnection.hpp>
 #include <xel/String.hpp>
-#include <cinttypes>
-#include <fcntl.h>
 
 #if defined(X_SYSTEM_LINUX)
+
+#include <cinttypes>
+#include <fcntl.h>
 
 X_NS
 {

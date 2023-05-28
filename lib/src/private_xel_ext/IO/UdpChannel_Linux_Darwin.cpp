@@ -2,6 +2,8 @@
 
 #if defined(X_SYSTEM_LINUX) || defined(X_SYSTEM_DARWIN)
 
+#include <fcntl.h>
+
 X_NS
 {
 
