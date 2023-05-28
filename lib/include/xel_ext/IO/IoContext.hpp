@@ -138,7 +138,7 @@ X_NS
         xOverlappedIoBuffer * _IoBufferPtr = nullptr;
 
         X_PRIVATE_STATIC_MEMBER xOverlappedIoBuffer * CreateOverlappedObject();
-        X_PRIVATE_STATIC_MEMBER xOverlappedIoBuffer * RetainOverlappedObject(xOverlappedIoBuffer * IoBufferPtr) { ++IoBufferPtr->ReferenceCount; return IoBufferPtr; }
+        X_PRIVATE_STATIC_MEMBER void    RetainOverlappedObject(xOverlappedIoBuffer * IoBufferPtr) { ++IoBufferPtr->ReferenceCount; }
         X_PRIVATE_STATIC_MEMBER ssize_t ReleaseOverlappedObject(xOverlappedIoBuffer * IoBufferPtr);
 
     #endif

@@ -177,7 +177,10 @@ X_NS {
 
     iBufferedIoReactor::xOverlappedIoBuffer * iBufferedIoReactor::CreateOverlappedObject()
     {
-        return RetainOverlappedObject(new xOverlappedIoBuffer());
+        auto IoBufferPtr = new xOverlappedIoBuffer();
+        IoBufferPtr->ReadObject.Outter = IoBufferPtr->WriteObject.Outter = IoBufferPtr;
+        RetainOverlappedObject(IoBufferPtr);
+        return IoBufferPtr;
     }
 
     ssize_t iBufferedIoReactor::ReleaseOverlappedObject(xOverlappedIoBuffer * IoBufferPtr)
