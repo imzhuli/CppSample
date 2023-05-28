@@ -38,6 +38,7 @@ X_NS
         xIoContext * _IoContextPtr;
         xSocket      _Socket X_DEBUG_INIT(InvalidSocket);
         iListener *  _ListenerPtr X_DEBUG_INIT(nullptr);
+        bool         _ErrorProcessed X_DEBUG_INIT(false); // prevent multiple call to OnError;
 
     #if defined(X_SYSTEM_WINDOWS)
         sockaddr_storage    _RemoteAddress;

@@ -83,20 +83,22 @@ X_NS
     void xUdpChannel::OnIoEventInReady()
 	{
 		// xUdpChannel * ChannelPtr, void * DataPtr, size_t DataSize, const xNetAddress & RemoteAddress)
-		ubyte Buffer[MaxPacketSize];
-		sockaddr_storage SockAddr;
-		socklen_t SockAddrLen = sizeof(SockAddr);
-		int ReadSize = recvfrom(_Socket, Buffer, sizeof(Buffer), 0, (sockaddr*)&SockAddr, &SockAddrLen);
+		while(true) {
+			ubyte Buffer[MaxPacketSize];
+			sockaddr_storage SockAddr;
+			socklen_t SockAddrLen = sizeof(SockAddr);
+			int ReadSize = recvfrom(_Socket, Buffer, sizeof(Buffer), 0, (sockaddr*)&SockAddr, &SockAddrLen);
 
-		if (ReadSize == -1) {
-			if (errno != EAGAIN) {
-				SetError();
+			if (ReadSize == -1) {
+				if (errno != EAGAIN) {
+					SetError();
+					return;
+				}
 				return;
 			}
-			return;
+			xNetAddress RemoteAddress = xNetAddress::Parse((const sockaddr*)&SockAddr);
+			_ListenerPtr->OnData(this, Buffer, (size_t)ReadSize, RemoteAddress);
 		}
-		xNetAddress RemoteAddress = xNetAddress::Parse((const sockaddr*)&SockAddr);
-		_ListenerPtr->OnData(this, Buffer, (size_t)ReadSize, RemoteAddress);
 	}
 
     void xUdpChannel::OnIoEventError()

@@ -21,6 +21,11 @@ X_NS
 	{
 		assert(IoContextPtr);
 		assert(ListenerPtr);
+
+		_IoContextPtr = IoContextPtr;
+		_ListenerPtr = ListenerPtr;
+		_ErrorProcessed = false;
+
 		_Socket = socket(BindAddress.GetAddressFamily(), SOCK_DGRAM, 0);
 		if (_Socket == InvalidSocket) {
 			return false;
@@ -42,8 +47,6 @@ X_NS
         if (!(_IoBufferPtr = CreateOverlappedObject())) { return false; }
         auto OverlappedObjectGuard = xScopeGuard([this]{ ReleaseOverlappedObject(_IoBufferPtr); });
 
-		_IoContextPtr = IoContextPtr;
-		_ListenerPtr = ListenerPtr;
 
 		OverlappedObjectGuard.Dismiss();
 		SocketGuard.Dismiss();
@@ -77,6 +80,11 @@ X_NS
 		// this implementation won't see any chance of getting unavailable, unless env changed (like ip)
 		assert(IsAvailable());
 		TryRecvData();
+		if (!IsAvailable()) {
+			if (HasError()) {
+				OnIoEventError();
+			}
+		}
 	}
 
 	void xUdpChannel::TryRecvData()
@@ -98,7 +106,6 @@ X_NS
 			if (ErrorCode != WSA_IO_PENDING) {
 				X_DEBUG_PRINTF("WSARecvFrom ErrorCode: %u\n", ErrorCode);
 				SetError();
-				_ListenerPtr->OnError(this);
 				return;
 			}
 		}
@@ -121,7 +128,9 @@ X_NS
 
     void xUdpChannel::OnIoEventError()
 	{
-		_ListenerPtr->OnError(this);
+		if (!Steal(_ErrorProcessed, true)) {
+			_ListenerPtr->OnError(this);
+		}
 	}
 
 }
