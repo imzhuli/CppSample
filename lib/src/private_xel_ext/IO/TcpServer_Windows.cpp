@@ -39,8 +39,6 @@ X_NS
         if (ReusePort) {
         #ifdef SO_REUSEADDR
             setsockopt(_ListenSocket, SOL_SOCKET, SO_REUSEADDR, (char *)X2Ptr(int(1)), sizeof(int));
-        #else
-            #pragma message("warning SO_REUSEADDR is not enabled on target platform")
         #endif
         }
 
@@ -59,15 +57,25 @@ X_NS
             return false;
         }
 
+        if (!(_IoBufferPtr = CreateOverlappedObject())) { return false; }
+        auto OverlappedObjectGuard = xScopeGuard([this]{ ReleaseOverlappedObject(_IoBufferPtr); });
+
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
 
-        TryPreAccept();
-
         X_DEBUG_PRINTF("xTcpServer::Init succeeded BinAddress=%s\n", Address.ToString().c_str());
+
+        OverlappedObjectGuard.Dismiss();
         FailSafe.Dismiss();
 		SetAvailable();
+
+        IoContextPtr->DeferCallback(*this);
         return true;
+    }
+
+    void xTcpServer::OnDeferredCallback()
+    {
+        TryPreAccept();
     }
 
     void xTcpServer::TryPreAccept()

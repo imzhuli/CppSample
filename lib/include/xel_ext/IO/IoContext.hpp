@@ -37,15 +37,15 @@ X_NS
         xEventPoller          _Poller X_DEBUG_INIT(InvalidEventPoller);
         iUserEventTrigger *   _UserEventTriggerPtr = nullptr;
 
-    #ifdef X_SYSTEM_WINDOWS
     public:
-        struct xDeferredEventNode : xListNode, xNonCopyable {};
-        using  xDeferredEventList = xList<xDeferredEventNode>;
-        void DeferEvent(xDeferredEventNode & Node) { PendingEventList.GrabTail(Node); }
+        struct xDeferredCallbackNode : xListNode, xNonCopyable {
+            virtual void OnDeferredCallback() {};
+        };
+        using  xDeferredCallbackList = xList<xDeferredCallbackNode>;
+        void   DeferCallback(xDeferredCallbackNode & Node) { PendingEventList.GrabTail(Node); }
     private:
-        xDeferredEventList PendingEventList; // to prevent infinate loop
-        xDeferredEventList DeferredEventList;
-    #endif
+        xDeferredCallbackList PendingEventList; // to prevent infinate loop
+        xDeferredCallbackList DeferredCallbackList;
     };
 
     #if defined(X_SYSTEM_WINDOWS)
@@ -94,9 +94,6 @@ X_NS
 
     class iBufferedIoReactor
     : public iIoReactor
-#ifdef X_SYSTEM_WINDOWS
-    , xIoContext::xDeferredEventNode
-#endif
     {
     protected:
         static constexpr const size_t InternalReadBufferSizeForTcp  = 2 * MaxPacketSize;
@@ -106,6 +103,7 @@ X_NS
             InternalReadBufferSizeForTcp : InternalReadBufferSizeForUdp;
 
     #ifndef X_SYSTEM_WINDOWS
+
         ubyte  _ReadBuffer[InternalReadBufferSize];
     protected:
         size_t              _ReadBufferDataSize;
@@ -116,28 +114,32 @@ X_NS
 
     protected:
         friend class xIoContext; // called on completion event port
-        X_INLINE void SetReadTransfered(DWORD Size)  { IoBufferPtr->ReadObject.DataSize  = Size; }
-        X_INLINE void SetWriteTransfered(DWORD Size) { IoBufferPtr->WriteObject.DataSize = Size; }
+        X_INLINE void SetReadTransfered(DWORD Size)  { _IoBufferPtr->ReadObject.DataSize  = Size; }
+        X_INLINE void SetWriteTransfered(DWORD Size) { _IoBufferPtr->WriteObject.DataSize = Size; }
 
     protected:
         struct xOverlappedIoBuffer;
-        struct xOverlappedBlock
+        struct xOverlappedObject
         {
             xOverlappedIoBuffer *  Outter;
+            bool                   AsyncOpMark;
             DWORD                  DataSize;
-            OVERLAPPED             OverlappedObject;
+            WSABUF                 BufferUsage;
+            OVERLAPPED             NativeOverlappedObject;
         };
-
         struct xOverlappedIoBuffer
         {
-            bool                  DeleteMark;
-            xOverlappedBlock      ReadObject;
+            ssize_t               ReferenceCount;
+            xOverlappedObject     ReadObject;
             ubyte                 ReadBuffer[InternalReadBufferSize];
-            xOverlappedBlock      WriteObject;
+            xOverlappedObject     WriteObject;
             xPacketBufferChain    WriteBufferChain;
         };
+        xOverlappedIoBuffer * _IoBufferPtr = nullptr;
 
-        xOverlappedIoBuffer * IoBufferPtr;
+        X_PRIVATE_STATIC_MEMBER xOverlappedIoBuffer * CreateOverlappedObject();
+        X_PRIVATE_STATIC_MEMBER xOverlappedIoBuffer * RetainOverlappedObject(xOverlappedIoBuffer * IoBufferPtr) { ++IoBufferPtr->ReferenceCount; return IoBufferPtr; }
+        X_PRIVATE_STATIC_MEMBER ssize_t ReleaseOverlappedObject(xOverlappedIoBuffer * IoBufferPtr);
 
     #endif
     };

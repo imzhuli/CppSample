@@ -11,6 +11,7 @@ X_NS
 
     class xTcpServer
     : protected iBufferedIoReactor
+	, protected xIoContext::xDeferredCallbackNode
     {
 	public:
 		struct iListener
@@ -61,6 +62,7 @@ X_NS
 			return eIoEventType::OutReady;
 		};
 		X_API_MEMBER void OnIoEventOutReady() override;
+		X_API_MEMBER void OnDeferredCallback() override;
 	#endif
 	};
 

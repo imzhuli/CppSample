@@ -76,6 +76,12 @@ X_NS {
                 }
             }
         }
+
+        DeferredCallbackList.GrabListTail(PendingEventList);
+        for (auto & CallbackNode : DeferredCallbackList) {
+            xListNode::Detach(CallbackNode);
+            CallbackNode.OnDeferredCallback();
+        }
     }
 
     namespace __io_detail__

@@ -10,12 +10,13 @@ X_NS
 
     class xUdpChannel final
     : public iBufferedIoReactor
+	, protected xIoContext::xDeferredCallbackNode
     , xAbstract
     {
     public:
         struct iListener {
             virtual void OnError(xUdpChannel * ChannelPtr) {}
-            virtual void OnData (xUdpChannel * ChannelPtr, void * DataPtr, size_t DataSize, const xNetAddress & RemoteAddress) = 0;
+            virtual bool OnData (xUdpChannel * ChannelPtr, void * DataPtr, size_t DataSize, const xNetAddress & RemoteAddress) = 0;
         };
 
     public:
@@ -29,6 +30,7 @@ X_NS
         X_API_MEMBER void OnIoEventError() override;
 
     #if defined(X_SYSTEM_WINDOWS)
+        X_API_MEMBER void OnDeferredCallback() override;
         X_API_MEMBER void TryRecvData();
     #endif
 

@@ -130,14 +130,14 @@ X_NS
         Fatal("UdpChannelError");
     }
 
-    void xLocalDnsServer::OnData (xUdpChannel * ChannelPtr, void * DataPtr, size_t DataSize, const xNetAddress & RemoteAddress)
+    bool xLocalDnsServer::OnData (xUdpChannel * ChannelPtr, void * DataPtr, size_t DataSize, const xNetAddress & RemoteAddress)
     {
         auto Hex = xel::HexShow(DataPtr, DataSize);
         // X_DEBUG_PRINTF("UdpData: \n%s\n", Hex.c_str());
 
         auto Reader = xStreamReader(DataPtr);
         if (!TestAndReduceSize(DataSize, 12)) { // invalid response, drop it
-            return;
+            return true;
         }
         // typedef struct {
         //     uint16_t     xid;      /* Randomly chosen identifier */
@@ -158,11 +158,11 @@ X_NS
 
         if (!(Flags & 0x8000)) {
             X_DEBUG_PRINTF("xLocalDnsServer::OnData not an dns answer\n");
-            return; // not an answer
+            return true; // not an answer
         }
         if (QCount != 1 || !ACount) {
             X_DEBUG_PRINTF("xLocalDnsServer::OnData qcount != 1 or acount == 0.\n");
-            return;
+            return true;
         }
 
         /* Check Query */
@@ -175,7 +175,7 @@ X_NS
             }
             if (!TestAndReduceSize(DataSize, 1)) { // invalid response, drop it
                 X_DEBUG_PRINTF("xLocalDnsServer::OnData Invalid domain segment length. \n");
-                return;
+                return true;
             }
             auto SegLength = Reader.R1();
             if (!SegLength) {
@@ -186,7 +186,7 @@ X_NS
             }
             if (!TestAndReduceSize(DataSize, SegLength)) { // invalid response, drop it
                 X_DEBUG_PRINTF("xLocalDnsServer::OnData Invalid domain segment length. \n");
-                return;
+                return true;
             }
             Reader.R(HostnameBuffer + TotalHostnameLength, SegLength);
             TotalHostnameLength += SegLength;
@@ -195,7 +195,7 @@ X_NS
         auto QueryClass = Reader.R2();
         if (QueryType != 1 || QueryClass != 1) {
             X_DEBUG_PRINTF("xLocalDnsServer::OnData unsupported query type=%i class=%i\n", (int)QueryType, (int)QueryClass);
-            return;
+            return true;
         }
 
         /* Extract answers */
@@ -208,7 +208,7 @@ X_NS
             }
             if (!TestAndReduceSize(DataSize, 12)) { // invalid response, drop it
                 X_DEBUG_PRINTF("xLocalDnsServer::OnData Invalid record header length. \n");
-                return;
+                return true;
             }
 
             // typedef struct dns_record_base_t {
@@ -237,12 +237,12 @@ X_NS
             (void)Ttl;
             if (!TestAndReduceSize(DataSize, RecordLength)) { // invalid response, drop it
                 // X_DEBUG_PRINTF("xLocalDnsServer::OnData Invalid record length. \n");
-                return;
+                return true;
             }
             if (Type == 1 && Class == 1) { /* INET4 && IN */
                 if (RecordLength != 4) {
                     X_DEBUG_PRINTF("xLocalDnsServer::OnData Invalid ipv4 address. \n");
-                    return;
+                    return true;
                 }
                 auto & Address4 = Resolved[ResolvedCounter++];
                 Address4 = xNetAddress::Make4();
@@ -257,7 +257,7 @@ X_NS
         }
 
         DoPushResolvResult(Index, HostnameBuffer, Resolved, ResolvedCounter);
-        return;
+        return true;
     }
 
     bool xLocalDnsServer::DoSendDnsQuery(xRequest * RequestPtr)

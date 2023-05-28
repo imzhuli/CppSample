@@ -38,11 +38,18 @@ X_NS
             X_DEBUG_PRINTF("xUdpChannel::Init failed to create competion port\n");
             return false;
         }
-		TryRecvData();
 
+        if (!(_IoBufferPtr = CreateOverlappedObject())) { return false; }
+        auto OverlappedObjectGuard = xScopeGuard([this]{ ReleaseOverlappedObject(_IoBufferPtr); });
+
+		_IoContextPtr = IoContextPtr;
 		_ListenerPtr = ListenerPtr;
+
+		OverlappedObjectGuard.Dismiss();
 		SocketGuard.Dismiss();
 		SetAvailable();
+
+        IoContextPtr->DeferCallback(*this);
 		return true;
 	}
 
@@ -50,9 +57,11 @@ X_NS
 	{
 		assert(_ListenerPtr);
 		assert(_Socket != InvalidSocket);
+		assert(_IoBufferPtr);
 
-		X_DEBUG_RESET(_ListenerPtr);
+		ReleaseOverlappedObject(X_DEBUG_STEAL(_IoBufferPtr));
 		XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
+		X_DEBUG_RESET(_ListenerPtr);
 		X_DEBUG_RESET(_IoContextPtr);
 	}
 
@@ -63,29 +72,52 @@ X_NS
 		sendto(_Socket, (const char *)DataPtr, (int)DataSize, 0, (const sockaddr*)&AddrStorage, (socklen_t)AddrLen);
 	}
 
+	void xUdpChannel::OnDeferredCallback()
+	{
+		X_DEBUG_PRINTF("xUdpChannel::OnDeferredCallback");
+		// this implementation won't see any chance of getting unavailable, unless env changed (like ip)
+		assert(IsAvailable());
+		TryRecvData();
+	}
+
 	void xUdpChannel::TryRecvData()
 	{
-        // _ReadBufferUsage.buf = (CHAR*)_ReadBuffer;
-        // _ReadBufferUsage.len = (ULONG)sizeof(_ReadBuffer);
-		// memset(&_RemoteAddress, 0, sizeof(_RemoteAddress));
-		// _RemoteAddressLength = sizeof(_RemoteAddress);
-        // memset(&_ReadOverlappedObject, 0, sizeof(_ReadOverlappedObject));
-        // auto Error = WSARecvFrom(_Socket, &_ReadBufferUsage, 1, nullptr, X2Ptr(DWORD(0)), (sockaddr*)&_RemoteAddress, &_RemoteAddressLength, &_ReadOverlappedObject, nullptr);
-        // if (Error) {
-        //     auto ErrorCode = WSAGetLastError();
-        //     if (ErrorCode != WSA_IO_PENDING) {
-        //         X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
-        //         SetError();
-        //     }
-        // }
+		auto & ReadObject = _IoBufferPtr->ReadObject;
+		if (ReadObject.AsyncOpMark) {
+			return;
+		}
+
+		auto & BU = ReadObject.BufferUsage;
+		BU.buf = (CHAR*)_IoBufferPtr->ReadBuffer;
+		BU.len = (ULONG)sizeof(_IoBufferPtr->ReadBuffer);
+		memset(&_RemoteAddress, 0, sizeof(_RemoteAddress));
+		_RemoteAddressLength = sizeof(_RemoteAddress);
+		memset(&ReadObject.NativeOverlappedObject, 0, sizeof(ReadObject.NativeOverlappedObject));
+		auto Error = WSARecvFrom(_Socket, &BU, 1, nullptr, X2Ptr(DWORD(0)), (sockaddr*)&_RemoteAddress, &_RemoteAddressLength, &ReadObject.NativeOverlappedObject, nullptr);
+		if (Error) {
+			auto ErrorCode = WSAGetLastError();
+			if (ErrorCode != WSA_IO_PENDING) {
+				X_DEBUG_PRINTF("WSARecvFrom ErrorCode: %u\n", ErrorCode);
+				SetError();
+				_ListenerPtr->OnError(this);
+				return;
+			}
+		}
+		ReadObject.AsyncOpMark = true;
+		RetainOverlappedObject(_IoBufferPtr);
 	}
 
     void xUdpChannel::OnIoEventInReady()
 	{
-		// assert(_ReadDataSize);
-		// auto RemoteAddress = xNetAddress::Parse((sockaddr*)&_RemoteAddress);
-		// _ListenerPtr->OnData(this, _ReadBuffer, _ReadDataSize, RemoteAddress);
-		// TryRecvData();
+		auto & ReadObject = _IoBufferPtr->ReadObject;
+		ReadObject.AsyncOpMark = false;
+
+		auto RemoteAddress = xNetAddress::Parse((sockaddr*)&_RemoteAddress);
+		if (!_ListenerPtr->OnData(this, _IoBufferPtr->ReadBuffer, _IoBufferPtr->ReadObject.DataSize, RemoteAddress)) {
+			SetError();
+			return;
+		}
+		_IoContextPtr->DeferCallback(*this);
 	}
 
     void xUdpChannel::OnIoEventError()

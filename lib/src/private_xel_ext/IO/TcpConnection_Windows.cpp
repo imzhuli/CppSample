@@ -16,7 +16,7 @@ X_NS
     {
         assert(NativeHandle != InvalidSocket);
         assert(!_ListenerPtr && ListenerPtr);
-        X_DEBUG_PRINTF("xTcpConnection::Init IoContextPtr=%p, Socket=%" PRIuPTR "\n", IoContextPtr, (uintptr_t&)NativeHandle);
+        X_DEBUG_PRINTF("xTcpConnection::Init:OnNewConnection IoContextPtr=%p, Socket=%" PRIuPTR "\n", IoContextPtr, (uintptr_t)NativeHandle);
 
         auto FailSafe = xScopeGuard{[=]{
             XelCloseSocket(NativeHandle);
@@ -29,6 +29,9 @@ X_NS
             return false;
         }
 
+        if (!(_IoBufferPtr = CreateOverlappedObject())) { return false; }
+        auto OverlappedObjectGuard = xScopeGuard([this]{ ReleaseOverlappedObject(_IoBufferPtr); });
+
         _Socket = NativeHandle;
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
@@ -38,119 +41,119 @@ X_NS
         _Reading = false;
         _FlushFlag = false;
 
-        Todo(); // TODO
-
         SetAvailable();
 
-        TryRecvData();
-
+        OverlappedObjectGuard.Dismiss();
         FailSafe.Dismiss();
+
+        IoContextPtr->DeferCallback(*this);
         return true;
     }
 
     bool xTcpConnection::Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr)
     {
-        int AF = AF_UNSPEC;
-        sockaddr_storage AddrStorage = {};
-        size_t AddrLen = Address.Dump(&AddrStorage);
-        if (Address.IsV4()) {
-            AF = AF_INET;
-        } else if (Address.IsV6()) {
-            AF = AF_INET6;
-        }
-        else {
-            X_DEBUG_PRINTF("Invalid target address\n");
-            return false;
-        }
-
-        assert(_Socket == InvalidSocket);
-        _Socket = WSASocket(AF, SOCK_STREAM, IPPROTO_IP, NULL, 0, WSA_FLAG_OVERLAPPED);
-        if (_Socket == InvalidSocket) {
-            X_DEBUG_PRINTF("Failed to create socket\n");
-            return false;
-        }
-
-        auto FailSafe = xScopeGuard{[this]{
-            XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
-            X_DEBUG_RESET(_IoContextPtr);
-            X_DEBUG_RESET(_ListenerPtr);
-        }};
-
-        // load connect ex:
-        LPFN_CONNECTEX ConnectEx = nullptr;
-        if (AF == AF_INET) {
-            ConnectEx = AtomicConnectEx.load();
-        } else if (AF == AF_INET6) {
-            ConnectEx = AtomicConnectEx6.load();
-        } else {
-            Fatal("Bug");
-        }
-        if (!ConnectEx) {
-            auto LockGuard = std::lock_guard(ConnectExLoaderMutex);
-            GUID guid = WSAID_CONNECTEX;
-            DWORD dwBytes = 0;
-            auto LoadError = WSAIoctl(_Socket, SIO_GET_EXTENSION_FUNCTION_POINTER,
-                        &guid, sizeof(guid),
-                        &ConnectEx, sizeof(ConnectEx),
-                        &dwBytes, NULL, NULL);
-            if (LoadError) {
-                auto ErrorCode = WSAGetLastError();
-                if (ErrorCode != WSA_IO_PENDING) {
-                    X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
-                    SetError();
-                }
-                return false;
-            }
-            X_DEBUG_PRINTF("ConnectEx: %p\n", ConnectEx);
-
-            if (AF == AF_INET) {
-                AtomicConnectEx = ConnectEx;
-            } else if (AF == AF_INET6) {
-                AtomicConnectEx6 = ConnectEx;
-            } else {
-                Fatal("Bug");
-            }
-        }while(false);
-
-        if (CreateIoCompletionPort((HANDLE)_Socket, *IoContextPtr, (ULONG_PTR)this, 0) == NULL) {
-            X_DEBUG_PRINTF("xTcpConnection::Init failed to create competion port\n");
-            return false;
-        }
-
-        /* ConnectEx requires the socket to be initially bound. */
-        do {
-            struct sockaddr_storage BindAddr;
-            memset(&BindAddr, 0, sizeof(BindAddr));
-            BindAddr.ss_family = AddrStorage.ss_family;
-            auto Error = bind(_Socket, (SOCKADDR*) &BindAddr, (int)AddrLen);
-            if (Error) {
-                X_DEBUG_PRINTF("bind failed: %u\n", WSAGetLastError());
-                return false;
-            }
-        } while(false);
-
-        // TODO: make connection
-        // memset(&_WriteOverlappedObject, 0, sizeof(_WriteOverlappedObject));
-        // auto Error = ConnectEx(_Socket, (SOCKADDR*)(&AddrStorage), (int)AddrLen, NULL, NULL, NULL, &_WriteOverlappedObject);
-        // if (Error) {
-        //     auto ErrorCode = WSAGetLastError();
-        //     X_DEBUG_PRINTF("Failed to build connection ErrorCode: %u\n", ErrorCode);
+        return false;
+        // int AF = AF_UNSPEC;
+        // sockaddr_storage AddrStorage = {};
+        // size_t AddrLen = Address.Dump(&AddrStorage);
+        // if (Address.IsV4()) {
+        //     AF = AF_INET;
+        // } else if (Address.IsV6()) {
+        //     AF = AF_INET6;
+        // }
+        // else {
+        //     X_DEBUG_PRINTF("Invalid target address\n");
         //     return false;
         // }
 
-        _IoContextPtr = IoContextPtr;
-        _ListenerPtr = ListenerPtr;
-        _Status = eStatus::Connecting;
-        _SuspendReading = false;
-        _Reading = false;
-        _FlushFlag = false;
+        // assert(_Socket == InvalidSocket);
+        // _Socket = WSASocket(AF, SOCK_STREAM, IPPROTO_IP, NULL, 0, WSA_FLAG_OVERLAPPED);
+        // if (_Socket == InvalidSocket) {
+        //     X_DEBUG_PRINTF("Failed to create socket\n");
+        //     return false;
+        // }
+
+        // auto FailSafe = xScopeGuard{[this]{
+        //     XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
+        //     X_DEBUG_RESET(_IoContextPtr);
+        //     X_DEBUG_RESET(_ListenerPtr);
+        // }};
+
+        // // load connect ex:
+        // LPFN_CONNECTEX ConnectEx = nullptr;
+        // if (AF == AF_INET) {
+        //     ConnectEx = AtomicConnectEx.load();
+        // } else if (AF == AF_INET6) {
+        //     ConnectEx = AtomicConnectEx6.load();
+        // } else {
+        //     Fatal("Bug");
+        // }
+        // if (!ConnectEx) {
+        //     auto LockGuard = std::lock_guard(ConnectExLoaderMutex);
+        //     GUID guid = WSAID_CONNECTEX;
+        //     DWORD dwBytes = 0;
+        //     auto LoadError = WSAIoctl(_Socket, SIO_GET_EXTENSION_FUNCTION_POINTER,
+        //                 &guid, sizeof(guid),
+        //                 &ConnectEx, sizeof(ConnectEx),
+        //                 &dwBytes, NULL, NULL);
+        //     if (LoadError) {
+        //         auto ErrorCode = WSAGetLastError();
+        //         if (ErrorCode != WSA_IO_PENDING) {
+        //             X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
+        //             SetError();
+        //         }
+        //         return false;
+        //     }
+        //     X_DEBUG_PRINTF("ConnectEx: %p\n", ConnectEx);
+
+        //     if (AF == AF_INET) {
+        //         AtomicConnectEx = ConnectEx;
+        //     } else if (AF == AF_INET6) {
+        //         AtomicConnectEx6 = ConnectEx;
+        //     } else {
+        //         Fatal("Bug");
+        //     }
+        // }while(false);
+
+        // if (CreateIoCompletionPort((HANDLE)_Socket, *IoContextPtr, (ULONG_PTR)this, 0) == NULL) {
+        //     X_DEBUG_PRINTF("xTcpConnection::Init failed to create competion port\n");
+        //     return false;
+        // }
+
+        // /* ConnectEx requires the socket to be initially bound. */
+        // do {
+        //     struct sockaddr_storage BindAddr;
+        //     memset(&BindAddr, 0, sizeof(BindAddr));
+        //     BindAddr.ss_family = AddrStorage.ss_family;
+        //     auto Error = bind(_Socket, (SOCKADDR*) &BindAddr, (int)AddrLen);
+        //     if (Error) {
+        //         X_DEBUG_PRINTF("bind failed: %u\n", WSAGetLastError());
+        //         return false;
+        //     }
+        // } while(false);
+
+        // // TODO: make connection
+        // // memset(&_WriteOverlappedObject, 0, sizeof(_WriteOverlappedObject));
+        // // auto Error = ConnectEx(_Socket, (SOCKADDR*)(&AddrStorage), (int)AddrLen, NULL, NULL, NULL, &_WriteOverlappedObject);
+        // // if (Error) {
+        // //     auto ErrorCode = WSAGetLastError();
+        // //     X_DEBUG_PRINTF("Failed to build connection ErrorCode: %u\n", ErrorCode);
+        // //     return false;
+        // // }
+
+        // _IoContextPtr = IoContextPtr;
+        // _ListenerPtr = ListenerPtr;
+        // _Status = eStatus::Connecting;
+        // _SuspendReading = false;
+        // _Reading = false;
+        // _FlushFlag = false;
 
 
-        Todo(); // TODO
+        // Todo(); // TODO
 
-        FailSafe.Dismiss();
-        SetAvailable();
-        return true;
+        // FailSafe.Dismiss();
+        // SetAvailable();
+        // return true;
     }
 
     void xTcpConnection::Clean()
@@ -162,6 +165,7 @@ X_NS
         //         delete WriteBufferPtr;
         //     }
         // }
+        // ReleaseOverlappedObject(_IoBufferPtr);
         // XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
     }
 
@@ -232,11 +236,12 @@ X_NS
         // }
     }
 
-    void xTcpConnection::TryRecvData(size_t SkipSize)
+    bool xTcpConnection::TryRecvData()
     {
         if (_SuspendReading || _Reading) {
-            return;
+            return true;
         }
+        return false;
         // _Reading = true;
         // _ReadBufferUsage.buf = (CHAR*)_ReadBuffer + SkipSize;
         // _ReadBufferUsage.len = (ULONG)(sizeof(_ReadBuffer) - SkipSize);

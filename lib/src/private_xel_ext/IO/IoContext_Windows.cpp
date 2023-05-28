@@ -63,21 +63,21 @@ X_NS {
             auto OverlappedPtr = Event.lpOverlapped;
 
             // Get Outter object and see, if ioevent should be ignored:
-            auto OverlappedBlockPtr = X_Entry(OverlappedPtr, iBufferedIoReactor::xOverlappedBlock, OverlappedObject);
+            auto OverlappedBlockPtr = X_Entry(OverlappedPtr, iBufferedIoReactor::xOverlappedObject, NativeOverlappedObject);
             if (!OverlappedBlockPtr) { // User Trigger event does not have overlapped object
                 continue;
             }
 
+            auto EventType = eIoEventType::Unspecified;
             auto OverlappedBufferPtr = OverlappedBlockPtr->Outter;
-
-            eIoEventType EventType = eIoEventType::Unspecified;
-            if (OverlappedBufferPtr->DeleteMark) {
-                EventType = eIoEventType::Cleanup;
+            if (!iBufferedIoReactor::ReleaseOverlappedObject(OverlappedBufferPtr)) {
+                // EventType = eIoEventType::Cleanup;
+                continue;
             }
-            else if (OverlappedPtr == &OverlappedBufferPtr->ReadObject.OverlappedObject) {
+            else if (OverlappedPtr == &OverlappedBufferPtr->ReadObject.NativeOverlappedObject) {
                 EventType = eIoEventType::InReady;
             }
-            else if (OverlappedPtr == &OverlappedBufferPtr->WriteObject.OverlappedObject) {
+            else if (OverlappedPtr == &OverlappedBufferPtr->WriteObject.NativeOverlappedObject) {
                 EventType = eIoEventType::OutReady;
             }
             else {
@@ -113,6 +113,12 @@ X_NS {
             // if (EventType == eIoEventType::Ignored) {
             //     continue;
             // }
+        }
+
+        DeferredCallbackList.GrabListTail(PendingEventList);
+        for (auto & CallbackNode : DeferredCallbackList) {
+            xListNode::UnLink(CallbackNode);
+            CallbackNode.OnDeferredCallback();
         }
 
     }
@@ -167,6 +173,21 @@ X_NS {
         auto TriggerPtr = (__io_detail__::xUserEventTrigger *)Steal(_UserEventTriggerPtr);
         TriggerPtr->Clean();
         delete TriggerPtr;
+    }
+
+    iBufferedIoReactor::xOverlappedIoBuffer * iBufferedIoReactor::CreateOverlappedObject()
+    {
+        return RetainOverlappedObject(new xOverlappedIoBuffer());
+    }
+
+    ssize_t iBufferedIoReactor::ReleaseOverlappedObject(xOverlappedIoBuffer * IoBufferPtr)
+    {
+        auto NewRefCount = --IoBufferPtr->ReferenceCount;
+        if (!NewRefCount) {
+            delete IoBufferPtr;
+        }
+        assert(NewRefCount >= 0);
+        return NewRefCount;
     }
 
 }
