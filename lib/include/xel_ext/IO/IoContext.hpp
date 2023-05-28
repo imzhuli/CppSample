@@ -137,6 +137,7 @@ X_NS
             size_t                UnprocessedDataSize;
             xOverlappedObject     WriteObject;
             xPacketBufferChain    WriteBufferChain;
+            bool                  FlushFlag;
         };
         xOverlappedIoBuffer * _IoBufferPtr = nullptr;
 

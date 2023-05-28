@@ -271,12 +271,23 @@ X_NS
 
     void xTcpConnection::OnDeferredCallback()
     {
-		// this implementation won't see any chance of getting unavailable, unless env changed (like ip)
-		assert(IsAvailable());
+        // object might have become unavailable, like in such case:
+        // in OnData callback, a call to PostData put this to deferred callback list, then set unavailable in OnFlush callback
+        if (!IsAvailable()) {
+            return;
+        }
         TryRecvData();
-		assert(IsAvailable());
+        if (!IsAvailable()) {
+            if (HasError()) {
+                OnIoEventError();
+            }
+            return;
+        }
         TrySendData();
-		assert(IsAvailable());
+        if (HasError()) {
+            OnIoEventError();
+        }
+        return;
     }
 
     void xTcpConnection::TryRecvData()
@@ -303,7 +314,6 @@ X_NS
 			if (ErrorCode != WSA_IO_PENDING) {
 				X_DEBUG_PRINTF("WSARecvFrom ErrorCode: %u\n", ErrorCode);
 				SetError();
-				_ListenerPtr->OnError(this);
 				return;
 			}
 		}
@@ -322,6 +332,9 @@ X_NS
 		}
         auto WriteBufferPtr = _IoBufferPtr->WriteBufferChain.Peek();
         if (!WriteBufferPtr) {
+            if (Steal(_IoBufferPtr->FlushFlag)) {
+                _ListenerPtr->OnFlush(this);
+            }
             return;
         }
 
@@ -335,12 +348,12 @@ X_NS
             if (ErrorCode != WSA_IO_PENDING) {
                 X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
                 SetError();
-				_ListenerPtr->OnError(this);
                 return;
             }
         }
 		WriteObject.AsyncOpMark = true;
         RetainOverlappedObject(_IoBufferPtr);
+        _IoBufferPtr->FlushFlag = true;
 
         return;
     }
