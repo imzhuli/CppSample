@@ -26,6 +26,9 @@ X_NS
 		}
 		auto SocketGuard = xScopeGuard([&]{ XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket)); });
 
+        int flags = fcntl(NativeHandle, F_GETFL);
+        fcntl(NativeHandle, F_SETFL, flags | O_NONBLOCK);
+
         sockaddr_storage AddrStorage;
         size_t AddrLen = BindAddress.Dump(&AddrStorage);
         auto BindRet = bind(_Socket, (sockaddr*)&AddrStorage, (int)AddrLen);
@@ -88,7 +91,6 @@ X_NS
 			sockaddr_storage SockAddr;
 			socklen_t SockAddrLen = sizeof(SockAddr);
 			int ReadSize = recvfrom(_Socket, Buffer, sizeof(Buffer), 0, (sockaddr*)&SockAddr, &SockAddrLen);
-
 			if (ReadSize == -1) {
 				if (errno != EAGAIN) {
 					SetError();
