@@ -81,6 +81,7 @@ X_NS
         X_PRIVATE_MEMBER void EnableWritingTrigger();
         X_PRIVATE_MEMBER void DisableWritingTrigger();
         bool _RequireOutputEvent X_DEBUG_INIT(false);
+        bool _FlushFlag X_DEBUG_INIT(false);
     #endif
 
     #if defined (X_SYSTEM_LINUX)
@@ -89,6 +90,7 @@ X_NS
         X_PRIVATE_MEMBER void TrySendData();
         X_PRIVATE_MEMBER void UpdateEventTrigger();
         bool _RequireOutputEvent X_DEBUG_INIT(false);
+        bool _FlushFlag X_DEBUG_INIT(false);
     #endif
 
     #if defined (X_SYSTEM_WINDOWS)
