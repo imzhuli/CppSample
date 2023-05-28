@@ -9,6 +9,8 @@ X_NS
     bool xTcpServer::Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr, bool ReusePort)
     {
         assert(Address);
+        _IoContextPtr = IoContextPtr;
+        _ListenerPtr = ListenerPtr;
 
         sockaddr_storage AddrStorage;
         size_t AddrLen = Address.Dump(&AddrStorage);
@@ -60,11 +62,6 @@ X_NS
         if (!(_IoBufferPtr = CreateOverlappedObject())) { return false; }
         auto OverlappedObjectGuard = xScopeGuard([this]{ ReleaseOverlappedObject(_IoBufferPtr); });
 
-        _IoContextPtr = IoContextPtr;
-        _ListenerPtr = ListenerPtr;
-
-        X_DEBUG_PRINTF("xTcpServer::Init succeeded BinAddress=%s\n", Address.ToString().c_str());
-
         OverlappedObjectGuard.Dismiss();
         FailSafe.Dismiss();
 		SetAvailable();
@@ -75,35 +72,49 @@ X_NS
 
     void xTcpServer::OnDeferredCallback()
     {
+        assert(IsAvailable());
         TryPreAccept();
+        assert(IsAvailable());
     }
 
     void xTcpServer::TryPreAccept()
     {
-        if (_PreAcceptSocket == InvalidSocket) {
-            _PreAcceptSocket = WSASocket(_AF, SOCK_STREAM, IPPROTO_IP, NULL, 0, WSA_FLAG_OVERLAPPED);
-            if (_PreAcceptSocket == InvalidSocket) {
-                X_DEBUG_PRINTF("xTcpServer::TryPreAccept failed to create pre accept socket\n");
-                Fatal();
-                return;
-            }
+		auto & ReadObject = _IoBufferPtr->ReadObject;
+		if (ReadObject.AsyncOpMark) {
+            return;
         }
-        memset(&_Overlapped, 0 , sizeof(_Overlapped));
+
+        assert(_PreAcceptSocket == InvalidSocket);
+        _PreAcceptSocket = WSASocket(_AF, SOCK_STREAM, IPPROTO_IP, NULL, 0, WSA_FLAG_OVERLAPPED);
+        if (_PreAcceptSocket == InvalidSocket) {
+            X_DEBUG_PRINTF("xTcpServer::TryPreAccept failed to create pre accept socket\n");
+            Fatal();
+            return;
+        }
+
+        auto & Overlapped = ReadObject.NativeOverlappedObject;
+        memset(&Overlapped, 0 , sizeof(Overlapped));
         auto AcceptResult = AcceptEx(_ListenSocket, _PreAcceptSocket, &_PreAcceptAddress, 0,
             sizeof(_PreAcceptAddress.Local) + 16,
-            sizeof(_PreAcceptAddress.Remote) + 16, &_PreAcceptAddress._PreAcceptReceivedLength, &_Overlapped);
+            sizeof(_PreAcceptAddress.Remote) + 16, &_PreAcceptAddress._PreAcceptReceivedLength, &Overlapped);
         if (!AcceptResult && ERROR_IO_PENDING != WSAGetLastError()) {
             X_DEBUG_PRINTF("xTcpServer::TryPreAccept failed to exec AcceptEx: reason=%i\n", WSAGetLastError());
             Fatal();
             return;
         }
+        ReadObject.AsyncOpMark = true;
+        RetainOverlappedObject(_IoBufferPtr);
     }
 
-    void xTcpServer::OnIoEventOutReady()
+    void xTcpServer::OnIoEventInReady()
     {
+		auto & ReadObject = _IoBufferPtr->ReadObject;
+		ReadObject.AsyncOpMark = false;
+
         setsockopt(_PreAcceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (char *)&_ListenSocket, sizeof(_ListenSocket));
         _ListenerPtr->OnNewConnection(this, Steal(_PreAcceptSocket, InvalidSocket));
-        TryPreAccept();
+
+        _IoContextPtr->DeferCallback(*this);
     }
 
     void xTcpServer::Clean()

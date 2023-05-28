@@ -54,14 +54,9 @@ X_NS
 			ubyte             _RemoteAddressPadding[16];
 			DWORD             _PreAcceptReceivedLength = 0;
 		} _PreAcceptAddress;
-        OVERLAPPED        _Overlapped;
 
 		X_API_MEMBER void TryPreAccept();
-		X_PRIVATE_MEMBER eIoEventType GetEventType(OVERLAPPED * OverlappedPtr) {
-			assert(OverlappedPtr == &_Overlapped);
-			return eIoEventType::OutReady;
-		};
-		X_API_MEMBER void OnIoEventOutReady() override;
+		X_API_MEMBER void OnIoEventInReady() override;
 		X_API_MEMBER void OnDeferredCallback() override;
 	#endif
 	};

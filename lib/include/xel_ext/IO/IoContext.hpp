@@ -120,6 +120,7 @@ X_NS
     protected:
         struct xOverlappedIoBuffer;
         struct xOverlappedObject
+        : private ::xel::xNonCopyable
         {
             xOverlappedIoBuffer *  Outter;
             bool                   AsyncOpMark;
@@ -128,6 +129,7 @@ X_NS
             OVERLAPPED             NativeOverlappedObject;
         };
         struct xOverlappedIoBuffer
+        : ::xel::xNonCopyable
         {
             ssize_t               ReferenceCount;
             xOverlappedObject     ReadObject;
