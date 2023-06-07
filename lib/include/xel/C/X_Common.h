@@ -15,13 +15,13 @@
 	#endif
 #elif defined(__APPLE__)
 	#include <TargetConditionals.h>
-	#if defined(TARGET_IPHONE_SIMULATOR)
+	#if TARGET_IPHONE_SIMULATOR || TARGET_OS_SIMULATOR
 		// iOS Simulator
 		#define X_SYSTEM_IPHONE_SIMULATOR
-	#elif defined(TARGET_OS_IPHONE)
+	#elif TARGET_OS_IPHONE
 		// iOS device
 		#define X_SYSTEM_IPHONE
-	#elif defined(TARGET_OS_OSX)
+	#elif TARGET_OS_OSX
 		// Other kinds of Mac OS
 		#define X_SYSTEM_OSX
 	#else
