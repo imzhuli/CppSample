@@ -5,7 +5,7 @@
 
 #if defined(X_SYSTEM_WINDOWS)
 #define strcasecmp _stricmp
-#elif defined(X_SYSTEM_MACOS)
+#elif defined(X_SYSTEM_DARWIN)
 #include <strings.h> // mac: strcasecmp
 #endif
 
@@ -66,7 +66,7 @@ X_NS
 		vhLine->hValueStart = vhValueStart;
 		// r-Trim value
 		if (char * pc = vhLine->hValueStart; *pc) {
-			while(*++pc) 
+			while(*++pc)
 			{}
 			while(isspace(*--pc)) {
 				*pc = '\0';

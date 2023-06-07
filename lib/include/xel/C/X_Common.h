@@ -21,9 +21,9 @@
 	#elif defined(TARGET_OS_IPHONE)
 		// iOS device
 		#define X_SYSTEM_IPHONE
-	#elif defined(TARGET_OS_MAC)
+	#elif defined(TARGET_OS_OSX)
 		// Other kinds of Mac OS
-		#define X_SYSTEM_MACOS
+		#define X_SYSTEM_OSX
 	#else
 	#	error "Unknown Apple platform"
 	#endif
@@ -46,7 +46,7 @@
 	#error "Unknown system type"
 #endif
 
-#if defined(X_SYSTEM_WINDOWS) || defined(X_SYSTEM_LINUX) || defined(X_SYSTEM_MACOS)
+#if defined(X_SYSTEM_WINDOWS) || defined(X_SYSTEM_LINUX) || defined(X_SYSTEM_OSX)
 #ifndef X_SYSTEM_ANDROID
 	#define X_SYSTEM_DESKTOP
 #endif
@@ -56,7 +56,7 @@
 	#define X_SYSTEM_IOS
 #endif
 
-#if defined(X_SYSTEM_MACOS) || defined(X_SYSTEM_IOS)
+#if defined(X_SYSTEM_OSX) || defined(X_SYSTEM_IOS)
 	#define X_SYSTEM_DARWIN
 #endif
 
