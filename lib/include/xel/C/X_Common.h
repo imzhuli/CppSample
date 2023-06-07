@@ -14,7 +14,6 @@
 		#define X_SYSTEM_WIN32
 	#endif
 #elif defined(__APPLE__)
-	#define X_SYSTEM_APPLE
 	#include <TargetConditionals.h>
 	#if defined(TARGET_IPHONE_SIMULATOR)
 		// iOS Simulator
