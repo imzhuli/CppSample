@@ -45,7 +45,7 @@ X_NS
 
     private:
         X_API_MEMBER void OnError(xUdpChannel * ChannelPtr) override;
-        X_API_MEMBER bool OnData (xUdpChannel * ChannelPtr, void * DataPtr, size_t DataSize, const xNetAddress & RemoteAddress) override;
+        X_API_MEMBER void OnData (xUdpChannel * ChannelPtr, void * DataPtr, size_t DataSize, const xNetAddress & RemoteAddress) override;
 
         X_PRIVATE_MEMBER bool DoSendDnsQuery(xRequest * RequestPtr);
         X_PRIVATE_MEMBER void DoPushResolvResult(uint16_t Index, const char * HostnameBuffer, const xNetAddress * ResolvedList, size_t ResolvedCounter);

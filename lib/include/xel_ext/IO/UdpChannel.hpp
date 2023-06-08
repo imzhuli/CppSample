@@ -16,7 +16,7 @@ X_NS
     public:
         struct iListener {
             virtual void OnError(xUdpChannel * ChannelPtr) {}
-            virtual bool OnData (xUdpChannel * ChannelPtr, void * DataPtr, size_t DataSize, const xNetAddress & RemoteAddress) = 0;
+            virtual void OnData (xUdpChannel * ChannelPtr, void * DataPtr, size_t DataSize, const xNetAddress & RemoteAddress) = 0;
         };
 
     public:
