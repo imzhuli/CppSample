@@ -576,7 +576,13 @@ X_NS
 #define X_DEBUG_STEAL(Param, ...) (::xel::Steal(Param, ##__VA_ARGS__))
 #define X_DEBUG_RESET(Param, ...) (::xel::Reset(Param, ##__VA_ARGS__))
 
+#ifdef  X_SYSTEM_ANDROID
+#include <android/log.h>
+#define X_DEBUG_PRINTF(...) __android_log_print(ANDROID_LOG_DEBUG, "Xel_Debug", ##__VA_ARGS__);
+#else
 #define X_DEBUG_PRINTF printf
+#endif
+
 #define X_DEBUG_FPRINTF fprintf
 #define X_DEBUG_BREAKPOINT(...) ::xel::Breakpoint()
 #else
