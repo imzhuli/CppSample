@@ -159,7 +159,6 @@ X_NS
 
     void xTcpConnection::Clean()
     {
-        X_DEBUG_PRINTF("Cleaning tcp connection: %p\n", this);
         ReleaseOverlappedObject(_IoBufferPtr);
         XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
     }
