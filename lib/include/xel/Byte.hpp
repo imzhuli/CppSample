@@ -167,7 +167,7 @@ X_NS
 		X_INLINE ubyte *         Origin() const               { return _start; }
 		X_INLINE ptrdiff_t       Offset() const               { return _curr - _start; }
 		X_INLINE void            Offset(ptrdiff_t offset)     { _curr = _start + offset; }
-		X_INLINE ubyte *         Skip(ptrdiff_t len = 0)      { ubyte * from = _curr; _curr += len; return from; }
+		X_INLINE ubyte *         Skip(ptrdiff_t len)          { ubyte * from = _curr; _curr += len; return from; }
 
 		X_INLINE void Reset()                              { _curr = _start; }
 		X_INLINE void Reset(void * s)                      { _curr = _start = static_cast<ubyte *>(s); }
@@ -206,7 +206,7 @@ X_NS
 		X_INLINE const ubyte *     Origin() const             { return _start; }
 		X_INLINE ptrdiff_t         Offset() const             { return _curr - _start; }
 		X_INLINE void              Offset(ptrdiff_t offset)   { _curr = _start + offset; }
-		X_INLINE const ubyte *     Skip(ptrdiff_t len = 0)    { const ubyte * from = _curr; _curr += len; return from; }
+		X_INLINE const ubyte *     Skip(ptrdiff_t len)        { const ubyte * from = _curr; _curr += len; return from; }
 
 		X_INLINE void Reset()                              { _curr = _start; }
 		X_INLINE void Reset(const void * s)                { _curr = _start = static_cast<const ubyte *>(s); }
