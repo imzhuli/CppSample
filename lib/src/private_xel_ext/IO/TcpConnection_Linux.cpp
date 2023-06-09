@@ -11,8 +11,6 @@ X_NS
 
     bool xTcpConnection::Init(xIoContext * IoContextPtr, xSocket NativeHandle, iListener * ListenerPtr)
     {
-        // X_DEBUG_PRINTF("xTcpConnection::Init NewConnection poller=%i socket=%i\n", (int)*IoContextPtr, NativeHandle);
-
         auto FailSafe = xScopeGuard{[=]{
             XelCloseSocket(NativeHandle);
             X_DEBUG_RESET(_IoContextPtr);

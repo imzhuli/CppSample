@@ -19,8 +19,6 @@ X_NS
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
 
-        X_DEBUG_PRINTF("xTcpConnection::Init:OnNewConnection IoContextPtr=%p, Socket=%" PRIuPTR "\n", IoContextPtr, (uintptr_t)NativeHandle);
-
         auto FailSafe = xScopeGuard{[=]{
             XelCloseSocket(NativeHandle);
             X_DEBUG_RESET(_IoContextPtr);
