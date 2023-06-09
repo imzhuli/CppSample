@@ -119,10 +119,7 @@ X_NS
 		ReadObject.AsyncOpMark = false;
 
 		auto RemoteAddress = xNetAddress::Parse((sockaddr*)&_RemoteAddress);
-		if (!_ListenerPtr->OnData(this, _IoBufferPtr->ReadBuffer, _IoBufferPtr->ReadObject.DataSize, RemoteAddress)) {
-			SetError();
-			return;
-		}
+		_ListenerPtr->OnData(this, _IoBufferPtr->ReadBuffer, _IoBufferPtr->ReadObject.DataSize, RemoteAddress);
 		_IoContextPtr->DeferCallback(*this);
 	}
 
