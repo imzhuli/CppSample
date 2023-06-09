@@ -159,9 +159,9 @@ X_NS
             X_DEBUG_PRINTF("Connection established\n");
             _Status = eStatus::Connected;
             _ListenerPtr->OnConnected(this);
-        } else {
-            TrySendData();
         }
+        TrySendData();
+
         if (Steal(_FlushFlag)) {
             _ListenerPtr->OnFlush(this);
         }
