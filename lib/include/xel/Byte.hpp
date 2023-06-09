@@ -146,6 +146,7 @@ X_NS
 
 		X_INLINE void W(ubyte c)                           { *(_curr++) = c; }
 		X_INLINE void W(const void * s, ptrdiff_t len)     { ::memcpy(_curr, s, len); _curr += len; }
+		X_INLINE void W0(ptrdiff_t len)                    { ::memset(_curr, 0, len); _curr += len; }
 
 		X_INLINE void W1(uint8_t u)                        { *(_curr++) = u; }
 		X_INLINE void W2(uint16_t u)                       { iter::write16(_curr, XelBE16(u)); }
