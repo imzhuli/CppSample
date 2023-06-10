@@ -99,7 +99,7 @@ int main(int argc, char * argv[])
     Connection.PostData("Hello", 5);
 
     Timer.Tag();
-    while(Timer.TestAndTag(3s))
+    while(!Timer.TestAndTag(3s))
     {
         IoContext.LoopOnce(100);
     }
