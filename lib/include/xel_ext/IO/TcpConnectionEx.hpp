@@ -1,8 +1,7 @@
 #pragma once
 
 #include <xel/Common.hpp>
-#include <xel/Util/MemoryPool.hpp>
-#include <xel/Util/IndexedStorage.hpp>
+#include <xel/Util/IndexedResourcePool.hpp>
 #include "./TcpConnection.hpp"
 #include <string>
 
@@ -66,50 +65,32 @@ X_NS
     {
         static_assert(std::is_base_of_v<xTcpConnectionEx, T>);
     public:
-        bool Init(size_t PoolSize)
-        {
-            xMemoryPoolOptions PoolOptions = {
-                .InitSize          = 1'0000,
-                .Addend            = 1'0000,
-                .MaxSizeIncrement  = std::max(size_t(1'0000), PoolSize / 10),
-            };
-            PoolOptions.MaxPoolSize = PoolSize;
-                if (!Pool.Init(PoolOptions)) {
-                    return false;
-                }
-            if (!KeyManager.Init(PoolSize)) {
-                Pool.Clean();
-                return false;
-            }
-            return true;
+        bool Init(size_t PoolSize) {
+            return ResourceManager.Init(PoolSize);
         }
         void Clean() {
-            KeyManager.Clean();
-            Pool.Clean();
+            ResourceManager.Clean();
         }
 
         X_INLINE T* GetConnectionById(xIndexId Key) {
-            auto Opt = KeyManager.CheckAndGet(Key);
-            return Opt() ? *Opt : nullptr;
+            return ResourceManager.GetInstanceByKey(Key);
         }
 
         X_INLINE T* CreateConnection() {
-            auto ConnectionPtr = Pool.Create();
+            auto [ConnectionPtr, ConnectionId] = ResourceManager.Create();
             if (!ConnectionPtr) {
                 return nullptr;
             }
-            ConnectionPtr->ConnectionId = KeyManager.Acquire(ConnectionPtr);
+            ConnectionPtr->ConnectionId = ConnectionId;
             return ConnectionPtr;
         }
 
         X_INLINE void DestroyConnection(T* ConnectionPtr) {
-            KeyManager.Release(Steal(ConnectionPtr->ConnectionId));
-            Pool.Destroy(ConnectionPtr);
+            ResourceManager.Destroy(ConnectionPtr, ConnectionPtr->ConnectionId);
         }
 
     private:
-        xIndexedStorage<T*>    KeyManager;
-        xMemoryPool<T>         Pool;
+        xIndexedResourcePool<T> ResourceManager;
     };
 
 }
