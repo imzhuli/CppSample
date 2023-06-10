@@ -57,7 +57,7 @@ X_NS
         X_INLINE bool HasPendingWrites() const { return !_FlushFlag; }
         #else // X_SYSTEM_WINDOWS
         X_INLINE bool HasPendingWrites() const {
-            assert(_IoBufferPtr)
+            assert(_IoBufferPtr);
             return !_IoBufferPtr->FlushFlag;
         }
         #endif
