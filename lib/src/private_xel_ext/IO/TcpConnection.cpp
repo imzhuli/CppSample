@@ -68,12 +68,12 @@ X_NS
         if (_Status == eStatus::Connecting) {
             X_DEBUG_PRINTF("Connection established\n");
             _Status = eStatus::Connected;
-            _ListenerPtr->OnConnected(this);
-        }
-        TrySendData();
-
-        if (Steal(_FlushFlag)) {
-            _ListenerPtr->OnFlush(this);
+            _ListenerPtr->OnConnected(this); // if PostData is called during callback, a TrySendData is called internally
+        } else {
+            TrySendData();
+            if (Steal(_FlushFlag)) {
+                _ListenerPtr->OnFlush(this);
+            }
         }
     }
 

@@ -36,6 +36,7 @@ X_NS
         _Socket = NativeHandle;
         _Status = eStatus::Connected;
         _SuspendReading = false;
+        _FlushFlag = false;
 
         OverlappedObjectGuard.Dismiss();
         FailSafe.Dismiss();
@@ -147,6 +148,7 @@ X_NS
 
         _Status = eStatus::Connecting;
         _SuspendReading = false;
+        _FlushFlag = false;
 
         OverlappedObjectGuard.Dismiss();
         FailSafe.Dismiss();

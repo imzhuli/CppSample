@@ -58,6 +58,7 @@ X_NS
 				_CheckTimestamp = NowMS;
 				return;
 			}
+			_Connected = _Connection.IsConnected();
 			_Active = true;
 			++_Version;
 		}
