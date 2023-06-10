@@ -72,9 +72,13 @@ X_NS
 
     void xTcpServer::OnDeferredCallback()
     {
-        assert(IsAvailable());
+        if (!IsAvailable()) {
+            return;
+        }
         TryPreAccept();
-        assert(IsAvailable());
+        if (HasError()) {
+            OnIoEventError();
+        }
     }
 
     void xTcpServer::TryPreAccept()
@@ -99,7 +103,7 @@ X_NS
             sizeof(_PreAcceptAddress.Remote) + 16, &_PreAcceptAddress._PreAcceptReceivedLength, &Overlapped);
         if (!AcceptResult && ERROR_IO_PENDING != WSAGetLastError()) {
             X_DEBUG_PRINTF("xTcpServer::TryPreAccept failed to exec AcceptEx: reason=%i\n", WSAGetLastError());
-            Fatal();
+            SetError();
             return;
         }
         ReadObject.AsyncOpMark = true;

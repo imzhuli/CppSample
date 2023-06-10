@@ -35,7 +35,7 @@ X_NS
         _WriteBufferPtr = nullptr;
         _Status = eStatus::Connected;
         _SuspendReading = false;
-        _FlushFlag = false;
+        _HasPendingWriteFlag = false;
         SetAvailable();
 
         FailSafe.Dismiss();
@@ -100,7 +100,7 @@ X_NS
         _ReadBufferDataSize = 0;
         _WriteBufferPtr = nullptr;
         _SuspendReading = false;
-        _FlushFlag = false;
+        _HasPendingWriteFlag = false;
         SetAvailable();
 
         FailSafe.Dismiss();
@@ -116,8 +116,7 @@ X_NS
             ssize_t SendSize = send(_Socket, _WriteBufferPtr->Buffer, _WriteBufferPtr->DataSize, XelNoWriteSignal);
             if (SendSize == -1) {
                 if (errno == EAGAIN) {
-                    if (!_RequireOutputEvent) {
-                        _RequireOutputEvent = true;
+                    if (!Steal(_RequireOutputEvent, true)) {
                         UpdateEventTrigger();
                     }
                     return;
@@ -127,8 +126,7 @@ X_NS
             }
             if ((_WriteBufferPtr->DataSize -= SendSize)) {
                 memmove(_WriteBufferPtr->Buffer, _WriteBufferPtr->Buffer + SendSize, _WriteBufferPtr->DataSize);
-                if (!_RequireOutputEvent) {
-                    _RequireOutputEvent = true;
+                if (!Steal(_RequireOutputEvent, true)) {
                     UpdateEventTrigger();
                 }
                 return;
@@ -136,9 +134,8 @@ X_NS
             delete _WriteBufferPtr;
             _WriteBufferPtr = _WriteBufferChain.Pop();
         }
-        _FlushFlag = true;
-        if (_RequireOutputEvent) {
-            _RequireOutputEvent = false;
+        _HasPendingWriteFlag = false;
+        if (Steal(_RequireOutputEvent)) {
             UpdateEventTrigger();
         }
         return;

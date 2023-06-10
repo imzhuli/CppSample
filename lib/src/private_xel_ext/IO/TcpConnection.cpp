@@ -71,7 +71,7 @@ X_NS
             _ListenerPtr->OnConnected(this); // if PostData is called during callback, a TrySendData is called internally
         } else {
             TrySendData();
-            if (Steal(_FlushFlag)) {
+            if (!_HasPendingWriteFlag) {
                 _ListenerPtr->OnFlush(this);
             }
         }
@@ -103,12 +103,12 @@ X_NS
             _WriteBufferChain.Push(BufferPtr);
         }
 
+        _HasPendingWriteFlag = true;
         if (_Status == eStatus::Connecting) {
             return DataSize;
         }
 
         // _Status == eStatus::Connected
-        _FlushFlag = false; // prevent OnFlush overhead
         TrySendData();
         return DataSize;
     }

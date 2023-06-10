@@ -77,14 +77,13 @@ X_NS
 
 	void xUdpChannel::OnDeferredCallback()
 	{
-		// this implementation won't see any chance of getting unavailable, unless env changed (like ip)
-		assert(IsAvailable());
+        if (!IsAvailable()) {
+            return;
+        }
 		TryRecvData();
-		if (!IsAvailable()) {
-			if (HasError()) {
-				OnIoEventError();
-			}
-		}
+        if (HasError()) {
+            OnIoEventError();
+        }
 	}
 
 	void xUdpChannel::TryRecvData()

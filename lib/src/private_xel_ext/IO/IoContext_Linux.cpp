@@ -77,10 +77,15 @@ X_NS {
             }
         }
 
-        DeferredCallbackList.GrabListTail(PendingEventList);
-        for (auto & CallbackNode : DeferredCallbackList) {
-            xListNode::Unlink(CallbackNode);
-            CallbackNode.OnDeferredCallback();
+        while(true) {
+            DeferredCallbackList.GrabListTail(PendingEventList);
+            if (DeferredCallbackList.IsEmpty()) {
+                break;
+            }
+            for (auto & CallbackNode : DeferredCallbackList) {
+                xListNode::Unlink(CallbackNode);
+                CallbackNode.OnDeferredCallback();
+            }
         }
     }
 

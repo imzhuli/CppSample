@@ -28,6 +28,7 @@ X_NS
 	private:
 		X_API_MEMBER void DoAccept();
 		X_API_MEMBER void OnAccept(xSocket NativeHandle);
+		X_API_MEMBER void OnIoEventError() override { Fatal("TcpServerError"); }
 
 	private:
 		xIoContext *  _IoContextPtr;

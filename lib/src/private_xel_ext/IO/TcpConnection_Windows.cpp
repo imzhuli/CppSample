@@ -36,7 +36,7 @@ X_NS
         _Socket = NativeHandle;
         _Status = eStatus::Connected;
         _SuspendReading = false;
-        _FlushFlag = false;
+        _HasPendingWriteFlag = false;
 
         OverlappedObjectGuard.Dismiss();
         FailSafe.Dismiss();
@@ -148,7 +148,7 @@ X_NS
 
         _Status = eStatus::Connecting;
         _SuspendReading = false;
-        _FlushFlag = false;
+        _HasPendingWriteFlag = false;
 
         OverlappedObjectGuard.Dismiss();
         FailSafe.Dismiss();
@@ -191,6 +191,7 @@ X_NS
             WriteBufferChain.Push(BufferPtr);
         }
 
+        _HasPendingWriteFlag = true;
         if (_Status == eStatus::Connected) {
             _IoContextPtr->DeferCallback(*this);
         }
@@ -329,7 +330,7 @@ X_NS
 		}
         auto WriteBufferPtr = _IoBufferPtr->WriteBufferChain.Peek();
         if (!WriteBufferPtr) {
-            if (Steal(_IoBufferPtr->FlushFlag)) {
+            if (Steal(_HasPendingWriteFlag)) {
                 _ListenerPtr->OnFlush(this);
             }
             return;
@@ -350,8 +351,6 @@ X_NS
         }
 		WriteObject.AsyncOpMark = true;
         RetainOverlappedObject(_IoBufferPtr);
-        _IoBufferPtr->FlushFlag = true;
-
         return;
     }
 

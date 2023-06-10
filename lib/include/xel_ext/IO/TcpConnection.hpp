@@ -79,7 +79,7 @@ X_NS
         X_API_MEMBER void ResizeReceiveBuffer(size_t Size);
 
         X_INLINE bool IsConnected() const { return _Status == eStatus::Connected; }
-        X_INLINE bool HasPendingWrites() const { return !_FlushFlag; }
+        X_INLINE bool HasPendingWrites() const { return _HasPendingWriteFlag; }
 
         // X_API_MEMBER size_t  GetPendingWriteBlockCount() const;
         // X_API_MEMBER bool    GracefulClose();  /* return value: true: immediately closed, false pending writes */
@@ -135,7 +135,7 @@ X_NS
         iListener *    _ListenerPtr X_DEBUG_INIT(nullptr);
 
         bool           _SuspendReading X_DEBUG_INIT(false);
-        bool           _FlushFlag X_DEBUG_INIT(false);
+        bool           _HasPendingWriteFlag X_DEBUG_INIT(false);
     };
 
 }
