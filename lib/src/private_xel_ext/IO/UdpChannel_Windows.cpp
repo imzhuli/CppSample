@@ -47,12 +47,15 @@ X_NS
         if (!(_IoBufferPtr = CreateOverlappedObject())) { return false; }
         auto OverlappedObjectGuard = xScopeGuard([this]{ ReleaseOverlappedObject(_IoBufferPtr); });
 
+		TryRecvData();
+		if (HasError()) {
+			return false;
+		}
 
 		OverlappedObjectGuard.Dismiss();
 		SocketGuard.Dismiss();
 		SetAvailable();
 
-        IoContextPtr->DeferCallback(*this);
 		return true;
 	}
 
@@ -62,7 +65,9 @@ X_NS
 		assert(_Socket != InvalidSocket);
 		assert(_IoBufferPtr);
 
+        _IoBufferPtr->DeleteMark = true;
 		ReleaseOverlappedObject(X_DEBUG_STEAL(_IoBufferPtr));
+
 		XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
 		X_DEBUG_RESET(_ListenerPtr);
 		X_DEBUG_RESET(_IoContextPtr);
@@ -73,17 +78,6 @@ X_NS
         sockaddr_storage AddrStorage = {};
         size_t AddrLen = Address.Dump(&AddrStorage);
 		sendto(_Socket, (const char *)DataPtr, (int)DataSize, 0, (const sockaddr*)&AddrStorage, (socklen_t)AddrLen);
-	}
-
-	void xUdpChannel::OnDeferredCallback()
-	{
-        if (!IsAvailable()) {
-            return;
-        }
-		TryRecvData();
-        if (HasError()) {
-            OnIoEventError();
-        }
 	}
 
 	void xUdpChannel::TryRecvData()
@@ -119,7 +113,8 @@ X_NS
 
 		auto RemoteAddress = xNetAddress::Parse((sockaddr*)&_RemoteAddress);
 		_ListenerPtr->OnData(this, _IoBufferPtr->ReadBuffer, _IoBufferPtr->ReadObject.DataSize, RemoteAddress);
-		_IoContextPtr->DeferCallback(*this);
+
+		TryRecvData();
 	}
 
     void xUdpChannel::OnIoEventError()

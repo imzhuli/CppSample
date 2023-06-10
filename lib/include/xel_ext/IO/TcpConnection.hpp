@@ -15,7 +15,6 @@ X_NS
 
     class xTcpConnection
     : public iBufferedIoReactor
-	, protected xIoContext::xDeferredCallbackNode
     , xAbstract
     {
     public:
@@ -122,7 +121,6 @@ X_NS
     #if defined (X_SYSTEM_WINDOWS)
         X_API_MEMBER void OnIoEventInReady() override;
         X_API_MEMBER void OnIoEventOutReady() override;
-        X_API_MEMBER void OnDeferredCallback() override;
         X_PRIVATE_MEMBER void TryRecvData();
         X_PRIVATE_MEMBER void TrySendData();
     #endif

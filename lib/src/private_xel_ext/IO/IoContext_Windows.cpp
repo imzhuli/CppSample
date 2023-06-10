@@ -69,9 +69,12 @@ X_NS {
             if (!OverlappedBlockPtr) { // User Trigger event does not have overlapped object
                 continue;
             }
+            auto OverlappedBufferPtr = OverlappedBlockPtr->Outter;
+            if (OverlappedBufferPtr->DeleteMark) {
+                continue;
+            }
 
             auto EventType = eIoEventType::Unspecified;
-            auto OverlappedBufferPtr = OverlappedBlockPtr->Outter;
             if (!iBufferedIoReactor::ReleaseOverlappedObject(OverlappedBufferPtr)) {
                 // EventType = eIoEventType::Cleanup;
                 continue;
@@ -115,18 +118,6 @@ X_NS {
             //     continue;
             // }
         }
-
-        while(true) {
-            DeferredCallbackList.GrabListTail(PendingEventList);
-            if (DeferredCallbackList.IsEmpty()) {
-                break;
-            }
-            for (auto & CallbackNode : DeferredCallbackList) {
-                xListNode::Unlink(CallbackNode);
-                CallbackNode.OnDeferredCallback();
-            }
-        }
-
     }
 
     namespace __io_detail__

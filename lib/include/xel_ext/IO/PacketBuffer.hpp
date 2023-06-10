@@ -30,6 +30,7 @@ X_NS
             }
             return CopySize;
         }
+        X_INLINE bool HasNext() const { return NextBufferPtr; }
 
     private:
         xPacketBuffer * NextBufferPtr = nullptr;

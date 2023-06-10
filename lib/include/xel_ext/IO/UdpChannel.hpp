@@ -10,7 +10,6 @@ X_NS
 
     class xUdpChannel final
     : public iBufferedIoReactor
-	, protected xIoContext::xDeferredCallbackNode
     , xAbstract
     {
     public:
@@ -30,7 +29,6 @@ X_NS
         X_API_MEMBER void OnIoEventError() override;
 
     #if defined(X_SYSTEM_WINDOWS)
-        X_API_MEMBER void OnDeferredCallback() override;
         X_API_MEMBER void TryRecvData();
     #endif
 

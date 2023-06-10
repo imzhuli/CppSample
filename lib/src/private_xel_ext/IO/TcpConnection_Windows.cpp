@@ -38,11 +38,15 @@ X_NS
         _SuspendReading = false;
         _HasPendingWriteFlag = false;
 
+		TryRecvData();
+		if (HasError()) {
+			return false;
+		}
+
         OverlappedObjectGuard.Dismiss();
         FailSafe.Dismiss();
         SetAvailable();
 
-        IoContextPtr->DeferCallback(*this);
         return true;
     }
 
@@ -150,6 +154,14 @@ X_NS
         _SuspendReading = false;
         _HasPendingWriteFlag = false;
 
+        /***
+         *  Always wait for completion event, and call TryRecvData Later
+         * */
+		// TryRecvData();
+		// if (HasError()) {
+		// 	return false;
+		// }
+
         OverlappedObjectGuard.Dismiss();
         FailSafe.Dismiss();
         SetAvailable();
@@ -159,7 +171,8 @@ X_NS
 
     void xTcpConnection::Clean()
     {
-        ReleaseOverlappedObject(_IoBufferPtr);
+        _IoBufferPtr->DeleteMark = true;
+        ReleaseOverlappedObject(X_DEBUG_STEAL(_IoBufferPtr));
         XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
     }
 
@@ -192,9 +205,11 @@ X_NS
         }
 
         _HasPendingWriteFlag = true;
-        if (_Status == eStatus::Connected) {
-            _IoContextPtr->DeferCallback(*this);
+        if (_Status == eStatus::Connecting) {
+            return DataSize;
         }
+
+        TrySendData();
         return DataSize;
     }
 
@@ -230,7 +245,8 @@ X_NS
             ProcessDataPtr += ProcessedData;
             RemainDataSize -= ProcessedData;
         }
-        _IoContextPtr->DeferCallback(*this);
+
+        TryRecvData();
     }
 
     void xTcpConnection::OnIoEventOutReady()
@@ -258,34 +274,27 @@ X_NS
                 X_DEBUG_PRINTF("Connection has been established %u seconds\n", seconds);
             }
             _Status = eStatus::Connected;
+
+            auto NeedFlushEvent = _HasPendingWriteFlag;
             _ListenerPtr->OnConnected(this);
+            TrySendData();
+            if (NeedFlushEvent && !_HasPendingWriteFlag) {
+                _ListenerPtr->OnFlush(this);
+            }
+            TryRecvData();
         }
         else {
             // remove last sent data from WriteBufferChain
             auto WriteBufferPtr = _IoBufferPtr->WriteBufferChain.Pop();
             assert(WriteBufferPtr == (void*)Steal(WriteObject.BufferUsage.buf));
             delete WriteBufferPtr;
-        }
-        _IoContextPtr->DeferCallback(*this);
-    }
 
-    void xTcpConnection::OnDeferredCallback()
-    {
-        if (!IsAvailable()) {
-            return;
-        }
-        TryRecvData();
-        if (!IsAvailable()) {
-            if (HasError()) {
-                OnIoEventError();
+            auto NeedFlushEvent = _HasPendingWriteFlag;
+            TrySendData();
+            if (NeedFlushEvent && !_HasPendingWriteFlag) {
+                _ListenerPtr->OnFlush(this);
             }
-            return;
         }
-        TrySendData();
-        if (HasError()) {
-            OnIoEventError();
-        }
-        return;
     }
 
     void xTcpConnection::TryRecvData()
@@ -330,9 +339,7 @@ X_NS
 		}
         auto WriteBufferPtr = _IoBufferPtr->WriteBufferChain.Peek();
         if (!WriteBufferPtr) {
-            if (Steal(_HasPendingWriteFlag)) {
-                _ListenerPtr->OnFlush(this);
-            }
+            _HasPendingWriteFlag = false;
             return;
         }
 
@@ -349,6 +356,9 @@ X_NS
                 return;
             }
         }
+        if (!WriteBufferPtr->HasNext()) {
+            _HasPendingWriteFlag = false;
+        }
 		WriteObject.AsyncOpMark = true;
         RetainOverlappedObject(_IoBufferPtr);
         return;
@@ -362,7 +372,7 @@ X_NS
     void xTcpConnection::ResumeReading()
     {
         _SuspendReading = false;
-        _IoContextPtr->DeferCallback(*this);
+        TryRecvData();
     }
 
 }

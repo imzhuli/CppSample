@@ -36,16 +36,6 @@ X_NS
     private:
         xEventPoller          _Poller X_DEBUG_INIT(InvalidEventPoller);
         iUserEventTrigger *   _UserEventTriggerPtr = nullptr;
-
-    public:
-        struct xDeferredCallbackNode : xListNode, xNonCopyable {
-            virtual void OnDeferredCallback() {};
-        };
-        using  xDeferredCallbackList = xList<xDeferredCallbackNode>;
-        void   DeferCallback(xDeferredCallbackNode & Node) { PendingEventList.GrabTail(Node); }
-    private:
-        xDeferredCallbackList PendingEventList; // to prevent infinate loop
-        xDeferredCallbackList DeferredCallbackList;
     };
 
     #if defined(X_SYSTEM_WINDOWS)
@@ -131,6 +121,7 @@ X_NS
         struct xOverlappedIoBuffer
         : ::xel::xNonCopyable
         {
+            bool                  DeleteMark;
             ssize_t               ReferenceCount;
             xOverlappedObject     ReadObject;
             ubyte                 ReadBuffer[InternalReadBufferSize];

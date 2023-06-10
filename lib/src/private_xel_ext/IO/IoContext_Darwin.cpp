@@ -88,17 +88,6 @@ X_NS {
             }
             */
         }
-
-        while(true) {
-            DeferredCallbackList.GrabListTail(PendingEventList);
-            if (DeferredCallbackList.IsEmpty()) {
-                break;
-            }
-            for (auto & CallbackNode : DeferredCallbackList) {
-                xListNode::Unlink(CallbackNode);
-                CallbackNode.OnDeferredCallback();
-            }
-        }
     }
 
     namespace __io_detail__

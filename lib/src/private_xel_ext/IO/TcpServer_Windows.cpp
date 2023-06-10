@@ -62,23 +62,32 @@ X_NS
         if (!(_IoBufferPtr = CreateOverlappedObject())) { return false; }
         auto OverlappedObjectGuard = xScopeGuard([this]{ ReleaseOverlappedObject(_IoBufferPtr); });
 
+        TryPreAccept();
+        if (HasError()) {
+            return false;
+        }
+
         OverlappedObjectGuard.Dismiss();
         FailSafe.Dismiss();
 		SetAvailable();
 
-        IoContextPtr->DeferCallback(*this);
         return true;
     }
 
-    void xTcpServer::OnDeferredCallback()
+    void xTcpServer::Clean()
     {
-        if (!IsAvailable()) {
-            return;
+        _IoBufferPtr->DeleteMark = true;
+        ReleaseOverlappedObject(_IoBufferPtr);
+
+        assert(_ListenSocket != InvalidSocket);
+        if (_PreAcceptSocket != InvalidSocket) {
+            XelCloseSocket(X_DEBUG_STEAL(_PreAcceptSocket, InvalidSocket));
         }
-        TryPreAccept();
-        if (HasError()) {
-            OnIoEventError();
-        }
+        XelCloseSocket(X_DEBUG_STEAL(_ListenSocket, InvalidSocket));
+        X_DEBUG_PRINTF("xTcpServer::Clean succeeded: Object=%p\n", this);
+
+        X_DEBUG_RESET(_ListenerPtr);
+        X_DEBUG_RESET(_IoContextPtr);
     }
 
     void xTcpServer::TryPreAccept()
@@ -118,20 +127,7 @@ X_NS
         setsockopt(_PreAcceptSocket, SOL_SOCKET, SO_UPDATE_ACCEPT_CONTEXT, (char *)&_ListenSocket, sizeof(_ListenSocket));
         _ListenerPtr->OnNewConnection(this, Steal(_PreAcceptSocket, InvalidSocket));
 
-        _IoContextPtr->DeferCallback(*this);
-    }
-
-    void xTcpServer::Clean()
-    {
-        assert(_ListenSocket != InvalidSocket);
-        if (_PreAcceptSocket != InvalidSocket) {
-            XelCloseSocket(X_DEBUG_STEAL(_PreAcceptSocket, InvalidSocket));
-        }
-        XelCloseSocket(X_DEBUG_STEAL(_ListenSocket, InvalidSocket));
-        X_DEBUG_PRINTF("xTcpServer::Clean succeeded: Object=%p\n", this);
-
-        X_DEBUG_RESET(_ListenerPtr);
-        X_DEBUG_RESET(_IoContextPtr);
+        TryPreAccept();
     }
 
 }
