@@ -31,12 +31,15 @@ X_NS {
 
     void xIoContext::Clean()
     {
+        CleanErrorList();
         CleanUserEventTrigger();
         close(X_DEBUG_STEAL(_Poller, InvalidEventPoller));
     }
 
     void xIoContext::LoopOnce(int TimeoutMS)
     {
+        ProcessErrorList();
+
         struct kevent Events[128];
         struct timespec TS = {
             TimeoutMS / 1000,
@@ -54,7 +57,7 @@ X_NS {
 
             if (EV.flags & EV_ERROR) {
                 ReactorPtr->SetError();
-                ReactorPtr->OnIoEventError();
+                ProcessError(*ReactorPtr);
                 continue;
             }
 
@@ -62,7 +65,7 @@ X_NS {
                 ReactorPtr->OnIoEventInReady();
                 if (!ReactorPtr->IsAvailable()) {
                     if (ReactorPtr->HasError()) {
-                        ReactorPtr->OnIoEventError();
+                        ProcessError(*ReactorPtr);
                     }
                     continue;
                 }
@@ -72,7 +75,7 @@ X_NS {
                 ReactorPtr->OnIoEventOutReady();
                 if (!ReactorPtr->IsAvailable()) {
                     if (ReactorPtr->HasError()) {
-                        ReactorPtr->OnIoEventError();
+                        ProcessError(*ReactorPtr);
                     }
                     continue;
                 }

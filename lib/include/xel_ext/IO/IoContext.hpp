@@ -12,52 +12,14 @@ X_NS
     class xIoContext;
     class iIoReactor;
 
-    class xIoContext
-    : xNonCopyable
-    {
-    public:
-        class iUserEventTrigger {
-        public:
-            virtual void Trigger() = 0;
-        };
-
-    public:
-        X_API_MEMBER bool Init();
-        X_API_MEMBER void Clean();
-        X_API_MEMBER void LoopOnce(int TimeoutMS = 50);
-
-        X_INLINE iUserEventTrigger * GetUserEventTrigger() const { return _UserEventTriggerPtr; }
-        X_INLINE operator xEventPoller () const { return _Poller; }
-
-    private:
-        X_PRIVATE_MEMBER bool SetupUserEventTrigger();
-        X_PRIVATE_MEMBER void CleanUserEventTrigger();
-
-    private:
-        xEventPoller          _Poller X_DEBUG_INIT(InvalidEventPoller);
-        iUserEventTrigger *   _UserEventTriggerPtr = nullptr;
-    };
-
-    #if defined(X_SYSTEM_WINDOWS)
-    enum struct eIoEventType
-    {
-        Unspecified,
-        Error,
-        InReady,
-        OutReady,
-        Closed,
-        Ignored,
-        Cleanup, // the event owner is already invalidated, cleanup the overlapped object.
-    };
-    #endif
-
     /** NOTE: !!! important !!!
         Due to CompletionPort design, it's very important to process overlapped object AFTER its owner might have been released.
         To unrelate overlapped object and it's owner, I am defining a small object in iBufferedIoReactor to help with that.
         On windows, Io object SHOULD NEVER directly derive from iIoReactor, but iBufferedIoReactor.
     */
     class iIoReactor
-    : private xNonCopyable
+    : public xListNode
+    , private xNonCopyable
     {
         friend class xIoContext;
     public:
@@ -81,6 +43,68 @@ X_NS
         X_INLINE void ClearError()     { _StatusFlags &= ~SF_Error; }
         X_INLINE void SetError()       { _StatusFlags |= SF_Error; }
     };
+
+    class xIoContext
+    : xNonCopyable
+    {
+    public:
+        class iUserEventTrigger {
+        public:
+            virtual void Trigger() = 0;
+        };
+
+    public:
+        X_API_MEMBER bool Init();
+        X_API_MEMBER void Clean();
+        X_API_MEMBER void LoopOnce(int TimeoutMS = 50);
+
+        X_INLINE iUserEventTrigger * GetUserEventTrigger() const { return _UserEventTriggerPtr; }
+        X_INLINE operator xEventPoller () const { return _Poller; }
+
+        X_INLINE void PostError(iIoReactor & IoReactor) {
+            if (IoReactor.HasError()) {
+                return;
+            }
+            IoReactor.SetError();
+            _ErrorIoReactorList.GrabTail(IoReactor);
+        }
+
+    private:
+        X_PRIVATE_MEMBER bool SetupUserEventTrigger();
+        X_PRIVATE_MEMBER void CleanUserEventTrigger();
+        X_INLINE void CleanErrorList() {
+            for (auto & IoReactor : _ErrorIoReactorList) {
+                xListNode::Unlink(IoReactor);
+            }
+        }
+        X_INLINE void ProcessError(iIoReactor& IoReactor) {
+            xListNode::Unlink(IoReactor);
+            IoReactor.OnIoEventError();
+        }
+        X_INLINE void ProcessErrorList() {
+            for (auto & IoReactor : _ErrorIoReactorList) {
+                ProcessError(IoReactor);
+            }
+        }
+
+    private:
+        xEventPoller          _Poller X_DEBUG_INIT(InvalidEventPoller);
+        iUserEventTrigger *   _UserEventTriggerPtr = nullptr;
+        xList<iIoReactor>     _ErrorIoReactorList;
+    };
+
+    #if defined(X_SYSTEM_WINDOWS)
+    enum struct eIoEventType
+    {
+        Unspecified,
+        Error,
+        InReady,
+        OutReady,
+        Closed,
+        Ignored,
+        Cleanup, // the event owner is already invalidated, cleanup the overlapped object.
+    };
+    #endif
 
     class iBufferedIoReactor
     : public iIoReactor

@@ -12,9 +12,9 @@ using namespace xel;
 using namespace std;
 
 
-static const char * host = "14.215.177.38";
+static const char * host = "192.168.123.100";
 // static const char * host = "8.8.8.8";
-static const uint16_t port = 80;
+static const uint16_t port = 10000;
 static const char * SendData = "GET / HTTP/1.1\r\nHost: www.baidu.com\r\nUser-Agent: curl/7.68.0\r\n\r\n";
 
 struct xSample
@@ -35,7 +35,7 @@ struct xSample
     void OnPeerClose(xTcpConnection * TcpConnectionPtr) override
     {
         printf("xSample::OnPeerClose Instance=%p\n", this);
-        IsClosed = true;
+        // IsClosed = true;
     }
 
     void OnError(xTcpConnection * TcpConnectionPtr) override
@@ -82,6 +82,21 @@ int main(int argc, char * argv[])
     Connection.ResumeReading();
     Connection.SuspendReading();
     Connection.ResumeReading();
+
+    while (!Timer.TestAndTag(1s))
+    {
+        if (SampleListener.IsClosed) {
+            break;
+        }
+        IoContext.LoopOnce(100);
+    }
+
+    for (int Counter = 0; Counter++ < 5; ) {
+        this_thread::sleep_for(1s);
+        X_DEBUG_PRINTF("%i\n", Counter);
+    }
+    X_DEBUG_PRINTF("==============\n");
+    Connection.PostData("Hello", 5);
 
     while(true)
     {

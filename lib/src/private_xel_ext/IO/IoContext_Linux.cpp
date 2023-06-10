@@ -34,12 +34,15 @@ X_NS {
 
     void xIoContext::Clean()
     {
+        CleanErrorList();
         CleanUserEventTrigger();
         close(X_DEBUG_STEAL(_Poller, InvalidEventPoller));
     }
 
     void xIoContext::LoopOnce(int TimeoutMS)
     {
+        ProcessErrorList();
+
         struct epoll_event Events[128];
         int Total = epoll_wait(_Poller, Events, (int)Length(Events), TimeoutMS < 0 ? -1 : TimeoutMS);
         for (int i = 0 ; i < Total ; ++i) {
@@ -52,7 +55,7 @@ X_NS {
 
             if (EV.events & (EPOLLERR | EPOLLHUP)) {
                 ReactorPtr->SetError();
-                ReactorPtr->OnIoEventError();
+                ProcessError(*ReactorPtr);
                 continue;
             }
 
@@ -60,7 +63,7 @@ X_NS {
                 ReactorPtr->OnIoEventInReady();
                 if (!ReactorPtr->IsAvailable()) {
                     if (ReactorPtr->HasError()) {
-                        ReactorPtr->OnIoEventError();
+                        ProcessError(*ReactorPtr);
                     }
                     continue;
                 }
@@ -70,7 +73,7 @@ X_NS {
                 ReactorPtr->OnIoEventOutReady();
                 if (!ReactorPtr->IsAvailable()) {
                     if (ReactorPtr->HasError()) {
-                        ReactorPtr->OnIoEventError();
+                        ProcessError(*ReactorPtr);
                     }
                     continue;
                 }

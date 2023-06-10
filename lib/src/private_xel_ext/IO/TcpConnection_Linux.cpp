@@ -121,7 +121,7 @@ X_NS
                     }
                     return;
                 }
-                SetError();
+                _IoContextPtr->PostError(*this);
                 return;
             }
             if ((_WriteBufferPtr->DataSize -= SendSize)) {
