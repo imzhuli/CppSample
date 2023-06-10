@@ -372,7 +372,9 @@ X_NS
     void xTcpConnection::ResumeReading()
     {
         _SuspendReading = false;
-        TryRecvData();
+        if (_Status == eStatus::Connected) {
+            TryRecvData();
+        }
     }
 
 }
