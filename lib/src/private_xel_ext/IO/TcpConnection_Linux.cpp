@@ -107,66 +107,6 @@ X_NS
         return true;
     }
 
-    void xTcpConnection::OnIoEventInReady()
-    {
-        // X_DEBUG_PRINTF("xTcpConnection::OnIoEventInReady\n");
-
-        while(true) {
-            size_t TotalSpace = sizeof(_ReadBuffer) - _ReadBufferDataSize;
-            assert(TotalSpace && "ReadBuffer size is larger than MaxPacketSize, listener should guarantee read buffer never be full");
-
-            int ReadSize = read(_Socket, _ReadBuffer + _ReadBufferDataSize, TotalSpace);
-            if (0 == ReadSize) {
-                X_DEBUG_PRINTF("xTcpConnection::OnIoEventInReady EOF\n");
-                _Status = eStatus::Closing;
-                _ListenerPtr->OnPeerClose(this);
-                SetDisabled();
-                return;
-            }
-            if (-1 == ReadSize) {
-                auto Error = errno;
-                if (EAGAIN == Error) {
-                    return;
-                }
-                SetError();
-                return;
-            }
-            _ReadBufferDataSize += ReadSize;
-            auto ProcessDataPtr = (ubyte*)_ReadBuffer;
-            while(_ReadBufferDataSize) {
-                auto ProcessedData = _ListenerPtr->OnData(this, ProcessDataPtr, _ReadBufferDataSize);
-                if (ProcessedData == InvalidPacketSize) {
-                    SetError();
-                    return;
-                }
-                if (!ProcessedData){
-                    if (ProcessDataPtr != _ReadBuffer) { // some data are processed
-                        memmove(_ReadBuffer, ProcessDataPtr, _ReadBufferDataSize);
-                    }
-                    break;
-                }
-                ProcessDataPtr += ProcessedData;
-                _ReadBufferDataSize -= ProcessedData;
-            }
-        }
-        return;
-    }
-
-    void xTcpConnection::OnIoEventOutReady()
-    {
-        // X_DEBUG_PRINTF("xTcpConnection::OnIoEventOutReady\n");
-        if (_Status == eStatus::Connecting) {
-            X_DEBUG_PRINTF("Connection established\n");
-            _Status = eStatus::Connected;
-            _ListenerPtr->OnConnected(this);
-        }
-        TrySendData();
-
-        if (Steal(_FlushFlag)) {
-            _ListenerPtr->OnFlush(this);
-        }
-    }
-
     void xTcpConnection::TrySendData()
     {
         if (!_WriteBufferPtr) {

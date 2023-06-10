@@ -268,8 +268,6 @@ X_NS
 
     void xTcpConnection::OnDeferredCallback()
     {
-        // object might have become unavailable, like in such case:
-        // in OnData callback, a call to PostData put this to deferred callback list, then set unavailable in OnFlush callback
         if (!IsAvailable()) {
             return;
         }

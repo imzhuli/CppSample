@@ -53,6 +53,15 @@ X_NS
         X_API_MEMBER void ResizeSendBuffer(size_t Size);
         X_API_MEMBER void ResizeReceiveBuffer(size_t Size);
 
+        #ifndef X_SYSTEM_WINDOWS
+        X_INLINE bool HasPendingWrites() const { return !_FlushFlag; }
+        #else // X_SYSTEM_WINDOWS
+        X_INLINE bool HasPendingWrites() const {
+            assert(_IoBufferPtr)
+            return !_IoBufferPtr->FlushFlag;
+        }
+        #endif
+
         // X_API_MEMBER size_t  GetPendingWriteBlockCount() const;
         // X_API_MEMBER bool    GracefulClose();  /* return value: true: immediately closed, false pending writes */
 
