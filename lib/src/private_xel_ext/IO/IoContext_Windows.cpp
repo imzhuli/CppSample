@@ -40,12 +40,15 @@ X_NS {
 
     void xIoContext::Clean()
     {
+        CleanErrorList();
         CleanUserEventTrigger();
         CloseHandle(X_DEBUG_STEAL(_Poller, InvalidEventPoller));
     }
 
     void xIoContext::LoopOnce(int TimeoutMS)
     {
+        ProcessErrorList();
+
         OVERLAPPED_ENTRY EventEntries[256];
         ULONG EventCount = 0;
         BOOL Result = GetQueuedCompletionStatusEx (_Poller, EventEntries, (ULONG)Length(EventEntries), &EventCount, (TimeoutMS < 0 ? INFINITE : (DWORD)TimeoutMS), FALSE);
@@ -58,7 +61,6 @@ X_NS {
 
         for (ULONG i = 0 ; i < EventCount ; ++i) {
             auto & Event = EventEntries[i];
-            auto ReactorPtr = (iBufferedIoReactor*)Event.lpCompletionKey;
             auto OverlappedPtr = Event.lpOverlapped;
 
             // X_DEBUG_PRINTF("xIoContext::LoopOnce, ReactorPtr=%p, lpOverlapped=%p, Transfered=%zi\n",
@@ -90,13 +92,19 @@ X_NS {
                 Fatal();
             }
 
+            // Till now, the ReactorPtr has become known as a valid pointer
+            auto ReactorPtr = (iBufferedIoReactor*)Event.lpCompletionKey;
+            if (!ReactorPtr->IsAvailable()) {
+                continue;
+            }
+
             // process read:
             if (EventType == eIoEventType::InReady) {
                 ReactorPtr->SetReadTransfered(Event.dwNumberOfBytesTransferred);
                 ReactorPtr->OnIoEventInReady();
                 if (!ReactorPtr->IsAvailable()) {
                     if (ReactorPtr->HasError()) {
-                        ReactorPtr->OnIoEventError();
+                        ProcessError(*ReactorPtr);
                     }
                     continue;
                 }
@@ -108,7 +116,7 @@ X_NS {
                 ReactorPtr->OnIoEventOutReady();
                 if (!ReactorPtr->IsAvailable()) {
                     if (ReactorPtr->HasError()) {
-                        ReactorPtr->OnIoEventError();
+                        ProcessError(*ReactorPtr);
                     }
                     continue;
                 }

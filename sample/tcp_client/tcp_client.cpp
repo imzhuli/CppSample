@@ -35,7 +35,7 @@ struct xSample
     void OnPeerClose(xTcpConnection * TcpConnectionPtr) override
     {
         printf("xSample::OnPeerClose Instance=%p\n", this);
-        // IsClosed = true;
+        IsClosed = true;
     }
 
     void OnError(xTcpConnection * TcpConnectionPtr) override
@@ -98,11 +98,9 @@ int main(int argc, char * argv[])
     X_DEBUG_PRINTF("==============\n");
     Connection.PostData("Hello", 5);
 
-    while(true)
+    Timer.Tag();
+    while(Timer.TestAndTag(3s))
     {
-        if (SampleListener.IsClosed) {
-            break;
-        }
         IoContext.LoopOnce(100);
     }
 

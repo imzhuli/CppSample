@@ -352,7 +352,7 @@ X_NS
             auto ErrorCode = WSAGetLastError();
             if (ErrorCode != WSA_IO_PENDING) {
                 X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
-                SetError();
+                _IoContextPtr->PostError(*this);
                 return;
             }
         }
