@@ -100,11 +100,11 @@ X_NS
         constexpr struct xSizeInit final { size_t value; } ZeroSizeInit {};
         constexpr struct xCapacityInit final { size_t value; } ZeroCapacityInit{};
 
-        template<typename T1, typename T2 = T1>
-        using xDiff = decltype(std::declval<T1>() - std::declval<T2>());
-        template<typename T1, typename T2> X_INLINE constexpr auto Diff(const T1& Value, const T2& ComparedToValue) { return Value - ComparedToValue; }
-        template<typename T1, typename T2> X_INLINE constexpr auto SignedDiff(const T1& Value, const T2& ComparedToValue) { return static_cast<std::make_signed_t<xDiff<T1, T2>>>(Value - ComparedToValue); }
-        template<typename T1, typename T2> X_INLINE constexpr auto UnsignedDiff(const T1& Value, const T2& ComparedToValue) { return static_cast<std::make_unsigned_t<xDiff<T1, T2>>>(Value - ComparedToValue); }
+        template<typename T> X_STATIC_INLINE constexpr auto Signed(T&& Value) { return static_cast<std::make_signed_t<xNonCVR<T&&>>>(std::forward<T>(Value)); }
+        template<typename T> X_STATIC_INLINE constexpr auto Unsigned(const T& Value) { return static_cast<std::make_unsigned_t<xNonCVR<T&&>>>(std::forward<T>(Value)); }
+        template<typename T1, typename T2> X_STATIC_INLINE constexpr auto Diff(T1&& Value, T2&& FromValue) { return std::forward<T1>(Value) - std::forward<T2>(FromValue); }
+        template<typename T1, typename T2> X_STATIC_INLINE constexpr auto SignedDiff(T1&& Value, T2&& FromValue) { return Signed(Diff(std::forward<T1>(Value), std::forward<T2>(FromValue))); }
+        template<typename T1, typename T2> X_STATIC_INLINE constexpr auto UnignedDiff(T1&& Value, T2&& FromValue) { return Unsigned(Diff(std::forward<T1>(Value), std::forward<T2>(FromValue))); }
 
         X_STATIC_INLINE void Pass() {};
         X_API           void Breakpoint();
