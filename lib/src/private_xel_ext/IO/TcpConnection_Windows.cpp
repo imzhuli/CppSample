@@ -271,7 +271,7 @@ X_NS
                     SetError();
                     return;
                 }
-                X_DEBUG_PRINTF("Connection has been established %u seconds\n", seconds);
+                // X_DEBUG_PRINTF("Connection has been established %u seconds\n", seconds);
             }
             _Status = eStatus::Connected;
 

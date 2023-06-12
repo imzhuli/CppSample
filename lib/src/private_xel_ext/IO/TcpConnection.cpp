@@ -64,9 +64,8 @@ X_NS
 
     void xTcpConnection::OnIoEventOutReady()
     {
-        // X_DEBUG_PRINTF("xTcpConnection::OnIoEventOutReady\n");
         if (_Status == eStatus::Connecting) {
-            X_DEBUG_PRINTF("Connection established\n");
+            // X_DEBUG_PRINTF("Connection established\n");
             _Status = eStatus::Connected;
 
             auto NeedFlushEvent = _HasPendingWriteFlag;
