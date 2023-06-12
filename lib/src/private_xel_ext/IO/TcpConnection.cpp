@@ -27,7 +27,6 @@ X_NS
 
             int ReadSize = read(_Socket, _ReadBuffer + _ReadBufferDataSize, TotalSpace);
             if (0 == ReadSize) {
-                X_DEBUG_PRINTF("xTcpConnection::OnIoEventInReady EOF\n");
                 _Status = eStatus::Closing;
                 SetDisabled();
                 _ListenerPtr->OnPeerClose(this);
