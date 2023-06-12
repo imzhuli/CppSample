@@ -30,7 +30,7 @@ X_NS
     public:
         struct iListener {
             virtual void   OnConnected(xAutoClientTcpConnection * ConnectionPtr) {}
-            virtual size_t OnData(xAutoClientTcpConnection * ConnectionPtr, void * DataPtr, size_t DataSize) = 0;
+            virtual size_t OnData(xAutoClientTcpConnection * ConnectionPtr, void * DataPtr, size_t DataSize) { return DataSize; }
         };
 
         X_API_MEMBER bool Init(xIoContext * ContextPtr, const xNetAddress ServerAddress, iListener * ListenerPtr);
