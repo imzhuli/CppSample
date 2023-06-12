@@ -170,12 +170,6 @@ X_NS
 
     void xTcpConnection::Clean()
     {
-        if (_WriteBufferPtr) {
-            delete _WriteBufferPtr;
-            while(auto WriteBufferPtr = _WriteBufferChain.Pop()) {
-                delete WriteBufferPtr;
-            }
-        }
         _IoBufferPtr->DeleteMark = true;
         ReleaseOverlappedObject(X_DEBUG_STEAL(_IoBufferPtr));
         XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
