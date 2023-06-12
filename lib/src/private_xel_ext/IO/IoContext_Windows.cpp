@@ -195,6 +195,7 @@ X_NS {
             while(auto BufferPtr = IoBufferPtr->WriteBufferChain.Pop()) {
                 delete BufferPtr;
             }
+            assert(IoBufferPtr->WriteBufferChain.IsEmpty());
             delete IoBufferPtr;
         }
         assert(NewRefCount >= 0);

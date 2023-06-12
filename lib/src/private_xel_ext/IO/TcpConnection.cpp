@@ -14,6 +14,7 @@ X_NS
                 delete WriteBufferPtr;
             }
         }
+        assert(_WriteBufferChain.IsEmpty());
         XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
     }
 
