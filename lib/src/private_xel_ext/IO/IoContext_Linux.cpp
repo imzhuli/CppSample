@@ -41,8 +41,6 @@ X_NS {
 
     void xIoContext::LoopOnce(int TimeoutMS)
     {
-        ProcessErrorList();
-
         struct epoll_event Events[128];
         int Total = epoll_wait(_Poller, Events, (int)Length(Events), TimeoutMS < 0 ? -1 : TimeoutMS);
         for (int i = 0 ; i < Total ; ++i) {
@@ -79,6 +77,7 @@ X_NS {
                 }
             }
         }
+        ProcessErrorList();
     }
 
     namespace __io_detail__

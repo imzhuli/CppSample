@@ -62,7 +62,7 @@ X_NS
         X_INLINE operator xEventPoller () const { return _Poller; }
 
         X_INLINE void PostError(iIoReactor & IoReactor) {
-            if (IoReactor.HasError()) {
+            if (!IoReactor.IsAvailable()) {
                 return;
             }
             IoReactor.SetError();

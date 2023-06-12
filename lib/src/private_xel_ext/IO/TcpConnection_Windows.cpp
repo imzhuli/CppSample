@@ -102,9 +102,8 @@ X_NS
                 auto ErrorCode = WSAGetLastError();
                 if (ErrorCode != WSA_IO_PENDING) {
                     X_DEBUG_PRINTF("ErrorCode: %u\n", ErrorCode);
-                    SetError();
+                    return false;
                 }
-                return false;
             }
             X_DEBUG_PRINTF("ConnectEx: %p\n", ConnectEx);
 
@@ -181,7 +180,7 @@ X_NS
         assert(DataPtr_ && DataSize);
         assert(_Status != eStatus::Unspecified);
 
-        if (_Status >= eStatus::Closing) {
+        if (!IsAvailable()) {
             return 0;
         }
 
@@ -220,8 +219,8 @@ X_NS
 
         if (!ReadObject.DataSize) {
             _Status = eStatus::Closing;
-            _ListenerPtr->OnPeerClose(this);
             SetDisabled();
+            _ListenerPtr->OnPeerClose(this);
             return;
         }
 
@@ -320,7 +319,7 @@ X_NS
 			auto ErrorCode = WSAGetLastError();
 			if (ErrorCode != WSA_IO_PENDING) {
 				X_DEBUG_PRINTF("WSARecvFrom ErrorCode: %u\n", ErrorCode);
-				SetError();
+                _IoContextPtr->PostError(*this);
 				return;
 			}
 		}

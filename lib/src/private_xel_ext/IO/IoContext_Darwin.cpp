@@ -38,8 +38,6 @@ X_NS {
 
     void xIoContext::LoopOnce(int TimeoutMS)
     {
-        ProcessErrorList();
-
         struct kevent Events[128];
         struct timespec TS = {
             TimeoutMS / 1000,
@@ -91,6 +89,7 @@ X_NS {
             }
             */
         }
+        ProcessErrorList();
     }
 
     namespace __io_detail__

@@ -47,8 +47,6 @@ X_NS {
 
     void xIoContext::LoopOnce(int TimeoutMS)
     {
-        ProcessErrorList();
-
         OVERLAPPED_ENTRY EventEntries[256];
         ULONG EventCount = 0;
         BOOL Result = GetQueuedCompletionStatusEx (_Poller, EventEntries, (ULONG)Length(EventEntries), &EventCount, (TimeoutMS < 0 ? INFINITE : (DWORD)TimeoutMS), FALSE);
@@ -126,6 +124,7 @@ X_NS {
             //     continue;
             // }
         }
+        ProcessErrorList();
     }
 
     namespace __io_detail__

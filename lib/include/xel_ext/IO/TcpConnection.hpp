@@ -93,10 +93,9 @@ X_NS
 
     protected:
         X_PRIVATE_MEMBER void OnIoEventError() override {
-            if (_Status < eStatus::Closing) {
-                _Status = eStatus::Closing;
-                _ListenerPtr->OnError(this);
-            }
+            assert(_Status < eStatus::Closing); // prevent re-entry
+            _Status = eStatus::Closing;
+            _ListenerPtr->OnError(this);
         }
 
     #if defined (X_SYSTEM_DARWIN)

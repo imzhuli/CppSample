@@ -29,8 +29,8 @@ X_NS
             if (0 == ReadSize) {
                 X_DEBUG_PRINTF("xTcpConnection::OnIoEventInReady EOF\n");
                 _Status = eStatus::Closing;
-                _ListenerPtr->OnPeerClose(this);
                 SetDisabled();
+                _ListenerPtr->OnPeerClose(this);
                 return;
             }
             if (-1 == ReadSize) {
@@ -88,7 +88,7 @@ X_NS
         assert(DataPtr_ && DataSize);
         assert(_Status != eStatus::Unspecified);
 
-        if (_Status >= eStatus::Closing) {
+        if (!IsAvailable()) {
             return 0;
         }
 
