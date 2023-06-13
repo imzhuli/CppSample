@@ -18,10 +18,11 @@ X_NS
         On windows, Io object SHOULD NEVER directly derive from iIoReactor, but iBufferedIoReactor.
     */
     class iIoReactor
-    : public xListNode
+    : private xListNode
     , private xNonCopyable
     {
         friend class xIoContext;
+        friend class xList<iIoReactor>;
     public:
         virtual void OnIoEventInReady()    { Pass(); }
         virtual void OnIoEventOutReady()   { Pass(); }
