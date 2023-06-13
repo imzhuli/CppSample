@@ -59,7 +59,7 @@ X_NS
              *
             */
             // callback on connected, normally this is not needed to be handled
-            virtual void   OnConnected(xTcpConnection * TcpConnectionPtr)  { }
+            virtual void   OnConnected(xTcpConnection * TcpConnectionPtr)  {}
             virtual size_t OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize) { return DataSize; }
             virtual void   OnFlush(xTcpConnection * TcpConnectionPtr) {}
             virtual void   OnPeerClose(xTcpConnection * TcpConnectionPtr)  {}
