@@ -10,9 +10,9 @@ X_NS
     {
         if (_WriteBufferPtr) {
             delete _WriteBufferPtr;
-            while(auto WriteBufferPtr = _WriteBufferChain.Pop()) {
-                delete WriteBufferPtr;
-            }
+        }
+        while(auto WriteBufferPtr = _WriteBufferChain.Pop()) {
+            delete WriteBufferPtr;
         }
         assert(_WriteBufferChain.IsEmpty());
         XelCloseSocket(X_DEBUG_STEAL(_Socket, InvalidSocket));
