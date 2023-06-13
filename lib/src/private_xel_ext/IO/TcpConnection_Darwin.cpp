@@ -39,7 +39,6 @@ X_NS
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
         _ReadBufferDataSize = 0;
-        _WriteBufferPtr = nullptr;
         _Status = eStatus::Connected;
         _SuspendReading = false;
         _HasPendingWriteFlag = false;
@@ -113,7 +112,6 @@ X_NS
         _IoContextPtr = IoContextPtr;
         _ListenerPtr = ListenerPtr;
         _ReadBufferDataSize = 0;
-        _WriteBufferPtr = nullptr;
         _SuspendReading = false;
         _HasPendingWriteFlag = false;
 
@@ -124,11 +122,8 @@ X_NS
 
     void xTcpConnection::TrySendData()
     {
-        if (!_WriteBufferPtr) {
-            _WriteBufferPtr = _WriteBufferChain.Pop();
-        }
-        while(_WriteBufferPtr) {
-            ssize_t SendSize = send(_Socket, _WriteBufferPtr->Buffer, _WriteBufferPtr->DataSize, XelNoWriteSignal);
+        while(auto WriteBufferPtr = _WriteBufferChain.Peek()) {
+            ssize_t SendSize = send(_Socket, WriteBufferPtr->Buffer, WriteBufferPtr->DataSize, XelNoWriteSignal);
             if (SendSize == -1) {
                 if (errno == EAGAIN) {
                     if (!Steal(_RequireOutputEvent, true)) {
@@ -139,15 +134,15 @@ X_NS
                 _IoContextPtr->PostError(*this);
                 return;
             }
-            if ((_WriteBufferPtr->DataSize -= SendSize)) {
-                memmove(_WriteBufferPtr->Buffer, _WriteBufferPtr->Buffer + SendSize, _WriteBufferPtr->DataSize);
+            if ((WriteBufferPtr->DataSize -= SendSize)) {
+                memmove(WriteBufferPtr->Buffer, WriteBufferPtr->Buffer + SendSize, WriteBufferPtr->DataSize);
                 if (!Steal(_RequireOutputEvent, true)) {
                     EnableWritingTrigger();
                 }
                 return;
             }
-            delete _WriteBufferPtr;
-            _WriteBufferPtr = _WriteBufferChain.Pop();
+            _WriteBufferChain.RemoveFront();
+            delete WriteBufferPtr;
         }
         _HasPendingWriteFlag = false;
         if (Steal(_RequireOutputEvent)) {

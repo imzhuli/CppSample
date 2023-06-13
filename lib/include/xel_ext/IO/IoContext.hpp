@@ -122,7 +122,6 @@ X_NS
     protected:
         size_t              _ReadBufferDataSize;
         xPacketBufferChain  _WriteBufferChain;
-        xPacketBuffer *     _WriteBufferPtr;
 
     #else
 

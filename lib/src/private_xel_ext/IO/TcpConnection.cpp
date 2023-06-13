@@ -8,9 +8,6 @@ X_NS
 
     void xTcpConnection::Clean()
     {
-        if (_WriteBufferPtr) {
-            delete _WriteBufferPtr;
-        }
         while(auto WriteBufferPtr = _WriteBufferChain.Pop()) {
             delete WriteBufferPtr;
         }
