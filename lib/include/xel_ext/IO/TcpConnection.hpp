@@ -63,7 +63,7 @@ X_NS
             virtual size_t OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize) { return DataSize; }
             virtual void   OnFlush(xTcpConnection * TcpConnectionPtr) {}
             virtual void   OnPeerClose(xTcpConnection * TcpConnectionPtr)  {}
-            virtual void   OnError(xTcpConnection * TcpConnectionPtr) {}
+            virtual void   OnError(xTcpConnection * TcpConnectionPtr) { OnPeerClose(); }
         };
 
     public:
