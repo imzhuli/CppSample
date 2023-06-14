@@ -10,10 +10,6 @@ X_NS
 
     struct xTcpConnectionExNode : xListNode, xNonCopyable
     {
-        using eType = uint8_t;
-        static constexpr const eType eUnSpecifiedType = 0;
-
-        eType    ConnectionType = eUnSpecifiedType;
         uint64_t ConnectionId  = 0;
         uint64_t ConnectionTimestampMS   = 0;
     };
@@ -82,6 +78,7 @@ X_NS
                 return nullptr;
             }
             ConnectionPtr->ConnectionId = ConnectionId;
+            ConnectionPtr->ConnectionTimestampMS = GetTimestampMS();
             return ConnectionPtr;
         }
 
