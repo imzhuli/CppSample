@@ -69,6 +69,11 @@ X_NS
 		X_INLINE const std::string &
 			operator[](const size_t Index) const { return _NonOptionArguments[Index]; }
 
+		X_INLINE const std::vector<std::string> &
+			GetSubArgs() const { return _SubCommandArguments; }
+		X_INLINE size_t
+			GetSubArgCount() const { return _SubCommandArguments.size(); }
+
 		X_API_MEMBER void CleanOptions();
 		X_API_MEMBER void CleanValues();
 		X_API_MEMBER std::string DescribeOptions();
@@ -84,6 +89,7 @@ X_NS
 		std::unordered_map<std::string, xCoreOption> _LongOptions;
 		std::unordered_map<std::string, std::string> _ParsedValues;
 		std::vector<std::string> _NonOptionArguments;
+		std::vector<std::string> _SubCommandArguments;
 	};
 
 }

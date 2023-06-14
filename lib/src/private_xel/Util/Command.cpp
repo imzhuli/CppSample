@@ -105,7 +105,7 @@ X_NS
 		}
 		else {
 			while(i < Argc) {
-				_NonOptionArguments.push_back(Argv[i++]);
+				_SubCommandArguments.push_back(Argv[i++]);
 			}
 		}
 	}
