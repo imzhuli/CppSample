@@ -4,8 +4,19 @@
 
 X_NS
 {
+	xCommandLine::xCommandLine(const std::vector<std::string> & Arguments, const std::vector<xOption> & OptionList)
+	{
+		for (const auto & Option : OptionList) {
+			AddOption(Option);
+		}
+		auto Cmd = std::vector<const char *>(Arguments.size());
+		for (size_t i = 0 ; i < Arguments.size(); ++i) {
+			Cmd[i] = Arguments[i].c_str();
+		}
+		Parse(Cmd.size(), Cmd.data());
+	}
 
-	xCommandLine::xCommandLine(int Argc, const char ** Argv, const std::vector<xOption> & OptionList)
+	xCommandLine::xCommandLine(size_t Argc, const char ** Argv, const std::vector<xOption> & OptionList)
 	{
 		for (const auto & Option : OptionList) {
 			AddOption(Option);

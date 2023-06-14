@@ -51,8 +51,9 @@ X_NS
 
 		X_INLINE xCommandLine() = default;
 		X_INLINE ~xCommandLine() = default;
-		X_API_MEMBER xCommandLine(int argc, const char ** argv, const std::vector<xOption> & OptionList = {});
-		X_INLINE xCommandLine(int argc, char ** argv, const std::vector<xOption> & OptionList = {})
+		X_API_MEMBER xCommandLine(const std::vector<std::string> & Arguments, const std::vector<xOption> & OptionList = {});
+		X_API_MEMBER xCommandLine(size_t argc, const char ** argv, const std::vector<xOption> & OptionList = {});
+		X_INLINE xCommandLine(size_t argc, char ** argv, const std::vector<xOption> & OptionList = {})
 		: xCommandLine(argc, const_cast<const char **>(argv), OptionList)
 		{}
 
