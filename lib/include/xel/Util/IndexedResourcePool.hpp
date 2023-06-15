@@ -38,7 +38,7 @@ X_NS
             Pool.Clean();
         }
 
-        X_INLINE T* GetInstanceByKey(xIndexId Key) {
+        X_INLINE T* GetInstanceByKey(xIndexId Key) const {
             auto Opt = KeyManager.CheckAndGet(Key);
             return Opt() ? *Opt : nullptr;
         }
