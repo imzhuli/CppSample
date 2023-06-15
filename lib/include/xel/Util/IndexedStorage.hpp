@@ -280,7 +280,7 @@ X_NS
 			Node.ValueHolder.Destroy();
 		}
 
-		X_INLINE bool Check(const xIndexId& Id) {
+		X_INLINE bool Check(const xIndexId& Id) const {
 			uint32_t Index = Id.GetIndex();
 			if (!X_LIKELY(Index < _IdPoolSize)) {
 				return false;
@@ -309,7 +309,7 @@ X_NS
 				return {};
 			}
 			auto Key = Id.GetKey();
-			auto Node = _IdPoolPtr[Index];
+			auto & Node = _IdPoolPtr[Index];
 			if(!X_LIKELY(xIndexId::IsSafeKey(Key)) || !X_LIKELY(Key == Node.Key)) {
 				return {};
 			}
