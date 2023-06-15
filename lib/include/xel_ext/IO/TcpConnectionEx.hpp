@@ -68,7 +68,7 @@ X_NS
             ResourceManager.Clean();
         }
 
-        X_INLINE T* GetConnectionById(xIndexId Key) {
+        X_INLINE T* GetConnectionById(xIndexId Key) const {
             return ResourceManager.GetInstanceByKey(Key);
         }
 
