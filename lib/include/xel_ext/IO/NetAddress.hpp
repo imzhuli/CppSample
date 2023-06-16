@@ -10,7 +10,7 @@ X_NS
     struct xNetAddress final
     {
         using xKeyType = std::array<ubyte, 20>;
-        enum : uint16_t {
+        enum eType : uint16_t {
             eUnknown, eIpv4, eIpv6
         } Type = eUnknown;
         union {
