@@ -21,7 +21,7 @@ X_NS
 		X_INLINE xListNode() noexcept { Reset(); }
 		X_INLINE xListNode(const xListNode & Other) noexcept { Reset(); }
 		X_INLINE ~xListNode() noexcept { DetachUnsafe(); }
-		X_INLINE xListNode & operator = (const xListNode & Other) { Pass(); return *this; }
+		X_INLINE xListNode & operator = (const xListNode & Other) noexcept { Pass(); return *this; }
 
 	public:
 		X_STATIC_INLINE bool IsLinked(const xListNode & Node) {
