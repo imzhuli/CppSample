@@ -18,7 +18,7 @@ X_NS
     , xNonCopyable
     {
     public:
-        static constexpr const size_t MaxQueryCount = 256;
+        static constexpr const size_t MaxQueryCount = 1024;
 
         class xRequest
         : public xListNode
@@ -42,6 +42,7 @@ X_NS
         X_API_MEMBER void SetDnsServer(const xNetAddress & NewAddress);
         X_API_MEMBER void PostQuery(xRequest * RequestPtr);
         X_API_MEMBER void Pick(xList<xRequest> & Receiver);
+        X_API_MEMBER void CancelAll();
 
     private:
         X_API_MEMBER void OnError(xUdpChannel * ChannelPtr) override;
@@ -70,6 +71,7 @@ X_NS
 
         std::thread        ServiceThread;
         std::atomic_bool   StopFlag;
+        std::atomic_bool   CancelFlag;
 
         NotifyCallback *   NotifyCallbackPtr;
         xVariable          NotifyVariable;

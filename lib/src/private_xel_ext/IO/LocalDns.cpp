@@ -56,12 +56,14 @@ X_NS
         IoContextGuard.Dismiss();
 
         StopFlag = false;
+        CancelFlag = false;
         ServiceThread = std::thread([this]{ this->Loop(); });
         return true;
     }
 
     void xLocalDnsServer::Clean()
     {
+        CancelFlag = false;
         StopFlag = true;
         ServiceThread.join();
         Renew(ServiceThread);
@@ -100,13 +102,18 @@ X_NS
             } while(false);
 
             // Check Timeout
-            do {
-                auto KillTimepoint = NowMS - QuerTimeoutMS;
+            if (CancelFlag.exchange(false)) {
                 for (auto & Request : RequestTimeoutList) {
-                    if (SignedDiff(Request.TimestampMS, KillTimepoint) < 0) {
+                    X_DEBUG_PRINTF("CancelDnsQuery: %s\n", Request.Hostname.c_str());
+                    ReleaseQuery(Request.Ident);
+                }
+            } else {
+                for (auto & Request : RequestTimeoutList) {
+                    if (Diff(NowMS, Request.TimestampMS) < QuerTimeoutMS) {
                         break;
                     }
-                    InternalRequestResultList.GrabTail(Request);
+                    X_DEBUG_PRINTF("TimeoutDnsQuery: %s\n", Request.Hostname.c_str());
+                    ReleaseQuery(Request.Ident);
                 }
             } while(false);
 
@@ -117,12 +124,15 @@ X_NS
 
         } // end of while
 
-        InternalRequestResultList.GrabListTail(RequestTimeoutList);
+        for (auto & Request : RequestTimeoutList) {
+            X_DEBUG_PRINTF("CancelDnsQueryAtExit: %s\n", Request.Hostname.c_str());
+            ReleaseQuery(Request.Ident);
+        }
+        assert(RequestTimeoutList.IsEmpty());
         if (!InternalRequestResultList.IsEmpty()) {
             Spinlock.SynchronizedCall([this]{ExchangeRequestResultList.GrabListTail(InternalRequestResultList);});
             (*NotifyCallbackPtr)(NotifyVariable);
         }
-
     }
 
     void xLocalDnsServer::OnError(xUdpChannel * ChannelPtr)
@@ -386,6 +396,11 @@ X_NS
             auto Guard = xSpinlockGuard(Spinlock);
             Receiver.GrabListTail(ExchangeRequestResultList);
         } while(false);
+    }
+
+    void xLocalDnsServer::CancelAll()
+    {
+        CancelFlag = true;
     }
 
 }
