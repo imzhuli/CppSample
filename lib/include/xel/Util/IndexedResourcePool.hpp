@@ -39,8 +39,7 @@ X_NS
         }
 
         X_INLINE T* GetInstanceByKey(xIndexId Key) const {
-            auto Opt = KeyManager.CheckAndGet(Key);
-            return Opt() ? *Opt : nullptr;
+            return *KeyManager.CheckAndGet(Key);
         }
 
         X_INLINE xResource Create() {
