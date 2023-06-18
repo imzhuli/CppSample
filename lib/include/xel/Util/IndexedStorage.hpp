@@ -45,7 +45,7 @@ X_NS
 		template<typename tValue, bool RandomKey>
 		friend class xIndexedStorage;
 
-		X_PRIVATE_STATIC_MEMBER uint32_t TimeSeed();
+		X_API_STATIC_MEMBER uint32_t TimeSeed();
 		static constexpr const  uint32_t MaxIndexValue    = ((uint32_t)0x3FFF'FFFFu);
 		static constexpr const  uint32_t KeyInUseBitmask  = ((uint32_t)0x4000'0000u);
 		static constexpr const  uint32_t KeyMask          = ((uint32_t)0x7FFF'FFFFu);

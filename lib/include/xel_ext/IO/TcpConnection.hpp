@@ -59,11 +59,11 @@ X_NS
              *
             */
             // callback on connected, normally this is not needed to be handled
-            virtual void   OnConnected(xTcpConnection * TcpConnectionPtr)  {}
-            virtual size_t OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize) { return DataSize; }
-            virtual void   OnFlush(xTcpConnection * TcpConnectionPtr) {}
-            virtual void   OnPeerClose(xTcpConnection * TcpConnectionPtr)  {}
-            virtual void   OnError(xTcpConnection * TcpConnectionPtr) { OnPeerClose(TcpConnectionPtr); }
+            X_API_MEMBER virtual void   OnConnected(xTcpConnection * TcpConnectionPtr)  {}
+            X_API_MEMBER virtual size_t OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize) { return DataSize; }
+            X_API_MEMBER virtual void   OnFlush(xTcpConnection * TcpConnectionPtr) {}
+            X_API_MEMBER virtual void   OnPeerClose(xTcpConnection * TcpConnectionPtr)  {}
+            X_API_MEMBER virtual void   OnError(xTcpConnection * TcpConnectionPtr) { OnPeerClose(TcpConnectionPtr); }
         };
 
     public:
@@ -99,21 +99,21 @@ X_NS
         }
 
     #if defined (X_SYSTEM_DARWIN)
-        X_PRIVATE_MEMBER void OnIoEventInReady() override;
-        X_PRIVATE_MEMBER void OnIoEventOutReady() override;
-        X_PRIVATE_MEMBER void TrySendData();
-        X_PRIVATE_MEMBER void EnableReadingTrigger();
-        X_PRIVATE_MEMBER void DisableReadingTrigger();
-        X_PRIVATE_MEMBER void EnableWritingTrigger();
-        X_PRIVATE_MEMBER void DisableWritingTrigger();
+        X_API_MEMBER void OnIoEventInReady() override;
+        X_API_MEMBER void OnIoEventOutReady() override;
+        X_API_MEMBER void TrySendData();
+        X_API_MEMBER void EnableReadingTrigger();
+        X_API_MEMBER void DisableReadingTrigger();
+        X_API_MEMBER void EnableWritingTrigger();
+        X_API_MEMBER void DisableWritingTrigger();
         bool _RequireOutputEvent X_DEBUG_INIT(false);
     #endif
 
     #if defined (X_SYSTEM_LINUX)
-        X_PRIVATE_MEMBER void OnIoEventInReady() override;
-        X_PRIVATE_MEMBER void OnIoEventOutReady() override;
-        X_PRIVATE_MEMBER void TrySendData();
-        X_PRIVATE_MEMBER void UpdateEventTrigger();
+        X_API_MEMBER void OnIoEventInReady() override;
+        X_API_MEMBER void OnIoEventOutReady() override;
+        X_API_MEMBER void TrySendData();
+        X_API_MEMBER void UpdateEventTrigger();
         bool _RequireOutputEvent X_DEBUG_INIT(false);
     #endif
 
