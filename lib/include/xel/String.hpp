@@ -27,6 +27,7 @@ X_NS
 
 	X_API void HexToStr(void * dst, const void * str, size_t len);
 	X_API std::string HexToStr(const void * str, size_t len);
+	X_INLINE std::string HexToStr(const std::string_view & view) { return HexToStr(view.data(), view.size()); }
 
 	X_API void StrToHexLower(void * dst, const void * str, size_t len);
 	X_API std::string StrToHexLower(const void * str, size_t len);
