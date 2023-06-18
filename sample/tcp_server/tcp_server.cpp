@@ -14,7 +14,7 @@ struct xSample
 : xTcpServer::iListener
 , xTcpConnection::iListener
 {
-    void OnNewConnection(xTcpServer * TcpServerPtr, xSocket NativeHandle) override
+    void OnNewConnection(xTcpServer * TcpServerPtr, xSocket && NativeHandle) override
     {
         X_DEBUG_PRINTF("xSample: New connection accepted: handle=%" PRIuPTR "\n", (uintptr_t)NativeHandle);
         auto ConnectionPtr = new xTcpConnection;

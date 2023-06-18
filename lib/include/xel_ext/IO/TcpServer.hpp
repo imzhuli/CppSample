@@ -13,9 +13,8 @@ X_NS
     : protected iBufferedIoReactor
     {
 	public:
-		struct iListener
-		{
-			virtual void OnNewConnection(xTcpServer * TcpServerPtr, xSocket NativeHandle) = 0;
+		struct iListener {
+			virtual void OnNewConnection(xTcpServer * TcpServerPtr, xSocket && NativeHandle) = 0;
 		};
 
     public:

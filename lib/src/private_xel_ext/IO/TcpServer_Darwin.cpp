@@ -92,7 +92,7 @@ X_NS
         if (NewSocket == InvalidSocket) {
             return;
         }
-        _ListenerPtr->OnNewConnection(this, NewSocket);
+        _ListenerPtr->OnNewConnection(this, std::move(NewSocket));
     }
 
 }
