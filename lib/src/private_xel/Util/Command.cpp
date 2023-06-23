@@ -60,7 +60,7 @@ X_NS
 	void xCommandLine::Parse(size_t Argc, const char * Argv[])
 	{
 		std::vector<std::string> Keys;
-		int i = 0;
+		size_t i = 0;
 		while(i < Argc) {
 			const char * Param = Argv[i++];
 			if (Keys.size()) {

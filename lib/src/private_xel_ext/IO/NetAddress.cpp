@@ -4,6 +4,30 @@
 X_NS
 {
 
+    bool operator < (const xNetAddress & lhs, const xNetAddress & rhs)
+    {
+        if (lhs.Type < rhs.Type) {
+            return true;
+        }
+        if (lhs.Type == xNetAddress::eUnknown) {
+            return lhs.Port < rhs.Port;
+        }
+        if (lhs.Type == xNetAddress::eIpv4) {
+            if (memcmp(lhs.Ipv4, rhs.Ipv4, 4) < 0) {
+                return true;
+            }
+            return lhs.Port < rhs.Port;
+        }
+        if (lhs.Type == xNetAddress::eIpv6) {
+            if (memcmp(lhs.Ipv6, rhs.Ipv6, 16) < 0) {
+                return true;
+            }
+            return lhs.Port < rhs.Port;
+        }
+        Fatal("Invalid address type");
+        return false;
+    }
+
     xNetAddress xNetAddress::Parse(const char * IpStr, uint16_t Port)
     {
         xNetAddress Ret;

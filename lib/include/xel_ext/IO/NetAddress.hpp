@@ -23,7 +23,7 @@ X_NS
         // methods:
         X_INLINE bool IsV4() const { return Type == eIpv4; }
         X_INLINE bool IsV6() const { return Type == eIpv6; }
-        X_INLINE operator bool () const { return Type != eUnknown; }
+        X_INLINE explicit operator bool () const { return Type != eUnknown; }
         X_INLINE xKeyType AsKey() const {
             xKeyType Ret;
             memcpy(Ret.data(), this, sizeof(*this));
@@ -116,5 +116,7 @@ X_NS
             return Parse((sockaddr*)SockAddrStoragePtr);
         }
     };
+
+    X_API bool operator < (const xNetAddress & lhs, const xNetAddress & rhs);
 
 }
