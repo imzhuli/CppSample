@@ -58,7 +58,7 @@ X_NS
 		{}
 
 		X_API_MEMBER void AddOption(const xOption &Option);
-		X_API_MEMBER void Parse(int Argc, const char * Argv[]);
+		X_API_MEMBER void Parse(size_t Argc, const char * Argv[]);
 
 		X_API_MEMBER xOptionValue GetOptionValue(const std::string & Key) const;
 		X_INLINE     xOptionValue operator[](const std::string & Key) const { return GetOptionValue(Key); }

@@ -105,7 +105,7 @@ X_NS
             if (CancelFlag.exchange(false)) {
                 for (auto & Request : RequestTimeoutList) {
                     X_DEBUG_PRINTF("CancelDnsQuery: %s\n", Request.Hostname.c_str());
-                    ReleaseQuery(Request.Ident);
+                    ReleaseQuery((uint16_t)Request.Ident);
                 }
             } else {
                 for (auto & Request : RequestTimeoutList) {
@@ -113,7 +113,7 @@ X_NS
                         break;
                     }
                     X_DEBUG_PRINTF("TimeoutDnsQuery: %s\n", Request.Hostname.c_str());
-                    ReleaseQuery(Request.Ident);
+                    ReleaseQuery((uint16_t)Request.Ident);
                 }
             } while(false);
 
@@ -126,7 +126,7 @@ X_NS
 
         for (auto & Request : RequestTimeoutList) {
             X_DEBUG_PRINTF("CancelDnsQueryAtExit: %s\n", Request.Hostname.c_str());
-            ReleaseQuery(Request.Ident);
+            ReleaseQuery((uint16_t)Request.Ident);
         }
         assert(RequestTimeoutList.IsEmpty());
         if (!InternalRequestResultList.IsEmpty()) {

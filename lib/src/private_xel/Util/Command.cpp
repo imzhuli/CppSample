@@ -57,7 +57,7 @@ X_NS
 		}
 	}
 
-	void xCommandLine::Parse(int Argc, const char * Argv[])
+	void xCommandLine::Parse(size_t Argc, const char * Argv[])
 	{
 		std::vector<std::string> Keys;
 		int i = 0;
