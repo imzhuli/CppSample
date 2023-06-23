@@ -35,8 +35,6 @@ X_NS
 		X_INLINE uint32_t GetIndex() const { return static_cast<uint32_t>(_Value); }
 		X_INLINE uint32_t GetKey()   const { return static_cast<uint32_t>(_Value >> 32);}
 
-		static constexpr uint64_t InvalidValue  = static_cast<uint64_t>(0);
-
 	private:
 		uint64_t _Value;
 
@@ -96,7 +94,7 @@ X_NS
 			uint32_t Index;
 			if (_NextFreeIdIndex == xIndexId::NoFreeIndex) {
 				if (_InitedId >= _IdPoolSize) {
-					return xIndexId::InvalidValue;
+					return {};
 				}
 				Index = _InitedId++;
 			} else {
@@ -205,7 +203,7 @@ X_NS
 			xNode * NodePtr;
 			if (_NextFreeIdIndex == xIndexId::NoFreeIndex) {
 				if (_InitedId >= _IdPoolSize) {
-					return xIndexId::InvalidValue;
+					return {};
 				}
 				NodePtr = &_IdPoolPtr[Index = _InitedId++];
 			} else {
@@ -229,7 +227,7 @@ X_NS
 			xNode * NodePtr;
 			if (_NextFreeIdIndex == xIndexId::NoFreeIndex) {
 				if (_InitedId >= _IdPoolSize) {
-					return xIndexId::InvalidValue;
+					return {};
 				}
 				NodePtr = &_IdPoolPtr[Index = _InitedId++];
 			} else {
@@ -253,7 +251,7 @@ X_NS
 			xNode * NodePtr;
 			if (_NextFreeIdIndex == xIndexId::NoFreeIndex) {
 				if (_InitedId >= _IdPoolSize) {
-					return xIndexId::InvalidValue;
+					return {};
 				}
 				NodePtr = &_IdPoolPtr[Index = _InitedId++];
 			} else {

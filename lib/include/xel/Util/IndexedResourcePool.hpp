@@ -45,7 +45,7 @@ X_NS
         X_INLINE xResource Create() {
             auto InstancePtr = Pool.Create();
             if (!InstancePtr) {
-                return { nullptr, xIndexId::InvalidValue };
+                return { nullptr, {} };
             }
             return { InstancePtr, KeyManager.Acquire(InstancePtr) };
         }
