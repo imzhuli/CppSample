@@ -9,7 +9,7 @@
 X_NS
 {
 
-    bool xTcpConnection::Init(xIoContext * IoContextPtr, xSocket NativeHandle, iListener * ListenerPtr)
+    bool xTcpConnection::Init(xIoContext * IoContextPtr, xSocket && NativeHandle, iListener * ListenerPtr)
     {
         auto FailSafe = xScopeGuard{[=]{
             XelCloseSocket(NativeHandle);

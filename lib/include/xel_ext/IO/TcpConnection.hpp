@@ -67,7 +67,7 @@ X_NS
         };
 
     public:
-        X_API_MEMBER bool Init(xIoContext * IoContextPtr, xSocket NativeHandle, iListener * ListenerPtr);
+        X_API_MEMBER bool Init(xIoContext * IoContextPtr, xSocket && NativeHandle, iListener * ListenerPtr);
         X_API_MEMBER bool Init(xIoContext * IoContextPtr, const xNetAddress & Address, iListener * ListenerPtr);
         X_API_MEMBER void Clean();
 

@@ -18,8 +18,7 @@ struct xSample
     {
         X_DEBUG_PRINTF("xSample: New connection accepted: handle=%" PRIuPTR "\n", (uintptr_t)NativeHandle);
         auto ConnectionPtr = new xTcpConnection;
-        if (!ConnectionPtr->Init(TcpServerPtr->GetIoContextPtr(), NativeHandle, this)) {
-            XelCloseSocket(NativeHandle);
+        if (!ConnectionPtr->Init(TcpServerPtr->GetIoContextPtr(), std::move(NativeHandle), this)) {
             delete ConnectionPtr;
             return;
         }

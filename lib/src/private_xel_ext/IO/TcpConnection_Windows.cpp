@@ -12,7 +12,7 @@ X_NS
     std::atomic<LPFN_CONNECTEX> AtomicConnectEx6 = nullptr;
     std::mutex ConnectExLoaderMutex;
 
-    bool xTcpConnection::Init(xIoContext * IoContextPtr, xSocket NativeHandle, iListener * ListenerPtr)
+    bool xTcpConnection::Init(xIoContext * IoContextPtr, xSocket && NativeHandle, iListener * ListenerPtr)
     {
         assert(NativeHandle != InvalidSocket);
         assert(!_ListenerPtr && ListenerPtr);
