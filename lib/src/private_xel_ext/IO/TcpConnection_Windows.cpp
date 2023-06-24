@@ -177,30 +177,36 @@ X_NS
 
     size_t xTcpConnection::PostData(const void * DataPtr_, size_t DataSize)
     {
-        assert(DataPtr_ && DataSize);
+        assert(DataPtr_);
         assert(_Status != eStatus::Unspecified);
+        auto & _WriteBufferChain = _IoBufferPtr->WriteBufferChain;
 
-        if (!IsAvailable()) {
+        if (!IsAvailable() || !DataSize) {
             return 0;
         }
 
-        auto & WriteBufferChain = _IoBufferPtr->WriteBufferChain;
-
         auto DataPtr = (const ubyte*)DataPtr_;
-        auto Packets = DataSize / sizeof(xPacketBuffer::Buffer);
+        auto RemainedSize = DataSize;
+        auto Packets = RemainedSize / sizeof(xPacketBuffer::Buffer);
         for (size_t i = 0 ; i < Packets; ++i) {
-            auto BufferPtr = new xPacketBuffer;
+            auto BufferPtr = new (std::nothrow) xPacketBuffer;
+            if (!BufferPtr) {
+                return DataSize - RemainedSize;
+            }
             memcpy(BufferPtr->Buffer, DataPtr, sizeof(xPacketBuffer::Buffer));
             BufferPtr->DataSize = sizeof(xPacketBuffer::Buffer);
             DataPtr  += sizeof(xPacketBuffer::Buffer);
-            DataSize -= sizeof(xPacketBuffer::Buffer);
-            WriteBufferChain.Push(BufferPtr);
+            RemainedSize -= sizeof(xPacketBuffer::Buffer);
+            _WriteBufferChain.Push(BufferPtr);
         }
-        if (DataSize) {
-            auto BufferPtr = new xPacketBuffer;
-            memcpy(BufferPtr->Buffer, DataPtr, DataSize);
-            BufferPtr->DataSize = DataSize;
-            WriteBufferChain.Push(BufferPtr);
+        if (RemainedSize) {
+            auto BufferPtr = new (std::nothrow) xPacketBuffer;
+            if (!BufferPtr) {
+                return DataSize - RemainedSize;
+            }
+            memcpy(BufferPtr->Buffer, DataPtr, RemainedSize);
+            BufferPtr->DataSize = RemainedSize;
+            _WriteBufferChain.Push(BufferPtr);
         }
 
         _HasPendingWriteFlag = true;

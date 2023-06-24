@@ -63,7 +63,10 @@ X_NS
 			assert(_NextFreeIdIndex == xIndexId::NoFreeIndex);
 			assert(_InitedId == 0);
 
-			_IdPoolPtr = new uint32_t[Size];
+			_IdPoolPtr = new (std::nothrow) uint32_t[Size];
+			if (!_IdPoolPtr) {
+				return false;
+			}
 			_IdPoolSize = (size32_t)Size;
 			_InitedId = 0;
 			_NextFreeIdIndex = xIndexId::NoFreeIndex;
@@ -164,7 +167,10 @@ X_NS
 			assert(_NextFreeIdIndex == xIndexId::NoFreeIndex);
 			assert(_InitedId == 0);
 
-			_IdPoolPtr = new xNode[Size];
+			_IdPoolPtr = new (std::nothrow) xNode[Size];
+			if (!_IdPoolPtr) {
+				return false;
+			}
 			_IdPoolSize = (size32_t)Size;
 			_InitedId = 0;
 			_NextFreeIdIndex = xIndexId::NoFreeIndex;

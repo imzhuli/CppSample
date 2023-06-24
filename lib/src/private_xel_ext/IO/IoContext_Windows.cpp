@@ -127,61 +127,12 @@ X_NS {
         ProcessErrorList();
     }
 
-    namespace __io_detail__
-    {
-        class xUserEventTrigger final
-        : public iBufferedIoReactor
-        , public xIoContext::iUserEventTrigger
-        {
-        public:
-            X_API_MEMBER bool Init(xIoContext * IoContextPtr);
-            X_API_MEMBER void Clean();
-            X_API_MEMBER void Trigger() override;
-
-        private:
-            void OnIoEventInReady() override;
-
-            xIoContext * _IoContextPtr X_DEBUG_INIT(nullptr);
-        };
-
-        bool xUserEventTrigger::Init(xIoContext * IoContextPtr)
-        {
-            _IoContextPtr = IoContextPtr;
-            return true;
-        }
-
-        void xUserEventTrigger::Clean()
-        {}
-
-        void xUserEventTrigger::OnIoEventInReady()
-        {}
-
-        void xUserEventTrigger::Trigger() {
-            PostQueuedCompletionStatus(*_IoContextPtr, 0, (ULONG_PTR)this, nullptr);
-        }
-
-    }
-
-    bool xIoContext::SetupUserEventTrigger()
-    {
-        auto TriggerPtr = new __io_detail__::xUserEventTrigger();
-        if (!TriggerPtr->Init(this)) {
-            return false;
-        }
-        _UserEventTriggerPtr = TriggerPtr;
-        return true;
-    }
-
-    void xIoContext::CleanUserEventTrigger()
-    {
-        auto TriggerPtr = (__io_detail__::xUserEventTrigger *)Steal(_UserEventTriggerPtr);
-        TriggerPtr->Clean();
-        delete TriggerPtr;
-    }
-
     iBufferedIoReactor::xOverlappedIoBuffer * iBufferedIoReactor::CreateOverlappedObject()
     {
-        auto IoBufferPtr = new xOverlappedIoBuffer();
+        auto IoBufferPtr = new (std::nothrow) xOverlappedIoBuffer();
+        if (!IoBufferPtr) {
+            return nullptr;
+        }
         IoBufferPtr->ReadObject.Outter = IoBufferPtr->WriteObject.Outter = IoBufferPtr;
         RetainOverlappedObject(IoBufferPtr);
         return IoBufferPtr;

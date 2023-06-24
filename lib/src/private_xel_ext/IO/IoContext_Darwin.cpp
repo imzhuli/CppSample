@@ -8,7 +8,6 @@
 
 X_NS {
 
-
     bool xIoContext::Init()
     {
         _Poller = kqueue();
@@ -90,68 +89,6 @@ X_NS {
             */
         }
         ProcessErrorList();
-    }
-
-    namespace __io_detail__
-    {
-
-        class xUserEventTrigger final
-        : public iIoReactor
-        , public xIoContext::iUserEventTrigger
-        {
-        public:
-            X_API_MEMBER bool Init(xIoContext * IoContextPtr);
-            X_API_MEMBER void Clean();
-            X_API_MEMBER void Trigger() override;
-
-        private:
-            void OnIoEventInReady() override;
-
-        private:
-            xIoContext * _IoContextPtr = nullptr;
-            static const uintptr_t _UserEventIdent = 0;
-        };
-
-        bool xUserEventTrigger::Init(xIoContext * IoContextPtr)
-        {
-            _IoContextPtr = IoContextPtr;
-            return true;
-        }
-
-        void xUserEventTrigger::Clean()
-        {
-            X_DEBUG_RESET(_IoContextPtr);
-        }
-
-        void xUserEventTrigger::OnIoEventInReady()
-        {
-            Pass();
-        }
-
-        void xUserEventTrigger::Trigger()
-        {
-            struct kevent event;
-            EV_SET(&event, _UserEventIdent, EVFILT_USER, 0, NOTE_TRIGGER, 0, NULL);
-            kevent(*_IoContextPtr, &event, 1, NULL, 0, NULL);
-        }
-
-    }
-
-    bool xIoContext::SetupUserEventTrigger()
-    {
-        auto TriggerPtr = new __io_detail__::xUserEventTrigger();
-        if (!TriggerPtr->Init(this)) {
-            return false;
-        }
-        _UserEventTriggerPtr = TriggerPtr;
-        return true;
-    }
-
-    void xIoContext::CleanUserEventTrigger()
-    {
-        auto TriggerPtr = (__io_detail__::xUserEventTrigger *)Steal(_UserEventTriggerPtr);
-        TriggerPtr->Clean();
-        delete TriggerPtr;
     }
 
 }
