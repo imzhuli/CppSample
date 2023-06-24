@@ -151,7 +151,7 @@ X_NS
 	class xIndexedStorage final
 	: xNonCopyable
 	{
-		static_assert(!std::is_reference_v<tValue> && !std::is_const_v<tValue> && std::is_copy_constructible_v<tValue>);
+		static_assert(!std::is_reference_v<tValue> && !std::is_const_v<tValue>);
 		struct xNode {
 			union {
 				uint32_t NextFreeIdIndex;
@@ -252,7 +252,7 @@ X_NS
 			return { (static_cast<uint64_t>(Rand) << 32) + Index };
 		}
 
-		X_INLINE xIndexId Acquire(tValue && Value = {}) {
+		X_INLINE xIndexId Acquire(tValue && Value) {
 			uint32_t Index;
 			xNode * NodePtr;
 			if (_NextFreeIdIndex == xIndexId::NoFreeIndex) {
