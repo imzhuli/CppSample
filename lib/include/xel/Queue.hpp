@@ -36,7 +36,16 @@ X_NS
 
         struct xForwardIterator
         {
+        private:
+            friend class xQueue;
             xQueueNode* NodePtr;
+
+            xForwardIterator(xQueueNode * NodePtr = nullptr) : NodePtr(NodePtr) {}
+
+        public:
+            xForwardIterator(const xForwardIterator &) = default;
+            xForwardIterator& operator=(const xForwardIterator &) = default;
+
             X_INLINE void operator ++ () {
                 assert(NodePtr);
                 NodePtr = NodePtr->NextPtr;
@@ -89,11 +98,11 @@ X_NS
         }
 
         X_INLINE xForwardIterator begin() {
-            return xForwardIterator{ FirstPtr };
+            return xForwardIterator(FirstPtr);
         }
 
         X_INLINE xForwardIterator end() {
-            return xForwardIterator{};
+            return xForwardIterator();
         }
 
     };
