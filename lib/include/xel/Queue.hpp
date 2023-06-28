@@ -10,12 +10,11 @@ X_NS
 
 	class xQueueNode
 	{
-	public:
-		xQueueNode * NextPtr = nullptr;
-
     private:
 		template<typename tNode>
 		friend class xQueue;
+	private:
+		xQueueNode * NextPtr = nullptr;
     public:
         X_INLINE xQueueNode() = default;
         X_INLINE xQueueNode(const xQueueNode &) {}
@@ -50,11 +49,11 @@ X_NS
             }
             X_INLINE tNode & operator * () const {
                 assert(NodePtr);
-                return static_cast<tNode&>(*NodePtr); // no further pointer check
+                return static_cast<tNode&>(*NodePtr);
             }
             X_INLINE tNode & operator -> () const {
                 assert(NodePtr);
-                return &static_cast<tNode&>(*NodePtr); // no further pointer check
+                return &static_cast<tNode&>(*NodePtr);
             }
         };
 
@@ -63,6 +62,7 @@ X_NS
             auto & QueueNode = static_cast<xQueueNode &>(Node);
             assert(!QueueNode.NextPtr);
             if (!LastPtr) {
+                assert(!FirstPtr);
                 FirstPtr = LastPtr = &QueueNode;
                 return;
             } else {
