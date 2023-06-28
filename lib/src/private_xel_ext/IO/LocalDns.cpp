@@ -44,10 +44,10 @@ X_NS
 
         DnsServerAddress = NewDnsServerAddress = ServerAddress;
         if (NotifyCallbackPtr) {
-            this->NotifyCallbackPtr = NotifyCallbackPtr;
+            this->ParallelizedNotifyCallbackPtr = NotifyCallbackPtr;
             this->NotifyVariable = NotifyVariable;
         } else {
-            this->NotifyCallbackPtr = &NoNotify;
+            this->ParallelizedNotifyCallbackPtr = &NoNotify;
             this->NotifyVariable = {};
         }
 
@@ -67,7 +67,7 @@ X_NS
         StopFlag = true;
         ServiceThread.join();
         Renew(ServiceThread);
-        Reset(NotifyCallbackPtr);
+        Reset(ParallelizedNotifyCallbackPtr);
         Reset(NotifyVariable);
 
         Renew(IdMarks);
@@ -119,7 +119,7 @@ X_NS
 
             if (!InternalRequestResultList.IsEmpty()) {
                 Spinlock.SynchronizedCall([this]{ExchangeRequestResultList.GrabListTail(InternalRequestResultList);});
-                (*NotifyCallbackPtr)(NotifyVariable);
+                (*ParallelizedNotifyCallbackPtr)(NotifyVariable);
             }
 
         } // end of while
@@ -131,7 +131,10 @@ X_NS
         assert(RequestTimeoutList.IsEmpty());
         if (!InternalRequestResultList.IsEmpty()) {
             Spinlock.SynchronizedCall([this]{ExchangeRequestResultList.GrabListTail(InternalRequestResultList);});
-            (*NotifyCallbackPtr)(NotifyVariable);
+            (*ParallelizedNotifyCallbackPtr)(NotifyVariable);
+        }
+        while (!Spinlock.SynchronizedCall([this]{ return ExchangeRequestResultList.IsEmpty(); })) {
+            std::this_thread::sleep_for(5ms);
         }
     }
 
@@ -346,7 +349,7 @@ X_NS
         }
         auto RequestPtr = IdPool[Index];
         if (0 != strcmp(HostnameBuffer, RequestPtr->Hostname.c_str())) {
-            X_DEBUG_PRINTF("xLocalDnsServer::DoPushResolvResult Query hostname don't match. \n");
+            X_DEBUG_PRINTF("xLocalDnsServer::DoPushResolvResult Query hostname doesn't match. \n");
             return;
         }
         if (TestAndReduceSize(ResolvedCounter, 1)) {
@@ -401,6 +404,7 @@ X_NS
     void xLocalDnsServer::CancelAll()
     {
         CancelFlag = true;
+        IoContext.GetUserEventTrigger()->Trigger();
     }
 
 }

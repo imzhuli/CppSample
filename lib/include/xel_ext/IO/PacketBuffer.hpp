@@ -51,13 +51,12 @@ X_NS
         X_INLINE xPacketBuffer * Peek() {
             return _FirstPtr;
         }
-        X_INLINE xPacketBuffer * RemoveFront() {
+        X_INLINE void RemoveFront() {
             assert(_FirstPtr);
             if (!(_FirstPtr = Steal(_FirstPtr->NextBufferPtr))) {
                 _LastPtr = nullptr;
             }
             --_TotalBufferCount;
-            return _FirstPtr;
         }
         X_INLINE xPacketBuffer * Pop() {
             if (auto TargetPtr = Peek()) {

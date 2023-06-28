@@ -35,7 +35,7 @@ X_NS
         using NotifyCallback = void (xVariable);
 
     public:
-        X_API_MEMBER bool Init(const xNetAddress & Server, NotifyCallback * NotifyCallbackPtr = nullptr, xVariable NotifyVariable = {});
+        X_API_MEMBER bool Init(const xNetAddress & Server, NotifyCallback * ParallelizedNotifyCallbackPtr = nullptr, xVariable NotifyVariable = {});
         X_API_MEMBER void Clean();
 
     public:
@@ -73,7 +73,7 @@ X_NS
         std::atomic_bool   StopFlag;
         std::atomic_bool   CancelFlag;
 
-        NotifyCallback *   NotifyCallbackPtr;
+        NotifyCallback *   ParallelizedNotifyCallbackPtr;
         xVariable          NotifyVariable;
     };
 

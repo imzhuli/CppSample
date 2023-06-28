@@ -106,16 +106,13 @@ X_NS
         template<typename T1, typename T2> X_STATIC_INLINE constexpr auto SignedDiff(T1&& Value, T2&& FromValue) { return Signed(Diff(std::forward<T1>(Value), std::forward<T2>(FromValue))); }
         template<typename T1, typename T2> X_STATIC_INLINE constexpr auto UnignedDiff(T1&& Value, T2&& FromValue) { return Unsigned(Diff(std::forward<T1>(Value), std::forward<T2>(FromValue))); }
 
-        X_STATIC_INLINE void Pass() {};
         X_API           void Breakpoint();
+        X_STATIC_INLINE void Pass(const char * = nullptr /* reason */) {};
 
-        [[noreturn]] X_STATIC_INLINE void Error() { throw nullptr; }
-        [[noreturn]] X_STATIC_INLINE void Error(const char * message) { throw message; }
-        [[noreturn]] X_STATIC_INLINE void Fatal() { std::abort(); }
-        [[noreturn]] X_STATIC_INLINE void Fatal(const char *) { std::abort(); }
-        [[noreturn]] X_STATIC_INLINE void Todo() { Fatal(); }
-        [[noreturn]] X_STATIC_INLINE void Todo(const char * info) { Fatal(info); }
-        [[noreturn]] X_STATIC_INLINE void Pure() { Fatal("placeholder of pure function called, which is not expected"); }
+        [[noreturn]] X_STATIC_INLINE void Error (const char * message = nullptr) { throw message; }
+        [[noreturn]] X_STATIC_INLINE void Fatal (const char * = nullptr /* reason */) { std::abort(); }
+        [[noreturn]] X_STATIC_INLINE void Todo  (const char * info = nullptr) { Fatal(info); }
+        [[noreturn]] X_STATIC_INLINE void Pure  () { Fatal("placeholder of pure function called, which is not expected"); }
 
         X_STATIC_INLINE constexpr const char * YN(bool y) { return y ? "yes" : "no"; }
         X_STATIC_INLINE constexpr const char * TF(bool t) { return t ? "true" : "false"; }

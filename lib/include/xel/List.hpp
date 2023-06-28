@@ -101,7 +101,7 @@ X_NS
 			xBaseNode* pNext;
 
 		private:
-			X_INLINE xExtendNode* Ptr() const { return static_cast<xExtendNode*>(pTarget); }
+			X_INLINE xExtendNode* Ptr() const { assert(pTarget); return &static_cast<xExtendNode&>(*pTarget); }
 			X_INLINE void Copy(xBaseNode* n) { pTarget = n; pNext = n->pNext; }
 
 		public:

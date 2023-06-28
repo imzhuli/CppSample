@@ -11,7 +11,7 @@ using namespace std;
 using namespace std::literals;
 
 auto DnsService = xLocalDnsServer();
-static auto DnsServerAddress = xNetAddress::Parse("192.168.123.1:553");
+static auto DnsServerAddress = xNetAddress::Parse("192.168.123.1:53");
 
 int main(int argc, char *argv[])
 {
@@ -25,6 +25,7 @@ int main(int argc, char *argv[])
     auto Query3 = std::make_unique<xLocalDnsServer::xRequest>();
     auto Query4 = std::make_unique<xLocalDnsServer::xRequest>();
     auto Query5 = std::make_unique<xLocalDnsServer::xRequest>();
+    auto List = xList<xLocalDnsServer::xRequest>();
 
     auto OptDnsServerAddress = Cmd["dns_server"];
     if (OptDnsServerAddress()) {
@@ -61,17 +62,21 @@ int main(int argc, char *argv[])
     Query4->Hostname = "ue.zhuli.cool";
     DnsService.PostQuery(Query4.get());
 
+    DnsService.Pick(List);
     DnsService.CancelAll();
 
     Query5->Hostname = "www.zhuli.cool";
     DnsService.PostQuery(Query5.get());
 
-    std::this_thread::sleep_for(2s);
-    auto List = xList<xLocalDnsServer::xRequest>();
-    DnsService.Pick(List);
-
     for (auto & Result : List) {
         cout << "Result: " << Result.Hostname << " addr1=" << Result.Address1.IpToString() << " addr2=" << Result.Address2.IpToString() << endl;
+        List.Remove(Result);
+    }
+
+    std::this_thread::sleep_for(2s);
+    DnsService.Pick(List);
+    for (auto & Result : List) {
+        cout << "Cancelled Result: " << Result.Hostname << " addr1=" << Result.Address1.IpToString() << " addr2=" << Result.Address2.IpToString() << endl;
         List.Remove(Result);
     }
 
