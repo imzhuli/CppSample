@@ -35,32 +35,37 @@ X_NS
 	void xAutoClientTcpConnection::Check(uint64_t NowMS)
 	{
 		if (Steal(_Dying)) {
+			_CheckTimestamp = NowMS;
 			_Connection.Clean();
 			_Active = false;
 			_Connected = false;
-			_CheckTimestamp = NowMS;
 			return;
 		}
 		if (_Connected) {
 			return;
 		}
 		if (_Active && NowMS - _CheckTimestamp >= 5'000) { // connection timeout
+			_CheckTimestamp = NowMS;
 			_Connection.Clean();
 			_Active = false;
 			_Connected = false;
-			_CheckTimestamp = NowMS;
 			_Dying = false;
 			return;
 		}
 		// reconnect
 		if (NowMS - _CheckTimestamp >= 15'000) { // reconnect timeout}
+            _CheckTimestamp = NowMS;
 			if (!_Connection.Init(_IoContextPtr, _ServerAddress, this)) {
-				_CheckTimestamp = NowMS;
 				return;
 			}
 			_Connected = _Connection.IsConnected();
 			_Active = true;
 			++_Version;
+
+            if (_Connected) {
+                _ListenerPtr->OnConnected(this);
+            }
+            return;
 		}
 		return;
 	}
@@ -80,17 +85,12 @@ X_NS
 
 	void xAutoClientTcpConnection::OnConnected(xTcpConnection * TcpConnectionPtr)
 	{
+        X_DEBUG_PRINTF("xAutoClientTcpConnection::OnConnected\n");
 		_Connected = true;
 		_ListenerPtr->OnConnected(this);
 	}
 
 	void xAutoClientTcpConnection::OnPeerClose(xTcpConnection * TcpConnectionPtr)
-	{
-		_Connected = false;
-		ResetConnection();
-	}
-
-	void xAutoClientTcpConnection::OnError(xTcpConnection * TcpConnectionPtr)
 	{
 		_Connected = false;
 		ResetConnection();

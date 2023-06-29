@@ -39,10 +39,9 @@ X_NS
         X_API_MEMBER uint64_t    GetVersion() const { return _Version; }
 
     protected:
-        X_API_MEMBER void   OnConnected(xTcpConnection * TcpConnectionPtr);
-        X_API_MEMBER size_t OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize);
-        X_API_MEMBER void   OnPeerClose(xTcpConnection * TcpConnectionPtr);
-        X_API_MEMBER void   OnError(xTcpConnection * TcpConnectionPtr);
+        X_API_MEMBER void   OnConnected(xTcpConnection * TcpConnectionPtr) override;
+        X_API_MEMBER size_t OnData(xTcpConnection * TcpConnectionPtr, void * DataPtr, size_t DataSize) override;
+        X_API_MEMBER void   OnPeerClose(xTcpConnection * TcpConnectionPtr) override;
 
     private:
         xNetAddress                  _ServerAddress;
