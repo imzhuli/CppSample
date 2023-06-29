@@ -34,8 +34,6 @@ endfunction()
 #test lib:
 build_sub(_)
 build_sub(dns)
-
+build_sub(udp_dump)
 
 test_sub(_)
-
-

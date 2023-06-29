@@ -11,7 +11,7 @@ using namespace std;
 using namespace std::literals;
 
 auto DnsService = xLocalDnsServer();
-static auto DnsServerAddress = xNetAddress::Parse("192.168.123.1:53");
+static auto DnsServerAddress = xNetAddress::Parse("47.252.112.245:13221");
 
 int main(int argc, char *argv[])
 {
@@ -49,7 +49,7 @@ int main(int argc, char *argv[])
 
     std::this_thread::sleep_for(1s);
 
-    Query2->Hostname = "www.qq.com";
+    Query2->Hostname = "www.gamesquad.top";
     DnsService.PostQuery(Query2.get());
 
     std::this_thread::sleep_for(1s);
