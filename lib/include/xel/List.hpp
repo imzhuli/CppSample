@@ -187,13 +187,13 @@ X_NS
 			if (IsEmpty()) {
 				return nullptr;
 			}
-			return static_cast<tNode*>(_Head.pNext);
+			return &static_cast<tNode&>(*_Head.pNext);
 		}
 		X_INLINE tNode * Tail() {
 			if (IsEmpty()) {
 				return nullptr;
 			}
-			return static_cast<tNode*>(_Head.pPrev);
+			return &static_cast<tNode&>(*_Head.pPrev);
 		}
 		X_INLINE tNode * PopHead() {
 			if (IsEmpty()) {
@@ -201,7 +201,7 @@ X_NS
 			}
 			auto ret = _Head.pNext;
 			ret->Detach();
-			return static_cast<tNode*>(ret);
+			return &static_cast<tNode&>(*ret);
 		}
 		X_INLINE tNode * PopTail() {
 			if (IsEmpty()) {
@@ -209,7 +209,7 @@ X_NS
 			}
 			auto ret = _Head.pPrev;
 			ret->Detach();
-			return static_cast<tNode*>(ret);
+			return &static_cast<tNode&>(*ret);
 		}
 		X_STATIC_INLINE void Remove(tNode& Node) {
 			Node.Detach();
