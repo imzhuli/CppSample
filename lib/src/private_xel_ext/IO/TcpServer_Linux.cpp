@@ -36,7 +36,7 @@ X_NS
         }
 
         if (ReusePort) {
-            setsockopt(_ListenSocket, SOL_SOCKET, SO_REUSEADDR, (char *)X2Ptr(int(1)), sizeof(int));
+            setsockopt(_ListenSocket, SOL_SOCKET, X_ENABLE_REUSEPORT, (char *)X2Ptr(int(1)), sizeof(int));
         }
 
         int flags = fcntl(_ListenSocket, F_GETFL);
