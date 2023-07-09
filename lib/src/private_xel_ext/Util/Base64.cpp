@@ -82,9 +82,9 @@ X_NS
 
         auto in = (const unsigned char *)in_;
         char *ret, *dst;
-        unsigned i_bits = 0;
-        size_t i_shift = 0;
-        size_t bytes_remaining = in_size;
+        uint32_t i_bits = 0;
+        int32_t  i_shift = 0;
+        size_t   bytes_remaining = in_size;
 
         if (in_size >= UINT_MAX / 4 ||
             out_size < X_BASE64_SIZE(in_size)) {
