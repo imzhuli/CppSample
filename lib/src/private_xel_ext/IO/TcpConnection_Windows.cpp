@@ -25,6 +25,10 @@ X_NS
             X_DEBUG_RESET(_ListenerPtr);
         }};
 
+        #ifdef SO_REUSEADDR
+        setsockopt(NativeHandle, SOL_SOCKET, SO_REUSEADDR, (char *)X2Ptr(int(1)), sizeof(int));
+        #endif
+
         if (CreateIoCompletionPort((HANDLE)NativeHandle, *IoContextPtr, (ULONG_PTR)this, 0) == NULL) {
             X_DEBUG_PRINTF("xTcpConnection::Init failed to create competion port\n");
             return false;
@@ -80,6 +84,10 @@ X_NS
             X_DEBUG_RESET(_IoContextPtr);
             X_DEBUG_RESET(_ListenerPtr);
         }};
+
+        #ifdef SO_REUSEADDR
+        setsockopt(_Socket, SOL_SOCKET, SO_REUSEADDR, (char *)X2Ptr(int(1)), sizeof(int));
+        #endif
 
         // load connect ex:
         LPFN_CONNECTEX ConnectEx = nullptr;
