@@ -575,7 +575,7 @@ X_NS
 
 #ifdef  X_SYSTEM_ANDROID
 #include <android/log.h>
-#define X_DEBUG_PRINTF(...) __android_log_print(ANDROID_LOG_DEBUG, "Xel_Debug", ##__VA_ARGS__);
+#define X_DEBUG_PRINTF(...) __android_log_print(ANDROID_LOG_DEBUG, "Xel_Debug", ##__VA_ARGS__)
 #else
 #define X_DEBUG_PRINTF printf
 #endif
