@@ -23,4 +23,4 @@ endfunction()
 
 add_sub_sample(tcp_client)
 add_sub_sample(tcp_server)
-
+add_sub_sample(s5_to_http)
