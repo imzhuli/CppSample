@@ -203,10 +203,10 @@ X_NS
 
 		X_INLINE const void *      operator ()() const        { return _curr; }
 		X_INLINE operator          const void * () const      { return _curr; }
-		X_INLINE const void *     Origin() const              { return _start; }
+		X_INLINE const void *      Origin() const             { return _start; }
 		X_INLINE ptrdiff_t         Offset() const             { return _curr - _start; }
 		X_INLINE void              Offset(ptrdiff_t offset)   { _curr = _start + offset; }
-		X_INLINE const void *     Skip(ptrdiff_t len)         { const ubyte * from = _curr; _curr += len; return from; }
+		X_INLINE const void *      Skip(ptrdiff_t len)        { const ubyte * from = _curr; _curr += len; return from; }
 
 		X_INLINE void Reset()                              { _curr = _start; }
 		X_INLINE void Reset(const void * s)                { _curr = _start = static_cast<const ubyte *>(s); }
