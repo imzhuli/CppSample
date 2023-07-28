@@ -163,7 +163,7 @@ X_NS
 		X_INLINE void WDL(double d)                        { __detail__::__raw__::UD ud{.d = d}; W8L(ud.u); }
 
 		X_INLINE void *          operator ()() const          { return _curr; }
-		X_INLINE operator        void * () const              { return _curr; }
+		X_INLINE operator        ubyte * () const             { return _curr; }
 		X_INLINE void *          Origin() const               { return _start; }
 		X_INLINE ptrdiff_t       Offset() const               { return _curr - _start; }
 		X_INLINE void            Offset(ptrdiff_t offset)     { _curr = _start + offset; }
@@ -202,7 +202,7 @@ X_NS
 		X_INLINE double   RDL()                            { __detail__::__raw__::UD ud{.u=R8L()}; return ud.d; }
 
 		X_INLINE const void *      operator ()() const        { return _curr; }
-		X_INLINE operator          const void * () const      { return _curr; }
+		X_INLINE operator          const ubyte * () const     { return _curr; }
 		X_INLINE const void *      Origin() const             { return _start; }
 		X_INLINE ptrdiff_t         Offset() const             { return _curr - _start; }
 		X_INLINE void              Offset(ptrdiff_t offset)   { _curr = _start + offset; }
