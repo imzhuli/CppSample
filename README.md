@@ -11,5 +11,5 @@ ffmpeg
 libwebsockets
 
 # included 3rd party library versions:
-glm:        20220420
-rapidjson:  20220406
+glm:        20230608 5c46b9c
+rapidjson:  20230717 a95e013

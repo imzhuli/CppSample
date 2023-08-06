@@ -1,6 +1,6 @@
 #include "../matrix.hpp"
 
-#include "matrix_vectorize.hpp"
+#include "_matrix_vectorize.hpp"
 
 namespace glm
 {
