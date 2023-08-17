@@ -187,7 +187,7 @@ X_NS
 
         template<typename T>
         [[nodiscard]] X_STATIC_INLINE constexpr bool
-        IsPow2(const T x) { static_assert(std::is_integral_v<T>); return x > 0 && !(x & (x-1)); }
+        IsPow2(const T x) { static_assert(std::is_unsigned_v<T>); return !(x & (x-1)); }
 
         template<typename T>
         [[nodiscard]] X_STATIC_INLINE std::remove_reference_t<T> &
