@@ -26,7 +26,7 @@ X_NS
     struct xPacketHeader final
     {
         static constexpr const size_t Size = 2 * sizeof(uint32_t) + sizeof(uint64_t);
-        static constexpr const xPacketCommandId CmdId_InnernalRequest             = 0x00'00;
+        static constexpr const xPacketCommandId CmdId_InnernalRequest             = 0x00;
         static constexpr const xPacketRequestId InternalRequest_KeepAlive         = 0x00;
         static constexpr const xPacketRequestId InternalRequest_RequestKeepAlive  = static_cast<uint64_t>(-1);
 
@@ -37,14 +37,14 @@ X_NS
         X_INLINE void Serialize(void * DestPtr) const {
             xStreamWriter S(DestPtr);
             S.W4L(MakeHeaderLength(PacketLength));
-            S.W2L(CommandId);
+            S.W4L(CommandId);
             S.W8L(RequestId);
         }
 
         X_INLINE size32_t Deserialize(const void * SourcePtr) {
             xStreamReader S(SourcePtr);
             PacketLength = PickPackageLength(S.R4L());
-            CommandId = S.R2L();
+            CommandId = S.R4L();
             RequestId = S.R8L();
             return PacketLength;
         }
@@ -62,7 +62,7 @@ X_NS
             xStreamWriter S(PacketPtr);
             S.Skip(
                 + 4 // PacketLength
-                + 2); // CommandId
+                + 4); // CommandId
             S.W8L(RequestId);
         };
 
