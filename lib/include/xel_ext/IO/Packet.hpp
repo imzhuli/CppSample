@@ -32,8 +32,6 @@ X_NS
         static constexpr const xPacketRequestId InternalRequest_RequestKeepAlive  = static_cast<uint64_t>(-1);
 
         xPacketLength            PacketLength = 0; // header size included, lower 24 bits as length, higher 8 bits as a magic check
-        xPacketSequence          PackageSequenceId = 0; // the index of the packet in a full package, (this is no typo)
-        xPacketSequence          PackageSequenceTotalMax = 0;
         xPacketCommandId         CommandId = 0;
         xPacketRequestId         RequestId = 0;
         ubyte                    TraceId[16] = {}; // allow uuid
@@ -41,8 +39,6 @@ X_NS
         X_INLINE void Serialize(void * DestPtr) const {
             xStreamWriter S(DestPtr);
             S.W4L(MakeHeaderLength(PacketLength));
-            S.W1L(PackageSequenceId);
-            S.W1L(PackageSequenceTotalMax);
             S.W2L(CommandId);
             S.W8L(RequestId);
             S.W(TraceId, 16);
@@ -51,8 +47,6 @@ X_NS
         X_INLINE size32_t Deserialize(const void * SourcePtr) {
             xStreamReader S(SourcePtr);
             PacketLength = PickPackageLength(S.R4L());
-            PackageSequenceId = S.R1L();
-            PackageSequenceTotalMax = S.R1L();
             CommandId = S.R2L();
             RequestId = S.R8L();
             S.R(TraceId, 16);
@@ -72,7 +66,6 @@ X_NS
             xStreamWriter S(PacketPtr);
             S.Skip(
                 + 4 // PacketLength
-                + 2 // SequenceId/SequenceTotal
                 + 2); // CommandId
             S.W8L(RequestId);
         };
