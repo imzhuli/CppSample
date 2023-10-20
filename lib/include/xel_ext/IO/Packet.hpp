@@ -6,12 +6,11 @@
 
 X_NS
 {
-    using xPacketCommandId = uint16_t;
     using xPacketLength    = uint32_t;
+    using xPacketCommandId = uint32_t;
     using xPacketRequestId = uint64_t;
-    using xPacketSequence  = uint8_t;
 
-    static constexpr const size_t   PacketHeaderSize = 32u;
+    static constexpr const size_t   PacketHeaderSize = 16u;
     static constexpr const uint32_t PacketMagicMask  = 0xFF'000000u;
     static constexpr const uint32_t PacketMagicValue = 0xCD'000000u;
     static constexpr const uint32_t PacketLengthMask = 0x00'FFFFFFu;
@@ -26,7 +25,7 @@ X_NS
     */
     struct xPacketHeader final
     {
-        static constexpr const size_t Size = 2 * sizeof(uint64_t) + 16;
+        static constexpr const size_t Size = 2 * sizeof(uint32_t) + sizeof(uint64_t);
         static constexpr const xPacketCommandId CmdId_InnernalRequest             = 0x00'00;
         static constexpr const xPacketRequestId InternalRequest_KeepAlive         = 0x00;
         static constexpr const xPacketRequestId InternalRequest_RequestKeepAlive  = static_cast<uint64_t>(-1);
@@ -34,14 +33,12 @@ X_NS
         xPacketLength            PacketLength = 0; // header size included, lower 24 bits as length, higher 8 bits as a magic check
         xPacketCommandId         CommandId = 0;
         xPacketRequestId         RequestId = 0;
-        ubyte                    TraceId[16] = {}; // allow uuid
 
         X_INLINE void Serialize(void * DestPtr) const {
             xStreamWriter S(DestPtr);
             S.W4L(MakeHeaderLength(PacketLength));
             S.W2L(CommandId);
             S.W8L(RequestId);
-            S.W(TraceId, 16);
         }
 
         X_INLINE size32_t Deserialize(const void * SourcePtr) {
@@ -49,7 +46,6 @@ X_NS
             PacketLength = PickPackageLength(S.R4L());
             CommandId = S.R2L();
             RequestId = S.R8L();
-            S.R(TraceId, 16);
             return PacketLength;
         }
 
